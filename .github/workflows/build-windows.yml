@@ -1,0 +1,139 @@
+name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
+
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', 'tests/**', '.github/workflows/build-windows.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x64:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      OPENBROWSER_PACKAGE_ARCH: x86_64
+      OPENBROWSER_PACKAGE_VARIANT: with-kernel
+      OPENBROWSER_BUNDLE_KERNEL: 'true'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Enable long paths before checkout
+        shell: pwsh
+        run: |
+          git config --global core.longpaths true
+          try { New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force | Out-Null } catch { Write-Host "Registry update skipped" }
+
+      - name: Checkout LYCO integration
+        uses: actions/checkout@v4
+        with:
+          path: lyco
+
+      - name: Checkout PINNED OpenBrowser Windows browser source
+        uses: actions/checkout@v4
+        with:
+          repository: sheying2013/OpenBrowser
+          ref: 5fa3b9d0bd218a948da15820b35fe598c362eba0
+          path: upstream
+          lfs: true
+          sparse-checkout: |
+            /*
+            !/Browserapp/kernels/macos-x64/
+            !/Browserapp/kernels/macos-arm64/
+            !/Browserapp/kernels/openbrowser/
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: upstream/Browserapp/package-lock.json
+
+      - name: Apply LYCO patch and static syntax checks
+        shell: pwsh
+        run: |
+          node lyco/scripts/apply.js upstream/Browserapp
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          foreach ($path in @('upstream/Browserapp/main.js','upstream/Browserapp/preload.js','upstream/Browserapp/renderer.js','upstream/Browserapp/lyco/ui.js','upstream/Browserapp/lyco/network.js')) {
+            node --check $path
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+      - name: Isolated LYCO proxy and Billing integration tests
+        shell: pwsh
+        run: |
+          node --test lyco/tests/network.test.js
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Install upstream dependencies
+        shell: pwsh
+        working-directory: upstream/Browserapp
+        run: npm ci --include=dev
+
+      - name: Upstream fingerprint browser isolation regression
+        shell: pwsh
+        working-directory: upstream/Browserapp
+        run: |
+          foreach($suite in @('selftest','selftest:isolation','selftest:proxyconcurrency','selftest:profiles')) {
+            npm run $suite
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+      - name: Download pinned official Mihomo for LYCO local proxy
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $version='v1.19.32'
+          $filename="mihomo-windows-amd64-compatible-$version.zip"
+          $dir="$env:RUNNER_TEMP\lyco-mihomo"
+          New-Item -Force -ItemType Directory $dir | Out-Null
+          gh release download $version -R MetaCubeX/mihomo -p $filename -D $dir
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Expand-Archive "$dir\$filename" -DestinationPath "$dir\unpacked"
+          $binary=Get-ChildItem "$dir\unpacked" -Recurse -File -Filter "*.exe" |
+            Where-Object { $_.Name -match '^mihomo' } | Select-Object -First 1
+          if (-not $binary) { throw "Mihomo executable missing from official release" }
+          $dest='upstream/Browserapp/lyco/core'
+          New-Item -Force -ItemType Directory $dest | Out-Null
+          Copy-Item -LiteralPath $binary.FullName -Destination "$dest/mihomo.exe"
+
+      - name: Install packaging tool NSIS
+        shell: pwsh
+        run: choco install nsis --no-progress --yes
+
+      - name: Prepare integrated browser kernel
+        shell: pwsh
+        working-directory: upstream/Browserapp
+        run: |
+          foreach($file in @('kernels/windows-x64/chrome.exe','kernels/windows-x64/chrome.dll')){
+            if (-not (Test-Path $file)) { throw "Pinned Windows browser kernel missing: $file" }
+          }
+          npm run prepare:bundled-kernel
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Build Windows portable ZIP and installer
+        shell: pwsh
+        working-directory: upstream/Browserapp
+        run: |
+          npm run package:portable
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $stem='OpenBrowser-Windows-x86_64-with-kernel'
+          $app="dist/$stem/runtime/resources/app"
+          foreach($file in @("$app/lyco/network.js","$app/lyco/ui.js","$app/lyco/core/mihomo.exe","$app/kernels/windows-x64/chrome.exe")){
+            if (-not (Test-Path $file)) { throw "Package missing: $file" }
+          }
+          foreach($ext in @('zip','exe')){
+            if (-not (Test-Path "dist/$stem.$ext")) { throw "Missing artifact $ext" }
+            Copy-Item "dist/$stem.$ext" "dist/LYCO-Browser-Windows-x64-MVP.$ext"
+          }
+
+      - name: Publish GitHub Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LYCO-Browser-Windows-x64-${{ github.run_number }}
+          path: |
+            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.zip
+            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.exe
+          if-no-files-found: error
+          retention-days: 10

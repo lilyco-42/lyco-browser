@@ -1,0 +1,14 @@
+# Local source integration only; all packaging and tests run in GitHub Actions
+upstream/
+node_modules/
+dist/
+*.exe
+*.zip
+*.msi
+*.dmg
+*.tar.gz
+.env
+.env.*
+.cache/
+out/
+*.log
