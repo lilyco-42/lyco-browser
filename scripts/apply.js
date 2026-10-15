@@ -13,6 +13,8 @@ for(const file of ['network.js','view.html','ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
+fs.mkdirSync(path.join(app,'lyco','core'),{recursive:true});
+fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.txt'),path.join(app,'lyco','core','LICENSE-MIHOMO.txt'));
 const view=fs.readFileSync(path.join(base,'src','view.html'),'utf8');
 one('index.html','<title>OpenBrowser</title>','<title>LYCO Browser · 代理与会员</title>');
 one('index.html','<button class="nav" data-view="proxies">',join(

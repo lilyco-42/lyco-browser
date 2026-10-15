@@ -120,7 +120,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
           $stem='OpenBrowser-Windows-x86_64-with-kernel'
           $app="dist/$stem/runtime/resources/app"
-          foreach($file in @("$app/lyco/network.js","$app/lyco/ui.js","$app/lyco/core/mihomo.exe","$app/kernels/windows-x64/chrome.exe")){
+          foreach($file in @("$app/lyco/network.js","$app/lyco/ui.js","$app/lyco/core/mihomo.exe","$app/lyco/core/LICENSE-MIHOMO.txt","$app/kernels/windows-x64/chrome.exe")){
             if (-not (Test-Path $file)) { throw "Package missing: $file" }
           }
           foreach($ext in @('zip','exe')){
