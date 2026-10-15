@@ -20,9 +20,9 @@ GitHub → **Actions** → **Build LYCO Browser (Windows x64, GitHub Actions ONL
 2. 仅在 Actions 将 `src/` 和 `scripts/apply.js` 注入 OpenBrowser 源码；
 3. GitHub Windows Runner 运行 JS 语法检查、`node --test`、OpenBrowser 官方安全/环境测试；
 4. 从 **MetaCubeX/mihomo 官方 GitHub Release v1.19.32** 下载 Windows x64 内核；
-5. 在 GitHub Actions 执行 NSIS 和便携包构建，并上传 `LYCO-Browser-Windows-x64-MVP.zip`、`.exe` 到 Actions **Artifacts**。
+5. 在 GitHub Actions 执行 NSIS 和便携包构建，并通过 `gh release upload` 上传 `LYCO-Browser-Windows-x64-MVP.zip`、`.exe` 到该提交的 **GitHub CI Prerelease**。
 
-> Artifact 与 Release 不同：当前构建完成后需从 Actions 对应 run 下载，**并不代表已经发布 GitHub Release**。任何用户体验和付费账户 E2E 都需额外人工验收。构建前不允许声称付费链路已经支付验证成功。
+> GitHub Actions Artifact 存储配额不足，所以改为**每个提交对应的 GitHub 预发布版**（`ci-<SHA前12位>`）直接托管二进制；仍然只是内部测试构建，不代表正式上线或完成支付 E2E。
 
 ## 源码结构
 

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   desktop:
@@ -139,18 +139,12 @@ jobs:
           test -f upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/lyco/core/mihomo
           cp upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel.tar.gz upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
 
-      - name: Upload macOS installer
+      - name: Upload macOS DMG to GitHub prerelease
         if: matrix.target == 'macos-arm64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: LYCO-Browser-macOS-arm64
-          path: upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
-          if-no-files-found: error
+        shell: bash
+        run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
 
-      - name: Upload Linux portable package
+      - name: Upload Linux portable tar.gz to GitHub prerelease
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: LYCO-Browser-Linux-x64
-          path: upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
-          if-no-files-found: error
+        shell: bash
+        run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz

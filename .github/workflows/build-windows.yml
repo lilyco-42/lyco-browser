@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows-x64:
@@ -128,12 +128,9 @@ jobs:
             Copy-Item "dist/$stem.$ext" "dist/LYCO-Browser-Windows-x64-MVP.$ext"
           }
 
-      - name: Publish GitHub Actions artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: LYCO-Browser-Windows-x64-${{ github.run_number }}
-          path: |
-            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.zip
+      - name: Upload Windows portable ZIP and EXE to GitHub prerelease
+        shell: bash
+        run: |
+          bash lyco/scripts/ci-publish-release.sh \
+            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.zip \
             upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.exe
-          if-no-files-found: error
-          retention-days: 10
