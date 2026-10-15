@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "LYCO Browser",
+    "slug": "lyco-browser",
+    "scheme": "lycobrowser",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "android": {
+      "package": "top.lain42.lycobrowser",
+      "permissions": [
+        "INTERNET"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "top.lain42.lycobrowser",
+      "supportsTablet": true
+    },
+    "web": {
+      "bundler": "metro",
+      "name": "LYCO Browser",
+      "shortName": "LYCO"
+    }
+  }
+}

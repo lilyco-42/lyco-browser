@@ -149,12 +149,12 @@ class LycoNetwork {
     const opts = [this.customCore, this.bundledCore,
       process.env.LYCO_MIHOMO_PATH].filter(Boolean);
     return opts.find(p => {
-      try { return path.basename(p).toLowerCase() === 'mihomo.exe' && fs.statSync(p).isFile(); }
+      try { return ['mihomo.exe','mihomo'].includes(path.basename(p).toLowerCase()) && fs.statSync(p).isFile(); }
       catch (_) { return false; }
     }) || null;
   }
   selectCore(p) {
-    if (typeof p !== 'string' || path.basename(p).toLowerCase() !== 'mihomo.exe' ||
+    if (typeof p !== 'string' || !['mihomo.exe','mihomo'].includes(path.basename(p).toLowerCase()) ||
         !fs.existsSync(p) || !fs.statSync(p).isFile()) throw Error('请选择官方 Mihomo 的 mihomo.exe 文件');
     this.customCore = p;
     return this.status();

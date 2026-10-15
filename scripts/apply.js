@@ -44,7 +44,7 @@ one('main.js','app.whenReady().then(async () => {',join(
  'app.whenReady().then(async () => {',
  '  lycoNetwork = new LycoNetwork({',
  "    dataDir: app.getPath('userData'),",
- "    bundledCore: path.join(__dirname, 'lyco', 'core', 'mihomo.exe'),",
+ "    bundledCore: path.join(__dirname, 'lyco', 'core', process.platform === 'win32' ? 'mihomo.exe' : 'mihomo'),",
  '  });'));
 one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:status', () => lycoNetwork.status());",
@@ -56,7 +56,7 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:choose-core', async () => {",
  '    const choice = await dialog.showOpenDialog(mainWindow, {',
  "      title: '选择官方 Mihomo 代理内核',",
- "      filters: [{name:'Mihomo',extensions:['exe']}],",
+ "      filters: process.platform === 'win32' ? [{name:'Mihomo',extensions:['exe']}] : [],",
  "      properties:['openFile'],",
  '    });',
  '    if (choice.canceled || !choice.filePaths?.length) return lycoNetwork.status();',

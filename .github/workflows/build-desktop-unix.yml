@@ -1,0 +1,156 @@
+name: LYCO Desktop · macOS Linux (GitHub Actions only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - '.github/workflows/build-desktop-unix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: macos-arm64, runner: macos-26, mihomo: mihomo-darwin-arm64-v1.19.32.gz, arch: arm64 }
+          - { target: linux-x64, runner: ubuntu-22.04, mihomo: mihomo-linux-amd64-v1.19.32.gz, arch: x86_64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OPENBROWSER_PACKAGE_VARIANT: with-kernel
+      OPENBROWSER_BUNDLE_KERNEL: 'true'
+      OPENBROWSER_PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+      - name: Checkout LYCO integration
+        uses: actions/checkout@v4
+        with:
+          path: lyco
+
+      - name: Checkout pinned OpenBrowser source and target kernel
+        uses: actions/checkout@v4
+        with:
+          repository: sheying2013/OpenBrowser
+          ref: 5fa3b9d0bd218a948da15820b35fe598c362eba0
+          path: upstream
+          lfs: true
+          sparse-checkout: |
+            /*
+            !/Browserapp/kernels/macos-x64/
+            !/Browserapp/kernels/windows-x64/
+            !/Browserapp/kernels/openbrowser/
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: upstream/Browserapp/package-lock.json
+
+      - name: Integrate official Billing VPN and verify JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node lyco/scripts/apply.js upstream/Browserapp
+          for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js; do
+            node --check "upstream/Browserapp/$f"
+          done
+          node --test lyco/tests/network.test.js
+
+      - name: Install upstream dependencies
+        shell: bash
+        working-directory: upstream/Browserapp
+        run: npm ci --include=dev
+
+      - name: Install Linux desktop dependencies (Linux only)
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y unzip xvfb libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcups2 libdrm2 libgbm1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2
+
+      - name: Fetch official pinned Mihomo core (no opaque third-party binary)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p upstream/Browserapp/lyco/core
+          gh release download v1.19.32 -R MetaCubeX/mihomo -p '${{ matrix.mihomo }}' -D "$RUNNER_TEMP"
+          gzip -dc "$RUNNER_TEMP/${{ matrix.mihomo }}" > upstream/Browserapp/lyco/core/mihomo
+          chmod +x upstream/Browserapp/lyco/core/mihomo
+          test -f upstream/Browserapp/lyco/core/LICENSE-MIHOMO.txt
+
+      - name: Prepare browser kernel (Linux)
+        if: matrix.target == 'linux-x64'
+        working-directory: upstream/Browserapp
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run prepare:linux-kernel
+          OPENBROWSER_VERIFY_PLATFORM=linux-x64 npm run prepare:bundled-kernel
+
+      - name: Prepare browser kernel (macOS ARM64)
+        if: matrix.target == 'macos-arm64'
+        working-directory: upstream/Browserapp
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f kernels/macos-arm64/Wayfern.app/Contents/MacOS/Wayfern
+          chmod +x kernels/macos-arm64/Wayfern.app/Contents/MacOS/Wayfern || true
+          npm run prepare:bundled-kernel
+
+      - name: Upstream isolation and network regression
+        working-directory: upstream/Browserapp
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run selftest
+          npm run selftest:isolation
+          npm run selftest:proxyconcurrency
+
+      - name: Package desktop application in runner only
+        working-directory: upstream/Browserapp
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run package:portable
+
+      - name: Verify macOS DMG
+        if: matrix.target == 'macos-arm64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel.dmg
+          test -f upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel/OpenBrowser.app/Contents/Resources/app/lyco/core/mihomo
+          cp upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel.dmg upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
+
+      - name: Verify Linux tar.gz
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel.tar.gz
+          test -f upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/lyco/core/mihomo
+          cp upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel.tar.gz upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
+
+      - name: Upload macOS installer
+        if: matrix.target == 'macos-arm64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: LYCO-Browser-macOS-arm64
+          path: upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
+          if-no-files-found: error
+
+      - name: Upload Linux portable package
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: LYCO-Browser-Linux-x64
+          path: upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
+          if-no-files-found: error

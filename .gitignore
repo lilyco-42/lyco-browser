@@ -12,3 +12,9 @@ dist/
 .cache/
 out/
 *.log
+.expo/
+apps/universal/.expo/
+apps/universal/node_modules/
+apps/universal/android/
+apps/universal/ios/
+apps/universal/dist-web/
