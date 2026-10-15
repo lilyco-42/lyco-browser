@@ -48,7 +48,7 @@ test('login fetches site entitlement and holds JWT privately in main only',async
   assert.equal(Object.prototype.hasOwnProperty.call(state,'token'),false);
   assert.equal(calls[0].auth,undefined);
   assert.equal(calls[1].auth,'Bearer opaque-jwt-test-only');
-  await assert.rejects(()=>app.connect(),/Mihomo/);
+  await assert.rejects(()=>app.connect(),/mihomo/i);
   assert.equal(await app.logout().then(s=>s.logged_in),false);
   assert.equal(calls.length,2);
 });
