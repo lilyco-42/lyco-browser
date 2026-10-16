@@ -94,6 +94,7 @@ class LycoNetwork {
     this.expiryTimer = null;
     this.connecting = null;
     this.connectionEpoch = 0;
+    this.authGeneration = 0;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -125,9 +126,13 @@ class LycoNetwork {
         typeof password !== 'string' || password.length < 8 || password.length > 256) {
       throw Error('请输入合法的网站用户名与密码');
     }
-    const result = await this.request('/login', { body: { username: username.trim(), password }, jwt: null });
-    if (typeof result.token !== 'string' || result.token.length > 4096) throw Error('官网登录结果无效');
+    const generation = ++this.authGeneration;
+    this.token = null; this.username = null; this.entitlement = null;
     await this.disconnect();
+    if (generation !== this.authGeneration) throw Error('登录已取消，请重新操作');
+    const result = await this.request('/login', { body: { username: username.trim(), password }, jwt: null });
+    if (generation !== this.authGeneration) throw Error('登录已取消，请重新操作');
+    if (typeof result.token !== 'string' || result.token.length > 4096) throw Error('官网登录结果无效');
     this.token = result.token;
     return this.refresh();
   }
@@ -248,8 +253,9 @@ class LycoNetwork {
     return this.status();
   }
   async logout() {
-    await this.disconnect();
+    this.authGeneration++;
     this.token = null; this.username = null; this.entitlement = null;
+    await this.disconnect();
     return this.status();
   }
 }

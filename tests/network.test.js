@@ -58,6 +58,37 @@ test('rejects anonymous connection, invalid login and bad core path',async()=>{
  await assert.rejects(()=>app.login({username:'hi',password:'a'}));
  assert.throws(()=>app.selectCore('C:\\fake\\other.exe'));
 });
+
+test('logout cancels a pending login response instead of reviving the session',async()=>{
+ let release,requested;
+ const started=new Promise(resolve=>{requested=resolve});
+ const app=new LycoNetwork({dataDir:__dirname,fetchFn:async url=>{
+  if(url.endsWith('/login')){requested();return new Promise(resolve=>{release=()=>resolve(new Response(JSON.stringify({token:'CANCELLED_LOGIN'})))});}
+  return new Response(JSON.stringify({username:'sample',entitlements:[active]}));
+ }});
+ const pending=app.login({username:'sample',password:'CI-owned-password'});
+ const cancelled=assert.rejects(pending,/取消|变化/);
+ await started;await app.logout();release();await cancelled;
+ assert.equal(app.status().logged_in,false);assert.equal(app.status().entitled,false);
+});
+
+test('a late earlier login cannot replace a newer account',async()=>{
+ let release,requested;
+ const started=new Promise(resolve=>{requested=resolve});
+ const app=new LycoNetwork({dataDir:__dirname,fetchFn:async(url,options)=>{
+  if(url.endsWith('/login')) {
+   const {username}=JSON.parse(options.body);
+   if(username==='owner-a'){requested();return new Promise(resolve=>{release=()=>resolve(new Response(JSON.stringify({token:'OWNER_A'})))});}
+   return new Response(JSON.stringify({token:'OWNER_B'}));
+  }
+  return new Response(JSON.stringify({username:options.headers.Authorization==='Bearer OWNER_B'?'owner-b':'owner-a',entitlements:[active]}));
+ }});
+ const first=app.login({username:'owner-a',password:'CI-owned-password'});
+ const cancelled=assert.rejects(first,/取消|变化/);
+ await started;assert.equal((await app.login({username:'owner-b',password:'CI-owned-password'})).username,'owner-b');
+ release();await cancelled;assert.equal(app.status().username,'owner-b');
+ await app.logout();
+});
 test('integration overlay includes required elements without leaking auth tokens',()=>{
  const html=fs.readFileSync(path.join(__dirname,'..','src','view.html'),'utf8');
  const script=fs.readFileSync(path.join(__dirname,'..','src','ui.js'),'utf8');

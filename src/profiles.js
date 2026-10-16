@@ -17,7 +17,11 @@ class LycoProfiles {
       this.bindings=Object.assign(Object.create(null),saved.bindings);
     }
     const start=engine.start.bind(engine);
-    engine.start=async profile=>start(await this.beforeStart(profile));
+    engine.start=async profile=>{
+      const ready=await this.beforeStart(profile);
+      if(ready.authorization) this.assertCurrent(ready.authorization);
+      return start(ready.profile);
+    };
   }
   save() {
     fs.mkdirSync(path.dirname(this.file),{recursive:true,mode:0o700});
@@ -28,9 +32,18 @@ class LycoProfiles {
     const state=await this.network.refresh();
     if(!state.logged_in || !state.entitled || !state.username) throw Error('请登录并开通有效代理月卡');
     if(owner && state.username!==owner) throw Error('此环境属于另一网站账号，请切回原账号后启动');
+    const connectionEpoch=this.network.connectionEpoch;
     const connected=await this.network.connect();
+    if(connected.username!==state.username || !connected.logged_in || !connected.entitled || this.network.connectionEpoch!==connectionEpoch)
+      throw Error('账号或连接已变化，请重新操作');
     if(!connected.connected || !Number.isInteger(connected.port)) throw Error('本地代理尚未就绪，环境不会直连启动');
-    return connected;
+    return {...connected,connectionEpoch};
+  }
+  assertCurrent(authorization) {
+    const current=this.network.status();
+    if(this.network.connectionEpoch!==authorization.connectionEpoch || current.username!==authorization.username ||
+        !current.logged_in || !current.entitled || !current.connected || current.port!==authorization.port)
+      throw Error('账号或连接已变化，请重新操作');
   }
   async proxy(state, existingId) {
     const payload={name:'LYCO 专属线路',protocol:'http',host:'127.0.0.1',port:state.port,
@@ -48,6 +61,7 @@ class LycoProfiles {
       const state=await this.authorized();
       const number=Math.max(0,...[...this.engine.profiles.values()].map(p=>Number(p.number)||0))+1;
       const record=await this.proxy(state);
+      this.assertCurrent(state);
       const id=randomUUID();
       const profile={id,number,name:String(number),title:'LYCO 专属环境',browser:'Google Chrome',
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
@@ -65,17 +79,18 @@ class LycoProfiles {
   async beforeStart(profile) {
     let binding=Object.hasOwn(this.bindings,profile?.id)?this.bindings[profile.id]:null;
     if(!binding) binding=Object.values(this.bindings).find(item=>item.proxyId===profile?.proxyId);
-    if(!binding) return profile;
+    if(!binding) return {profile};
     const state=await this.authorized(binding.owner);
     const record=await this.proxy(state,binding.proxyId);
+    this.assertCurrent(state);
     const stored=this.engine.profiles.get(profile.id);
     if(!stored) throw Error('专属环境已不存在');
     if(!Object.hasOwn(this.bindings,profile.id)) {
       if(!/^[A-Za-z0-9_-]{1,120}$/.test(profile.id) || ['__proto__','prototype','constructor'].includes(profile.id)) throw Error('环境标识无效');
       this.bindings[profile.id]={...binding};this.save();
     }
-    return {...stored,...profile,networkMode:'proxy',proxy:record.raw,proxyId:record.id,
-      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id}};
+    return {profile:{...stored,...profile,networkMode:'proxy',proxy:record.raw,proxyId:record.id,
+      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id}},authorization:state};
   }
   async login(credentials) {
     // Switching accounts must not leave an old window using a recycled port.
