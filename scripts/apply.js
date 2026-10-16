@@ -110,6 +110,8 @@ one('renderer.js','function renderProfiles() {',join(
 
 const icon=path.join(base,'resources','branding','icon-source.png');
 fs.copyFileSync(icon,path.join(app,'assets','logo.png'));
+// Upstream's native window/dock code still reads this legacy asset name.
+fs.copyFileSync(icon,path.join(app,'assets','logo-pixel.png'));
 for(const name of ['icon-source.json','ICON-LICENSE.md']) {
  fs.copyFileSync(path.join(base,'resources','branding',name),path.join(app,'lyco',name));
 }
