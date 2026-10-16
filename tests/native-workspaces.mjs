@@ -54,7 +54,13 @@ try {
  await page.locator('#lyco-create-profile').click();
  await page.waitForFunction(()=>Boolean(window.__lycoCreated));
  const profile=await page.evaluate(()=>window.__lycoCreated);
- assert.ok(profile.proxyId);assert.match(profile.proxy,/^http:\/\/127\.0\.0\.1:\d+$/);
+ assert.ok(profile.proxyId);
+ // ProxyStore appends an encoded display label as a URI fragment. Validate
+ // the actual endpoint; that label is not part of the socket destination.
+ const endpoint=new URL(profile.proxy);
+ assert.equal(endpoint.protocol,'http:');assert.equal(endpoint.hostname,'127.0.0.1');
+ assert.ok(Number(endpoint.port)>1023);assert.equal(endpoint.username,'');assert.equal(endpoint.password,'');
+ assert.equal(endpoint.search,'');assert.equal(endpoint.pathname,'/');
  assert.equal(await page.locator(`#profile-table tr[data-profile-id="${profile.id}"]`).count(),1);
  const state=await page.evaluate(()=>window.ops.lycoStatus());assert.equal(state.connected,true);
  await new Promise((resolve,reject)=>{
