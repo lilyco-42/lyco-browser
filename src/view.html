@@ -1,7 +1,7 @@
-<section class="view" id="view-lyco">
+<section class="view" id="view-lyco" lang="zh-CN" translate="no">
  <header style="padding:18px 24px"><h2>LYCO Browser · 代理与会员</h2><p>多环境浏览器 × 官方网络权益 × 官网支付</p></header>
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;padding:16px">
-  <article class="card" style="padding:22px"><h2>官网登录及权益</h2><p>登录 lain42.top，校验已有 proxy_1m 月卡。密码不会保存。</p>
+  <article class="card" style="padding:22px"><h2>官网登录及权益</h2><p>使用 lain42.top 网站账号登录，验证已有代理月卡。密码不会保存。</p>
    <form id="lyco-login" style="display:grid;gap:10px">
     <label>用户名<input id="lyco-username" autocomplete="username" required minlength="3" maxlength="120" placeholder="网站用户名"></label>
     <label>密码<input id="lyco-password" type="password" autocomplete="current-password" required minlength="8" placeholder="网站密码"></label>
@@ -15,7 +15,7 @@
    <div style="display:flex;flex-wrap:wrap;gap:8px">
     <button type="button" id="lyco-pick-core" class="outline">导入 mihomo.exe</button><button type="button" id="lyco-connect" class="primary">连接代理</button><button type="button" id="lyco-disconnect" class="outline">断开</button>
    </div>
-   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" id="lyco-create-profile" class="primary">一键创建专属代理环境</button></div>
+   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" id="lyco-create-profile" class="primary">一键创建专属代理环境</button><button type="button" id="lyco-copy-extension" class="outline">复制浏览器插件连接码</button></div>
    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"><button type="button" id="lyco-import" class="outline" disabled>导入当前代理到代理库</button><button type="button" id="lyco-go-proxies" class="outline">绑定浏览器环境 →</button></div>
    <p>推荐使用“一键创建专属代理环境”：自动连接并绑定本站代理，再到环境列表点击启动。每次启动都会核对所属账号和月卡，重连后自动更新本地端口。退出账号会关闭受管环境并断开代理。手动导入功能仍保留。</p>
   </article>

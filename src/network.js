@@ -161,6 +161,14 @@ class LycoNetwork {
       has_core: Boolean(this.findCore()),
     };
   }
+  async extensionConnection() {
+    const state = await this.refresh();
+    if (!state.entitled || !state.connected) throw Error('请先登录有效月卡并连接本地代理');
+    const issuedAt = Date.now();
+    const expiresAt = Math.min(issuedAt + 8 * 60 * 60 * 1000,
+      this.entitlement?.expires_at ? Date.parse(this.entitlement.expires_at) : Infinity);
+    return {kind:'lyco-loopback-proxy',version:1,scheme:'http',host:'127.0.0.1',port:state.port,issuedAt,expiresAt};
+  }
   findCore() {
     const opts = [this.customCore, this.bundledCore,
       process.env.LYCO_MIHOMO_PATH].filter(Boolean);

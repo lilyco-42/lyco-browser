@@ -107,6 +107,17 @@ test('concurrent environment connections start one tracked core',async t=>{
  const [a,b]=await Promise.all([app.connect(),app.connect()]);
  assert.equal(children.length,1);assert.equal(a.port,b.port);assert.equal(a.connected,true);
 });
+
+test('extension handoff contains only a bounded loopback connection, never account or node secrets',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ const connection=await app.extensionConnection();
+ const {parseConnection}=await import('../extensions/lain42/connection.mjs');
+ assert.deepEqual(parseConnection(JSON.stringify(connection)),connection);
+ assert.equal(connection.port,app.port);assert.equal(connection.scheme,'http');
+ assert.ok(connection.expiresAt<=connection.issuedAt+8*60*60*1000);
+ assert.doesNotMatch(JSON.stringify(connection),/password|Bearer|token|sample/);
+ await app.disconnect();await assert.rejects(()=>app.extensionConnection(),/连接本地代理/);
+});
 test('a late exit from the previous core cannot clear the new core or its configuration',async t=>{
  const {app,children}=await lifecycleFixture(t);await app.connect();await app.disconnect();await app.connect();
  const current=app.child;const config=app.configPath;children[0].emit('exit',0);
