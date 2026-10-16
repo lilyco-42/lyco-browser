@@ -9,7 +9,7 @@ function setup(t) {
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lyco-profiles-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  const state={username:'owner-a',logged_in:true,entitled:true,connected:true,port:18001};
  const calls={starts:[],stops:[],proxies:new Map()};
- const network={refresh:async()=>({...state}),connect:async()=>({...state}),disconnect:async()=>{state.connected=false;return state},logout:async()=>{state.logged_in=false;return state}};
+ const network={connectionEpoch:0,status:()=>({...state}),refresh:async()=>({...state}),connect:async()=>({...state}),disconnect:async()=>{network.connectionEpoch++;state.connected=false;return state},logout:async()=>{network.connectionEpoch++;state.logged_in=false;return state}};
  const engine={profiles:new Map(),start:async p=>{calls.starts.push(p);return p},stop:async id=>calls.stops.push(id),syncProfiles:async profiles=>{for(const p of profiles)engine.profiles.set(p.id,p)}};
  const proxyStore={create:async p=>{const record={...p,id:'proxy-'+calls.proxies.size};calls.proxies.set(record.id,record);return record},update:async(id,p)=>{const r={...p,id};calls.proxies.set(id,r);return r}};
  const args={network,engine,proxyStore,dataDir:dir};
@@ -66,6 +66,16 @@ test('account switching while the proxy store saves prevents browser launch',asy
  const {service,state,args,engine,calls}=setup(t);const {profile}=await service.create();
  const update=args.proxyStore.update;
  args.proxyStore.update=async(...params)=>{const result=await update(...params);state.username='owner-b';return result};
+ await assert.rejects(()=>engine.start(profile),/账号.*变化/);
+ assert.equal(calls.starts.length,0);
+});
+
+test('a recycled port in a new connection cannot authorize an old pending launch',async t=>{
+ const {service,state,args,engine,calls}=setup(t);const {profile}=await service.create();
+ const update=args.proxyStore.update;
+ args.proxyStore.update=async(...params)=>{
+  const result=await update(...params);await args.network.disconnect();state.connected=true;return result;
+ };
  await assert.rejects(()=>engine.start(profile),/账号.*变化/);
  assert.equal(calls.starts.length,0);
 });
