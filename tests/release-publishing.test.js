@@ -1,0 +1,52 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const os=require('node:os');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+
+function publish(t,{held=true,existing=false}={}) {
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lyco-publish-'));
+ t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const calls=path.join(dir,'calls.txt'),asset=path.join(dir,'preview.zip');
+ fs.writeFileSync(asset,'CI-only fixture');
+ fs.writeFileSync(path.join(dir,'gh'),`#!/bin/bash
+printf '%s\\n' "$*" >> "$LYCO_TEST_GH_CALLS"
+if [[ "$1 $2" == 'release view' ]]; then
+  [[ "$LYCO_TEST_EXISTING" == 'yes' ]] && exit 0
+  exit 1
+fi
+exit 0
+`,{mode:0o755});
+ const env={...process.env,PATH:dir+path.delimiter+process.env.PATH,
+  GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'lilyco-42/lyco-browser',GITHUB_SHA:'a'.repeat(40),
+  LYCO_TEST_GH_CALLS:calls,LYCO_TEST_EXISTING:existing?'yes':'no'};
+ if(held)env.LYCO_DESKTOP_PUBLIC_RELEASE='false';else delete env.LYCO_DESKTOP_PUBLIC_RELEASE;
+ const result=spawnSync('bash',[path.join(__dirname,'../scripts/ci-publish-release.sh'),asset],{env,encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);
+ return {calls:fs.readFileSync(calls,'utf8').trim().split('\n'),stdout:result.stdout};
+}
+
+test('unapproved desktop builds are created and retained as drafts before asset upload',t=>{
+ const result=publish(t);
+ assert.match(result.calls.find(line=>line.startsWith('release create ')),/--draft/);
+ const edit=result.calls.findIndex(line=>line.startsWith('release edit '));
+ const upload=result.calls.findIndex(line=>line.startsWith('release upload '));
+ assert.ok(edit>=0&&upload>edit);
+ assert.match(result.calls[edit],/--draft/);assert.match(result.stdout,/not approved/);
+});
+
+test('an existing release is made draft before replacing desktop assets',t=>{
+ const result=publish(t,{existing:true});
+ assert.equal(result.calls.some(line=>line.startsWith('release create ')),false);
+ assert.match(result.calls[1],/^release edit .*--draft/);
+ assert.match(result.calls[2],/^release upload /);
+});
+
+test('other existing publishers keep their explicit prerelease behavior',t=>{
+ const result=publish(t,{held:false});
+ const create=result.calls.find(line=>line.startsWith('release create '));
+ assert.match(create,/--prerelease/);assert.doesNotMatch(create,/--draft/);
+ assert.equal(result.calls.some(line=>line.startsWith('release edit ')),false);
+});
