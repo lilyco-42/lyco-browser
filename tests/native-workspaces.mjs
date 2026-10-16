@@ -70,6 +70,16 @@ try {
  },proxyPort);
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
+ // Use the actual upstream translator in both languages; its fallback must
+ // not split our complete localized strings into Chinese/English fragments.
+ for (const locale of ['zh-CN','en']) {
+  assert.equal(await page.evaluate(locale=>window.OpenBrowserI18n.setLocale(locale),locale),locale);
+  assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证月卡');
+  assert.equal(await page.locator('#lyco-copy-extension').textContent(),'复制浏览器插件连接码');
+  assert.equal(await page.locator('[data-view="lyco"] span').textContent(),'LYCO 代理与会员');
+  assert.equal(await page.locator('#lyco-password').getAttribute('placeholder'),'网站密码');
+ }
+ report.checks.push('localized-panel-survives-upstream-language-switch');
  assert.equal(await page.locator('#lyco-create-profile').isDisabled(),true);
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
