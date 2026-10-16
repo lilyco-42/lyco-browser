@@ -13,6 +13,12 @@ const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolv
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const origin=http.createServer((req,res)=>{report.proxyRequests.push({path:req.url,proxied:tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes'});res.end('LYCO browser fixture reached through proxy');});
 const originPort=await listen(origin);
+const geo=http.createServer((_req,res)=>{
+ report.geoProbeRequests=(report.geoProbeRequests||0)+1;
+ res.writeHead(200,{'Content-Type':'application/json'});
+ res.end(JSON.stringify({status:'success',query:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));
+});
+const geoPort=await listen(geo);
 const proxy=http.createServer((req,res)=>{
  const url=new URL(req.url);
  if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));return;}
@@ -23,10 +29,12 @@ const proxy=http.createServer((req,res)=>{
 // Mihomo's HTTP adapter uses CONNECT even for HTTP targets. Permit ONLY the
 // ephemeral CI origin, never a general-purpose tunnel or public listener.
 proxy.on('connect',(req,socket,head)=>{
- if(![`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)) {
+ const targetPort=req.url==='ip-api.com:80'?geoPort:
+  [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:null;
+ if(!targetPort) {
   socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;
  }
- const upstream=net.connect({host:'127.0.0.1',port:originPort});
+ const upstream=net.connect({host:'127.0.0.1',port:targetPort});
  tunnelSockets.add(socket);tunnelSockets.add(upstream);
  upstream.once('connect',()=>{
   const port=upstream.localPort;tunnelPorts.add(port);
@@ -118,6 +126,6 @@ try {
 } finally {
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
- origin.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>proxy.close(r));
+ origin.closeAllConnections();geo.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>geo.close(r));await new Promise(r=>proxy.close(r));
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 }
