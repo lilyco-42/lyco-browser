@@ -44,6 +44,7 @@ try{
  const browserPage=await context.newPage();
  await browserPage.goto(`http://lyco-extension.invalid:${originPort}/through-proxy`);
  assert.ok(report.requests.some(row=>row.path==='/through-proxy'&&row.proxied));
+ await popup.bringToFront();
  assert.equal(await popup.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await popup.screenshot({path:path.join(evidence,'extension-enabled.png'),fullPage:true});
  report.checks.push('real-unpacked-extension-UI','invalid-code-no-settings-or-tabs-change','original-Lyco-icon','actual-Chromium-proxy-traffic');
@@ -55,7 +56,7 @@ try{
  // Fault-inject expired session data, then exercise the actual popup/status
  // path. There is no production-only test endpoint or permission bypass.
  await worker.evaluate(async()=>{const {connection}=await chrome.storage.session.get('connection');connection.expiresAt=Date.now()-1;await chrome.storage.session.set({connection})});
- await popup.reload();await popup.locator('#state').filter({hasText:'代理已暂停'}).waitFor();
+ await popup.bringToFront();await popup.reload();await popup.locator('#state').filter({hasText:'代理已暂停'}).waitFor();
  assert.equal((await read()).value.rules.singleProxy.port,9);
  await popup.screenshot({path:path.join(evidence,'extension-expired.png'),fullPage:true});
  await popup.locator('#disconnect').click();await popup.locator('#state').filter({hasText:'尚未启用'}).waitFor();
