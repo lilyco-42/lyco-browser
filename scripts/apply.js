@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,s.replace(from,to),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','view.html','ui.js']){
+for(const file of ['network.js','profiles.js','view.html','ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -26,6 +26,7 @@ one('renderer.js','function viewMetaFor(view) {',join(
  'function viewMetaFor(view) {',
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
+ "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
  "  lycoLogin: (params) => ipcRenderer.invoke('lyco:login', params),",
  "  lycoRefresh: () => ipcRenderer.invoke('lyco:refresh'),",
@@ -39,6 +40,8 @@ one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
 one('main.js',"const { randomUUID } = require('crypto');",join(
  "const { randomUUID } = require('crypto');",
  "const { LycoNetwork, SHOP: LYCO_SHOP, ACCOUNT: LYCO_ACCOUNT } = require('./lyco/network');",
+ "const { LycoProfiles } = require('./lyco/profiles');",
+ "let lycoProfiles = null;",
  "let lycoNetwork = null;"));
 one('main.js','app.whenReady().then(async () => {',join(
  'app.whenReady().then(async () => {',
@@ -48,11 +51,12 @@ one('main.js','app.whenReady().then(async () => {',join(
  '  });'));
 one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:status', () => lycoNetwork.status());",
- "  registerTrustedIpc('lyco:login', (_event, credentials) => lycoNetwork.login(credentials || {}));",
+ "  registerTrustedIpc('lyco:login', (_event, credentials) => lycoProfiles.login(credentials || {}));",
  "  registerTrustedIpc('lyco:refresh', () => lycoNetwork.refresh());",
- "  registerTrustedIpc('lyco:logout', () => lycoNetwork.logout());",
+ "  registerTrustedIpc('lyco:logout', () => lycoProfiles.disconnect({logout:true}));",
  "  registerTrustedIpc('lyco:connect', () => lycoNetwork.connect());",
- "  registerTrustedIpc('lyco:disconnect', () => lycoNetwork.disconnect());",
+ "  registerTrustedIpc('lyco:disconnect', () => lycoProfiles.disconnect());",
+ "  registerTrustedIpc('lyco:create-profile', () => lycoProfiles.create());",
  "  registerTrustedIpc('lyco:choose-core', async () => {",
  '    const choice = await dialog.showOpenDialog(mainWindow, {',
  "      title: '选择官方 Mihomo 代理内核',",
@@ -69,3 +73,32 @@ one('main.js','.then(() => localSettingsWriter.flushNow())',join(
  '.then(() => localSettingsWriter.flushNow())',
  '    .then(() => lycoNetwork?.disconnect())'));
 console.log('LYCO overlay applied to pinned upstream');
+
+// Pinned upstream declares browser inside try, but references it from catch.
+// Preserve the real startup failure and cleanup instead of masking it with a
+// ReferenceError on every failed launch (including failures before selection).
+one('engine.js','    let liveItem = null;','    let liveItem = null;\n    let browser = null;');
+one('engine.js','    const browser = this.chooseBrowser(profile);','    browser = this.chooseBrowser(profile);');
+one('engine.js',"      const kernelVer = browser?.version || (isOpenBrowser148(browser) ? '148' : 'system');",
+ "      const kernelVer = browser?.version || (browser && isOpenBrowser148(browser) ? '148' : 'system');");
+
+one('main.js',"  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",join(
+ "  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",
+ "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData')});"));
+one('renderer.js','function renderProfiles() {',join(
+ 'window.adoptLycoProfile = function(profile) {',
+ '  if (!profile || !profile.id) throw Error("创建环境未返回有效标识");',
+ '  const index=ui.profiles.findIndex(p=>p.id===profile.id);',
+ '  const value=normalizeProfileSettings(profile);',
+ '  if(index<0) ui.profiles.push(value); else ui.profiles[index]=value;',
+ '  ui.nextProfileNumber=Math.max(ui.nextProfileNumber||1,(Number(value.number)||0)+1);',
+ '  save(); invalidateViewCache(["profiles","groups","sync","extensions","proxies"]);',
+ '  renderProfiles();',
+ '};',
+ 'function renderProfiles() {'));
+
+const icon=path.join(base,'resources','branding','icon-source.png');
+fs.copyFileSync(icon,path.join(app,'assets','logo.png'));
+for(const name of ['icon-source.json','ICON-LICENSE.md']) {
+ fs.copyFileSync(path.join(base,'resources','branding',name),path.join(app,'lyco',name));
+}

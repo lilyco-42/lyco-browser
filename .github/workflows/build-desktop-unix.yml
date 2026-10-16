@@ -62,7 +62,17 @@ jobs:
           for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js; do
             node --check "upstream/Browserapp/$f"
           done
-          node --test lyco/tests/network.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build owner icon assets in Actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install Pillow==11.3.0
+          python lyco/scripts/build-icons.py
 
       - name: Install upstream dependencies
         shell: bash
@@ -113,6 +123,7 @@ jobs:
           npm run selftest
           npm run selftest:isolation
           npm run selftest:proxyconcurrency
+          node --test ../../lyco/tests/upstream-start-failure.test.js
 
       - name: Package desktop application in runner only
         working-directory: upstream/Browserapp
