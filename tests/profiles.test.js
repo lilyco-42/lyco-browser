@@ -54,3 +54,18 @@ test('a cloned managed proxy keeps its ownership guard',async t=>{
  state.username='owner-a';await engine.start(clone);
  assert.equal(service.bindings[clone.id].owner,'owner-a');
 });
+
+test('account switching during proxy connection cannot create an environment for the new owner',async t=>{
+ const {service,state,args,engine}=setup(t);
+ args.network.connect=async()=>{state.username='owner-b';return {...state}};
+ await assert.rejects(()=>service.create(),/账号.*变化/);
+ assert.equal(engine.profiles.size,0);assert.equal(Object.keys(service.bindings).length,0);
+});
+
+test('account switching while the proxy store saves prevents browser launch',async t=>{
+ const {service,state,args,engine,calls}=setup(t);const {profile}=await service.create();
+ const update=args.proxyStore.update;
+ args.proxyStore.update=async(...params)=>{const result=await update(...params);state.username='owner-b';return result};
+ await assert.rejects(()=>engine.start(profile),/账号.*变化/);
+ assert.equal(calls.starts.length,0);
+});
