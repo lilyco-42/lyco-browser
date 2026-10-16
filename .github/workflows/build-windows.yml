@@ -131,6 +131,10 @@ jobs:
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          node -e "const p=require('path');require('./upstream/Browserapp/scripts/ensure-host-runtime').ensureHostRuntime(p.resolve('upstream/Browserapp'))"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          node upstream/Browserapp/scripts/build-native.js upstream/Browserapp
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           $binary=node -e "const p=require('path');const r=require('./upstream/Browserapp/scripts/resolve-host-dist');console.log(r.findHostWindowsExe(r.resolveHostDist(p.resolve('upstream/Browserapp'))))"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           node lyco/tests/native-workspaces.mjs $binary upstream/Browserapp lyco-native-preflight
