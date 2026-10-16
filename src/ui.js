@@ -10,6 +10,7 @@
   e('lyco-network-status').textContent=s.connected?('已连接 · 本地 HTTP 127.0.0.1:'+s.port):('未连接 · '+(s.has_core?'Mihomo 已配置':'尚未导入 Mihomo'));
   e('lyco-import').disabled=!s.connected;
   e('lyco-create-profile').disabled=!s.entitled||!s.has_core;
+  e('lyco-copy-extension').disabled=!s.entitled||!s.connected;
   e('lyco-connect').disabled=!s.entitled||s.connected||!s.has_core;
   e('lyco-disconnect').disabled=!s.connected;
   e('lyco-refresh').disabled=!s.logged_in;
@@ -30,6 +31,7 @@
   },'官网权益已核实');
  });
  e('lyco-refresh').onclick=()=>run(()=>window.ops.lycoRefresh(),'已刷新权益');
+ e('lyco-copy-extension').onclick=()=>run(()=>window.ops.lycoCopyExtension(),'已复制连接码，请粘贴到 LYCO 订阅助手；不含账号密钥');
  e('lyco-logout').onclick=()=>run(()=>window.ops.lycoLogout(),'已退出且断开代理');
  e('lyco-pick-core').onclick=()=>run(()=>window.ops.lycoChooseCore(),'代理核心路径已核实');
  e('lyco-connect').onclick=()=>run(()=>window.ops.lycoConnect(),'代理已启动，可导入代理库');

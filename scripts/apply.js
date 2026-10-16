@@ -17,6 +17,11 @@ fs.mkdirSync(path.join(app,'lyco','core'),{recursive:true});
 fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.txt'),path.join(app,'lyco','core','LICENSE-MIHOMO.txt'));
 const view=fs.readFileSync(path.join(base,'src','view.html'),'utf8');
 one('index.html','<title>OpenBrowser</title>','<title>LYCO Browser · 代理与会员</title>');
+one('index.html','href="assets/logo-pixel.png?v=20261002-flat"','href="assets/logo.png"');
+one('index.html','src="assets/logo-pixel.png?v=20261002-flat" alt="OpenBrowser"','src="assets/logo.png" alt="Lyco 原创角色"');
+one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">','<strong>LYCO Browser</strong><small data-i18n="app.brand.sub">');
+one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
+one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
 one('index.html','<button class="nav" data-view="proxies">',join(
  '<button class="nav" data-view="lyco"><i data-lucide="shield-check"></i><span>LYCO 代理与会员</span></button>',
  '<button class="nav" data-view="proxies">'));
@@ -27,6 +32,7 @@ one('renderer.js','function viewMetaFor(view) {',join(
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
  "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
+ "  lycoCopyExtension: () => ipcRenderer.invoke('lyco:copy-extension'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
  "  lycoLogin: (params) => ipcRenderer.invoke('lyco:login', params),",
  "  lycoRefresh: () => ipcRenderer.invoke('lyco:refresh'),",
@@ -57,6 +63,11 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:connect', () => lycoNetwork.connect());",
  "  registerTrustedIpc('lyco:disconnect', () => lycoProfiles.disconnect());",
  "  registerTrustedIpc('lyco:create-profile', () => lycoProfiles.create());",
+ "  registerTrustedIpc('lyco:copy-extension', async () => {",
+ "    const connection = await lycoNetwork.extensionConnection();",
+ "    require('electron').clipboard.writeText(JSON.stringify(connection));",
+ "    return {ok:true};",
+ "  });",
  "  registerTrustedIpc('lyco:choose-core', async () => {",
  '    const choice = await dialog.showOpenDialog(mainWindow, {',
  "      title: '选择官方 Mihomo 代理内核',",
