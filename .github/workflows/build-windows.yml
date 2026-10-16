@@ -3,7 +3,10 @@ name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'tests/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
   workflow_dispatch:
 
 permissions:
@@ -63,7 +66,17 @@ jobs:
       - name: Isolated LYCO proxy and Billing integration tests
         shell: pwsh
         run: |
-          node --test lyco/tests/network.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build owner icon assets in Actions
+        shell: pwsh
+        run: |
+          python -m pip install Pillow==11.3.0
+          python lyco/scripts/build-icons.py
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Install upstream dependencies
@@ -128,7 +141,30 @@ jobs:
             Copy-Item "dist/$stem.$ext" "dist/LYCO-Browser-Windows-x64-MVP.$ext"
           }
 
+      - name: Native packaged membership, owned profiles and real proxy routing
+        shell: pwsh
+        run: |
+          npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $root='upstream/Browserapp/dist/OpenBrowser-Windows-x86_64-with-kernel'
+          node lyco/tests/native-workspaces.mjs "$root/runtime/OpenBrowser.exe" "$root/runtime/resources/app"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Preserve native acceptance evidence in an unpublished draft
+        if: always() && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
+        shell: pwsh
+        run: |
+          if (Test-Path lyco-native-evidence) {
+            Compress-Archive -Path lyco-native-evidence -DestinationPath "$env:RUNNER_TEMP/lyco-native-evidence.zip"
+            $tag="evidence-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+            gh release create $tag --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --draft --title "CI evidence $env:GITHUB_RUN_ID"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+            gh release upload $tag "$env:RUNNER_TEMP/lyco-native-evidence.zip" --repo $env:GITHUB_REPOSITORY
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
       - name: Upload Windows portable ZIP and EXE to GitHub prerelease
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           bash lyco/scripts/ci-publish-release.sh \

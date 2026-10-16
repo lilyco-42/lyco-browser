@@ -78,7 +78,7 @@ function waitForPort(port, child, timeoutMs = 10000) {
 }
 
 class LycoNetwork {
-  constructor({ dataDir, bundledCore, fetchFn = globalThis.fetch, spawnFn = spawn } = {}) {
+  constructor({ dataDir, bundledCore, fetchFn = (...args) => globalThis.fetch(...args), spawnFn = spawn } = {}) {
     if (!dataDir) throw Error('dataDir required');
     this.dataDir = dataDir;
     this.bundledCore = bundledCore || '';
@@ -91,6 +91,7 @@ class LycoNetwork {
     this.port = null;
     this.configPath = null;
     this.customCore = null;
+    this.expiryTimer = null;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -98,7 +99,7 @@ class LycoNetwork {
       headers: { ...(body ? { 'Content-Type': 'application/json' } : {}),
         ...(jwt ? { Authorization: 'Bearer ' + jwt } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(15000), redirect: 'error',
     });
     if (!response.ok) {
       if (response.status === 401 && jwt === this.token) {
@@ -134,7 +135,18 @@ class LycoNetwork {
     this.username = typeof me.username === 'string' ? me.username : '';
     this.entitlement = extractEntitlement(me);
     if (!this.entitlement && this.child) await this.disconnect();
+    if(this.child) this.armExpiry();
     return this.status();
+  }
+  armExpiry() {
+    clearTimeout(this.expiryTimer);
+    if(!this.entitlement?.expires_at) return;
+    const remaining=Date.parse(this.entitlement.expires_at)-Date.now();
+    if(!Number.isFinite(remaining) || remaining<=0) {
+      this.entitlement=null;void this.disconnect();return;
+    }
+    this.expiryTimer=setTimeout(()=>this.armExpiry(),Math.min(remaining,2147483647));
+    this.expiryTimer.unref?.();
   }
   status() {
     const connected = Boolean(this.child && this.child.exitCode === null && !this.child.killed && this.port);
@@ -183,6 +195,7 @@ class LycoNetwork {
     child.on('exit', () => { this.child = null; this.port = null; this.cleanupConfig().catch(() => {}); });
     try {
       await waitForPort(port, child);
+      this.armExpiry();
       return this.status();
     } catch (e) {
       await this.disconnect();
@@ -195,6 +208,7 @@ class LycoNetwork {
     if (p) await fsp.rm(p, { force: true }).catch(() => {});
   }
   async disconnect() {
+    clearTimeout(this.expiryTimer);this.expiryTimer=null;
     if (this.child) {
       const child = this.child;
       this.child = null; this.port = null;

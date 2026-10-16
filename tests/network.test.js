@@ -69,3 +69,15 @@ test('integration overlay includes required elements without leaking auth tokens
  assert.match(script,/window\.ops\.lycoOpenShop/);
  assert.doesNotMatch(html,/BILLING_ADMIN_TOKEN|BILLING_SECRET|MIHOMO_SUB_TOKEN/);
 });
+
+test('a known entitlement expiry stops the core and removes its temporary config',async()=>{
+ const tmp=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'lyco-expiry-'));
+ try {
+  const app=new LycoNetwork({dataDir:tmp});
+  const config=path.join(tmp,'config.json');fs.writeFileSync(config,'{}');
+  let killed=false;app.child={exitCode:null,killed:false,kill(){killed=true;}};app.port=18001;app.configPath=config;
+  app.entitlement={expires_at:new Date(Date.now()-1000).toISOString()};
+  app.armExpiry();await new Promise(resolve=>setTimeout(resolve,30));
+  assert.equal(killed,true);assert.equal(app.status().connected,false);assert.equal(fs.existsSync(config),false);
+ } finally {fs.rmSync(tmp,{recursive:true,force:true});}
+});
