@@ -92,6 +92,8 @@ class LycoNetwork {
     this.configPath = null;
     this.customCore = null;
     this.expiryTimer = null;
+    this.connecting = null;
+    this.connectionEpoch = 0;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -131,7 +133,9 @@ class LycoNetwork {
   }
   async refresh() {
     if (!this.token) throw Error('请先登录网站账号');
+    const sessionToken=this.token,epoch=this.connectionEpoch;
     const me = await this.request('/me');
+    if(this.token!==sessionToken || this.connectionEpoch!==epoch)throw Error('登录会话已变化，请重新操作');
     this.username = typeof me.username === 'string' ? me.username : '';
     this.entitlement = extractEntitlement(me);
     if (!this.entitlement && this.child) await this.disconnect();
@@ -171,7 +175,15 @@ class LycoNetwork {
     this.customCore = p;
     return this.status();
   }
-  async connect() {
+  connect() {
+    if(this.connecting) return this.connecting;
+    const pending=this.connectOnce().finally(()=>{if(this.connecting===pending)this.connecting=null;});
+    this.connecting=pending;
+    return pending;
+  }
+  async connectOnce() {
+    const epoch=this.connectionEpoch;
+    const stillCurrent=()=>{if(epoch!==this.connectionEpoch)throw Error('连接已取消，请重新连接');};
     if (this.status().connected) return this.status();
     if (!this.token || !this.entitlement) throw Error('需要先购买并激活 proxy_1m 代理月卡');
     if (!TOKEN_REGEX.test(this.entitlement.token)) throw Error('订阅令牌无效');
@@ -179,22 +191,31 @@ class LycoNetwork {
     if (!core) throw Error('请先导入官方 mihomo.exe 代理内核');
     // Refresh entitlement before every connection, not only at login.
     await this.refresh();
+    stillCurrent();
     if (!this.entitlement) throw Error('代理权益已过期，请先续费');
     const subscription = await this.request('/sub/' + encodeURIComponent(this.entitlement.token) + '/clash', { raw: true });
+    stillCurrent();
     const port = await freePort();
+    stillCurrent();
     const config = makeConfig(subscription, port);
     const dataDir = path.join(this.dataDir, 'lyco-network');
     await fsp.mkdir(dataDir, { recursive: true, mode: 0o700 });
     const configPath = path.join(dataDir, 'config.json');
     await fsp.writeFile(configPath, JSON.stringify(config), { encoding: 'utf8', mode: 0o600 });
     this.configPath = configPath;
+    try {stillCurrent();}catch(error){await this.cleanupConfig();throw error;}
     const child = this.spawnFn(core, ['-f', configPath, '-d', dataDir],
       { cwd: dataDir, windowsHide: true, stdio: 'ignore' });
     this.child = child; this.port = port;
-    child.on('error', () => { this.child = null; this.port = null; this.cleanupConfig().catch(() => {}); });
-    child.on('exit', () => { this.child = null; this.port = null; this.cleanupConfig().catch(() => {}); });
+    const onGone=()=>{
+      if(this.child!==child)return;
+      this.child=null;this.port=null;clearTimeout(this.expiryTimer);
+      this.cleanupConfig().catch(()=>{});
+    };
+    child.on('error',onGone);child.on('exit',onGone);
     try {
       await waitForPort(port, child);
+      stillCurrent();
       this.armExpiry();
       return this.status();
     } catch (e) {
@@ -208,6 +229,7 @@ class LycoNetwork {
     if (p) await fsp.rm(p, { force: true }).catch(() => {});
   }
   async disconnect() {
+    this.connectionEpoch++;
     clearTimeout(this.expiryTimer);this.expiryTimer=null;
     if (this.child) {
       const child = this.child;

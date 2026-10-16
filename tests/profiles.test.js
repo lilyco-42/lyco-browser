@@ -11,7 +11,7 @@ function setup(t) {
  const calls={starts:[],stops:[],proxies:new Map()};
  const network={refresh:async()=>({...state}),connect:async()=>({...state}),disconnect:async()=>{state.connected=false;return state},logout:async()=>{state.logged_in=false;return state}};
  const engine={profiles:new Map(),start:async p=>{calls.starts.push(p);return p},stop:async id=>calls.stops.push(id),syncProfiles:async profiles=>{for(const p of profiles)engine.profiles.set(p.id,p)}};
- const proxyStore={create:p=>{const record={...p,id:'proxy-'+calls.proxies.size};calls.proxies.set(record.id,record);return record},update:(id,p)=>{const r={...p,id};calls.proxies.set(id,r);return r}};
+ const proxyStore={create:async p=>{const record={...p,id:'proxy-'+calls.proxies.size};calls.proxies.set(record.id,record);return record},update:async(id,p)=>{const r={...p,id};calls.proxies.set(id,r);return r}};
  const args={network,engine,proxyStore,dataDir:dir};
  return {state,calls,engine,args,service:new LycoProfiles(args),dir};
 }

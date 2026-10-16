@@ -32,12 +32,12 @@ class LycoProfiles {
     if(!connected.connected || !Number.isInteger(connected.port)) throw Error('本地代理尚未就绪，环境不会直连启动');
     return connected;
   }
-  proxy(state, existingId) {
+  async proxy(state, existingId) {
     const payload={name:'LYCO 专属线路',protocol:'http',host:'127.0.0.1',port:state.port,
       raw:'http://127.0.0.1:'+state.port,remark:'LYCO Browser · 网站月卡管理'};
     const store=typeof this.proxyStore==='function'?this.proxyStore():this.proxyStore;
     if(!store) throw Error('代理库尚未就绪，请稍后重试');
-    const record=existingId ? store.update(existingId,payload) : store.create(payload);
+    const record=await (existingId ? store.update(existingId,payload) : store.create(payload));
     if(!record?.id) throw Error('保存专属代理失败，环境未启动');
     return record;
   }
@@ -47,7 +47,7 @@ class LycoProfiles {
     try {
       const state=await this.authorized();
       const number=Math.max(0,...[...this.engine.profiles.values()].map(p=>Number(p.number)||0))+1;
-      const record=this.proxy(state);
+      const record=await this.proxy(state);
       const id=randomUUID();
       const profile={id,number,name:String(number),title:'LYCO 专属环境',browser:'Google Chrome',
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
@@ -67,7 +67,7 @@ class LycoProfiles {
     if(!binding) binding=Object.values(this.bindings).find(item=>item.proxyId===profile?.proxyId);
     if(!binding) return profile;
     const state=await this.authorized(binding.owner);
-    const record=this.proxy(state,binding.proxyId);
+    const record=await this.proxy(state,binding.proxyId);
     const stored=this.engine.profiles.get(profile.id);
     if(!stored) throw Error('专属环境已不存在');
     if(!Object.hasOwn(this.bindings,profile.id)) {

@@ -23,8 +23,9 @@ proxy.on('connect',(_req,socket)=>socket.end('HTTP/1.1 502 CI fixture only\r\n\r
 const proxyPort=await listen(proxy);
 let application;
 try {
+ const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA|PROGRAMFILES(?:\(X86\))?|COMMONPROGRAMFILES|HOMEDRIVE|HOMEPATH|OS|PROCESSOR_ARCHITECTURE|NUMBER_OF_PROCESSORS)$/i.test(key)));
  application=await electron.launch({executablePath:binary,args:[appRoot],timeout:60000,
-  env:{...process.env,OPENBROWSER_API_PORT:String(51000+Math.floor(Math.random()*1000))}});
+  env:{...cleanEnv,OPENBROWSER_API_PORT:String(51000+Math.floor(Math.random()*1000))}});
  const page=await application.firstWindow();await page.waitForLoadState('domcontentloaded');
  await application.evaluate(async({shell},port)=>{
   globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
@@ -45,6 +46,10 @@ try {
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);
+ report.checks.push('native-login-valid-entitlement');
+ const connections=await page.evaluate(()=>Promise.all([window.ops.lycoConnect(),window.ops.lycoConnect()]));
+ assert.equal(connections[0].port,connections[1].port);
+ report.checks.push('concurrent-connect-same-core-port');
  await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{window.__lycoCreated=p;return adopt(p)}});
  await page.locator('#lyco-create-profile').click();
  await page.waitForFunction(()=>Boolean(window.__lycoCreated));
@@ -79,6 +84,12 @@ try {
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).connected,false);
  report.checks.push('official-purchase-link-no-payment','cross-account-start-rejected','expired-entitlement-disconnects');
  await page.screenshot({path:path.join(evidence,'windows-expired-membership.png')});
+} catch(error) {
+ report.failure=String(error.stack||error);
+ if(application) {
+  try {const p=await application.firstWindow();report.feedback=await p.locator('#lyco-feedback').textContent();report.state=await p.evaluate(()=>window.ops.lycoStatus());await p.screenshot({path:path.join(evidence,'windows-failure.png')});}catch{}
+ }
+ throw error;
 } finally {
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  origin.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>proxy.close(r));
