@@ -125,6 +125,17 @@ jobs:
           npm run prepare:bundled-kernel
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      - name: Native preflight before expensive archive and installer compression
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $binary=node -e "const p=require('path');const r=require('./upstream/Browserapp/scripts/resolve-host-dist');console.log(r.findHostWindowsExe(r.resolveHostDist(p.resolve('upstream/Browserapp'))))"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          node lyco/tests/native-workspaces.mjs $binary upstream/Browserapp lyco-native-preflight
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
       - name: Build Windows portable ZIP and installer
         shell: pwsh
         working-directory: upstream/Browserapp
@@ -142,6 +153,7 @@ jobs:
           }
 
       - name: Native packaged membership, owned profiles and real proxy routing
+        timeout-minutes: 5
         shell: pwsh
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
@@ -154,8 +166,9 @@ jobs:
         if: always() && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
         shell: pwsh
         run: |
-          if (Test-Path lyco-native-evidence) {
-            Compress-Archive -Path lyco-native-evidence -DestinationPath "$env:RUNNER_TEMP/lyco-native-evidence.zip"
+          $directories=@('lyco-native-preflight','lyco-native-evidence') | Where-Object {Test-Path $_}
+          if ($directories) {
+            Compress-Archive -Path $directories -DestinationPath "$env:RUNNER_TEMP/lyco-native-evidence.zip"
             $tag="evidence-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
             gh release create $tag --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --draft --title "CI evidence $env:GITHUB_RUN_ID"
             if ($LASTEXITCODE -ne 0) { exit 1 }

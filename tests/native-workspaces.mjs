@@ -1,15 +1,17 @@
 import {_electron as electron} from 'playwright';
 import http from 'node:http';
+import net from 'node:net';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
-const evidence=path.resolve('lyco-native-evidence');await fs.mkdir(evidence,{recursive:true});
+const evidence=path.resolve(process.argv[4]||'lyco-native-evidence');await fs.mkdir(evidence,{recursive:true});
 const report={commit:process.env.GITHUB_SHA,binary,fixtureBilling:true,realPayments:0,proxyRequests:[],checks:[]};
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
-const origin=http.createServer((req,res)=>{report.proxyRequests.push({path:req.url,proxied:req.headers['x-ci-proxy']==='yes'});res.end('LYCO browser fixture reached through proxy');});
+const tunnelPorts=new Set(),tunnelSockets=new Set();
+const origin=http.createServer((req,res)=>{report.proxyRequests.push({path:req.url,proxied:tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes'});res.end('LYCO browser fixture reached through proxy');});
 const originPort=await listen(origin);
 const proxy=http.createServer((req,res)=>{
  const url=new URL(req.url);
@@ -18,8 +20,25 @@ const proxy=http.createServer((req,res)=>{
  const upstream=http.request(url,{headers:{...req.headers,'x-ci-proxy':'yes'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res)});
  upstream.on('error',()=>{res.writeHead(502);res.end()});req.pipe(upstream);
 });
-// No unrestricted CONNECT tunnel and no public listener.
-proxy.on('connect',(_req,socket)=>socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n'));
+// Mihomo's HTTP adapter uses CONNECT even for HTTP targets. Permit ONLY the
+// ephemeral CI origin, never a general-purpose tunnel or public listener.
+proxy.on('connect',(req,socket,head)=>{
+ if(![`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)) {
+  socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;
+ }
+ const upstream=net.connect({host:'127.0.0.1',port:originPort});
+ tunnelSockets.add(socket);tunnelSockets.add(upstream);
+ upstream.once('connect',()=>{
+  const port=upstream.localPort;tunnelPorts.add(port);
+  upstream.once('close',()=>tunnelPorts.delete(port));
+  socket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+  if(head.length)upstream.write(head);
+  socket.pipe(upstream);upstream.pipe(socket);
+ });
+ upstream.on('error',()=>socket.destroy());socket.on('error',()=>upstream.destroy());
+ socket.once('close',()=>{tunnelSockets.delete(socket);upstream.destroy()});
+ upstream.once('close',()=>{tunnelSockets.delete(upstream);socket.destroy()});
+});
 const proxyPort=await listen(proxy);
 let application;
 try {
@@ -98,6 +117,7 @@ try {
  throw error;
 } finally {
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
+ for(const socket of tunnelSockets)socket.destroy();
  origin.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>proxy.close(r));
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 }
