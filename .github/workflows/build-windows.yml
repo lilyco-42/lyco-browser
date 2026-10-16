@@ -92,6 +92,8 @@ jobs:
             npm run $suite
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
+          node --test ../../lyco/tests/upstream-start-failure.test.js
+          if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Download pinned official Mihomo for LYCO local proxy
         shell: pwsh

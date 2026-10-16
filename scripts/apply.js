@@ -74,6 +74,14 @@ one('main.js','.then(() => localSettingsWriter.flushNow())',join(
  '    .then(() => lycoNetwork?.disconnect())'));
 console.log('LYCO overlay applied to pinned upstream');
 
+// Pinned upstream declares browser inside try, but references it from catch.
+// Preserve the real startup failure and cleanup instead of masking it with a
+// ReferenceError on every failed launch (including failures before selection).
+one('engine.js','    let liveItem = null;','    let liveItem = null;\n    let browser = null;');
+one('engine.js','    const browser = this.chooseBrowser(profile);','    browser = this.chooseBrowser(profile);');
+one('engine.js',"      const kernelVer = browser?.version || (isOpenBrowser148(browser) ? '148' : 'system');",
+ "      const kernelVer = browser?.version || (browser && isOpenBrowser148(browser) ? '148' : 'system');");
+
 one('main.js',"  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",join(
  "  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",
  "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData')});"));

@@ -123,6 +123,7 @@ jobs:
           npm run selftest
           npm run selftest:isolation
           npm run selftest:proxyconcurrency
+          node --test ../../lyco/tests/upstream-start-failure.test.js
 
       - name: Package desktop application in runner only
         working-directory: upstream/Browserapp
