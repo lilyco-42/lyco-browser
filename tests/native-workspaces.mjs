@@ -68,6 +68,23 @@ try {
    throw Error('Unexpected fixture endpoint');
   };
  },proxyPort);
+ // The workbench must drive existing real dialogs and data, not demo rows.
+ await page.locator('#lyco-group-create').click();
+ await page.locator('#group-name').fill('CI Workspace');
+ await page.locator('#group-form button[value="default"]').click();
+ const groupChip=page.locator('#profile-group-chips [data-group-filter]').filter({hasText:'CI Workspace'});
+ await groupChip.click();const groupId=await groupChip.getAttribute('data-group-filter');
+ await page.locator('#create-profile').click();
+ assert.equal(await page.locator('#profile-create-group').inputValue(),groupId);
+ await page.locator('#profile-form .dialog-head button[value="cancel"]').click();
+ await page.locator('#batch-add').click();
+ assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
+ await page.locator('#batch-add-form button[value="cancel"]').last().click();
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),5);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),10);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ report.checks.push('real-native-group-create-and-current-group-dialog-defaults','compact-columns-retain-expanded-details');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
  // Use the actual upstream translator in both languages; its fallback must
@@ -93,11 +110,12 @@ try {
  const connection=parseConnection(await application.evaluate(({clipboard})=>clipboard.readText()));
  assert.equal(connection.port,connections[0].port);
  assert.equal(connection.scheme,'http');report.checks.push('real-main-process-extension-handoff-no-account-secrets');
- await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{window.__lycoCreated=p;return adopt(p)}});
+ await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{const value=adopt(p);window.__lycoCreated=value;return value}});
  await page.locator('#lyco-create-profile').click();
  await page.waitForFunction(()=>Boolean(window.__lycoCreated));
  const profile=await page.evaluate(()=>window.__lycoCreated);
  assert.ok(profile.proxyId);
+ assert.equal(profile.groupId,groupId);
  // ProxyStore appends an encoded display label as a URI fragment. Validate
  // the actual endpoint; that label is not part of the socket destination.
  const endpoint=new URL(profile.proxy);
@@ -114,13 +132,21 @@ try {
  await page.screenshot({path:path.join(evidence,'windows-workspace.png')});
  // Exercise the actual existing engine with the bound profile and bundled browser.
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;
- await page.evaluate(async({profile,target})=>window.ops.startProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
+ await page.evaluate(({profile,target})=>window.adoptLycoProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
+ await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).dblclick();
  const deadline=Date.now()+30000;
  while(Date.now()<deadline&&!report.proxyRequests.some(r=>r.path==='/browser-probe'))await new Promise(r=>setTimeout(r,250));
  assert.ok(report.proxyRequests.some(r=>r.path==='/browser-probe'&&r.proxied),'Real bundled Chromium traffic must pass through the managed proxy');
  assert.equal(report.proxyRequests.some(r=>r.path==='/browser-probe'&&!r.proxied),false);
  report.checks.push('real-bundled-chromium-via-managed-proxy');
+ report.checks.push('double-click-environment-starts-real-managed-browser');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
+ await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
+ await page.locator('#view-profile-editor').waitFor({state:'visible'});
+ assert.equal(await page.locator('#editor-id').inputValue(),profile.id);
+ await page.locator('[data-view="profiles"]').click();
+ report.checks.push('context-menu-opens-existing-environment-editor');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#lyco-buy').click();
  await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('已在系统浏览器打开'));
