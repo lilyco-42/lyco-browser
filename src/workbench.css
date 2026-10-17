@@ -1,5 +1,5 @@
 /* LYCO workspace primitives: existing application tokens and semantic controls. */
-#view-profiles{--lyco-wb-accent:#be3047;--lyco-wb-border:var(--ui-border,#dfe3e8);--lyco-wb-surface:var(--ui-panel,var(--ui-card,#fff));font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+#view-profiles{--lyco-wb-accent:#be3047;--lyco-wb-border:var(--ui-border,#dfe3e8);--lyco-wb-surface:var(--ui-surface,#fff);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 #view-profiles.active{display:grid!important;grid-template-columns:164px minmax(0,1fr);gap:16px;align-content:start}
 #view-profiles>:not(.lyco-group-navigation){grid-column:2;min-width:0}
 #view-profiles .lyco-group-navigation{grid-column:1;grid-row:1/span 4;min-width:0;min-height:380px;max-height:72vh;overflow:auto;border:1px solid var(--lyco-wb-border);border-radius:12px;background:var(--lyco-wb-surface);padding:12px}
@@ -40,11 +40,11 @@ html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col
 .lyco-list-extras>summary{display:flex;align-items:center;justify-content:center;height:100%;min-height:34px;padding:6px 10px;border:1px solid var(--ui-border,#dfe3e8);border-radius:7px;cursor:pointer;font-size:12px;list-style:none}
 .lyco-list-extras>button{display:none}
 .lyco-list-extras[open]{z-index:40}
-.lyco-list-extras[open]>button{display:block;position:absolute;left:0;width:166px;min-height:38px;background:var(--ui-panel,#fff);color:var(--ui-text,#18232c);border:1px solid var(--ui-border,#dfe3e8);border-radius:0;text-align:left;padding:9px 12px}
+.lyco-list-extras[open]>button{display:block;position:absolute;left:0;width:166px;min-height:38px;background:var(--ui-surface,#fff);color:var(--ui-text,#18232c);border:1px solid var(--ui-border,#dfe3e8);border-radius:0;text-align:left;padding:9px 12px}
 .lyco-list-extras[open]>button:nth-of-type(1){top:100%;border-radius:8px 8px 0 0}
 .lyco-list-extras[open]>button:nth-of-type(2){top:calc(100% + 38px)}
 .lyco-list-extras[open]>button:nth-of-type(3){top:calc(100% + 76px);border-radius:0 0 8px 8px}
-.lyco-profile-menu{position:fixed;z-index:10000;min-width:168px;padding:5px;border:1px solid var(--ui-border,#dfe3e8);border-radius:9px;background:var(--ui-panel,#fff);box-shadow:0 12px 32px #0002;color:var(--ui-text,#18232c);font-family:ui-sans-serif,system-ui,sans-serif}
+.lyco-profile-menu{position:fixed;z-index:10000;min-width:168px;padding:5px;border:1px solid var(--ui-border,#dfe3e8);border-radius:9px;background:var(--ui-surface,#fff);box-shadow:0 12px 32px #0002;color:var(--ui-text,#18232c);font-family:ui-sans-serif,system-ui,sans-serif}
 .lyco-profile-menu[hidden]{display:none!important}
 .lyco-profile-menu button{display:block;width:100%;min-height:36px;border:0;border-radius:5px;background:transparent;color:inherit;text-align:left;padding:8px 11px;font:inherit;font-size:13px;cursor:pointer}
 .lyco-profile-menu button:focus-visible,.lyco-profile-menu button:hover{outline:none;background:#be304718}

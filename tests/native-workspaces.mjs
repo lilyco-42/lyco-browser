@@ -120,11 +120,12 @@ try {
  report.checks.push('compact-columns-retain-expanded-details');
  // Inspect real native geometry: upstream's 980px table and sticky actions
  // previously hid the network/status columns despite five displayed headers.
- const workspaceWindow=await application.browserWindow(page);
  report.compactLayouts=[];
  for(const width of [1024,1440]) {
-  await workspaceWindow.evaluate((window,width)=>window.setBounds({width,height:800}),width);
-  await page.waitForFunction(width=>window.outerWidth===width,width);
+  // Size the actual packaged renderer's viewport, not Windows' decorated
+  // outerWidth (which differs with native caption/DPI and screen limits).
+  await page.setViewportSize({width,height:800});
+  await page.waitForFunction(width=>window.innerWidth===width,width);
   const layout=await page.locator('#view-profiles .table-card').evaluate(card=>{
    const rect=element=>{const r=element.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}};
    const visible=element=>getComputedStyle(element).display!=='none';
@@ -142,9 +143,20 @@ try {
   }
   report.compactLayouts.push(layout);
  }
- await workspaceWindow.evaluate(window=>window.setBounds({width:1024,height:800}));
- await page.waitForFunction(()=>window.outerWidth===1024);
+ await page.setViewportSize({width:1024,height:800});
+ await page.waitForFunction(()=>window.innerWidth===1024);
  report.checks.push('native-compact-columns-fit-at-1024-and-1440-without-overlap');
+ await page.locator('#theme-trigger').click();
+ await page.locator('#theme-appearance [data-color-mode="dark"]').click();
+ await page.waitForFunction(()=>document.documentElement.dataset.colorMode==='dark');
+ const groupBackground=await page.locator('.lyco-group-navigation').evaluate(element=>getComputedStyle(element).backgroundColor);
+ assert.ok(groupBackground.match(/\d+/g).slice(0,3).every(channel=>Number(channel)<128),'The group rail must use the actual dark theme surface');
+ await page.locator('#theme-trigger').click();
+ await page.screenshot({path:path.join(evidence,'windows-workspace-dark.png')});
+ await page.locator('#theme-trigger').click();
+ await page.locator('#theme-appearance [data-color-mode="light"]').click();
+ await page.locator('#theme-trigger').click();
+ report.checks.push('native-workbench-follows-existing-dark-and-light-theme');
  const beforeBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
  await page.locator('#batch-add').click();await page.locator('#batch-add-count').fill('2');
  assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
