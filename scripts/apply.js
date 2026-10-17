@@ -28,6 +28,9 @@ one('index.html','<button class="nav" data-view="proxies">',join(
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
 one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n</body>');
+// The count already uses the parameterized catalogue. Auto-translation must
+// not restore its cached initial Chinese zero over a later English count.
+one('index.html','id="profile-selection-count"','id="profile-selection-count" translate="no"');
 one('index.html','<div class="group-chip-row" id="profile-group-chips"></div>',join(
  '<aside class="lyco-group-navigation" aria-label="Environment groups">',
  '<div class="lyco-group-heading"><strong data-lyco-label="groups" translate="no">分组</strong><button id="lyco-group-create" type="button" data-lyco-label="newGroup" translate="no">新建分组</button></div>',
