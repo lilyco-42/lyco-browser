@@ -157,3 +157,4 @@ fs.copyFileSync(icon,path.join(app,'assets','logo-pixel.png'));
 for(const name of ['icon-source.json','ICON-LICENSE.md']) {
  fs.copyFileSync(path.join(base,'resources','branding',name),path.join(app,'lyco',name));
 }
+require('./brand-windows-installer')(app);

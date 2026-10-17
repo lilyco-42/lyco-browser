@@ -70,7 +70,7 @@ try {
  },proxyPort);
  // The workbench must drive existing real dialogs and data, not demo rows.
  await page.locator('#lyco-group-create').click();
- const groupName=`CI ${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}-${path.basename(evidence).endsWith('preflight')?'preflight':'package'}`;
+ const groupName=`CI ${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}-${path.basename(evidence)}`;
  await page.locator('#group-name').fill(groupName);
  await page.locator('#group-form button[value="default"]').click();
  const groupChip=page.locator('#profile-group-chips [data-group-filter]').filter({hasText:groupName});
@@ -166,6 +166,7 @@ try {
  const afterBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
  const batchIds=afterBatch.filter(id=>!beforeBatch.includes(id));assert.equal(batchIds.length,2);
  const appData=await application.evaluate(({app})=>app.getPath('userData'));
+ report.userDataPath=appData;
  const persisted=JSON.parse(await fs.readFile(path.join(appData,'openbrowser-engine.json'),'utf8'));
  for(const id of batchIds)assert.equal(persisted.profiles.find(row=>row.id===id)?.groupId,groupId);
  report.checks.push('real-batch-create-two-environments-persists-selected-group');

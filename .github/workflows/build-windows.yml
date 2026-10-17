@@ -32,7 +32,7 @@ jobs:
       OPENBROWSER_PACKAGE_ARCH: x86_64
       OPENBROWSER_PACKAGE_VARIANT: with-kernel
       OPENBROWSER_BUNDLE_KERNEL: 'true'
-      LYCO_DESKTOP_PUBLIC_RELEASE: 'false'
+      LYCO_DESKTOP_PUBLIC_RELEASE: 'true'
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Enable long paths before checkout
@@ -181,11 +181,16 @@ jobs:
           node lyco/tests/native-workspaces.mjs "$root/runtime/OpenBrowser.exe" "$root/runtime/resources/app"
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      - name: Install the actual EXE, verify LYCO icons and shortcuts, run it and uninstall
+        timeout-minutes: 10
+        shell: pwsh
+        run: ./lyco/tests/windows-installer.ps1
+
       - name: Preserve native acceptance evidence in an unpublished draft
         if: always() && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
         shell: pwsh
         run: |
-          $directories=@('lyco-native-preflight','lyco-native-evidence') | Where-Object {Test-Path $_}
+          $directories=@('lyco-native-preflight','lyco-native-evidence','lyco-native-installed') | Where-Object {Test-Path $_}
           if ($directories) {
             Compress-Archive -Path $directories -DestinationPath "$env:RUNNER_TEMP/lyco-native-evidence.zip"
             $tag="evidence-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
