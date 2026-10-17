@@ -80,11 +80,7 @@ try {
  await page.locator('#batch-add').click();
  assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
  await page.locator('#batch-add-form button[value="cancel"]').last().click();
- assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),5);
- await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
- assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),10);
- await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
- report.checks.push('real-native-group-create-and-current-group-dialog-defaults','compact-columns-retain-expanded-details');
+ report.checks.push('real-native-group-create-and-current-group-dialog-defaults');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
  // Use the actual upstream translator in both languages; its fallback must
@@ -116,6 +112,11 @@ try {
  const profile=await page.evaluate(()=>window.__lycoCreated);
  assert.ok(profile.proxyId);
  assert.equal(profile.groupId,groupId);
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),5);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),10);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ report.checks.push('compact-columns-retain-expanded-details');
  // ProxyStore appends an encoded display label as a URI fragment. Validate
  // the actual endpoint; that label is not part of the socket destination.
  const endpoint=new URL(profile.proxy);
