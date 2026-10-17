@@ -1,0 +1,20 @@
+{
+  "repository": "adryfish/fingerprint-chromium",
+  "purpose": "Static candidate audit only; no browser execution or redistribution approval",
+  "versions": [
+    {
+      "tag": "148.0.7778.215",
+      "source_commit": "13b89eae304123f0710f2d33fd0816a2f61d7ffc",
+      "asset": "ungoogled-chromium_148.0.7778.215-1.1_windows_x64.zip",
+      "size": 189767686,
+      "sha256": "9ef3f471b7a6641b4224532522b29141ce3746e27d55788d88e2fd951f362579"
+    },
+    {
+      "tag": "150.0.7871.186",
+      "source_commit": "698a1002bd54c021ac2001cc6298bbc45826dcbb",
+      "asset": "ungoogled-chromium_150.0.7871.186-1.1_windows_x64.zip",
+      "size": 193743241,
+      "sha256": "4d549c326e51ebbabf562fd365eb5380d9d4a81200da2c60f075c688d9a77e03"
+    }
+  ]
+}

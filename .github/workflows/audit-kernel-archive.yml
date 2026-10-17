@@ -1,0 +1,56 @@
+name: Static kernel candidate audit (no browser execution)
+
+on:
+  push:
+    paths: ['scripts/audit-kernel-archive.py', 'resources/kernel-audit/**', '.github/workflows/audit-kernel-archive.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archive-audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Download locked official candidate archives and source metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit-input license-audit
+          repo=adryfish/fingerprint-chromium
+          for tag in 148.0.7778.215 150.0.7871.186; do
+            case "$tag" in
+              148.0.7778.215) source=13b89eae304123f0710f2d33fd0816a2f61d7ffc ;;
+              150.0.7871.186) source=698a1002bd54c021ac2001cc6298bbc45826dcbb ;;
+            esac
+            gh api "repos/$repo/releases/tags/$tag" > "audit-input/release-$tag.json"
+            gh api "repos/$repo/commits/$source" > "audit-input/source-$tag.json"
+            gh api "repos/$repo/git/trees/$source?recursive=1" > "audit-input/tree-$tag.json"
+            gh api "repos/$repo/contents/LICENSE?ref=$source" --jq .content | base64 --decode > "license-audit/source-LICENSE-$tag.txt"
+            gh release download "$tag" --repo "$repo" --pattern "ungoogled-chromium_$tag-1.1_windows_x64.zip" --dir audit-input
+          done
+      - name: Verify archive identities and inspect notices and font inventory
+        run: python scripts/audit-kernel-archive.py resources/kernel-audit/fingerprint-chromium.json audit-input license-audit
+      - name: Preserve static audit evidence only (never candidate binaries)
+        if: always() && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d license-audit ]; then exit 0; fi
+          python -m zipfile -c "$RUNNER_TEMP/kernel-license-audit.zip" license-audit
+          tag="kernel-audit-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft \
+            --title "Static kernel archive audit $GITHUB_RUN_ID" \
+            --notes 'Static archive/license inspection only. No browser execution, product acceptance or distribution clearance. Candidate binaries are not uploaded.'
+          gh release upload "$tag" "$RUNNER_TEMP/kernel-license-audit.zip" --repo "$GITHUB_REPOSITORY"
