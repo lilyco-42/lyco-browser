@@ -58,3 +58,15 @@ test('explicitly authorized desktop builds create a public prerelease',t=>{
  assert.equal(result.calls.some(line=>line.startsWith('release edit ')),false);
  assert.match(result.stdout,/CI release:/);
 });
+test('universal release steps expose a scoped GitHub token only at publication',()=>{
+ const yaml=fs.readFileSync(path.join(__dirname,'../.github/workflows/build-universal.yml'),'utf8').replace(/\r\n/g,'\n');
+ for(const name of [
+  'Upload React Native Web to GitHub prerelease',
+  'Upload Android APK to GitHub prerelease',
+  'Upload iOS simulator build to GitHub prerelease',
+ ]) {
+  const block='      - name: '+name+'\n        env:\n          GH_TOKEN: '+'$'+'{{ github.token }}'+'\n        run:';
+  assert.ok(yaml.includes(block),'GH_TOKEN missing from '+name);
+ }
+ assert.ok(!yaml.includes('\n  env:\n    GH_TOKEN:'),'Do not expose release token at workflow scope');
+});
