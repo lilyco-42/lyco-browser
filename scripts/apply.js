@@ -119,7 +119,7 @@ one('renderer.js','function renderProfiles() {',join(
  'window.adoptLycoProfile = function(profile) {',
  '  if (!profile || !profile.id) throw Error("创建环境未返回有效标识");',
  '  const index=ui.profiles.findIndex(p=>p.id===profile.id);',
- '  if (!Object.hasOwn(profile, "groupId")) profile = {...profile, groupId: lycoPreferredGroup()};',
+ '  if (index < 0 && !profile.groupId) profile = {...profile, groupId: lycoPreferredGroup()};',
  '  const value=normalizeProfileSettings(profile);',
  '  if(index<0) ui.profiles.push(value); else ui.profiles[index]=value;',
  '  ui.nextProfileNumber=Math.max(ui.nextProfileNumber||1,(Number(value.number)||0)+1);',
