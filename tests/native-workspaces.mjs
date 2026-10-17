@@ -123,6 +123,7 @@ try {
  assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
  await page.locator('#batch-add-form button[value="default"]').click();
  await page.locator('#batch-add-dialog').waitFor({state:'hidden'});
+ await page.waitForFunction(expected=>document.querySelectorAll('#profile-table tr[data-profile-id]').length===expected,beforeBatch.length+2);
  const afterBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
  const batchIds=afterBatch.filter(id=>!beforeBatch.includes(id));assert.equal(batchIds.length,2);
  const appData=await application.evaluate(({app})=>app.getPath('userData'));
