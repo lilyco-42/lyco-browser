@@ -71,7 +71,7 @@ jobs:
         run: |
           node lyco/scripts/apply.js upstream/Browserapp
           if ($LASTEXITCODE -ne 0) { exit 1 }
-          foreach ($path in @('upstream/Browserapp/main.js','upstream/Browserapp/preload.js','upstream/Browserapp/renderer.js','upstream/Browserapp/lyco/ui.js','upstream/Browserapp/lyco/network.js')) {
+          foreach ($path in @('upstream/Browserapp/main.js','upstream/Browserapp/preload.js','upstream/Browserapp/renderer.js','upstream/Browserapp/lyco/ui.js','upstream/Browserapp/lyco/network.js','upstream/Browserapp/lyco/workbench.js')) {
             node --check $path
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }

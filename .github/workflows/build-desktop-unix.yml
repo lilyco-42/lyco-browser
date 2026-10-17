@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           node lyco/scripts/apply.js upstream/Browserapp
-          for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js; do
+          for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js lyco/workbench.js; do
             node --check "upstream/Browserapp/$f"
           done
           node --test lyco/tests/network.test.js lyco/tests/profiles.test.js

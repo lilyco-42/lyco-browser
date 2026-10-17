@@ -108,7 +108,12 @@ test('a known entitlement expiry stops the core and removes its temporary config
   const config=path.join(tmp,'config.json');fs.writeFileSync(config,'{}');
   let killed=false;app.child={exitCode:null,killed:false,kill(){killed=true;}};app.port=18001;app.configPath=config;
   app.entitlement={expires_at:new Date(Date.now()-1000).toISOString()};
-  app.armExpiry();await new Promise(resolve=>setTimeout(resolve,30));
+  // Expiry starts asynchronous disk cleanup. Await that real operation;
+  // a 30ms sleep races the shared Actions runner's filesystem scheduling.
+  const disconnect=app.disconnect.bind(app);let disconnection;
+  app.disconnect=()=>{disconnection=disconnect();return disconnection};
+  app.armExpiry();assert.ok(disconnection,'An expired entitlement must initiate disconnect');
+  await disconnection;
   assert.equal(killed,true);assert.equal(app.status().connected,false);assert.equal(fs.existsSync(config),false);
  } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 });

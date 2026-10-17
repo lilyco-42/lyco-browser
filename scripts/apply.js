@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,s.replace(from,to),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','view.html','ui.js']){
+for(const file of ['network.js','profiles.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -26,7 +26,12 @@ one('index.html','<button class="nav" data-view="proxies">',join(
  '<button class="nav" data-view="lyco" lang="zh-CN" translate="no"><i data-lucide="shield-check"></i><span>LYCO 代理与会员</span></button>',
  '<button class="nav" data-view="proxies">'));
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
-one('index.html','</body>','<script src="lyco/ui.js"></script>\n</body>');
+one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
+one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n</body>');
+one('index.html','<div class="group-chip-row" id="profile-group-chips"></div>',join(
+ '<aside class="lyco-group-navigation" aria-label="Environment groups">',
+ '<div class="lyco-group-heading"><strong data-lyco-label="groups" translate="no">分组</strong><button id="lyco-group-create" type="button" data-lyco-label="newGroup" translate="no">新建分组</button></div>',
+ '<div class="group-chip-row" id="profile-group-chips"></div></aside>'));
 // Respect the standard opt-out on the localized LYCO panel. The upstream
 // word-substitution fallback otherwise turns complete Chinese into mixed text.
 one('i18n.js',
@@ -102,16 +107,45 @@ one('main.js',"  engine = new BrowserEngine(app, { profileDataRoot: localSetting
  "  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",
  "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData')});"));
 one('renderer.js','function renderProfiles() {',join(
+ 'function lycoPreferredGroup() {',
+ "  return activeGroupFilter === 'ungrouped' ? UNGROUPED_ID : (findGroup(activeGroupFilter)?.id || listGroups()[0]?.id || UNGROUPED_ID);",
+ '}',
+ 'window.lycoWorkbenchActions = {',
+ '  createGroup: () => openGroupDialog(null),',
+ '  start: id => startProfile(id), stop: id => stopProfile(id),',
+ '  edit: id => openProfileEditor(id), clone: id => cloneProfile(id),',
+ '  running: id => Boolean(profileEngine(id).running),',
+ '};',
  'window.adoptLycoProfile = function(profile) {',
  '  if (!profile || !profile.id) throw Error("创建环境未返回有效标识");',
  '  const index=ui.profiles.findIndex(p=>p.id===profile.id);',
+ '  if (index < 0 && !profile.groupId) profile = {...profile, groupId: lycoPreferredGroup()};',
  '  const value=normalizeProfileSettings(profile);',
  '  if(index<0) ui.profiles.push(value); else ui.profiles[index]=value;',
  '  ui.nextProfileNumber=Math.max(ui.nextProfileNumber||1,(Number(value.number)||0)+1);',
  '  save(); invalidateViewCache(["profiles","groups","sync","extensions","proxies"]);',
  '  renderProfiles();',
+ '  return value;',
  '};',
  'function renderProfiles() {'));
+
+// Only change the defaults at actual create entry points, not startup/migration.
+for(const [header,field] of [
+ ['function openCreateProfileDialog() {','profile-create-group'],
+ ["$('#batch-add').addEventListener('click', () => {\n  $('#batch-add-start').value = String(nextProfileNumber());",'batch-add-group'],
+]) {
+ const file=path.join(app,'renderer.js');
+ const source=fs.readFileSync(file,'utf8').replace(/\r\n/g,'\n');
+ const anchor=header+"\n  fillGroupSelect($('#"+field+"'), listGroups()[0]?.id || UNGROUPED_ID);";
+ if(source.split(anchor).length!==2)throw Error('Renderer group-create anchor mismatch: '+field);
+ fs.writeFileSync(file,source.replace(anchor,header+"\n  fillGroupSelect($('#"+field+"'), lycoPreferredGroup());"),'utf8');
+}
+one('renderer.js',join("    const nameCell = document.createElement('td');",'    nameCell.append(buildEnvIdentity(profile));'),
+ join("    const nameCell = document.createElement('td'); nameCell.className = 'col-name'; row.tabIndex = 0;",'    nameCell.append(buildEnvIdentity(profile));'));
+one('renderer.js','    networkCell.append(networkInfo);',join(
+ '    networkCell.append(networkInfo);',
+ "    const compactExit = networkInfo.cloneNode(true); compactExit.classList.add('lyco-inline-exit'); proxyCell.append(compactExit);",
+ "    nameCell.append(element('small', 'lyco-environment-meta', groupNameOf(profile)));"));
 
 const icon=path.join(base,'resources','branding','icon-source.png');
 fs.copyFileSync(icon,path.join(app,'assets','logo.png'));

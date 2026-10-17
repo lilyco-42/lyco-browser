@@ -68,6 +68,20 @@ try {
    throw Error('Unexpected fixture endpoint');
   };
  },proxyPort);
+ // The workbench must drive existing real dialogs and data, not demo rows.
+ await page.locator('#lyco-group-create').click();
+ const groupName=`CI ${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}-${path.basename(evidence).endsWith('preflight')?'preflight':'package'}`;
+ await page.locator('#group-name').fill(groupName);
+ await page.locator('#group-form button[value="default"]').click();
+ const groupChip=page.locator('#profile-group-chips [data-group-filter]').filter({hasText:groupName});
+ await groupChip.click();const groupId=await groupChip.getAttribute('data-group-filter');
+ await page.locator('#create-profile').click();
+ assert.equal(await page.locator('#profile-create-group').inputValue(),groupId);
+ await page.locator('#profile-form .dialog-head button[value="cancel"]').click();
+ await page.locator('#batch-add').click();
+ assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
+ await page.locator('#batch-add-form button[value="cancel"]').last().click();
+ report.checks.push('real-native-group-create-and-current-group-dialog-defaults');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
  // Use the actual upstream translator in both languages; its fallback must
@@ -93,11 +107,68 @@ try {
  const connection=parseConnection(await application.evaluate(({clipboard})=>clipboard.readText()));
  assert.equal(connection.port,connections[0].port);
  assert.equal(connection.scheme,'http');report.checks.push('real-main-process-extension-handoff-no-account-secrets');
- await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{window.__lycoCreated=p;return adopt(p)}});
+ await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{const value=adopt(p);window.__lycoCreated=value;return value}});
  await page.locator('#lyco-create-profile').click();
  await page.waitForFunction(()=>Boolean(window.__lycoCreated));
  const profile=await page.evaluate(()=>window.__lycoCreated);
  assert.ok(profile.proxyId);
+ assert.equal(profile.groupId,groupId);
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),5);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),10);
+ await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
+ report.checks.push('compact-columns-retain-expanded-details');
+ // Inspect real native geometry: upstream's 980px table and sticky actions
+ // previously hid the network/status columns despite five displayed headers.
+ report.compactLayouts=[];
+ for(const width of [1024,1440]) {
+  // Size the actual packaged renderer's viewport, not Windows' decorated
+  // outerWidth (which differs with native caption/DPI and screen limits).
+  await page.setViewportSize({width,height:800});
+  await page.waitForFunction(width=>window.innerWidth===width,width);
+  const layout=await page.locator('#view-profiles .table-card').evaluate(card=>{
+   const rect=element=>{const r=element.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}};
+   const visible=element=>getComputedStyle(element).display!=='none';
+   return {viewport:innerWidth,card:rect(card),clientWidth:card.clientWidth,scrollWidth:card.scrollWidth,
+    headers:[...card.querySelectorAll('thead th')].filter(visible).map(rect),
+    cells:[...card.querySelector('tbody tr[data-profile-id]').children].filter(visible).map(rect)};
+  });
+  assert.equal(layout.headers.length,5);assert.equal(layout.cells.length,5);
+  assert.ok(layout.scrollWidth<=layout.clientWidth+1,'Compact information must fit without horizontal scrolling');
+  for(let index=0;index<5;index++) {
+   const cell=layout.cells[index],header=layout.headers[index];
+   assert.ok(cell.width>20&&cell.left>=layout.card.left-1&&cell.right<=layout.card.right+1,'Every compact cell must fit inside its card');
+   assert.ok(Math.abs(header.left-cell.left)<=1&&Math.abs(header.right-cell.right)<=1,'Headers must align with their cells');
+   if(index)assert.ok(layout.cells[index-1].right<=cell.left+1,'Compact cells must not overlap');
+  }
+  report.compactLayouts.push(layout);
+ }
+ await page.setViewportSize({width:1024,height:800});
+ await page.waitForFunction(()=>window.innerWidth===1024);
+ report.checks.push('native-compact-columns-fit-at-1024-and-1440-without-overlap');
+ await page.locator('#theme-trigger').click();
+ await page.locator('#theme-appearance [data-color-mode="dark"]').click();
+ await page.waitForFunction(()=>document.documentElement.dataset.colorMode==='dark');
+ const groupBackground=await page.locator('.lyco-group-navigation').evaluate(element=>getComputedStyle(element).backgroundColor);
+ assert.ok(groupBackground.match(/\d+/g).slice(0,3).every(channel=>Number(channel)<128),'The group rail must use the actual dark theme surface');
+ await page.locator('#theme-trigger').click();
+ await page.screenshot({path:path.join(evidence,'windows-workspace-dark.png')});
+ await page.locator('#theme-trigger').click();
+ await page.locator('#theme-appearance [data-color-mode="light"]').click();
+ await page.locator('#theme-trigger').click();
+ report.checks.push('native-workbench-follows-existing-dark-and-light-theme');
+ const beforeBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
+ await page.locator('#batch-add').click();await page.locator('#batch-add-count').fill('2');
+ assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
+ await page.locator('#batch-add-form button[value="default"]').click();
+ await page.locator('#batch-add-dialog').waitFor({state:'hidden'});
+ await page.waitForFunction(expected=>document.querySelectorAll('#profile-table tr[data-profile-id]').length===expected,beforeBatch.length+2);
+ const afterBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
+ const batchIds=afterBatch.filter(id=>!beforeBatch.includes(id));assert.equal(batchIds.length,2);
+ const appData=await application.evaluate(({app})=>app.getPath('userData'));
+ const persisted=JSON.parse(await fs.readFile(path.join(appData,'openbrowser-engine.json'),'utf8'));
+ for(const id of batchIds)assert.equal(persisted.profiles.find(row=>row.id===id)?.groupId,groupId);
+ report.checks.push('real-batch-create-two-environments-persists-selected-group');
  // ProxyStore appends an encoded display label as a URI fragment. Validate
  // the actual endpoint; that label is not part of the socket destination.
  const endpoint=new URL(profile.proxy);
@@ -114,13 +185,21 @@ try {
  await page.screenshot({path:path.join(evidence,'windows-workspace.png')});
  // Exercise the actual existing engine with the bound profile and bundled browser.
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;
- await page.evaluate(async({profile,target})=>window.ops.startProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
+ await page.evaluate(({profile,target})=>window.adoptLycoProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
+ await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).dblclick();
  const deadline=Date.now()+30000;
  while(Date.now()<deadline&&!report.proxyRequests.some(r=>r.path==='/browser-probe'))await new Promise(r=>setTimeout(r,250));
  assert.ok(report.proxyRequests.some(r=>r.path==='/browser-probe'&&r.proxied),'Real bundled Chromium traffic must pass through the managed proxy');
  assert.equal(report.proxyRequests.some(r=>r.path==='/browser-probe'&&!r.proxied),false);
  report.checks.push('real-bundled-chromium-via-managed-proxy');
+ report.checks.push('double-click-environment-starts-real-managed-browser');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
+ await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
+ await page.locator('#view-profile-editor').waitFor({state:'visible'});
+ assert.equal(await page.locator('#editor-id').inputValue(),profile.id);
+ await page.locator('[data-view="profiles"]').click();
+ report.checks.push('context-menu-opens-existing-environment-editor');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#lyco-buy').click();
  await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('已在系统浏览器打开'));
