@@ -21,6 +21,16 @@
 #view-profiles.lyco-detailed-profiles .profile-table-compact :is(th,td){display:table-cell!important}
 #view-profiles .profile-table-compact th.col-name{min-width:170px}
 #view-profiles .profile-table-compact td.col-name{min-width:170px;max-width:240px}
+/* Override the upstream ten-column/sticky-action widths only in compact mode.
+   Counting displayed cells does not prove that the network/status cells fit. */
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card table.profile-table-compact{width:100%!important;min-width:0!important;table-layout:fixed!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card :is(th,td){min-width:0!important;max-width:none!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card :is(th.col-check,td:first-child){width:36px!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col-name{width:auto!important;overflow:hidden!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col-network{width:140px!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col-status{width:78px!important}
+html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col-actions{width:148px!important;position:static!important;box-shadow:none!important}
+#view-profiles .lyco-inline-exit{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #view-profiles .profile-table-compact .actions{gap:4px}
 #view-profiles .profile-table-compact .actions button{min-width:30px;min-height:32px;border-radius:7px}
 #view-profiles .lyco-environment-meta{display:block;margin:5px 0 0 46px;opacity:.7;font-size:11px;font-weight:400}
