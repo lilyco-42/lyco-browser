@@ -3,8 +3,8 @@
  const actions=window.lycoWorkbenchActions;
  if(!actions)throw Error('LYCO workbench actions are unavailable');
  const labels={
-  'zh-CN':{groups:'分组',newGroup:'新建分组',more:'更多操作',details:'展开详细列',compact:'收起详细列',start:'启动环境',stop:'停止环境',edit:'编辑环境',clone:'复制环境'},
-  en:{groups:'Groups',newGroup:'New group',more:'More actions',details:'Show details',compact:'Compact columns',start:'Start environment',stop:'Stop environment',edit:'Edit environment',clone:'Clone environment'},
+  'zh-CN':{groups:'分组',newGroup:'新建分组',more:'更多操作',bulkMore:'更多批量操作',bulkSettings:'批量环境设置',bulkGroup:'移动环境分组',bulkDelete:'删除选中环境',copyProfiles:'复制环境',details:'展开详细列',compact:'收起详细列',start:'启动环境',stop:'停止环境',edit:'编辑环境',clone:'复制环境'},
+  en:{groups:'Groups',newGroup:'New group',more:'More actions',bulkMore:'More bulk actions',bulkSettings:'Environment preferences and network',bulkGroup:'Move environments to a group',bulkDelete:'Delete selected environments',copyProfiles:'Copy profiles',details:'Show details',compact:'Compact columns',start:'Start environment',stop:'Stop environment',edit:'Edit environment',clone:'Clone environment'},
  };
  const text=key=>(labels[window.OpenBrowserI18n?.getLocale()]||labels.en)[key];
  const table=document.getElementById('profile-table');
@@ -22,6 +22,33 @@
   detailToggle.textContent=text(detailed?'compact':'details');extra.open=false;
  };
  extra.append(detailToggle);toolbar.append(extra);
+ const bulkActions=document.querySelector('#profile-selection-bar .selection-actions');
+ const bulkMore=document.createElement('details');bulkMore.id='lyco-bulk-more';bulkMore.className='lyco-bulk-more';
+ const bulkSummary=document.createElement('summary');bulkSummary.dataset.lycoLabel='bulkMore';bulkSummary.translate=false;
+ const bulkPanel=document.createElement('div');bulkPanel.className='lyco-bulk-panel';
+ const bulkGroups=[
+  ['bulkSettings',['batch-edit-preferences','batch-update','batch-set-direct']],
+  ['bulkGroup',['batch-assign-group','batch-assign-group-btn']],
+  ['bulkDelete',['delete-selected']],
+ ];
+ const bulkActionIds=new Set(bulkGroups.flatMap(([,ids])=>ids).filter(id=>id!=='batch-assign-group'));
+ for(const [label,ids] of bulkGroups) {
+  const group=document.createElement('div');group.className='lyco-bulk-section';
+  group.setAttribute('role','group');group.dataset.lycoAria=label;
+  for(const id of ids) {
+   const control=document.getElementById(id);
+   group.append(id==='batch-assign-group'?control.closest('label'):control);
+  }
+  bulkPanel.append(group);
+ }
+ bulkMore.append(bulkSummary,bulkPanel);bulkActions.append(bulkMore);
+ const copyLabel=document.querySelector('#copy-selected span');
+ copyLabel.dataset.lycoLabel='copyProfiles';copyLabel.translate=false;
+ bulkPanel.addEventListener('click',event=>{
+  if(bulkActionIds.has(event.target.closest('button')?.id))bulkMore.open=false;
+ });
+ bulkMore.addEventListener('toggle',()=>{if(bulkMore.open)extra.open=false});
+ extra.addEventListener('toggle',()=>{if(extra.open)bulkMore.open=false});
  document.getElementById('lyco-group-create').onclick=()=>actions.createGroup();
  const menu=document.createElement('div');menu.className='lyco-profile-menu';menu.id='lyco-profile-menu';
  menu.setAttribute('role','menu');menu.setAttribute('aria-label','Environment actions');menu.translate=false;menu.hidden=true;
@@ -63,12 +90,21 @@
   }
   if(event.key==='Tab')close(false);
  });
- document.addEventListener('pointerdown',event=>{if(!menu.contains(event.target))close(false)});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'){close(true);extra.open=false}});
+ document.addEventListener('pointerdown',event=>{
+  if(!menu.contains(event.target))close(false);
+  if(!bulkMore.contains(event.target)&&!event.target.closest('.themed-select-menu,.themed-multiselect-menu'))bulkMore.open=false;
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){
+   close(true);extra.open=false;
+   if(bulkMore.open){bulkMore.open=false;bulkSummary.focus()}
+  }
+ });
  window.addEventListener('resize',()=>close(false));
  document.addEventListener('scroll',()=>close(false),true);
  function translate(){
   document.querySelectorAll('[data-lyco-label]').forEach(node=>{node.textContent=text(node.dataset.lycoLabel)});
+  document.querySelectorAll('[data-lyco-aria]').forEach(node=>{node.setAttribute('aria-label',text(node.dataset.lycoAria))});
   menu.querySelectorAll('button').forEach(node=>{node.textContent=text(node.dataset.lycoAction)});
   detailToggle.textContent=text(view.classList.contains('lyco-detailed-profiles')?'compact':'details');
  }

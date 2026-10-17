@@ -169,6 +169,48 @@ try {
  const persisted=JSON.parse(await fs.readFile(path.join(appData,'openbrowser-engine.json'),'utf8'));
  for(const id of batchIds)assert.equal(persisted.profiles.find(row=>row.id===id)?.groupId,groupId);
  report.checks.push('real-batch-create-two-environments-persists-selected-group');
+ async function expectSelectionCount(count) {
+  const expected=await page.evaluate(count=>window.OpenBrowserI18n.t('profiles.selected',{n:count}),count);
+  assert.equal(await page.locator('#profile-selection-count').textContent(),expected);
+ }
+ for(const locale of ['en','zh-CN','en']) {
+  await page.evaluate(locale=>window.OpenBrowserI18n.setLocale(locale),locale);
+  await expectSelectionCount(2);
+ }
+ const batchCheckbox=page.locator(`#profile-table tr[data-profile-id="${batchIds[0]}"] [data-profile-select]`);
+ await batchCheckbox.uncheck();await expectSelectionCount(1);
+ await batchCheckbox.check();await expectSelectionCount(2);
+ await page.locator('#select-all-profiles').check();await expectSelectionCount(3);
+ await page.locator('#select-all-profiles').uncheck();await expectSelectionCount(0);
+ assert.equal(await page.locator('#profile-selection-bar').isVisible(),false);
+ for(const id of batchIds)await page.locator(`#profile-table tr[data-profile-id="${id}"] [data-profile-select]`).check();
+ await expectSelectionCount(2);
+ report.checks.push('native-bulk-selection-counts-survive-locales-and-selection-changes');
+ report.bulkLayouts=[];
+ for(const width of [1024,1440]) {
+  await page.setViewportSize({width,height:800});
+  const layout=await page.locator('#profile-selection-bar .selection-actions').evaluate(toolbar=>{
+   const bounds=element=>{const rect=element.getBoundingClientRect();return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom}};
+   return {viewport:innerWidth,clientWidth:toolbar.clientWidth,scrollWidth:toolbar.scrollWidth,bounds:bounds(toolbar),
+    controls:[...toolbar.children].filter(element=>getComputedStyle(element).display!=='none').map(bounds)};
+  });
+  assert.ok(layout.controls.length<=4,'Keep at most four primary bulk controls');
+  assert.ok(layout.scrollWidth<=layout.clientWidth+1,'Bulk actions must fit without horizontal scrolling');
+  for(const control of layout.controls)assert.ok(control.left>=layout.bounds.left-1&&control.right<=layout.bounds.right+1,'Every bulk control must fit in the toolbar');
+  report.bulkLayouts.push(layout);
+ }
+ await page.setViewportSize({width:1024,height:800});
+ await page.locator('#lyco-bulk-more summary').click();
+ await page.screenshot({path:path.join(evidence,'windows-bulk-actions.png')});
+ await page.locator('#batch-edit-preferences').click();
+ await page.locator('#batch-preferences-dialog').waitFor({state:'visible'});
+ assert.match(await page.locator('#batch-pref-summary').textContent(),/2/);
+ await page.locator('#batch-preferences-form .dialog-head button[value="cancel"]').click();
+ await page.locator('#lyco-bulk-more summary').press('Enter');
+ assert.equal(await page.locator('#lyco-bulk-more').evaluate(element=>element.open),true);
+ await page.locator('#lyco-bulk-more summary').press('Escape');
+ assert.equal(await page.locator('#lyco-bulk-more').evaluate(element=>element.open),false);
+ report.checks.push('native-bulk-toolbar-fits-and-opens-existing-preferences');
  // ProxyStore appends an encoded display label as a URI fragment. Validate
  // the actual endpoint; that label is not part of the socket destination.
  const endpoint=new URL(profile.proxy);

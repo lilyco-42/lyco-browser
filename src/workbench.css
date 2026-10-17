@@ -49,5 +49,22 @@ html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col
 .lyco-profile-menu button{display:block;width:100%;min-height:36px;border:0;border-radius:5px;background:transparent;color:inherit;text-align:left;padding:8px 11px;font:inherit;font-size:13px;cursor:pointer}
 .lyco-profile-menu button:focus-visible,.lyco-profile-menu button:hover{outline:none;background:#be304718}
 .lyco-profile-menu button:disabled{opacity:.4;cursor:default}
+/* Four stable primary actions; every original secondary control keeps its ID
+   and event handlers inside a grouped disclosure rather than a scrolling row. */
+html[data-ui-theme] #view-profiles #profile-selection-bar.is-visible{display:grid!important;grid-template-columns:minmax(0,1fr);gap:8px;overflow:visible!important}
+html[data-ui-theme] #view-profiles #profile-selection-bar .selection-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;min-width:0;overflow:visible!important}
+html[data-ui-theme] #view-profiles #profile-selection-bar .selection-actions>button{min-width:0;width:100%;white-space:normal;overflow-wrap:anywhere}
+.lyco-bulk-more{position:relative;min-width:0}
+.lyco-bulk-more>summary{display:flex;align-items:center;justify-content:center;min-height:34px;height:100%;padding:7px 10px;list-style:none;cursor:pointer;border:1px solid var(--ui-border,#dfe3e8);border-radius:7px;font-size:12px;color:var(--ui-text,#18232c);background:var(--ui-surface,#fff)}
+.lyco-bulk-more>summary:focus-visible{outline:2px solid var(--lyco-wb-accent);outline-offset:2px}
+.lyco-bulk-panel{display:none}
+.lyco-bulk-more[open]{z-index:50}
+.lyco-bulk-more[open]>.lyco-bulk-panel{display:grid;gap:10px;position:absolute;right:0;top:calc(100% + 6px);width:320px;max-width:calc(100vw - 32px);padding:12px;border:1px solid var(--ui-border,#dfe3e8);border-radius:9px;background:var(--ui-surface,#fff);color:var(--ui-text,#18232c);box-shadow:0 10px 28px #0002}
+.lyco-bulk-section{display:grid;gap:6px;min-width:0}
+.lyco-bulk-section+.lyco-bulk-section{padding-top:10px;border-top:1px solid var(--ui-border,#dfe3e8)}
+html[data-ui-theme] #view-profiles .lyco-bulk-panel button{width:100%;min-width:0;min-height:34px;white-space:normal}
+html[data-ui-theme] #view-profiles .lyco-bulk-panel .batch-group-assign{display:grid;grid-template-columns:auto minmax(0,1fr);width:100%;gap:8px}
+html[data-ui-theme] #view-profiles .lyco-bulk-panel .themed-select{min-width:0;width:100%;max-width:none}
+@media(max-width:1100px){html[data-ui-theme] #view-profiles #profile-selection-bar .selection-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1000px){#view-profiles.active{grid-template-columns:140px minmax(0,1fr);gap:12px}#view-profiles .lyco-group-navigation{padding:10px}}
 @media(max-width:760px){#view-profiles.active{grid-template-columns:minmax(0,1fr)}#view-profiles>:not(.lyco-group-navigation){grid-column:1}#view-profiles .lyco-group-navigation{grid-column:1;grid-row:auto;min-height:0;max-height:160px}#view-profiles #profile-group-chips{flex-direction:row;flex-wrap:wrap}#view-profiles #profile-group-chips .group-chip{width:auto;max-width:190px}.lyco-group-heading{grid-template-columns:1fr auto;align-items:center}}
