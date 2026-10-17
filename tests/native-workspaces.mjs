@@ -70,9 +70,10 @@ try {
  },proxyPort);
  // The workbench must drive existing real dialogs and data, not demo rows.
  await page.locator('#lyco-group-create').click();
- await page.locator('#group-name').fill('CI Workspace');
+ const groupName=`CI ${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}-${path.basename(evidence).endsWith('preflight')?'preflight':'package'}`;
+ await page.locator('#group-name').fill(groupName);
  await page.locator('#group-form button[value="default"]').click();
- const groupChip=page.locator('#profile-group-chips [data-group-filter]').filter({hasText:'CI Workspace'});
+ const groupChip=page.locator('#profile-group-chips [data-group-filter]').filter({hasText:groupName});
  await groupChip.click();const groupId=await groupChip.getAttribute('data-group-filter');
  await page.locator('#create-profile').click();
  assert.equal(await page.locator('#profile-create-group').inputValue(),groupId);
@@ -117,6 +118,17 @@ try {
  assert.equal(await page.locator('.profile-table-compact thead th:visible').count(),10);
  await page.locator('.lyco-list-extras summary').click();await page.locator('#lyco-profile-details').click();
  report.checks.push('compact-columns-retain-expanded-details');
+ const beforeBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
+ await page.locator('#batch-add').click();await page.locator('#batch-add-count').fill('2');
+ assert.equal(await page.locator('#batch-add-group').inputValue(),groupId);
+ await page.locator('#batch-add-form button[value="default"]').click();
+ await page.locator('#batch-add-dialog').waitFor({state:'hidden'});
+ const afterBatch=await page.locator('#profile-table tr[data-profile-id]').evaluateAll(rows=>rows.map(row=>row.dataset.profileId));
+ const batchIds=afterBatch.filter(id=>!beforeBatch.includes(id));assert.equal(batchIds.length,2);
+ const appData=await application.evaluate(({app})=>app.getPath('userData'));
+ const persisted=JSON.parse(await fs.readFile(path.join(appData,'openbrowser-engine.json'),'utf8'));
+ for(const id of batchIds)assert.equal(persisted.profiles.find(row=>row.id===id)?.groupId,groupId);
+ report.checks.push('real-batch-create-two-environments-persists-selected-group');
  // ProxyStore appends an encoded display label as a URI fragment. Validate
  // the actual endpoint; that label is not part of the socket destination.
  const endpoint=new URL(profile.proxy);
