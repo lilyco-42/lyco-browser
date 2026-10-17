@@ -27,7 +27,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       OPENBROWSER_PACKAGE_VARIANT: with-kernel
       OPENBROWSER_BUNDLE_KERNEL: 'true'
-      LYCO_DESKTOP_PUBLIC_RELEASE: 'false'
+      LYCO_DESKTOP_PUBLIC_RELEASE: 'true'
       OPENBROWSER_PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
       - name: Checkout LYCO integration
