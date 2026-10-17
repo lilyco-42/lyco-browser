@@ -7,6 +7,7 @@ if (-not $resolvedRoot.StartsWith($tempRoot,[StringComparison]::OrdinalIgnoreCas
 $installer=(Resolve-Path 'upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.exe').Path
 $registryPath='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\LYCO Browser'
 $upstreamRegistryPath='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenBrowser'
+if(Test-Path $registryPath){throw 'Fresh runner must not have an existing LYCO installation'}
 $upstreamBefore=if(Test-Path $upstreamRegistryPath){Get-ItemProperty $upstreamRegistryPath | ConvertTo-Json -Compress}else{'absent'}
 $process=Start-Process -FilePath $installer -ArgumentList @('/S',"/D=$installRoot") -Wait -PassThru -WindowStyle Hidden
 if ($process.ExitCode -ne 0) { throw "Installer exited $($process.ExitCode)" }
@@ -17,7 +18,8 @@ foreach($required in @($binary,$uninstaller,(Join-Path $appRoot 'lyco/network.js
 $entry=Get-ItemProperty $registryPath
 if($entry.DisplayName -ne 'LYCO Browser' -or $entry.Publisher -ne 'LYCO Browser' -or $entry.InstallLocation -ne $installRoot){throw 'LYCO uninstall registration mismatch'}
 $shell=New-Object -ComObject WScript.Shell
-foreach($shortcut in @((Join-Path ([Environment]::GetFolderPath('Programs')) 'LYCO Browser/LYCO Browser.lnk'),(Join-Path ([Environment]::GetFolderPath('Desktop')) 'LYCO Browser.lnk'))) {
+$shortcuts=@((Join-Path ([Environment]::GetFolderPath('Programs')) 'LYCO Browser/LYCO Browser.lnk'),(Join-Path ([Environment]::GetFolderPath('Desktop')) 'LYCO Browser.lnk'))
+foreach($shortcut in $shortcuts) {
  if(-not(Test-Path -LiteralPath $shortcut)){throw "Shortcut missing: $shortcut"}
  if($shell.CreateShortcut($shortcut).TargetPath -ne $binary){throw 'Shortcut target mismatch'}
 }
@@ -34,6 +36,7 @@ if($process.ExitCode -ne 0){throw "Uninstaller exited $($process.ExitCode)"}
 $deadline=[DateTime]::UtcNow.AddSeconds(60)
 while(((Test-Path -LiteralPath $installRoot) -or (Test-Path $registryPath)) -and [DateTime]::UtcNow -lt $deadline){Start-Sleep -Milliseconds 250}
 if((Test-Path -LiteralPath $installRoot) -or (Test-Path $registryPath)){throw 'Installation or registration remains after uninstall'}
+foreach($shortcut in $shortcuts){if(Test-Path -LiteralPath $shortcut){throw 'Uninstall left a broken shortcut'}}
 if([IO.File]::ReadAllText($marker) -ne 'CI user data must survive uninstall'){throw 'Uninstall removed user files'}
 $upstreamAfter=if(Test-Path $upstreamRegistryPath){Get-ItemProperty $upstreamRegistryPath | ConvertTo-Json -Compress}else{'absent'}
 if($upstreamBefore -ne $upstreamAfter){throw 'Original OpenBrowser registration changed'}
