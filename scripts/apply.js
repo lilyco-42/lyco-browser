@@ -140,7 +140,8 @@ for(const [header,field] of [
  if(source.split(anchor).length!==2)throw Error('Renderer group-create anchor mismatch: '+field);
  fs.writeFileSync(file,source.replace(anchor,header+"\n  fillGroupSelect($('#"+field+"'), lycoPreferredGroup());"),'utf8');
 }
-one('renderer.js',"const nameCell = document.createElement('td');", "const nameCell = document.createElement('td'); nameCell.className = 'col-name'; row.tabIndex = 0;");
+one('renderer.js',join("    const nameCell = document.createElement('td');",'    nameCell.append(buildEnvIdentity(profile));'),
+ join("    const nameCell = document.createElement('td'); nameCell.className = 'col-name'; row.tabIndex = 0;",'    nameCell.append(buildEnvIdentity(profile));'));
 one('renderer.js','    networkCell.append(networkInfo);',join(
  '    networkCell.append(networkInfo);',
  "    const compactExit = networkInfo.cloneNode(true); compactExit.classList.add('lyco-inline-exit'); proxyCell.append(compactExit);",
