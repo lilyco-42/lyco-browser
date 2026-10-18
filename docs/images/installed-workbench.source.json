@@ -1,13 +1,13 @@
 {
   "source": "GitHub Actions actual installed Windows application",
-  "product_commit": "a6e481d3fe67aff091b11a38f984267808d88030",
-  "run_url": "https://github.com/lilyco-42/lyco-browser/actions/runs/39122539733",
+  "product_commit": "12ae5a9377ba7f22155ae2e7ef3b43ff77eab234",
+  "run_url": "https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242",
   "phase": "lyco-native-installed",
-  "original_path": "windows-workspace.png",
-  "image_sha256": "8ff279e2da5738b782502ae279ade5b83ebc0dbe8155e145523d6e22b297ec5b",
-  "evidence_zip_sha256": "f9aa6755cd2e54d5e239137de966354cd43dbbecde14ba822f2348292d972324",
+  "original_path": "windows-bulk-actions.png",
+  "image_sha256": "222d1e2cd309320bf46c124e8db8d31288ad7023b5a9215e7d08dfa5f7bfde77",
+  "evidence_zip_sha256": "62820e9dea3536fb09b50186d4285613c0f80f77f6b0791b0fe0cf3f575d0634",
   "image_edited": false,
   "billing": "CI fixtures; realPayments=0",
-  "native_checks": 26,
+  "native_checks": 27,
   "installer_checks": 6
 }
