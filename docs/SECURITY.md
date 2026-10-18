@@ -7,8 +7,9 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
 
 - Wayfern profiles capture the engine's complete native fingerprint through
   its page-target API and retain it privately in the environment directory.
-  Subsequent launches restore that identity before user-page navigation;
-  newly opened page targets receive the same identity. This retains native
+  Subsequent launches restore that identity before the explicit start-page
+  navigation in the tested startup flow; newly opened page targets receive
+  the same identity through runtime application. This retains native
   noise rather than layering a fresh native device underneath saved settings.
   A damaged, wrong-profile or rejected identity fails startup instead of
   silently minting a replacement. Stock Chromium/legacy kernels retain their
@@ -19,6 +20,10 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   and reach its original process/lock cleanup. The actual native regression
   damages a CI profile cache, requires a rejected launch and zero target
   requests, then restores its backup and launches the same profile again.
+  This is not a first-script guarantee for every launch path: additional
+  command-line startup URLs and native session restore can load before the
+  post-launch identity application. Those paths still require a production
+  correction and actual native regression; new-tab timing is also unverified.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,
