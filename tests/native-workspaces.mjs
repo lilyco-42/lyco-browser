@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseConnection} from '../extensions/lain42/connection.mjs';
+import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -12,7 +13,13 @@ const evidence=path.resolve(process.argv[4]||'lyco-native-evidence');await fs.mk
 const report={commit:process.env.GITHUB_SHA,binary,fixtureBilling:true,realPayments:0,proxyRequests:[],checks:[]};
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 const tunnelPorts=new Set(),tunnelSockets=new Set();
-const origin=http.createServer((req,res)=>{report.proxyRequests.push({path:req.url,proxied:tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes'});res.end('LYCO browser fixture reached through proxy');});
+const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
+const origin=http.createServer((req,res)=>{
+ const proxied=tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes';
+ report.proxyRequests.push({path:req.url,proxied});
+ if(privacyProbe.route(req,res,proxied))return;
+ res.end('LYCO browser fixture reached through proxy');
+});
 const originPort=await listen(origin);
 const geo=http.createServer((_req,res)=>{
  report.geoProbeRequests=(report.geoProbeRequests||0)+1;
@@ -263,6 +270,29 @@ try {
    'Managed Chromium MUST NOT bypass its proxy for 127.0.0.1 even when direct access works');
  report.checks.push('real-bundled-chromium-managed-loopback-cannot-bypass-mihomo');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ // Actual packaged Chromium/WebRTC versus CI-owned UDP STUN endpoint. The
+ // fixture confirms localhost UDP is reachable. Any packet is a direct leak.
+ const rtcTarget='http://127.0.0.1:'+originPort+'/webrtc-probe';
+ await page.evaluate(({profile,target})=>window.adoptLycoProfile({
+  ...profile,startUrl:target,platform:{type:'other',startUrl:target},
+  advanced:{startUrls:target},
+  privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false,webrtc:'proxy'},
+ }),{profile,target:rtcTarget});
+ await page.locator('#profile-table tr[data-profile-id="'+profile.id+'"] .col-name').dblclick();
+ const rtcDeadline=Date.now()+22000;
+ while(Date.now()<rtcDeadline&&!privacyProbe.snapshot().rtc)
+  await new Promise(resolve=>setTimeout(resolve,150));
+ const rtcResult=privacyProbe.snapshot();
+ assert.ok(rtcResult.rtc?.completed,'Actual Chromium failed to execute the WebRTC probe');
+ assert.equal(rtcResult.rtc.blocked,false,'WebRTC probe did not exercise a peer connection');
+ assert.equal(rtcResult.pageProxied,true,'WebRTC probe page bypassed Mihomo');
+ assert.equal(rtcResult.reportProxied,true,'WebRTC probe result bypassed Mihomo');
+ assert.equal(rtcResult.rtc.ipCandidate,false,'WebRTC returned a literal IP candidate');
+ assert.equal(rtcResult.udpPackets,0,'WebRTC leaked direct UDP packets to the CI STUN endpoint');
+ report.webrtcAudit={completed:true,blocked:rtcResult.rtc.blocked,
+  candidateCount:rtcResult.rtc.candidateCount,directUdpPackets:rtcResult.udpPackets};
+ report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
+ await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});
@@ -290,6 +320,7 @@ try {
 } finally {
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
+ await privacyProbe.close();
  origin.closeAllConnections();geo.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>geo.close(r));await new Promise(r=>proxy.close(r));
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 }
