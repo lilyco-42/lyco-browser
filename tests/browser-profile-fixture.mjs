@@ -12,14 +12,16 @@ async function observeProfile(marker) {
   document.cookie = key + '=' + marker + '; Path=/; Max-Age=600; SameSite=Lax';
   localStorage.setItem(key, marker);
   await document.fonts.ready;
-  const draw = () => {
+  let textWidth = null;
+  const draw = (withText = true) => {
     const canvas = document.createElement('canvas');
     canvas.width = 320; canvas.height = 100;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw Error('Actual browser has no usable 2D canvas');
     ctx.fillStyle = '#e7c8a4'; ctx.fillRect(0, 0, 320, 100);
     ctx.fillStyle = '#156c53'; ctx.font = '17px Arial';
-    ctx.fillText('LYCO native profile 0123456789', 11, 34);
+    textWidth = ctx.measureText('LYCO native profile 0123456789').width;
+    if (withText) ctx.fillText('LYCO native profile 0123456789', 11, 34);
     ctx.globalAlpha = 0.6; ctx.fillStyle = '#b42455';
     ctx.beginPath(); ctx.arc(175, 66, 23, 0, Math.PI * 2); ctx.fill();
     const png = canvas.toDataURL('image/png');
@@ -36,7 +38,7 @@ async function observeProfile(marker) {
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     before, after: {cookie: cookie(), local: localStorage.getItem(key)},
-    canvas: [draw(), draw()],
+    canvas: [draw(), draw()], canvasControl: [draw(false), draw(false)], textWidth,
   };
 }
 

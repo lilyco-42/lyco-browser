@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
-export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report, checkpoint}) {
+export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report, checkpoint, appRoot}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
   const settings = {
@@ -18,6 +22,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   assert.ok(second.proxyId, 'Second environment must retain its managed proxy binding');
   const profiles = {A: profile, B: second};
   const results = {};
+  const requireApp = createRequire(path.join(appRoot, 'package.json'));
+  const {loadInitObject} = requireApp('./automation/kernel-init-sync');
+  report.profileRuntime = {};
   for (const [phase, owner] of [['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B']]) {
     const expected = settings[owner];
     const target = `http://127.0.0.1:${originPort}/profile-probe?phase=${phase}`;
@@ -44,6 +51,15 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       assert.equal(observed.pageProxied, true, `${phase}: page bypassed the managed proxy`);
       assert.equal(observed.reportProxied, true, `${phase}: report bypassed the managed proxy`);
       const value = observed.value;
+      const state = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profiles[owner].id);
+      assert.ok(state?.profileDirectory, `${phase}: missing actual engine profile directory`);
+      const init = loadInitObject(await fs.readFile(path.join(state.profileDirectory, 'init.json')));
+      const digest = input => input == null ? null : createHash('sha256').update(JSON.stringify(input)).digest('hex');
+      report.profileRuntime[phase] = {fingerprint: state.fingerprint,
+        canvasEnabled: init.is_canvas_finger_printing_enable,
+        canvasPayloadDigest: digest(init.canvas_fingerprint_info),
+        canvasConsistency: init.canvas_fingerprint_keep_consistent_setting};
+      await checkpoint(phase + ':runtime-recorded');
       assert.equal(value.error, undefined, `${phase}: ${value.error}`);
       assert.equal(value.userAgent, ua, `${phase}: saved User-Agent not applied`);
       assert.equal(value.platform, 'Win32', `${phase}: Windows platform not applied`);
@@ -58,7 +74,16 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       assert.equal(value.canvas.length, 2);
       assert.match(value.canvas[0], /^[0-9a-f]{8}$/);
       assert.equal(value.canvas[0], value.canvas[1], `${phase}: same drawing changed within one page`);
+      assert.equal(value.canvasControl[0], value.canvasControl[1], `${phase}: shape-only canvas changed within one page`);
+      if (prior !== null) {
+        assert.equal(value.canvasControl[0], results[owner.toLowerCase() + '-first'].canvasControl[0], `${phase}: shape-only canvas changed across restart`);
+        assert.equal(value.canvas[0], results[owner.toLowerCase() + '-first'].canvas[0], `${phase}: same-profile canvas changed across restart`);
+      }
       results[phase] = value;
+    } catch (error) {
+      report.failure = String(error.stack || error);
+      await checkpoint(phase + ':failed');
+      throw error;
     } finally {
       await checkpoint(phase + ':stop');
       await page.evaluate(id => window.ops.stopProfile(id), profiles[owner].id);
@@ -66,8 +91,6 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       await checkpoint(phase + ':stopped');
     }
   }
-  assert.equal(results['a-first'].canvas[0], results['a-reopen'].canvas[0], 'A canvas changed across restart');
-  assert.equal(results['b-first'].canvas[0], results['b-reopen'].canvas[0], 'B canvas changed across restart');
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles');

@@ -18,7 +18,7 @@ const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
 const profileProbe=createBrowserProfileFixture();
 const checkpoint=async stage=>{
- report.stage=stage;report.profileAudit=profileProbe.snapshot();
+ report.stage=stage;report.stageAt=new Date().toISOString();report.profileAudit=profileProbe.snapshot();
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 };
 const origin=http.createServer((req,res)=>{
@@ -306,7 +306,7 @@ try {
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
  await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
- await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint});
+ await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot});
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});
