@@ -24,6 +24,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const results = {};
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
+  const cdp = requireApp('./cdp');
   report.profileRuntime = {};
   for (const [phase, owner] of [['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B']]) {
     const expected = settings[owner];
@@ -53,12 +54,32 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       const value = observed.value;
       const state = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profiles[owner].id);
       assert.ok(state?.profileDirectory, `${phase}: missing actual engine profile directory`);
-      const init = loadInitObject(await fs.readFile(path.join(state.profileDirectory, 'init.json')));
+      // Legacy OpenBrowser writes init.json; Wayfern uses a different startup
+      // path. Missing legacy config is an observation, not a failed contract.
+      const initBytes = await fs.readFile(path.join(state.profileDirectory, 'init.json')).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      const init = initBytes ? loadInitObject(initBytes) : null;
+      if (initBytes) assert.ok(init && typeof init === 'object', 'Existing native init is not decodable');
       const digest = input => input == null ? null : createHash('sha256').update(JSON.stringify(input)).digest('hex');
-      report.profileRuntime[phase] = {fingerprint: state.fingerprint,
-        canvasEnabled: init.is_canvas_finger_printing_enable,
-        canvasPayloadDigest: digest(init.canvas_fingerprint_info),
-        canvasConsistency: init.canvas_fingerprint_keep_consistent_setting};
+      report.profileRuntime[phase] = {fingerprint: state.fingerprint, browser: state.browser,
+        legacyInitPresent: Boolean(initBytes), canvasEnabled: init?.is_canvas_finger_printing_enable,
+        canvasPayloadDigest: digest(init?.canvas_fingerprint_info),
+        canvasConsistency: init?.canvas_fingerprint_keep_consistent_setting};
+      // Read-only documented RPC; never refresh/set a fingerprint or supply,
+      // change, log or bypass a licence token. Only hashes leave this CI host.
+      try {
+        assert.ok(Number.isInteger(state.port) && state.port > 1023 && state.port < 65536);
+        const socket = await cdp.browserSocket(state.port);
+        const result = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
+        const raw = result?.fingerprint ?? result;
+        const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        report.profileRuntime[phase].nativeFingerprint = {available: true,
+          digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas)};
+      } catch {
+        report.profileRuntime[phase].nativeFingerprint = {available: false};
+      }
       await checkpoint(phase + ':runtime-recorded');
       assert.equal(value.error, undefined, `${phase}: ${value.error}`);
       assert.equal(value.userAgent, ua, `${phase}: saved User-Agent not applied`);
