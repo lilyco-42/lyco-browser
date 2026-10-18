@@ -107,8 +107,11 @@ one('engine.js',
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
-one('engine.js', '    this.startRunningWatch(item);', join(
+// Keep this inside the original injection try: injectionFailed is block-scoped.
+// Run after keepDefaultTab, which intentionally closes other preexisting tabs.
+one('engine.js', '      // Brand window title as 环境 N (not generic Chrome)', join(
  '    if (!restoreSession && customStartUrls.length > 1 && !item.verificationBlocked && !item.cdpError && !injectionFailed) {',
+'      try {',
  '      await openPreparedStartupPages({',
  '        urls: customStartUrls.slice(1), port: item.port, connection, cdp,',
  '        assertActive: () => this.assertStartGenerationActive(profile.id, lifecycleGeneration),',
@@ -118,8 +121,12 @@ one('engine.js', '    this.startRunningWatch(item);', join(
  '            trackOn: item, phase: "lyco-extra-startup-pages",',
  '          }),',
  '      });',
+'      } catch (error) {',
+'        item.lycoStartupPagesFailed = true;',
+'        throw error;',
+'      }',
  '    }',
- '    this.startRunningWatch(item);'));
+'      // Brand window title as 环境 N (not generic Chrome)'));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
  '      try {',
@@ -135,7 +142,7 @@ one('engine.js', '      item.startUrl = startUrl;', join(
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(
- '      if (item.lycoNativeIdentityFailed) throw error;',
+ '      if (item.lycoNativeIdentityFailed || item.lycoStartupPagesFailed) throw error;',
  '      item.cdpError = error.message;'));
 one('engine.js',
  '    const tabs = await cdp.tabs(port);',

@@ -111,6 +111,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         const extraDeadline = Date.now() + 30000;
         while (Date.now() < extraDeadline && !fixture.result(extraPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
         const extra = fixture.result(extraPhase);
+        const startup = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profiles[owner].id);
+        report.startupPages[phase] = {extra: extra || null, running: startup?.running,
+          cdpError: startup?.cdpError, blocked: startup?.verificationBlocked};
         assert.ok(extra?.value && extra.pageProxied && extra.reportProxied, `${phase}: extra startup page did not reach the proxy fixture`);
         assert.equal(extra.value.error, undefined, `${phase}: ${extra.value.error}`);
         for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
