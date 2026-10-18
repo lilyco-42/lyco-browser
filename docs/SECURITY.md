@@ -15,6 +15,10 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   existing path, and explicit refresh-on-start remains an explicit option.
   Native payloads are not uploaded in CI evidence, sent to the website or
   printed in logs. This native integration must pass the current runtime gate.
+  Identity setup errors bypass the upstream last-chance homepage navigation
+  and reach its original process/lock cleanup. The actual native regression
+  damages a CI profile cache, requires a rejected launch and zero target
+  requests, then restores its backup and launches the same profile again.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,

@@ -2,6 +2,7 @@
 // storage, canvas, Chromium, or the application's production fingerprint code.
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
+  ['a-corrupt', 'A'], ['a-recover', 'A'],
 ]);
 
 async function observeProfile(marker) {
