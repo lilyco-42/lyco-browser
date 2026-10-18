@@ -111,9 +111,8 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        port: item.port, cdp, refresh: allowSeedRefresh,',
  '      });'));
 one('engine.js',
- "    const phase = String(options.phase || 'applyRuntimeSettings');\n    const tabs = await cdp.tabs(port);",
- join("    const phase = String(options.phase || 'applyRuntimeSettings');",
  '    const tabs = await cdp.tabs(port);',
+ join('    const tabs = await cdp.tabs(port);',
  '    await options.trackOn?.lycoNativeIdentity?.apply(tabs);'));
 one('engine.js',
  "      let bypass = '<-loopback>;127.0.0.1;localhost';",
