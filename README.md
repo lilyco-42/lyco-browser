@@ -1,6 +1,28 @@
 # LYCO Browser · 指纹/多环境浏览器与官方代理支付
 
-**Windows x64 MVP，所有编译、测试、打包只在 GitHub Actions 进行。** 不允许使用开发机或生产服务器运行浏览器、构建 Electron 安装包或进行本地集成测试。
+**桌面预览版：Windows x64、macOS Apple Silicon、Linux x64。** 维护过程中的编译、打包和自动验收只在 GitHub Actions 执行；下载后可在自己的设备上使用。
+
+## 下载与开始使用
+
+[下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-a2648ed772fd)
+
+| 系统 | 下载 | 说明 |
+| --- | --- | --- |
+| Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a2648ed772fd/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a2648ed772fd/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |
+| macOS Apple Silicon | [DMG](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a2648ed772fd/LYCO-Browser-macOS-arm64-MVP.dmg) | ARM64，不适用于 Intel Mac |
+| Linux x64 | [tar.gz](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a2648ed772fd/LYCO-Browser-Linux-x64-MVP.tar.gz) | 桌面预览包 |
+
+此处固定到已验收的产品提交 `a2648ed772fd233c8fc07f35581da3358080155a`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`d9863763e95b915df028366d0b064a1d3b0c906cf41895c6edc9c4486bd03dee`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
+
+1. 下载并安装或解压，打开 **LYCO Browser**。
+2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
+3. 本站月卡用户点击 **一键创建专属代理环境**；购买或续费由你主动打开[官网商城](https://lain42.top/shop/#proxy_1m)完成。
+4. 在环境列表双击启动。分组、批量创建及右键编辑都连接实际后端；退出账号会关闭受管窗口，权益到期会断开本站代理。
+
+![GitHub Actions 实际安装后的环境工作台](docs/images/installed-workbench.png)
+
+Windows 已验证真实安装、窗口操作、代理流量、账号归属校验、到期断开和卸载保留用户数据；macOS/Linux 已通过对应构建和打包检查，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。完整范围和限制见[受管代理安全边界](docs/SECURITY.md)。
+
 
 > **运行及随包资源分发授权已确认（2026-10-17）：** 产品所有者明确确认既有 Wayfern 书面授权涵盖 LYCO 运行、分发及随包 Windows/macOS 字体资源再分发，桌面工作流解除草稿分发限制。此记录依据所有者确认，不公开授权文件或商业条款，也不向其他项目授予相同权利。当前提交必须通过对应 Actions 门禁后才发布 CI 预览包；第三方版权、许可与源码来源继续保留，旧草稿不会自动发布。
 

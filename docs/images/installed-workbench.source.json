@@ -1,0 +1,13 @@
+{
+  "source": "GitHub Actions actual installed Windows application",
+  "product_commit": "a2648ed772fd233c8fc07f35581da3358080155a",
+  "run_url": "https://github.com/lilyco-42/lyco-browser/actions/runs/39099549003",
+  "phase": "lyco-native-installed",
+  "original_path": "windows-workspace.png",
+  "image_sha256": "cf210233447915f9e04f6b5eb8f599c20f7045268c232ee2a98bd5db2f2da892",
+  "evidence_zip_sha256": "a0fc55d837e3a95c689de1a147f800c11405c527530ba8196ca1ef7bed074822",
+  "image_edited": false,
+  "billing": "CI fixtures; realPayments=0",
+  "native_checks": 20,
+  "installer_checks": 6
+}
