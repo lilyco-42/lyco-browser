@@ -17,6 +17,11 @@ class LycoProfiles {
       this.bindings=Object.assign(Object.create(null),saved.bindings);
     }
     network.onCoreExit=()=>this.stopManaged();
+    // The upstream sanitizer rebuilds proxyMeta and drops custom flags.
+    // Resolve policy from trusted, persisted bindings at the final launch
+    // boundary instead of trusting renderer metadata to survive that path.
+    engine.lycoIsManagedProfile=profile=>Object.hasOwn(this.bindings,profile?.id) ||
+      Object.values(this.bindings).some(binding=>binding.proxyId===profile?.proxyId);
     const start=engine.start.bind(engine);
     engine.start=async profile=>{
       const ready=await this.beforeStart(profile);

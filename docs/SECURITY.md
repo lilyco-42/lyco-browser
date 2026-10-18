@@ -15,6 +15,9 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   bypass list and keep Chromium's special negative-loopback rule, which
   disables the implicit Chromium loopback bypass. Unmanaged profiles keep
   existing settings.
+- Managed status comes from persisted main-process ownership bindings at
+  launch. It survives upstream metadata normalization and cannot be enabled
+  or disabled by a renderer-provided `lycoManaged` flag.
 - Real packaged Chromium Actions acceptance checks whether a runner-reachable
   loopback HTTP fixture gets contacted **through Mihomo** (not directly).
 - All managed HTTP traffic uses the PROXY policy, including lain42.top.

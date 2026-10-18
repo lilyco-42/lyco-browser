@@ -22,6 +22,14 @@ test('creates a paid-account environment with proxy already selected and no auto
  assert.equal(calls.starts.length,0);assert.equal(engine.profiles.size,1);
  assert.doesNotMatch(JSON.stringify(profile),/Bearer|sub_url|password/);
 });
+
+test('managed routing survives sanitized metadata and cannot be forged by an unbound profile',async t=>{
+ const {service,engine}=setup(t);const {profile}=await service.create();
+ const sanitized={...profile,proxyMeta:{proxyId:profile.proxyId,directBypass:false}};
+ assert.equal(engine.lycoIsManagedProfile(sanitized),true);
+ assert.equal(engine.lycoIsManagedProfile({...sanitized,id:'clone'}),true);
+ assert.equal(engine.lycoIsManagedProfile({id:'independent',proxyId:null,proxyMeta:{lycoManaged:true}}),false);
+});
 test('before every launch verifies account and overrides a stale or manually removed proxy',async t=>{
  const {service,state,engine,calls}=setup(t);const {profile}=await service.create();
  state.port=18002;const started=await engine.start({...profile,proxy:'DIRECT',proxyId:null});

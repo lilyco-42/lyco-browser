@@ -239,6 +239,14 @@ try {
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
  // Negative control: the CI runner can reach 127.0.0.1 without a proxy.
  // This passes only if packaged Chromium uses Mihomo, not a local bypass.
+ await new Promise((resolve,reject)=>{
+  http.get({host:'127.0.0.1',port:originPort,path:'/direct-loopback-canary'},response=>{
+   let body='';response.on('data',chunk=>body+=chunk);
+   response.on('end',()=>{try{assert.match(body,/reached through proxy/);resolve()}catch(error){reject(error)}});
+  }).on('error',reject);
+ });
+ assert.ok(report.proxyRequests.some(row=>row.path==='/direct-loopback-canary'&&!row.proxied));
+ report.loopbackDirectControl=true;
  const loopbackTarget='http://127.0.0.1:'+originPort+'/loopback-probe';
  await page.evaluate(({profile,target})=>window.adoptLycoProfile({
   ...profile,startUrl:target,platform:{type:'other',startUrl:target},
