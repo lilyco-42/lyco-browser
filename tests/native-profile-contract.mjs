@@ -21,6 +21,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   assert.notEqual(second.id, profile.id, 'Storage test requires two actual environments');
   assert.ok(second.proxyId, 'Second environment must retain its managed proxy binding');
   const profiles = {A: profile, B: second};
+  const profileRoots = {};
   const results = {};
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
@@ -54,6 +55,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       const value = observed.value;
       const state = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profiles[owner].id);
       assert.ok(state?.profileDirectory, `${phase}: missing actual engine profile directory`);
+      profileRoots[owner] = state.profileDirectory;
       // Legacy OpenBrowser writes init.json; Wayfern uses a different startup
       // path. Missing legacy config is an observation, not a failed contract.
       const initBytes = await fs.readFile(path.join(state.profileDirectory, 'init.json')).catch(error => {
@@ -117,6 +119,57 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles');
+  // Exercise the REAL engine's nested startup catch, not only the cache helper:
+  // no last-chance navigation, ready state or stranded lock on a rejected file.
+  const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);
+  const identityBackup = await fs.readFile(identityPath);
+  const damagedBytes = Buffer.from('{ CI deliberately damaged native identity');
+  let recoveryProfile;
+  try {
+    await checkpoint('profile:damaged-identity');
+    await fs.writeFile(identityPath, damagedBytes);
+    const target = `http://127.0.0.1:${originPort}/profile-probe?phase=a-corrupt`;
+    const corruptProfile = await page.evaluate(({source, target}) => window.adoptLycoProfile({
+      ...source, startUrl: target, platform: {type: 'other', startUrl: target},
+      advanced: {...source.advanced, startUrls: target},
+      privacy: {...source.privacy, refreshFingerprintOnStart: false},
+    }), {source: profile, target});
+    await assert.rejects(() => page.evaluate(source => window.ops.startProfile(source), corruptProfile), /原生身份文件损坏/);
+    const stopped = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profile.id);
+    assert.equal(stopped.running, false, 'Rejected identity must not leave an apparently ready browser');
+    assert.equal(Boolean(stopped.starting), false, 'Rejected identity must release startup state');
+    assert.deepEqual(await fs.readFile(identityPath), damagedBytes, 'Rejected cache was silently replaced');
+    assert.equal(fixture.result('a-corrupt'), undefined, 'Rejected identity navigated to a user page');
+    assert.equal(report.proxyRequests.some(row => row.path.includes('phase=a-corrupt')), false,
+      'A real target request escaped the failed identity startup');
+    report.checks.push('native-damaged-identity-blocks-navigation-and-cleans-startup');
+    await fs.writeFile(identityPath, identityBackup);
+    const recoveryTarget = `http://127.0.0.1:${originPort}/profile-probe?phase=a-recover`;
+    recoveryProfile = await page.evaluate(({source, target}) => window.adoptLycoProfile({
+      ...source, startUrl: target, platform: {type: 'other', startUrl: target},
+      advanced: {...source.advanced, startUrls: target},
+      privacy: {...source.privacy, refreshFingerprintOnStart: false},
+    }), {source: profile, target: recoveryTarget});
+    await checkpoint('profile:identity-backup-recovery');
+    const recovered = await page.evaluate(source => window.ops.startProfile(source), recoveryProfile);
+    assert.equal(recovered.running, true, 'Original identity backup did not release/recover the real profile');
+    assert.equal(recovered.verificationBlocked, false);
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline && !fixture.result('a-recover')?.value) await new Promise(resolve => setTimeout(resolve, 150));
+    const observed = fixture.result('a-recover');
+    assert.ok(observed?.value && observed.pageProxied && observed.reportProxied,
+      'Recovered browser must actually reach the fixture through Mihomo');
+    assert.deepEqual(await fs.readFile(identityPath), identityBackup, 'Recovery changed the saved identity');
+    report.checks.push('native-identity-backup-restores-profile-launch');
+  } catch (error) {
+    report.failure = String(error.stack || error);
+    await checkpoint('profile:identity-failure-contract-failed');
+    throw error;
+  } finally {
+    await page.evaluate(id => window.ops.stopProfile(id), profile.id).catch(() => {});
+    await fs.writeFile(identityPath, identityBackup);
+    report.profileAudit = fixture.snapshot();
+  }
   // Restore the original environment as the existing ownership/expiry target.
   await checkpoint('profile:restore-original');
   await page.evaluate(source => window.adoptLycoProfile(source), profile);

@@ -106,10 +106,21 @@ one('engine.js',
  "const { prepareNativeIdentity } = require('./lyco/native-identity');"));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
- '      item.lycoNativeIdentity = await prepareNativeIdentity({',
- '        enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
- '        port: item.port, cdp, refresh: allowSeedRefresh,',
- '      });'));
+ '      try {',
+ '        item.lycoNativeIdentity = await prepareNativeIdentity({',
+ '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
+ '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '        });',
+ '      } catch (error) {',
+ '        item.lycoNativeIdentityFailed = true;',
+ '        item.verificationBlocked = true;',
+ '        throw error;',
+ '      }'));
+// The upstream inner catch normally attempts a last-chance navigation. A
+// rejected identity must reach the existing outer cleanup, never that fallback.
+one('engine.js', '      item.cdpError = error.message;', join(
+ '      if (item.lycoNativeIdentityFailed) throw error;',
+ '      item.cdpError = error.message;'));
 one('engine.js',
  '    const tabs = await cdp.tabs(port);',
  join('    const tabs = await cdp.tabs(port);',
