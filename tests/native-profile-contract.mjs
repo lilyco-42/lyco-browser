@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
-export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report}) {
+export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report, checkpoint}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
   const settings = {
     A: {language: 'en-GB', timezone: 'Asia/Tokyo', cores: 6, memory: 4},
     B: {language: 'fr-FR', timezone: 'Europe/Paris', cores: 8, memory: 8},
   };
+  await checkpoint('profile:create-second');
   await page.locator('[data-view="lyco"]').click();
   await page.locator('#lyco-create-profile').click();
   await page.waitForFunction(id => window.__lycoCreated?.id && window.__lycoCreated.id !== id, profile.id);
@@ -20,6 +21,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   for (const [phase, owner] of [['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B']]) {
     const expected = settings[owner];
     const target = `http://127.0.0.1:${originPort}/profile-probe?phase=${phase}`;
+    await checkpoint(phase + ':configure');
     await page.evaluate(({source, expected, target, ua}) => window.adoptLycoProfile({
       ...source, os: 'Windows', language: expected.language, userAgent: ua,
       startUrl: target, platform: {type: 'other', startUrl: target},
@@ -30,11 +32,14 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         timezoneMode: 'custom', timezone: expected.timezone, canvas: 'noise', refreshFingerprintOnStart: false},
     }), {source: profiles[owner], expected, target, ua});
     await page.locator('[data-view="profiles"]').click();
+    await checkpoint(phase + ':launch');
     await page.locator(`#profile-table tr[data-profile-id="${profiles[owner].id}"] .col-name`).dblclick();
     try {
+      await checkpoint(phase + ':observe');
       const deadline = Date.now() + 30000;
       while (Date.now() < deadline && !fixture.result(phase)?.value) await new Promise(resolve => setTimeout(resolve, 150));
       const observed = fixture.result(phase);
+      await checkpoint(phase + ':reported');
       assert.ok(observed?.value, `${phase}: real browser did not send its profile observation`);
       assert.equal(observed.pageProxied, true, `${phase}: page bypassed the managed proxy`);
       assert.equal(observed.reportProxied, true, `${phase}: report bypassed the managed proxy`);
@@ -55,8 +60,10 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       assert.equal(value.canvas[0], value.canvas[1], `${phase}: same drawing changed within one page`);
       results[phase] = value;
     } finally {
+      await checkpoint(phase + ':stop');
       await page.evaluate(id => window.ops.stopProfile(id), profiles[owner].id);
       report.profileAudit = fixture.snapshot();
+      await checkpoint(phase + ':stopped');
     }
   }
   assert.equal(results['a-first'].canvas[0], results['a-reopen'].canvas[0], 'A canvas changed across restart');
@@ -65,5 +72,6 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles');
   // Restore the original environment as the existing ownership/expiry target.
+  await checkpoint('profile:restore-original');
   await page.evaluate(source => window.adoptLycoProfile(source), profile);
 }

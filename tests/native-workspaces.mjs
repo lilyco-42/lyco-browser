@@ -17,6 +17,10 @@ const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolv
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
 const profileProbe=createBrowserProfileFixture();
+const checkpoint=async stage=>{
+ report.stage=stage;report.profileAudit=profileProbe.snapshot();
+ await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
+};
 const origin=http.createServer((req,res)=>{
  const proxied=tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes';
  report.proxyRequests.push({path:req.url,proxied});
@@ -62,10 +66,11 @@ proxy.on('connect',(req,socket,head)=>{
 const proxyPort=await listen(proxy);
 let application;
 try {
+ await checkpoint('launch-workbench');
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA|PROGRAMFILES(?:\(X86\))?|COMMONPROGRAMFILES|HOMEDRIVE|HOMEPATH|OS|PROCESSOR_ARCHITECTURE|NUMBER_OF_PROCESSORS)$/i.test(key)));
  application=await electron.launch({executablePath:binary,args:[appRoot],timeout:60000,
   env:{...cleanEnv,OPENBROWSER_API_PORT:String(51000+Math.floor(Math.random()*1000))}});
- const page=await application.firstWindow();await page.waitForLoadState('domcontentloaded');
+ const page=await application.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
  await application.evaluate(async({shell},port)=>{
   globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
   shell.openExternal=async url=>{globalThis.__lycoOpened.push(url)};
@@ -238,6 +243,7 @@ try {
  report.checks.push('packaged-native-login-create-profile','actual-bundled-mihomo-http-routing');
  await page.screenshot({path:path.join(evidence,'windows-workspace.png')});
  // Exercise the actual existing engine with the bound profile and bundled browser.
+ await checkpoint('managed-browser-probe');
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;
  await page.evaluate(({profile,target})=>window.adoptLycoProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).dblclick();
@@ -259,6 +265,7 @@ try {
  assert.ok(report.proxyRequests.some(row=>row.path==='/direct-loopback-canary'&&!row.proxied));
  report.loopbackDirectControl=true;
  const loopbackTarget='http://127.0.0.1:'+originPort+'/loopback-probe';
+ await checkpoint('managed-loopback-probe');
  await page.evaluate(({profile,target})=>window.adoptLycoProfile({
   ...profile,startUrl:target,platform:{type:'other',startUrl:target},
   advanced:{startUrls:target},
@@ -277,6 +284,7 @@ try {
  // Actual packaged Chromium/WebRTC versus CI-owned UDP STUN endpoint. The
  // fixture confirms localhost UDP is reachable. Any packet is a direct leak.
  const rtcTarget='http://127.0.0.1:'+originPort+'/webrtc-probe';
+ await checkpoint('webrtc-probe');
  await page.evaluate(({profile,target})=>window.adoptLycoProfile({
   ...profile,startUrl:target,platform:{type:'other',startUrl:target},
   advanced:{startUrls:target},
@@ -296,8 +304,9 @@ try {
  report.webrtcAudit={completed:true,blocked:rtcResult.rtc.blocked,
   candidateCount:rtcResult.rtc.candidateCount,directUdpPackets:rtcResult.udpPackets};
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
+ await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
- await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report});
+ await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint});
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});
