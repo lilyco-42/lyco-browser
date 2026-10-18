@@ -13,6 +13,8 @@ release_notes='Internal test builds. React Native + desktop cross-platform proto
 if [[ "${LYCO_DESKTOP_PUBLIC_RELEASE:-}" == 'false' ]]; then
   release_flags+=(--draft)
   release_notes='Owner-only desktop build. Public distribution is held while bundled system-font redistribution rights are reviewed. Functional CI evidence does not constitute commercial distribution approval.'
+elif [[ "${LYCO_DESKTOP_PUBLIC_RELEASE:-}" == 'true' ]]; then
+  release_notes='Desktop preview builds: Windows x64 EXE/ZIP, macOS arm64 DMG and Linux x64 archive. Assets are uploaded by individual platform jobs; availability alone does not prove complete workflow acceptance. Verify Windows native and installation evidence in the matching completed Actions run before recommending a build. macOS/Linux packaging is not native UI acceptance. No comprehensive fingerprint or real-payment certification is claimed.'
 fi
 if ! gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
   gh release create "$tag" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" "${release_flags[@]}" \
