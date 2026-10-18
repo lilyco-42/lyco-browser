@@ -17,6 +17,11 @@ class LycoProfiles {
       this.bindings=Object.assign(Object.create(null),saved.bindings);
     }
     network.onCoreExit=()=>this.stopManaged();
+    // The upstream sanitizer rebuilds proxyMeta and drops custom flags.
+    // Resolve policy from trusted, persisted bindings at the final launch
+    // boundary instead of trusting renderer metadata to survive that path.
+    engine.lycoIsManagedProfile=profile=>Object.hasOwn(this.bindings,profile?.id) ||
+      Object.values(this.bindings).some(binding=>binding.proxyId===profile?.proxyId);
     const start=engine.start.bind(engine);
     engine.start=async profile=>{
       const ready=await this.beforeStart(profile);
@@ -66,7 +71,7 @@ class LycoProfiles {
       const id=randomUUID();
       const profile={id,number,name:String(number),title:'LYCO 专属环境',browser:'Google Chrome',
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
-        networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id},
+        networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''},
         language:'en-US',startUrl:'https://www.youtube.com/',platform:{type:'other',startUrl:'https://www.youtube.com/'},
         privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona'}};
       this.bindings[id]={owner:state.username,proxyId:record.id};
@@ -91,7 +96,7 @@ class LycoProfiles {
       this.bindings[profile.id]={...binding};this.save();
     }
     return {profile:{...stored,...profile,networkMode:'proxy',proxy:record.raw,proxyId:record.id,
-      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id}},authorization:state};
+      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''}},authorization:state};
   }
   async login(credentials) {
     // Switching accounts must not leave an old window using a recycled port.

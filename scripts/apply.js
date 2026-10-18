@@ -98,6 +98,11 @@ one('main.js','.then(() => localSettingsWriter.flushNow())',join(
  '    .then(() => lycoNetwork?.disconnect())'));
 console.log('LYCO overlay applied to pinned upstream');
 
+// Protect only LYCO owned proxy windows from the upstream local-host bypass.
+// Preserve unowned/manual profiles and legacy local start pages.
+one('engine.js',
+ "      let bypass = '<-loopback>;127.0.0.1;localhost';",
+ "      let bypass = this.lycoIsManagedProfile?.(profile) ? '<-loopback>' : '<-loopback>;127.0.0.1;localhost';");
 // Pinned upstream declares browser inside try, but references it from catch.
 // Preserve the real startup failure and cleanup instead of masking it with a
 // ReferenceError on every failed launch (including failures before selection).
