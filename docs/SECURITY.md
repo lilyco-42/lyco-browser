@@ -31,6 +31,12 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
 
 ## Honest limitations / next gate
 
+- Windows GitHub Actions now contains a real bundled Chromium WebRTC
+  negative-control probe: a CI-owned UDP listener first receives a deliberate
+  control packet, then tests whether an in-browser ICE STUN attempt sends any
+  direct UDP packets or exposes literal IP ICE candidates. Page and report
+  must both be delivered through Mihomo. This checks one local STUN path only,
+  **not** all public STUN/TURN servers, mDNS, candidate types or OS platforms.
 - A local HTTP proxy does not cover all device traffic. Browser WebRTC,
   DNS, IPv6, UDP, extensions, OS networking and local services require
   runner-based leak tests for each browser kernel/platform. No claim of
