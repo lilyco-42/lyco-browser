@@ -25,9 +25,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: npm install --no-audit --no-fund
+      - run: node --test ../../tests/release-publishing.test.js
       - run: npx tsc --noEmit
       - run: npx expo export --platform web --output-dir dist-web
       - name: Upload React Native Web to GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           tar czf "$RUNNER_TEMP/LYCO-RN-Web.tar.gz" dist-web
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
@@ -51,6 +54,8 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
       - name: Upload Android APK to GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/LYCO-Browser-Android-debug.apk"
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-debug.apk"
@@ -84,4 +89,6 @@ jobs:
           test -d "$APP"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$RUNNER_TEMP/LYCO-Browser-iOS-simulator.zip"
       - name: Upload iOS simulator build to GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-iOS-simulator.zip"
