@@ -26,8 +26,9 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   before the original engine cleans the failed start. The real two-page test
   samples navigator values and a shape-only canvas in each page's first script,
   keeps both configured tabs open, and repeats after reopening the environment.
-  This new path still requires the current commit's native gate. Native session
-  restore and arbitrary new-tab timing remain unverified; session restore can
+  The [12ae5a9 Windows workflow](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)
+  verifies this two-page flow in preflight, portable and installed binaries.
+  Native session restore and arbitrary new-tab timing remain unverified; session restore can
   still load before post-launch identity and needs a separate correction.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.

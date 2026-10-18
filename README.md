@@ -4,15 +4,15 @@
 
 ## 下载与开始使用
 
-[下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-a6e481d3fe67)
+[下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-12ae5a9377ba)
 
 | 系统 | 下载 | 说明 |
 | --- | --- | --- |
-| Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a6e481d3fe67/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a6e481d3fe67/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |
-| macOS Apple Silicon | [DMG](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a6e481d3fe67/LYCO-Browser-macOS-arm64-MVP.dmg) | ARM64，不适用于 Intel Mac |
-| Linux x64 | [tar.gz](https://github.com/lilyco-42/lyco-browser/releases/download/ci-a6e481d3fe67/LYCO-Browser-Linux-x64-MVP.tar.gz) | 桌面预览包 |
+| Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |
+| macOS Apple Silicon | [DMG](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-macOS-arm64-MVP.dmg) | ARM64，不适用于 Intel Mac |
+| Linux x64 | [tar.gz](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Linux-x64-MVP.tar.gz) | 桌面预览包 |
 
-此处固定到已验收的产品提交 `a6e481d3fe67aff091b11a38f984267808d88030`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`ec4958aba4d7b4dc9a3816689d8efc404202dc019b250570e6873c3d8d811281`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
+此处固定到已验收的产品提交 `12ae5a9377ba7f22155ae2e7ef3b43ff77eab234`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`c842b091536f84dc986b25131fddbdd4b19821b4e70f58186f5894c8ef6222bb`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
 
 1. 下载并安装或解压，打开 **LYCO Browser**。
 2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
@@ -21,9 +21,9 @@
 
 ![GitHub Actions 实际安装后的环境工作台](docs/images/installed-workbench.png)
 
-Windows 的[正式提交验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39122539733)已通过：预检、便携包和实际安装后各 26 项原生检查，另有 6 项安装检查。包括分组与批量操作、真实代理流量、两环境 Cookie/localStorage 隔离、重启后 Canvas 一致、身份文件损坏时拒绝访问目标网页、恢复备份后重新启动，以及卸载保留用户数据。截图来自该正式包的实际安装窗口。
+Windows 的[正式提交验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)已通过：预检、便携包和实际安装后各 27 项原生检查，另有 6 项安装检查。包括分组与批量操作、双启动页在身份准备后打开且保留标签、真实代理流量、两环境 Cookie/localStorage 隔离、重启后 Canvas 一致、身份文件损坏时拒绝访问目标网页、恢复备份后重新启动，以及卸载保留用户数据。截图来自该正式包的实际安装窗口。
 
-macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github.com/lilyco-42/lyco-browser/actions/runs/39122539591)，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。多启动网址、会话恢复及其他未覆盖路径仍需验证，完整范围见[受管代理安全边界](docs/SECURITY.md)。
+macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698195)，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。本轮已验证双启动页；原生会话恢复、任意新标签的首次脚本时序及其他未覆盖路径仍需验证，完整范围见[受管代理安全边界](docs/SECURITY.md)。
 
 
 > **运行及随包资源分发授权已确认（2026-10-17）：** 产品所有者明确确认既有 Wayfern 书面授权涵盖 LYCO 运行、分发及随包 Windows/macOS 字体资源再分发，桌面工作流解除草稿分发限制。此记录依据所有者确认，不公开授权文件或商业条款，也不向其他项目授予相同权利。当前提交必须通过对应 Actions 门禁后才发布 CI 预览包；第三方版权、许可与源码来源继续保留，旧草稿不会自动发布。
