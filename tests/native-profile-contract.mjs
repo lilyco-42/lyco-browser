@@ -27,19 +27,22 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
   const cdp = requireApp('./cdp');
   report.profileRuntime = {};
+  report.startupPages = {};
   for (const [phase, owner] of [['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B']]) {
     const expected = settings[owner];
     const target = `http://127.0.0.1:${originPort}/profile-probe?phase=${phase}`;
+    const extraPhase = owner === 'A' ? phase + '-extra' : null;
+    const extraTarget = extraPhase ? `http://127.0.0.1:${originPort}/profile-probe?phase=${extraPhase}` : null;
     await checkpoint(phase + ':configure');
-    await page.evaluate(({source, expected, target, ua}) => window.adoptLycoProfile({
+    await page.evaluate(({source, expected, target, extraTarget, ua}) => window.adoptLycoProfile({
       ...source, os: 'Windows', language: expected.language, userAgent: ua,
       startUrl: target, platform: {type: 'other', startUrl: target},
-      advanced: {...source.advanced, startUrls: target, saveCookies: true},
+      advanced: {...source.advanced, startUrls: extraTarget ? target + '\n' + extraTarget : target, saveCookies: true},
       fingerprint: {...source.fingerprint, cores: expected.cores, memory: expected.memory},
       privacy: {...source.privacy, deviceProfile: 'default', cores: expected.cores, memory: expected.memory,
         languageMode: 'profile', uiLanguage: 'profile', langFromIp: false, timezoneFromIp: false, geoFromIp: false,
         timezoneMode: 'custom', timezone: expected.timezone, canvas: 'noise', refreshFingerprintOnStart: false},
-    }), {source: profiles[owner], expected, target, ua});
+    }), {source: profiles[owner], expected, target, extraTarget, ua});
     await page.locator('[data-view="profiles"]').click();
     await checkpoint(phase + ':launch');
     await page.locator(`#profile-table tr[data-profile-id="${profiles[owner].id}"] .col-name`).dblclick();
@@ -104,6 +107,22 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         assert.equal(value.canvasControl[0], results[owner.toLowerCase() + '-first'].canvasControl[0], `${phase}: shape-only canvas changed across restart`);
         assert.equal(value.canvas[0], results[owner.toLowerCase() + '-first'].canvas[0], `${phase}: same-profile canvas changed across restart`);
       }
+      if (extraPhase) {
+        const extraDeadline = Date.now() + 30000;
+        while (Date.now() < extraDeadline && !fixture.result(extraPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
+        const extra = fixture.result(extraPhase);
+        assert.ok(extra?.value && extra.pageProxied && extra.reportProxied, `${phase}: extra startup page did not reach the proxy fixture`);
+        assert.equal(extra.value.error, undefined, `${phase}: ${extra.value.error}`);
+        for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
+          assert.deepEqual(extra.value[field], value[field], `${phase}: extra page first script saw a different ${field}`);
+        }
+        assert.deepEqual(extra.value.canvasControl, value.canvasControl, `${phase}: extra page first-script native canvas differs`);
+        assert.deepEqual(extra.value.canvas, value.canvas, `${phase}: extra page canvas differs`);
+        const targets = await cdp.tabs(state.port);
+        assert.ok(targets.some(tab => tab.url === target) && targets.some(tab => tab.url === extraTarget),
+          `${phase}: multiple configured startup pages were closed or replaced`);
+        report.startupPages[phase] = {mainPresent: true, extraPresent: true, extra};
+      }
       results[phase] = value;
     } catch (error) {
       report.failure = String(error.stack || error);
@@ -118,7 +137,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   }
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
-    'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles');
+    'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
+    'native-multiple-startup-pages-retained-with-first-script-profile');
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);

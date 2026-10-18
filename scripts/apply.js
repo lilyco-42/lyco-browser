@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,s.replace(from,to),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -103,7 +103,23 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity } = require('./lyco/native-identity');"));
+ "const { prepareNativeIdentity } = require('./lyco/native-identity');",
+ "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
+one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
+ '      // Extra URLs are opened only after the original runtime is ready.');
+one('engine.js', '    this.startRunningWatch(item);', join(
+ '    if (!restoreSession && customStartUrls.length > 1 && !item.verificationBlocked && !item.cdpError && !injectionFailed) {',
+ '      await openPreparedStartupPages({',
+ '        urls: customStartUrls.slice(1), port: item.port, connection, cdp,',
+ '        assertActive: () => this.assertStartGenerationActive(profile.id, lifecycleGeneration),',
+ '        prepare: () => this.applyRuntimeSettings(item.port, profile,',
+ '          item.nativeKernelFingerprint ? fingerprintForNativeKernelInject(item.fingerprint) : item.fingerprint, {',
+ '            appliedTargetIds: item.fpAppliedTargets, appliedFingerprintHash: item.fpAppliedHash,',
+ '            trackOn: item, phase: "lyco-extra-startup-pages",',
+ '          }),',
+ '      });',
+ '    }',
+ '    this.startRunningWatch(item);'));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
  '      try {',
