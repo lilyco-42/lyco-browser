@@ -3,16 +3,26 @@
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
+  ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
 ]);
 
-async function observeProfile(marker) {
+async function observeProfile(marker, readOnly = false) {
+  // Read these synchronously in the page's first script, before font readiness
+  // or network awaits can hide a late runtime injection.
+  const initial = {
+    userAgent: navigator.userAgent, platform: navigator.platform,
+    language: navigator.language, languages: Array.from(navigator.languages),
+    cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
   const key = 'lyco_native_profile_storage';
   const cookie = () => document.cookie.split(';').map(part => part.trim())
     .find(part => part.startsWith(key + '='))?.slice(key.length + 1) ?? null;
   const before = {cookie: cookie(), local: localStorage.getItem(key)};
-  document.cookie = key + '=' + marker + '; Path=/; Max-Age=600; SameSite=Lax';
-  localStorage.setItem(key, marker);
-  await document.fonts.ready;
+  if (!readOnly) {
+    document.cookie = key + '=' + marker + '; Path=/; Max-Age=600; SameSite=Lax';
+    localStorage.setItem(key, marker);
+  }
   let textWidth = null;
   const draw = (withText = true) => {
     const canvas = document.createElement('canvas');
@@ -33,13 +43,12 @@ async function observeProfile(marker) {
     for (let i = 0; i < png.length; i++) hash = Math.imul(hash ^ png.charCodeAt(i), 16777619) >>> 0;
     return hash.toString(16).padStart(8, '0');
   };
+  const initialShape = [draw(false), draw(false)];
+  await document.fonts.ready;
   return {
-    userAgent: navigator.userAgent, platform: navigator.platform,
-    language: navigator.language, languages: Array.from(navigator.languages),
-    cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    ...initial,
     before, after: {cookie: cookie(), local: localStorage.getItem(key)},
-    canvas: [draw(), draw()], canvasControl: [draw(false), draw(false)], textWidth,
+    canvas: [draw(), draw()], canvasControl: initialShape, textWidth,
   };
 }
 
@@ -57,7 +66,7 @@ export function createBrowserProfileFixture() {
       entry.pageProxied = Boolean(proxied);
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
-      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ')'
+      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(phase.endsWith('-extra')) + ')'
         + '.then(' + post + ').catch(error=>(' + post + ')({error:String(error)}));';
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
       res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title><script>' + script + '</script>');

@@ -20,10 +20,15 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   and reach its original process/lock cleanup. The actual native regression
   damages a CI profile cache, requires a rejected launch and zero target
   requests, then restores its backup and launches the same profile again.
-  This is not a first-script guarantee for every launch path: additional
-  command-line startup URLs and native session restore can load before the
-  post-launch identity application. Those paths still require a production
-  correction and actual native regression; new-tab timing is also unverified.
+  Extra configured startup pages are now created as blank targets after the
+  original first-page setup, receive the existing native/runtime settings,
+  and only then navigate. A failed preparation closes only those new targets
+  before the original engine cleans the failed start. The real two-page test
+  samples navigator values and a shape-only canvas in each page's first script,
+  keeps both configured tabs open, and repeats after reopening the environment.
+  This new path still requires the current commit's native gate. Native session
+  restore and arbitrary new-tab timing remain unverified; session restore can
+  still load before post-launch identity and needs a separate correction.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,

@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,s.replace(from,to),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -103,7 +103,30 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity } = require('./lyco/native-identity');"));
+ "const { prepareNativeIdentity } = require('./lyco/native-identity');",
+ "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
+one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
+ '      // Extra URLs are opened only after the original runtime is ready.');
+// Keep this inside the original injection try: injectionFailed is block-scoped.
+// Run after keepDefaultTab, which intentionally closes other preexisting tabs.
+one('engine.js', '      // Brand window title as 环境 N (not generic Chrome)', join(
+ '    if (!restoreSession && customStartUrls.length > 1 && !item.verificationBlocked && !item.cdpError && !injectionFailed) {',
+'      try {',
+ '      await openPreparedStartupPages({',
+ '        urls: customStartUrls.slice(1), port: item.port, connection, cdp,',
+ '        assertActive: () => this.assertStartGenerationActive(profile.id, lifecycleGeneration),',
+ '        prepare: () => this.applyRuntimeSettings(item.port, profile,',
+ '          item.nativeKernelFingerprint ? fingerprintForNativeKernelInject(item.fingerprint) : item.fingerprint, {',
+ '            appliedTargetIds: item.fpAppliedTargets, appliedFingerprintHash: item.fpAppliedHash,',
+ '            trackOn: item, phase: "lyco-extra-startup-pages",',
+ '          }),',
+ '      });',
+'      } catch (error) {',
+'        item.lycoStartupPagesFailed = true;',
+'        throw error;',
+'      }',
+ '    }',
+'      // Brand window title as 环境 N (not generic Chrome)'));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
  '      try {',
@@ -119,7 +142,7 @@ one('engine.js', '      item.startUrl = startUrl;', join(
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(
- '      if (item.lycoNativeIdentityFailed) throw error;',
+ '      if (item.lycoNativeIdentityFailed || item.lycoStartupPagesFailed) throw error;',
  '      item.cdpError = error.message;'));
 one('engine.js',
  '    const tabs = await cdp.tabs(port);',
