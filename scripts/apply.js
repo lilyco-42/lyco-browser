@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,s.replace(from,to),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -100,6 +100,20 @@ console.log('LYCO overlay applied to pinned upstream');
 
 // Protect only LYCO owned proxy windows from the upstream local-host bypass.
 // Preserve unowned/manual profiles and legacy local start pages.
+one('engine.js',
+ "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
+ join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
+ "const { prepareNativeIdentity } = require('./lyco/native-identity');"));
+one('engine.js', '      item.startUrl = startUrl;', join(
+ '      item.startUrl = startUrl;',
+ '      item.lycoNativeIdentity = await prepareNativeIdentity({',
+ '        enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
+ '        port: item.port, cdp, refresh: allowSeedRefresh,',
+ '      });'));
+one('engine.js',
+ '    const tabs = await cdp.tabs(port);',
+ join('    const tabs = await cdp.tabs(port);',
+ '    await options.trackOn?.lycoNativeIdentity?.apply(tabs);'));
 one('engine.js',
  "      let bypass = '<-loopback>;127.0.0.1;localhost';",
  "      let bypass = this.lycoIsManagedProfile?.(profile) ? '<-loopback>' : '<-loopback>;127.0.0.1;localhost';");

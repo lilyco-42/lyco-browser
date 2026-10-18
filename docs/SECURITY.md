@@ -5,6 +5,16 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
 
 ## Protections in this change
 
+- Wayfern profiles capture the engine's complete native fingerprint through
+  its page-target API and retain it privately in the environment directory.
+  Subsequent launches restore that identity before user-page navigation;
+  newly opened page targets receive the same identity. This retains native
+  noise rather than layering a fresh native device underneath saved settings.
+  A damaged, wrong-profile or rejected identity fails startup instead of
+  silently minting a replacement. Stock Chromium/legacy kernels retain their
+  existing path, and explicit refresh-on-start remains an explicit option.
+  Native payloads are not uploaded in CI evidence, sent to the website or
+  printed in logs. This native integration must pass the current runtime gate.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,
@@ -31,6 +41,13 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
 
 ## Honest limitations / next gate
 
+- The Windows native suite requires two real managed environments to apply
+  explicit User-Agent, platform, language, timezone, CPU and memory settings.
+  CI-owned pages read these browser properties directly, write separate cookies
+  and localStorage, then reopen both environments to verify persistence and
+  isolation. A fixed canvas drawing must be repeatable per environment and
+  distinct between the two saved seeds. These are scoped runtime contracts;
+  they do not establish correctness for every fingerprint surface or website.
 - Windows GitHub Actions now contains a real bundled Chromium WebRTC
   negative-control probe: a CI-owned UDP listener first receives a deliberate
   control packet, then tests whether an in-browser ICE STUN attempt sends any

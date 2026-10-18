@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - name: Reject session and ownership regressions before downloading the browser kernel
-        run: node --test tests/network.test.js tests/profiles.test.js tests/release-publishing.test.js
+        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/release-publishing.test.js
 
   windows-x64:
     needs: integration-guards
@@ -79,7 +79,7 @@ jobs:
       - name: Isolated LYCO proxy and Billing integration tests
         shell: pwsh
         run: |
-          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - uses: actions/setup-python@v5
@@ -141,7 +141,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Native preflight before expensive archive and installer compression
-        timeout-minutes: 5
+        # The profile contract adds four genuine browser launches/reopens. The
+        # preceding five-minute diagnostic reached b-reopen:stop with all four
+        # observations captured. Keep per-action bounds and retain every check.
+        timeout-minutes: 8
         shell: pwsh
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
@@ -172,7 +175,7 @@ jobs:
           }
 
       - name: Native packaged membership, owned profiles and real proxy routing
-        timeout-minutes: 5
+        timeout-minutes: 8
         shell: pwsh
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
