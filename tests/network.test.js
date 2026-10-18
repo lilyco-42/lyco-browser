@@ -168,3 +168,38 @@ test('disconnect cancels an in-flight subscription fetch before spawning a new c
  while(!requested)await new Promise(r=>setTimeout(r,5));await app.disconnect();release();await rejected;
  assert.equal(children.length,0);assert.equal(app.status().connected,false);
 });
+
+test('managed proxy strips direct selections and rejects implicit compatible fallback',()=>{
+ const node={name:'remote',type:'http',server:'127.0.0.1',port:9001};
+ const source={proxies:[node],'proxy-groups':[
+  {name:'AUTO',type:'url-test',proxies:['DIRECT','remote'],'empty-fallback':'COMPATIBLE'},
+  {name:'PROXY',type:'select',proxies:['DIRECT','AUTO','REJECT'],
+   'default-selected':'DIRECT','empty-fallback':'DIRECT'},
+ ]};
+ const config=makeConfig(source,18999);
+ assert.deepEqual(config.rules,['MATCH,PROXY']);
+ assert.equal(config['allow-lan'],false);
+ assert.deepEqual(config['proxy-groups'][0].proxies,['remote']);
+ assert.deepEqual(config['proxy-groups'][1].proxies,['AUTO','REJECT']);
+ assert.equal(config['proxy-groups'][1]['default-selected'],'AUTO');
+ assert.ok(config['proxy-groups'].every(group=>group['empty-fallback']==='REJECT'));
+ assert.ok(source['proxy-groups'][1].proxies.includes('DIRECT'),'must not mutate subscription');
+ assert.throws(()=>makeConfig({...source,'proxy-groups':[{
+  name:'PROXY',type:'select',proxies:['DIRECT','COMPATIBLE']}]},18999),/非直连/);
+ assert.throws(()=>makeConfig({...source,proxies:[{...node,type:'direct'}]},18999),/直连节点/);
+ assert.throws(()=>makeConfig({...source,'proxy-groups':[{
+  name:'PROXY',type:'select',proxies:['unknown']}]},18999),/未知代理出口/);
+ assert.throws(()=>makeConfig({...source,'proxy-groups':[{
+  name:'PROXY',type:'select',proxies:['remote'],'include-all-proxies':true}]},18999),/无法验证/);
+});
+
+test('unexpected Mihomo exit triggers managed-window shutdown hook',async t=>{
+ const {app,children}=await lifecycleFixture(t);
+ await app.connect();
+ let notified;const done=new Promise(resolve=>{notified=resolve});
+ app.onCoreExit=()=>notified();
+ children[0].emit('exit',1);
+ await done;
+ assert.equal(app.status().connected,false);
+ assert.equal(app.port,null);
+});

@@ -49,6 +49,8 @@ tests/network.test.js
 .github/workflows/build-windows.yml
 ```
 
+安全审计与剩余限制参见 [Managed Proxy Privacy Boundary](docs/SECURITY.md)。受管代理启用拒绝直连降级，但不承诺全设备 VPN、WebRTC/DNS 零泄漏或绕过平台检测。
+
 ## 权限与网络边界
 
 - 代理必须**明确分配给环境**：推荐“一键创建专属代理环境”；仅对创建的受管环境绑定代理，不修改其他 profile。

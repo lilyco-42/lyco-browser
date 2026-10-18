@@ -16,6 +16,7 @@ class LycoProfiles {
       }
       this.bindings=Object.assign(Object.create(null),saved.bindings);
     }
+    network.onCoreExit=()=>this.stopManaged();
     const start=engine.start.bind(engine);
     engine.start=async profile=>{
       const ready=await this.beforeStart(profile);
@@ -97,8 +98,11 @@ class LycoProfiles {
     await this.disconnect();
     return this.network.login(credentials);
   }
+  async stopManaged() {
+    await Promise.allSettled(Object.keys(this.bindings).map(id=>this.engine.stop(id)));
+  }
   async disconnect({logout=false}={}) {
-    for(const id of Object.keys(this.bindings)) await this.engine.stop(id);
+    await this.stopManaged();
     return logout ? this.network.logout() : this.network.disconnect();
   }
 }

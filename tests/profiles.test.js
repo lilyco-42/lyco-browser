@@ -79,3 +79,13 @@ test('a recycled port in a new connection cannot authorize an old pending launch
  await assert.rejects(()=>engine.start(profile),/账号.*变化/);
  assert.equal(calls.starts.length,0);
 });
+
+test('unexpected proxy loss shuts down only bound managed environments',async t=>{
+ const {service,engine,calls,args}=setup(t);
+ engine.profiles.set('independent',{id:'independent'});
+ const {profile}=await service.create();
+ assert.equal(typeof args.network.onCoreExit,'function');
+ await args.network.onCoreExit();
+ assert.deepEqual(calls.stops,[profile.id]);
+ assert.equal(calls.stops.includes('independent'),false);
+});

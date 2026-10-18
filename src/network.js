@@ -35,14 +35,40 @@ function makeConfig(input, port) {
       !obj['proxy-groups'].some(g => g?.name === 'PROXY')) {
     throw Error('订阅配置缺少合法的代理节点或 PROXY 分组');
   }
+  // A managed workspace must never silently bypass its proxy exit.
+  // Mihomo's COMPATIBLE empty fallback is equivalent to DIRECT.
+  const bypass=new Set(['DIRECT','COMPATIBLE','PASS','PASS-RULE']);
+  const isBypass=name=>typeof name==='string' && bypass.has(name.toUpperCase());
+  const proxies=obj.proxies.map(node=>{
+    if(!node || typeof node!=='object' || Array.isArray(node) ||
+      typeof node.name!=='string' || !node.name ||
+      typeof node.type!=='string' || !node.type ||
+      isBypass(node.name) || ['direct','pass','dns'].includes(node.type.toLowerCase()) ||
+      isBypass(node['dialer-proxy']))throw Error('订阅包含不安全的直连节点');
+    return {...node};
+  });
+  const groups=obj['proxy-groups'].map(group=>{
+    if(!group || typeof group!=='object' || Array.isArray(group) ||
+      typeof group.name!=='string' || !group.name ||
+      !Array.isArray(group.proxies) ||
+      !group.proxies.every(name=>typeof name==='string') ||
+      group.use?.length || group['include-all'] || group['include-all-proxies'] ||
+      group['include-all-providers'])throw Error('订阅含无法验证的代理分组');
+    const allowed=group.proxies.filter(name=>!isBypass(name));
+    if(!allowed.length)throw Error('代理分组没有非直连节点');
+    return {...group,proxies:allowed,'empty-fallback':'REJECT',
+      'default-selected':allowed.includes(group['default-selected'])?group['default-selected']:allowed[0],
+      'include-all':false,'include-all-proxies':false,'include-all-providers':false};
+  });
+  const known=new Set([...proxies.map(node=>node.name),...groups.map(group=>group.name),'REJECT','REJECT-DROP']);
+  if(!groups.some(group=>group.name==='PROXY') ||
+    groups.some(group=>group.proxies.some(name=>!known.has(name))) ||
+    proxies.some(node=>node['dialer-proxy'] && !known.has(node['dialer-proxy'])))
+    throw Error('订阅存在未知代理出口，拒绝降级直连');
   return {
     'mixed-port': port, 'allow-lan': false, 'bind-address': '127.0.0.1',
     ipv6: false, mode: 'rule', 'log-level': 'warning',
-    proxies: obj.proxies, 'proxy-groups': obj['proxy-groups'],
-    rules: ['DOMAIN-SUFFIX,lain42.top,DIRECT',
-      'DOMAIN-SUFFIX,github.com,PROXY',
-      'DOMAIN-SUFFIX,githubusercontent.com,PROXY',
-      'MATCH,PROXY'],
+    proxies, 'proxy-groups':groups, rules:['MATCH,PROXY'],
   };
 }
 
@@ -95,6 +121,7 @@ class LycoNetwork {
     this.connecting = null;
     this.connectionEpoch = 0;
     this.authGeneration = 0;
+    this.onCoreExit = null;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -223,6 +250,9 @@ class LycoNetwork {
     const onGone=()=>{
       if(this.child!==child)return;
       this.child=null;this.port=null;clearTimeout(this.expiryTimer);
+      // Unexpected core loss closes managed windows. Explicit disconnect
+      // clears this.child first, so the callback is never invoked for it.
+      try { Promise.resolve(this.onCoreExit?.()).catch(()=>{}); } catch (_) {}
       this.cleanupConfig().catch(()=>{});
     };
     child.on('error',onGone);child.on('exit',onGone);
