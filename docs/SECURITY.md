@@ -31,6 +31,13 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
 
 ## Honest limitations / next gate
 
+- The Windows native suite requires two real managed environments to apply
+  explicit User-Agent, platform, language, timezone, CPU and memory settings.
+  CI-owned pages read these browser properties directly, write separate cookies
+  and localStorage, then reopen both environments to verify persistence and
+  isolation. A fixed canvas drawing must be repeatable per environment and
+  distinct between the two saved seeds. These are scoped runtime contracts;
+  they do not establish correctness for every fingerprint surface or website.
 - Windows GitHub Actions now contains a real bundled Chromium WebRTC
   negative-control probe: a CI-owned UDP listener first receives a deliberate
   control packet, then tests whether an in-browser ICE STUN attempt sends any

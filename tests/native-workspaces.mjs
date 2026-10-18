@@ -6,6 +6,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseConnection} from '../extensions/lain42/connection.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
+import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
+import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -14,10 +16,12 @@ const report={commit:process.env.GITHUB_SHA,binary,fixtureBilling:true,realPayme
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
+const profileProbe=createBrowserProfileFixture();
 const origin=http.createServer((req,res)=>{
  const proxied=tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes';
  report.proxyRequests.push({path:req.url,proxied});
  if(privacyProbe.route(req,res,proxied))return;
+ if(profileProbe.route(req,res,proxied))return;
  res.end('LYCO browser fixture reached through proxy');
 });
 const originPort=await listen(origin);
@@ -293,6 +297,7 @@ try {
   candidateCount:rtcResult.rtc.candidateCount,directUdpPackets:rtcResult.udpPackets};
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report});
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});
@@ -318,6 +323,7 @@ try {
  }
  throw error;
 } finally {
+ report.profileAudit=profileProbe.snapshot();
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();
