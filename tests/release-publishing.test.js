@@ -48,6 +48,7 @@ test('other existing publishers keep their explicit prerelease behavior',t=>{
  const result=publish(t,{held:false});
  const create=result.calls.find(line=>line.startsWith('release create '));
  assert.match(create,/--prerelease/);assert.doesNotMatch(create,/--draft/);
+ assert.match(create,/Android debug APK; iOS simulator only/);
  assert.equal(result.calls.some(line=>line.startsWith('release edit ')),false);
 });
 
@@ -55,6 +56,10 @@ test('explicitly authorized desktop builds create a public prerelease',t=>{
  const result=publish(t,{held:false,approved:true});
  const create=result.calls.find(line=>line.startsWith('release create '));
  assert.match(create,/--prerelease/);assert.doesNotMatch(create,/--draft/);
+ assert.match(create,/Windows x64 EXE\/ZIP, macOS arm64 DMG and Linux x64 archive/);
+ assert.match(create,/availability alone does not prove complete workflow acceptance/);
+ assert.match(create,/macOS\/Linux packaging is not native UI acceptance/);
+ assert.doesNotMatch(create,/React Native|Android|iOS simulator|system-font redistribution rights are reviewed/);
  assert.equal(result.calls.some(line=>line.startsWith('release edit ')),false);
  assert.match(result.stdout,/CI release:/);
 });
