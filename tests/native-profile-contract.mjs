@@ -71,7 +71,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       // change, log or bypass a licence token. Only hashes leave this CI host.
       try {
         assert.ok(Number.isInteger(state.port) && state.port > 1023 && state.port < 65536);
-        const socket = await cdp.browserSocket(state.port);
+        const targets = await cdp.tabs(state.port);
+        const socket = targets.find(tab => tab.url === target)?.webSocketDebuggerUrl;
+        if (!socket) throw Error('CI profile page target missing');
         const result = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
         const raw = result?.fingerprint ?? result;
         const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
