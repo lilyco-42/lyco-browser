@@ -237,6 +237,24 @@ try {
  report.checks.push('real-bundled-chromium-via-managed-proxy');
  report.checks.push('double-click-environment-starts-real-managed-browser');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ // Negative control: the CI runner can reach 127.0.0.1 without a proxy.
+ // This passes only if packaged Chromium uses Mihomo, not a local bypass.
+ const loopbackTarget='http://127.0.0.1:'+originPort+'/loopback-probe';
+ await page.evaluate(({profile,target})=>window.adoptLycoProfile({
+  ...profile,startUrl:target,platform:{type:'other',startUrl:target},
+  advanced:{startUrls:target},
+  privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false},
+ }),{profile,target:loopbackTarget});
+ await page.locator('#profile-table tr[data-profile-id="'+profile.id+'"] .col-name').dblclick();
+ const loopbackDeadline=Date.now()+30000;
+ while(Date.now()<loopbackDeadline&&!report.proxyRequests.some(row=>row.path==='/loopback-probe'))
+  await new Promise(resolve=>setTimeout(resolve,250));
+ const loopbackRows=report.proxyRequests.filter(row=>row.path==='/loopback-probe');
+ assert.ok(loopbackRows.length>0,'Expected loopback fixture request from packaged Chromium');
+ assert.ok(loopbackRows.every(row=>row.proxied),
+   'Managed Chromium MUST NOT bypass its proxy for 127.0.0.1 even when direct access works');
+ report.checks.push('real-bundled-chromium-managed-loopback-cannot-bypass-mihomo');
+ await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});

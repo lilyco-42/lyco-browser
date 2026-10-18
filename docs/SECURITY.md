@@ -11,6 +11,12 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   PASS, or COMPATIBLE exits. Every group uses REJECT on an empty fallback.
   Unknown routes or provider-expanded groups are rejected rather than
   silently falling back to the device network.
+- Managed Chromium profiles remove the upstream localhost/127.0.0.1 proxy
+  bypass list and keep Chromium's special negative-loopback rule, which
+  disables the implicit Chromium loopback bypass. Unmanaged profiles keep
+  existing settings.
+- Real packaged Chromium Actions acceptance checks whether a runner-reachable
+  loopback HTTP fixture gets contacted **through Mihomo** (not directly).
 - All managed HTTP traffic uses the PROXY policy, including lain42.top.
   The trusted Electron main process still authenticates to LYCO's Billing API
   independently using HTTPS; that API request is not browser profile traffic.

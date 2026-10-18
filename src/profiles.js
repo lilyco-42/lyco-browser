@@ -66,7 +66,7 @@ class LycoProfiles {
       const id=randomUUID();
       const profile={id,number,name:String(number),title:'LYCO 专属环境',browser:'Google Chrome',
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
-        networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id},
+        networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''},
         language:'en-US',startUrl:'https://www.youtube.com/',platform:{type:'other',startUrl:'https://www.youtube.com/'},
         privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona'}};
       this.bindings[id]={owner:state.username,proxyId:record.id};
@@ -91,7 +91,7 @@ class LycoProfiles {
       this.bindings[profile.id]={...binding};this.save();
     }
     return {profile:{...stored,...profile,networkMode:'proxy',proxy:record.raw,proxyId:record.id,
-      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id}},authorization:state};
+      proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''}},authorization:state};
   }
   async login(credentials) {
     // Switching accounts must not leave an old window using a recycled port.
