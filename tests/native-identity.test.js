@@ -98,3 +98,36 @@ test('foreign CDP addresses, invalid payloads and rejected restores cannot becom
 test('non-Wayfern kernels are not given foreign native APIs', async () => {
   assert.equal(await prepareNativeIdentity({enabled: false}), null);
 });
+
+test('declared settings reach native pages without changing saved device/noise or accepting unrelated overrides', async t => {
+  const f = await fixture(t);
+  await prepareNativeIdentity(f.args);
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const before = await fs.readFile(file, 'utf8');
+  f.calls.length = 0;
+  const identity = await prepareNativeIdentity({...f.args, settings: {
+    languages: ['en-GB', 'en'], timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4,
+    canvasSeed: 999, fonts: 'untrusted',
+  }});
+  const expected = {...JSON.parse(before).fingerprint, language: 'en-GB', languages: ['en-GB', 'en'],
+    timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4};
+  assert.deepEqual(f.calls[0].params, expected);
+  assert.equal(f.calls.some(call => call.method === 'Wayfern.getFingerprint'), false);
+  const sent = [];
+  await identity.applySession({command: async (...args) => sent.push(args)}, 'new-session', {type: 'page', targetId: 'new-page'});
+  assert.deepEqual(sent[0][1], expected);
+  assert.equal(await fs.readFile(file, 'utf8'), before);
+  f.calls.length = 0;
+  await prepareNativeIdentity({...f.args, settings: {languages: ['fr-FR', 'fr'], hardwareConcurrency: 8}});
+  assert.equal(f.calls[0].params.canvasSeed, expected.canvasSeed);
+  assert.equal(await fs.readFile(file, 'utf8'), before);
+});
+
+test('invalid native UI settings fail before reading or changing the saved identity', async t => {
+  const f = await fixture(t);
+  for (const settings of [{languages: []}, {languages: ['en-GB\n']}, {hardwareConcurrency: 0},
+    {hardwareConcurrency: 1.5}, {deviceMemory: Infinity}, {timezone: 'not/a/timezone'}]) {
+    await assert.rejects(prepareNativeIdentity({...f.args, settings}));
+  }
+  assert.equal(f.calls.length, 0);
+});
