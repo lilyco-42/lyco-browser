@@ -53,6 +53,12 @@ async function observeProfile(marker, readOnly = false) {
   };
 }
 
+// A second observation only: it never changes navigator, native settings,
+// storage, document scripts or navigation. Initial-page assertions stay intact.
+export function readOnlyProfileProbeSource() {
+  return '(' + observeProfile.toString() + ')("A",true)';
+}
+
 export function createBrowserProfileFixture() {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const observations = new Map();

@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
+import {readOnlyProfileProbeSource} from './browser-profile-fixture.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -154,9 +155,13 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
           report.newTabNative ||= {};
           report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
-          const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true,
-            expression: '({language:navigator.language,hardwareConcurrency:navigator.hardwareConcurrency,deviceMemory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone})'}, 2000);
-          report.newTabNative[phase].currentPage = nativeSettings(current?.result?.value, expected);
+          report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
+          const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
+            expression: readOnlyProfileProbeSource()}, 3000);
+          const later = current?.result?.value;
+          report.newTabNative[phase].currentPage = nativeSettings({...later, hardwareConcurrency: later?.cores, deviceMemory: later?.memory}, expected);
+          report.newTabNative[phase].laterCanvas = later?.canvas;
+          report.newTabNative[phase].laterShape = later?.canvasControl;
         } catch {
           report.newTabNative ||= {};
           report.newTabNative[phase] = {available: false};
