@@ -18,6 +18,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
         record({kind: 'attached', type: ['page', 'tab', 'iframe', 'worker', 'service_worker', 'shared_worker'].includes(info.type) ? info.type : 'other',
           session: id(event.params?.sessionId), parent: id(event.sessionId), waiting: Boolean(event.params?.waitingForDebugger)});
       }
+      if (event?.method === 'Runtime.exceptionThrown') {
+        const name = event.params?.exceptionDetails?.exception?.className;
+        record({kind: 'runtime-exception', session: id(event.sessionId),
+          type: ['Error', 'TypeError', 'ReferenceError', 'SyntaxError', 'RangeError'].includes(name) ? name : 'other'});
+      }
       return onEvent?.call(this, event, ...rest);
     }});
     const command = connection.command;
@@ -41,6 +46,18 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
   BrowserEngine.prototype.startWorkerFingerprintInjection = function (item, ...args) {
     record({kind: 'worker-setup', nativeIdentity: Boolean(item.lycoNativeIdentity)});
     return start.call(this, item, ...args);
+  };
+  const apply = BrowserEngine.prototype.applyFingerprintToSession;
+  BrowserEngine.prototype.applyFingerprintToSession = function (connection, sessionId, item, fingerprint, targetInfo) {
+    const profile = item?.profile || {}, fp = fingerprint || item?.fingerprint || {};
+    // Export comparisons only, never user settings or the native device.
+    record({kind: 'page-config', session: id(sessionId),
+      currentLanguage: fp.languages?.[0] === item?.fingerprint?.languages?.[0],
+      declaredLanguage: fp.languages?.[0] === profile.language,
+      declaredCores: fp.hardwareConcurrency === profile.privacy?.cores,
+      declaredMemory: fp.deviceMemory === profile.privacy?.memory,
+      declaredTimezone: fp.timezone === profile.privacy?.timezone});
+    return apply.call(this, connection, sessionId, item, fingerprint, targetInfo);
   };
   return records;
 }
