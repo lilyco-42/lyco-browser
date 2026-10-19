@@ -28,8 +28,13 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   keeps both configured tabs open, and repeats after reopening the environment.
   The [12ae5a9 Windows workflow](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)
   verifies this two-page flow in preflight, portable and installed binaries.
-  Native session restore and arbitrary new-tab timing remain unverified; session restore can
-  still load before post-launch identity and needs a separate correction.
+  A [new real-browser regression](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)
+  now proves that a target opened directly at a URL after startup can observe
+  default language, CPU, memory, timezone and a different native canvas in its
+  first script, despite correct cookies and proxy routing. The current preview
+  must not be treated as complete identity isolation. [PR #22](https://github.com/lilyco-42/lyco-browser/pull/22)
+  is a pending correction, not accepted release evidence. Native session restore
+  can also load before post-launch identity and still needs separate correction.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,

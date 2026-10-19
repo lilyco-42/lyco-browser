@@ -6,6 +6,8 @@
 
 [下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-12ae5a9377ba)
 
+> **已知限制（2026-10-19）：** 新回归已复现：环境启动后直接打开的新标签，第一段脚本可能读到默认语言、CPU、内存、时区及不同的原生 Canvas。Cookie 和代理正确不代表页面身份正确；现有包仍是实验预览，不能用于依赖完整身份隔离的场景。[修正 PR #22](https://github.com/lilyco-42/lyco-browser/pull/22) 尚待完整验收，[复现记录](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)。
+
 | 系统 | 下载 | 说明 |
 | --- | --- | --- |
 | Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |
@@ -23,7 +25,7 @@
 
 Windows 的[正式提交验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)已通过：预检、便携包和实际安装后各 27 项原生检查，另有 6 项安装检查。包括分组与批量操作、双启动页在身份准备后打开且保留标签、真实代理流量、两环境 Cookie/localStorage 隔离、重启后 Canvas 一致、身份文件损坏时拒绝访问目标网页、恢复备份后重新启动，以及卸载保留用户数据。截图来自该正式包的实际安装窗口。
 
-macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698195)，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。本轮已验证双启动页；原生会话恢复、任意新标签的首次脚本时序及其他未覆盖路径仍需验证，完整范围见[受管代理安全边界](docs/SECURITY.md)。
+macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698195)，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。本轮已验证双启动页；新标签首次脚本问题已复现且正在修正，原生会话恢复及其他未覆盖路径仍需独立验收，完整范围见[受管代理安全边界](docs/SECURITY.md)。
 
 
 > **运行及随包资源分发授权已确认（2026-10-17）：** 产品所有者明确确认既有 Wayfern 书面授权涵盖 LYCO 运行、分发及随包 Windows/macOS 字体资源再分发，桌面工作流解除草稿分发限制。此记录依据所有者确认，不公开授权文件或商业条款，也不向其他项目授予相同权利。当前提交必须通过对应 Actions 门禁后才发布 CI 预览包；第三方版权、许可与源码来源继续保留，旧草稿不会自动发布。
