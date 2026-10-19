@@ -189,6 +189,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     }
   }
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
+  assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
+    'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',

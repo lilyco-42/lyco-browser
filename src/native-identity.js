@@ -145,7 +145,17 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       throw error;
     }
   };
-  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), apply, applySession};
+  const seed = device.canvasNoiseSeed;
+  const ownsCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
+    && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
+  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), ownsCanvasNoise, apply, applySession};
 }
 
-module.exports = {prepareNativeIdentity};
+function nativeCanvasFingerprint(value, identity) {
+  if (!identity?.ownsCanvasNoise || value?.canvas?.mode !== 'noise' || value.canvas.nativePixels === true) return value;
+  // Keep the declared noise mode, mark, seed and all other surfaces. The
+  // restored native canvasNoiseSeed owns pixels, not a second late JS layer.
+  return {...value, canvas: {...value.canvas, nativePixels: true}};
+}
+
+module.exports = {prepareNativeIdentity, nativeCanvasFingerprint};

@@ -103,7 +103,7 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity } = require('./lyco/native-identity');",
+ "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
 // Pause page targets themselves. A paused tab container may expose a child
@@ -127,6 +127,17 @@ one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
+one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
+ '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
+one('engine.js', '    const baseFp = fingerprint || item.fingerprint || buildFingerprint(enriched);',
+ '    const baseFp = nativeCanvasFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
+one('engine.js', '  async startWorkerFingerprintInjection(item, fingerprint) {', join(
+ '  async startWorkerFingerprintInjection(item, fingerprint) {',
+ '    fingerprint = nativeCanvasFingerprint(fingerprint, item?.lycoNativeIdentity);'));
+one('automation/fingerprint.js', "  } else if (CFG.canvas && CFG.canvas.mode === 'noise') {",
+ "  } else if (CFG.canvas && CFG.canvas.mode === 'noise' && !CFG.canvas.nativePixels) {");
+one('automation/fingerprint.js', "  } else if (CFG.canvas?.mode === 'noise') {",
+ "  } else if (CFG.canvas?.mode === 'noise' && !CFG.canvas.nativePixels) {");
 one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",

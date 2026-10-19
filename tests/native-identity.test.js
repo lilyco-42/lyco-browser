@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const {prepareNativeIdentity} = require('../src/native-identity');
+const {prepareNativeIdentity, nativeCanvasFingerprint} = require('../src/native-identity');
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-identity-'));
@@ -130,4 +130,26 @@ test('invalid native UI settings fail before reading or changing the saved ident
     await assert.rejects(prepareNativeIdentity({...f.args, settings}));
   }
   assert.equal(f.calls.length, 0);
+});
+
+test('native canvas ownership retains the actual saved seed, declared noise and every other surface', async t => {
+  const f = await fixture(t);
+  f.cdp.call = async (_target, method, params) => {
+    f.calls.push({method, params});
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: {canvasNoiseSeed: 1234567, unknownNoise: {keep: true}}} : {};
+  };
+  const identity = await prepareNativeIdentity(f.args);
+  assert.equal(identity.ownsCanvasNoise, true);
+  assert.equal(f.calls.find(row => row.method === 'Wayfern.setFingerprint').params.canvasNoiseSeed, 1234567);
+  const fp = {canvas: {mode: 'noise', mark: 7}, webgl: {mode: 'noise'}, audio: {mode: 'noise'}, seed: 'unchanged'};
+  const runtime = nativeCanvasFingerprint(fp, identity);
+  assert.deepEqual(runtime.canvas, {mode: 'noise', mark: 7, nativePixels: true});
+  assert.deepEqual(fp.canvas, {mode: 'noise', mark: 7});
+  assert.equal(runtime.webgl, fp.webgl); assert.equal(runtime.audio, fp.audio); assert.equal(runtime.seed, fp.seed);
+  assert.equal(nativeCanvasFingerprint(fp, null), fp, 'Other kernels keep their complete JS noise');
+  assert.equal(nativeCanvasFingerprint(fp, {ownsCanvasNoise: false}), fp);
+  for (const mode of ['blocked', 'real']) {
+    const other = {...fp, canvas: {mode}};
+    assert.equal(nativeCanvasFingerprint(other, identity), other, 'Do not change other user canvas policies');
+  }
 });
