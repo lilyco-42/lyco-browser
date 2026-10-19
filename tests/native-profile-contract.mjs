@@ -189,6 +189,28 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       await checkpoint(phase + ':stopped');
     }
   }
+  const nativeDevices = {};
+  for (const owner of ['A', 'B']) {
+    nativeDevices[owner] = JSON.parse(await fs.readFile(path.join(profileRoots[owner],
+      `lyco-native-identity-${profiles[owner].id}.json`), 'utf8')).fingerprint;
+  }
+  // New private-cache diagnostics expose only availability/type/equality, not
+  // the seed values or the complete native device. A prior run failed before
+  // reaching restoration because two separately captured devices drew alike.
+  const seedPresent = owner => Object.hasOwn(nativeDevices[owner], 'canvasNoiseSeed');
+  report.nativeCanvasOwnership = {
+    seedPresent: {A: seedPresent('A'), B: seedPresent('B')},
+    seedTypes: {A: typeof nativeDevices.A.canvasNoiseSeed, B: typeof nativeDevices.B.canvasNoiseSeed},
+    distinctCapturedSeeds: seedPresent('A') && seedPresent('B')
+      && nativeDevices.A.canvasNoiseSeed !== nativeDevices.B.canvasNoiseSeed,
+    distinctHtmlShape: results['a-first'].canvasControl[0] !== results['b-first'].canvasControl[0],
+    distinctHtmlText: results['a-first'].canvas[0] !== results['b-first'].canvas[0],
+  };
+  console.log(JSON.stringify({nativeCanvasOwnership: report.nativeCanvasOwnership}));
+  // Collect the independent saved-session behavior before asserting the
+  // cross-profile Canvas result. All original strict assertions remain below.
+  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
+    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
     'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
@@ -196,8 +218,6 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
-  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
-    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);
