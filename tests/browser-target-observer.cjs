@@ -22,10 +22,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
     }});
     const command = connection.command;
     connection.command = async function (method, params, options) {
-      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
+      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
         return command.call(this, method, params, options);
       }
       const event = {kind: 'command', method, session: id(options?.sessionId), done: false, failed: false};
+      if (method === 'Page.addScriptToEvaluateOnNewDocument') event.immediate = params?.runImmediately === true;
       if (method === 'Target.setAutoAttach') {
         event.pause = Boolean(params?.waitForDebuggerOnStart);
         event.filter = params?.filter?.map(row => ({type: row.type, exclude: Boolean(row.exclude)}));

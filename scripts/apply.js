@@ -105,7 +105,7 @@ one('engine.js',
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
- "const { createPausedTabGate } = require('./lyco/new-tab-gate');"));
+ "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
 // Modern Chromium introduces a `tab` container above a page. The protocol's
 // default filter excludes it, so later top-level tabs can miss the original
 // document-start barrier and receive only the delayed running-watch fallback.
@@ -126,6 +126,22 @@ one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
+one('engine.js',
+ "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
+ join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
+ '    const documentStart = createDocumentStartGuard(Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe);'));
+one('engine.js', '        return await connection.command(method, params, { sessionId, timeout });', join(
+ '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
+ '        documentStart.succeeded(method, result);',
+ '        return result;'));
+one('engine.js',
+ '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {',
+ join('        documentStart.failed(method, err);',
+ '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {'));
+one('engine.js',
+ '    // Synchronize Blink physical layout scaling with target devicePixelRatio for desktop personas.',
+ join('    documentStart.assertReady();',
+ '    // Synchronize Blink physical layout scaling with target devicePixelRatio for desktop personas.'));
 one('engine.js', '    const completedInitialTargets = new Set();', join(
  '    const completedInitialTargets = new Set();',
  '    const newTabGate = createPausedTabGate({onRefused: (sessionId, targetId) => {',
@@ -141,6 +157,11 @@ one('engine.js', '            if (isInitial && !completedInitialTargets.has(targ
  '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
 one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
  '        } catch (error) {',
+ '          if (item.lycoNativeIdentity && (waitingForDebugger || newTabGate.has(event.sessionId))) {',
+ '            connection.lycoIdentityRefusedSessions ||= new Set();',
+ '            connection.lycoIdentityRefusedSessions.add(sessionId);',
+ "            void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
+ '          }',
  '          newTabGate.fail(sessionId, error);',
  '          newTabGate.fail(event.sessionId, error);',
  '          report(error, targetInfo);',

@@ -30,4 +30,17 @@ function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
     fail: (sessionId, error) => finish(sessionId, true, error),
   };
 }
-module.exports = {createPausedTabGate};
+function createDocumentStartGuard(enabled) {
+  let failure = null;
+  const applies = method => enabled && method === 'Page.addScriptToEvaluateOnNewDocument';
+  return {
+    parameters(method, params) { return applies(method) ? {...params, runImmediately: true} : params; },
+    succeeded(method, result) {
+      if (applies(method)) failure = typeof (result?.identifier ?? result?.result?.identifier) === 'string'
+        ? null : Error('内核未确认页面初始化脚本，已阻止页面运行');
+    },
+    failed(method, error) { if (applies(method)) failure = error || Error('页面初始化脚本注册失败'); },
+    assertReady() { if (failure) throw failure; },
+  };
+}
+module.exports = {createPausedTabGate, createDocumentStartGuard};

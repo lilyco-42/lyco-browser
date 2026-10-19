@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {createPausedTabGate} = require('../src/new-tab-gate');
+const {createPausedTabGate, createDocumentStartGuard} = require('../src/new-tab-gate');
 
 test('parent remains paused while a child with waiting=false is being prepared', async () => {
   const refused = [], gate = createPausedTabGate({onRefused: (...args) => refused.push(args)});
@@ -36,4 +36,21 @@ test('a failed child without an error object is not mistaken for readiness', asy
   const gate = createPausedTabGate();
   const failed = assert.rejects(gate.begin('parent', 'new-tab'), /失败/);
   gate.fail('parent', null); await failed;
+});
+
+test('paused native pages register for the existing context without changing script source', () => {
+  const guard = createDocumentStartGuard(true), params = {source: 'CI full original script', worldName: 'main'};
+  assert.deepEqual(guard.parameters('Page.addScriptToEvaluateOnNewDocument', params), {...params, runImmediately: true});
+  assert.equal(params.runImmediately, undefined);
+  assert.equal(guard.parameters('Runtime.enable', params), params);
+  const legacy = createDocumentStartGuard(false);
+  assert.equal(legacy.parameters('Page.addScriptToEvaluateOnNewDocument', params), params);
+});
+
+test('a swallowed registration failure or missing receipt cannot release a native page', () => {
+  const guard = createDocumentStartGuard(true), method = 'Page.addScriptToEvaluateOnNewDocument';
+  guard.failed(method, Error('native registration refused'));
+  assert.throws(() => guard.assertReady(), /refused/);
+  guard.succeeded(method, {}); assert.throws(() => guard.assertReady(), /未确认/);
+  guard.succeeded(method, {identifier: 'real-script-id'}); assert.doesNotThrow(() => guard.assertReady());
 });
