@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -105,6 +105,7 @@ one('engine.js',
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
+ "const { openSavedSession } = require('./lyco/session-restore');",
  "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
 // Pause page targets themselves. A paused tab container may expose a child
 // page with waitingForDebugger=false; holding the container did not protect
@@ -165,6 +166,8 @@ one('engine.js',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
 one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
+ '            item.lycoPreparedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoPreparedPageTargets.add(targetId);',
  '            newTabGate.ready(event.sessionId);',
  '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
 one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
@@ -209,6 +212,7 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '          deferredRestore: lycoDeferredRestore,',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
  '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',
@@ -218,6 +222,30 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.verificationBlocked = true;',
  '        throw error;',
  '      }'));
+// A restored page can run while the original engine is still connecting CDP.
+// Bring up the same kernel/profile without windows, install its original
+// page/worker auto-attach handling, then request Chromium's own session restore.
+one('engine.js', '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;', join(
+ '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;',
+ '    const lycoDeferredRestore = Boolean(restoreSession && isWayfernKernel(browser));'));
+one('engine.js', "    if (restoreSession) args.push('--restore-last-session');",
+ "    if (lycoDeferredRestore) args.push('--no-startup-window');\n    else if (restoreSession) args.push('--restore-last-session');");
+one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucceeded;', join(
+ '      if (lycoDeferredRestore && injectSucceeded && workerSucceeded) {',
+ '        try {',
+ '          await openSavedSession({binary: launchBinary, root, spawn,',
+ '            assertActive: () => {',
+ '              this.assertStartGenerationActive(profile.id, lifecycleGeneration);',
+ '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
+ '            },',
+ '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
+ '            hasPreparedPage: () => Boolean(item.lycoPreparedPageTargets?.size),',
+ '          });',
+ '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
+ '      }',
+ '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
+one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',
+ '    item.workerFingerprintConnection = connection;\n    item.workerFingerprintConnectionReady = connection;\n    return connection;');
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(

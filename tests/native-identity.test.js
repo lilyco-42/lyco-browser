@@ -47,6 +47,26 @@ test('a damaged or wrong-owner cache fails without silently replacing the identi
   assert.equal(f.calls.length, 0);
 });
 
+test('deferred session restore prepares only an existing saved identity before any page is opened', async t => {
+  const f = await fixture(t);
+  await prepareNativeIdentity(f.args);
+  const original = f.calls.find(row => row.method === 'Wayfern.setFingerprint').params;
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const bytes = await fs.readFile(file);
+  f.tabs.length = 0; f.calls.length = 0;
+  await assert.rejects(prepareNativeIdentity(f.args), /尚未提供页面目标/);
+  await assert.rejects(prepareNativeIdentity({...f.args, deferredRestore: true, refresh: true}), /首次启动或刷新/);
+  const identity = await prepareNativeIdentity({...f.args, deferredRestore: true});
+  assert.equal(f.calls.length, 0);
+  assert.deepEqual(await fs.readFile(file), bytes);
+  const sent = [];
+  await identity.applySession({command: async (...args) => {sent.push(args);}}, 'session-restored', {type: 'page', targetId: 'restored'});
+  assert.deepEqual(sent[0], ['Wayfern.setFingerprint', original, {sessionId: 'session-restored', timeout: 5000}]);
+  await fs.unlink(file);
+  await assert.rejects(prepareNativeIdentity({...f.args, deferredRestore: true}), /尚未提供页面目标/);
+  assert.equal(f.calls.length, 0, 'Do not create a replacement device without a paused page');
+});
+
 test('a paused new page gets the complete saved native device on its original session', async t => {
   const f = await fixture(t), identity = await prepareNativeIdentity(f.args);
   const original = f.calls.find(call => call.method === 'Wayfern.setFingerprint').params;
