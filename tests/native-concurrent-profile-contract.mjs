@@ -84,9 +84,14 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       assert.equal(workers.error, undefined, owner + ': ' + workers.error);
       for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
         checkRealm(workers[realm], expected, owner + ' ' + realm);
-        assert.equal(workers[realm].shapePixels, current.initial.shapePixels, owner + ' ' + realm + ' pixel noise differs');
         assert.equal(workers[realm].offscreenPixels, current.initial.offscreenPixels, owner + ' ' + realm + ' OffscreenCanvas differs');
         assert.equal(workers[realm].offscreenOpaquePixels, current.initial.offscreenOpaquePixels, owner + ' ' + realm + ' opaque OffscreenCanvas differs');
+      }
+      // Check the same API in every realm first, so a proven ServiceWorker
+      // mismatch cannot be concealed by the distinct HTML/native API result.
+      // Retain the existing cross-API assertion as a separate unresolved gate.
+      for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
+        assert.equal(workers[realm].shapePixels, current.initial.shapePixels, owner + ' ' + realm + ' pixel noise differs');
       }
       assert.equal(entry.workersReportProxied, true);
       for (const kind of ['dedicated', 'service']) {

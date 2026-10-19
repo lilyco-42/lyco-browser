@@ -106,6 +106,12 @@ one('engine.js',
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
+// This connection already owns complete page/worker preparation below. The
+// module-wide legacy wrapper otherwise injects latestFingerprint from another
+// environment into ServiceWorker before the owning handler can run.
+one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
+ "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
+one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
 // Pause page targets themselves. A paused tab container may expose a child
 // page with waitingForDebugger=false; holding the container did not protect
 // that page's first script in the real native regression. Avoid attaching
