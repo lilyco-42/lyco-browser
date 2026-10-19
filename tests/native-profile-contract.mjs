@@ -23,6 +23,10 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const profiles = {A: profile, B: second};
   const profileRoots = {};
   const results = {};
+  const nativeSettings = (device, expected) => Object.fromEntries([
+    ['language', expected.language], ['timezone', expected.timezone],
+    ['hardwareConcurrency', expected.cores], ['deviceMemory', expected.memory],
+  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key), matches: device?.[key] === expectedValue}]));
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
   const cdp = requireApp('./cdp');
@@ -84,7 +88,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         const raw = result?.fingerprint ?? result;
         const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
         report.profileRuntime[phase].nativeFingerprint = {available: true,
-          digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas)};
+          digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas),
+          declared: nativeSettings(native, expected)};
       } catch {
         report.profileRuntime[phase].nativeFingerprint = {available: false};
       }
@@ -139,6 +144,23 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         while (Date.now() < newDeadline && !fixture.result(newPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
         const newTab = fixture.result(newPhase);
         report.newTabs[phase] = newTab || null;
+        // Read-only diagnosis, never inject/repair/reload the page. Keep the
+        // original first-script observation and all assertions unchanged.
+        try {
+          const socket = (await cdp.tabs(state.port)).find(tab => tab.id === opened.targetId)?.webSocketDebuggerUrl;
+          if (!socket) throw Error('New target unavailable for read-only observation');
+          const nativeResult = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
+          const raw = nativeResult?.fingerprint ?? nativeResult;
+          const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          report.newTabNative ||= {};
+          report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+          const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true,
+            expression: '({language:navigator.language,hardwareConcurrency:navigator.hardwareConcurrency,deviceMemory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone})'}, 2000);
+          report.newTabNative[phase].currentPage = nativeSettings(current?.result?.value, expected);
+        } catch {
+          report.newTabNative ||= {};
+          report.newTabNative[phase] = {available: false};
+        }
         await checkpoint(newPhase + ':observed');
         assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
         assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
