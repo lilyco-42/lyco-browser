@@ -141,10 +141,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Native preflight before expensive archive and installer compression
-        # The profile contract adds four genuine browser launches/reopens. The
-        # preceding five-minute diagnostic reached b-reopen:stop with all four
-        # observations captured. Keep per-action bounds and retain every check.
-        timeout-minutes: 8
+        # Retain sequential A/B and new-target checks, then seed and restore a
+        # genuine two-tab session. Allow those two extra native launches while
+        # keeping each individual operation and the whole step bounded.
+        timeout-minutes: 12
         shell: pwsh
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
@@ -175,7 +175,7 @@ jobs:
           }
 
       - name: Native packaged membership, owned profiles and real proxy routing
-        timeout-minutes: 8
+        timeout-minutes: 12
         shell: pwsh
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
@@ -185,7 +185,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Install the actual EXE, verify LYCO icons and shortcuts, run it and uninstall
-        timeout-minutes: 10
+        timeout-minutes: 12
         shell: pwsh
         run: ./lyco/tests/windows-installer.ps1
 

@@ -5,6 +5,7 @@ const phases = new Map([
   ['a-corrupt', 'A'], ['a-recover', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
   ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
+  ['a-session-restore', 'A'], ['a-session-restore-extra', 'A'],
 ]);
 
 async function observeProfile(marker, readOnly = false) {
@@ -92,5 +93,6 @@ export function createBrowserProfileFixture() {
     });
     return true;
   }
-  return {route, snapshot: () => Object.fromEntries(observations), result: phase => observations.get(phase)};
+  return {route, snapshot: () => Object.fromEntries(observations), result: phase => observations.get(phase),
+    clear: phase => observations.delete(phase)};
 }
