@@ -71,6 +71,13 @@ try {
  application=await electron.launch({executablePath:binary,args:[appRoot],timeout:60000,
   env:{...cleanEnv,OPENBROWSER_API_PORT:String(51000+Math.floor(Math.random()*1000))}});
  const page=await application.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
+ // Observe the actual installed/portable core without changing product files,
+ // timeout, proxy selection or permissions. Raw output/secrets are discarded.
+ await application.evaluate((_electron,{appRoot,observer})=>{
+  const require=process.mainModule.require.bind(process.mainModule);
+  const {LycoNetwork}=require(appRoot+'/lyco/network.js');
+  globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork);
+ },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await application.evaluate(async({shell},port)=>{
   globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
   shell.openExternal=async url=>{globalThis.__lycoOpened.push(url)};
@@ -333,6 +340,7 @@ try {
  throw error;
 } finally {
  report.profileAudit=profileProbe.snapshot();
+ if(application)try{report.coreStartup=await application.evaluate(()=>globalThis.__lycoCoreStartupEvidence||[])}catch{}
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();
