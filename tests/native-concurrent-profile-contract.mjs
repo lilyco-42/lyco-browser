@@ -125,12 +125,21 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     const a = evidence.profiles.A.workers, b = evidence.profiles.B.workers;
     const distinct = realm => Boolean(a[realm] && b[realm] && a[realm].offscreenPixels !== b[realm].offscreenPixels);
     console.log(JSON.stringify({workerCanvasDistinctProfiles: {window: distinct('windowStart'), dedicated: distinct('dedicated'), service: distinct('service')}}));
-    for (const owner of ['A', 'B']) checkWorkers(owner, evidence.profiles[owner]);
-    assert.notEqual(active.A.initial.shapePixels, active.B.initial.shapePixels, 'Parallel environments lost distinct shape noise');
-    for (const realm of ['windowStart', 'dedicated', 'service']) assert.ok(distinct(realm), realm + ': parallel OffscreenCanvas lost per-profile noise');
+    // Capture the independent post-stop state before a cross-API failure can
+    // conceal it. A and B were both observed running during all reads above.
     await page.evaluate(id => window.ops.stopProfile(id), active.B.id);
     await wait(async () => !(await statuses()).find(item => item.id === active.B.id)?.running);
     evidence.afterStoppingB = await readWorkers('A', 'after-stopping-B');
+    const after = evidence.afterStoppingB.workers;
+    console.log(JSON.stringify({workerAfterStoppingBRelations: {
+      dedicatedMatchesOwningOffscreen: after.dedicated?.offscreenPixels === active.A.initial.offscreenPixels,
+      serviceMatchesOwningOffscreen: after.service?.offscreenPixels === active.A.initial.offscreenPixels,
+      dedicatedOpaqueMatchesOwningOffscreen: after.dedicated?.offscreenOpaquePixels === active.A.initial.offscreenOpaquePixels,
+      serviceOpaqueMatchesOwningOffscreen: after.service?.offscreenOpaquePixels === active.A.initial.offscreenOpaquePixels,
+    }}));
+    for (const owner of ['A', 'B']) checkWorkers(owner, evidence.profiles[owner]);
+    assert.notEqual(active.A.initial.shapePixels, active.B.initial.shapePixels, 'Parallel environments lost distinct shape noise');
+    for (const realm of ['windowStart', 'dedicated', 'service']) assert.ok(distinct(realm), realm + ': parallel OffscreenCanvas lost per-profile noise');
     checkWorkers('A', evidence.afterStoppingB);
     report.checks.push('native-concurrent-profiles-first-script-worker-storage-and-proxy-isolation');
     await checkpoint('concurrent:passed');
