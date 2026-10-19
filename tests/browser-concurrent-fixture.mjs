@@ -1,18 +1,31 @@
 // Ordinary CI pages/workers read their own first-script values. No navigator,
 // native identity, canvas implementation, or application setting is patched.
 function readRealm() {
-  const canvas = typeof document === 'object' ? document.createElement('canvas') : new OffscreenCanvas(320, 100);
-  canvas.width = 320; canvas.height = 100;
-  const context = canvas.getContext('2d');
-  if (!context) throw Error('No actual 2D canvas in this realm');
-  context.fillStyle = '#e7c8a4'; context.fillRect(0, 0, 320, 100);
-  context.fillStyle = '#156c53'; context.beginPath(); context.arc(175, 66, 23, 0, Math.PI * 2); context.fill();
-  let hash = 2166136261;
-  // Compare the same RGBA API across realms, not different PNG encoders.
-  for (const value of context.getImageData(0, 0, 320, 100).data) hash = Math.imul(hash ^ value, 16777619) >>> 0;
+  const draw = (offscreen, opaquePattern) => {
+    const canvas = offscreen ? new OffscreenCanvas(320, 100) : document.createElement('canvas');
+    canvas.width = 320; canvas.height = 100;
+    const context = canvas.getContext('2d');
+    if (!context) throw Error('No actual 2D canvas in this realm');
+    if (opaquePattern) {
+      // Integer rectangles isolate pixel-noise ownership from curved-edge GPU
+      // rasterization differences. No alpha, fonts or PNG encoder is involved.
+      for (let y = 0; y < 100; y += 10) for (let x = 0; x < 320; x += 10) {
+        context.fillStyle = `rgb(${(x * 7 + y * 3) % 256},${(x * 11 + y * 5) % 256},${(x * 13 + y * 17) % 256})`;
+        context.fillRect(x, y, 10, 10);
+      }
+    } else {
+      context.fillStyle = '#e7c8a4'; context.fillRect(0, 0, 320, 100);
+      context.fillStyle = '#156c53'; context.beginPath(); context.arc(175, 66, 23, 0, Math.PI * 2); context.fill();
+    }
+    let hash = 2166136261;
+    for (const value of context.getImageData(0, 0, 320, 100).data) hash = Math.imul(hash ^ value, 16777619) >>> 0;
+    return hash.toString(16).padStart(8, '0');
+  };
+  const offscreen = typeof document !== 'object';
   return {language: navigator.language, languages: Array.from(navigator.languages),
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, shapePixels: hash.toString(16).padStart(8, '0')};
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, shapePixels: draw(offscreen, false),
+    offscreenPixels: draw(true, false), opaquePixels: draw(offscreen, true), offscreenOpaquePixels: draw(true, true)};
 }
 
 function pageProbe(read, phase) {

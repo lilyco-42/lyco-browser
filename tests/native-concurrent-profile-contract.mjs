@@ -55,13 +55,16 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       // Click the page's normal button; its own JS creates ordinary workers.
       // No fingerprint override, reload, or direct worker evaluation by the harness.
       await cdp.call(socket, 'Runtime.evaluate', {expression: 'document.getElementById("read-workers").click()'}, 2000);
-      const workers = await wait(() => fixture.result(current.phase)?.workers);
+      await wait(() => fixture.result(current.phase)?.workers);
+      return structuredClone(fixture.result(current.phase));
+    };
+    const checkWorkers = (owner, entry) => {
+      const current = active[owner], expected = settings[owner], workers = entry.workers;
       assert.equal(workers.error, undefined, owner + ': ' + workers.error);
       for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
         checkRealm(workers[realm], expected, owner + ' ' + realm);
         assert.equal(workers[realm].shapePixels, current.initial.shapePixels, owner + ' ' + realm + ' pixel noise differs');
       }
-      const entry = fixture.result(current.phase);
       assert.equal(entry.workersReportProxied, true);
       for (const kind of ['dedicated', 'service']) {
         const requests = entry.requests.filter(row => row.kind === kind);
@@ -69,17 +72,20 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
         assert.ok(requests.every(row => row.proxied), kind + ' bypassed Mihomo');
         assert.ok(requests.every(row => row.language.split(',')[0] === expected.language), owner + ' worker request language crossed environments');
       }
-      return structuredClone(entry);
     };
     for (const owner of ['A', 'B']) {
       await checkpoint('concurrent:' + owner + ':workers');
       evidence.profiles[owner] = await readWorkers(owner);
       assert.equal((await statuses()).filter(item => [active.A.id, active.B.id].includes(item.id) && item.running).length, 2);
     }
+    // Preserve both complete observations before asserting: one failing
+    // surface must not conceal what the other live environment actually saw.
+    for (const owner of ['A', 'B']) checkWorkers(owner, evidence.profiles[owner]);
     assert.notEqual(active.A.initial.shapePixels, active.B.initial.shapePixels, 'Parallel environments lost distinct shape noise');
     await page.evaluate(id => window.ops.stopProfile(id), active.B.id);
     await wait(async () => !(await statuses()).find(item => item.id === active.B.id)?.running);
     evidence.afterStoppingB = await readWorkers('A');
+    checkWorkers('A', evidence.afterStoppingB);
     report.checks.push('native-concurrent-profiles-first-script-worker-storage-and-proxy-isolation');
     await checkpoint('concurrent:passed');
   } finally {
