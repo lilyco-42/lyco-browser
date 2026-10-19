@@ -134,10 +134,21 @@ one('engine.js', '    const baseFp = fingerprint || item.fingerprint || buildFin
 one('engine.js', '  async startWorkerFingerprintInjection(item, fingerprint) {', join(
  '  async startWorkerFingerprintInjection(item, fingerprint) {',
  '    fingerprint = nativeCanvasFingerprint(fingerprint, item?.lycoNativeIdentity);'));
-one('automation/fingerprint.js', "  } else if (CFG.canvas && CFG.canvas.mode === 'noise') {",
- "  } else if (CFG.canvas && CFG.canvas.mode === 'noise' && !CFG.canvas.nativePixels) {");
-one('automation/fingerprint.js', "  } else if (CFG.canvas?.mode === 'noise') {",
- "  } else if (CFG.canvas?.mode === 'noise' && !CFG.canvas.nativePixels) {");
+// Suppress only the HTML 2D/export layer actually owned by the restored native
+// device. Keep original window OffscreenCanvas and Worker JS noise; neither
+// Worker target supports the native protocol in the actual capability probe.
+one('automation/fingerprint.js', '        hookGetAndPut(ctxProto);',
+ '        if (!CFG.canvas.nativeHtmlPixels) hookGetAndPut(ctxProto);');
+one('automation/fingerprint.js', '        if (canvasProto && canvasProto.toDataURL) {',
+ '        if (!CFG.canvas.nativeHtmlPixels && canvasProto && canvasProto.toDataURL) {');
+one('automation/fingerprint.js', '        if (canvasProto && canvasProto.toBlob) {',
+ '        if (!CFG.canvas.nativeHtmlPixels && canvasProto && canvasProto.toBlob) {');
+// Preserve the accepted native path for the other, not-yet-characterized
+// transfer APIs; do not introduce a second noise pass through an HTML copy.
+one('automation/fingerprint.js', "        if (videoFrameProto && typeof videoFrameProto.copyTo === 'function') {",
+ "        if (!CFG.canvas.nativeHtmlPixels && videoFrameProto && typeof videoFrameProto.copyTo === 'function') {");
+one('automation/fingerprint.js', "        if (gpuQueueProto && typeof gpuQueueProto.copyExternalImageToTexture === 'function') {",
+ "        if (!CFG.canvas.nativeHtmlPixels && gpuQueueProto && typeof gpuQueueProto.copyExternalImageToTexture === 'function') {");
 one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",

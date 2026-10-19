@@ -146,16 +146,17 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     }
   };
   const seed = device.canvasNoiseSeed;
-  const ownsCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
+  const ownsHtmlCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
     && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
-  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), ownsCanvasNoise, apply, applySession};
+  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), ownsHtmlCanvasNoise, apply, applySession};
 }
 
 function nativeCanvasFingerprint(value, identity) {
-  if (!identity?.ownsCanvasNoise || value?.canvas?.mode !== 'noise' || value.canvas.nativePixels === true) return value;
-  // Keep the declared noise mode, mark, seed and all other surfaces. The
-  // restored native canvasNoiseSeed owns pixels, not a second late JS layer.
-  return {...value, canvas: {...value.canvas, nativePixels: true}};
+  if (!identity?.ownsHtmlCanvasNoise || value?.canvas?.mode !== 'noise' || value.canvas.nativeHtmlPixels === true) return value;
+  // Actual page/new-tab tests establish native HTML canvas ownership. Worker
+  // targets do not expose that native interface: retain their original JS
+  // noise and the window's OffscreenCanvas path instead of assuming ownership.
+  return {...value, canvas: {...value.canvas, nativeHtmlPixels: true}};
 }
 
 module.exports = {prepareNativeIdentity, nativeCanvasFingerprint};

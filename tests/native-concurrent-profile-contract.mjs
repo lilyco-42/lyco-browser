@@ -68,7 +68,13 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
         // opaque payloads, customer data, seeds or account credentials.
         console.log(JSON.stringify({nativeWorkerCapability: {owner, stage, ...evidence.nativeWorkerCapability[stage][owner]}}));
       } finally {
-        await cdp.call(socket, 'Runtime.evaluate', {expression: 'document.getElementById("release-workers").click()'}, 2000);
+        // Server receipt can precede the page's fetch continuation enabling
+        // its release button. Wait read-only, then click once; do not turn a
+        // disabled-button click into a silent 45-second timer fallback.
+        await wait(async () => fixture.result(current.phase)?.released?.complete ||
+          (await cdp.call(socket, 'Runtime.evaluate', {expression: '!document.getElementById("release-workers").disabled'}, 2000)).result?.value === true);
+        if (!fixture.result(current.phase)?.released?.complete) await cdp.call(socket, 'Runtime.evaluate',
+          {expression: 'document.getElementById("release-workers").click()'}, 2000);
         await wait(() => fixture.result(current.phase)?.released?.complete);
       }
       return structuredClone(fixture.result(current.phase));
@@ -79,6 +85,8 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
         checkRealm(workers[realm], expected, owner + ' ' + realm);
         assert.equal(workers[realm].shapePixels, current.initial.shapePixels, owner + ' ' + realm + ' pixel noise differs');
+        assert.equal(workers[realm].offscreenPixels, current.initial.offscreenPixels, owner + ' ' + realm + ' OffscreenCanvas differs');
+        assert.equal(workers[realm].offscreenOpaquePixels, current.initial.offscreenOpaquePixels, owner + ' ' + realm + ' opaque OffscreenCanvas differs');
       }
       assert.equal(entry.workersReportProxied, true);
       for (const kind of ['dedicated', 'service']) {
@@ -95,8 +103,26 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     }
     // Preserve both complete observations before asserting: one failing
     // surface must not conceal what the other live environment actually saw.
+    evidence.readbackRelations = {};
+    for (const owner of ['A', 'B']) {
+      const value = evidence.profiles[owner].workers;
+      const same = (left, right, field) => Boolean(left && right && left[field] === right[field]);
+      const relations = evidence.readbackRelations[owner] = {
+        htmlMatchesWindowOffscreen: Boolean(value.windowStart && value.windowStart.shapePixels === value.windowStart.offscreenPixels),
+        firstWindowOffscreenStable: same(value.windowStart, value.windowNow, 'offscreenPixels'),
+        dedicatedMatchesWindowOffscreen: same(value.dedicated, value.windowStart, 'offscreenPixels'),
+        serviceMatchesWindowOffscreen: same(value.service, value.windowStart, 'offscreenPixels'),
+        dedicatedOpaqueMatchesWindowOffscreen: same(value.dedicated, value.windowStart, 'offscreenOpaquePixels'),
+        serviceOpaqueMatchesWindowOffscreen: same(value.service, value.windowStart, 'offscreenOpaquePixels'),
+      };
+      console.log(JSON.stringify({workerCanvasRelations: {owner, ...relations}}));
+    }
+    const a = evidence.profiles.A.workers, b = evidence.profiles.B.workers;
+    const distinct = realm => Boolean(a[realm] && b[realm] && a[realm].offscreenPixels !== b[realm].offscreenPixels);
+    console.log(JSON.stringify({workerCanvasDistinctProfiles: {window: distinct('windowStart'), dedicated: distinct('dedicated'), service: distinct('service')}}));
     for (const owner of ['A', 'B']) checkWorkers(owner, evidence.profiles[owner]);
     assert.notEqual(active.A.initial.shapePixels, active.B.initial.shapePixels, 'Parallel environments lost distinct shape noise');
+    for (const realm of ['windowStart', 'dedicated', 'service']) assert.ok(distinct(realm), realm + ': parallel OffscreenCanvas lost per-profile noise');
     await page.evaluate(id => window.ops.stopProfile(id), active.B.id);
     await wait(async () => !(await statuses()).find(item => item.id === active.B.id)?.running);
     evidence.afterStoppingB = await readWorkers('A', 'after-stopping-B');
