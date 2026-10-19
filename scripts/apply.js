@@ -1,15 +1,15 @@
 'use strict';
 // Applied ONLY by GitHub Actions to the pinned upstream checkout.
 const fs=require('node:fs'),path=require('node:path');
+const {replaceOne}=require('./source-patch');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
 function one(file,from,to){
- const p=path.join(app,file),s=fs.readFileSync(p,'utf8'),count=s.split(from).length-1;
- if(count!==1)throw Error(file+': upstream anchor mismatch: '+from.slice(0,80)+' ('+count+')');
- fs.writeFileSync(p,s.replace(from,to),'utf8');
+ const p=path.join(app,file),s=fs.readFileSync(p,'utf8');
+ fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -103,8 +103,84 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity } = require('./lyco/native-identity');",
- "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
+ "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
+ "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
+ "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
+// Pause page targets themselves. A paused tab container may expose a child
+// page with waitingForDebugger=false; holding the container did not protect
+// that page's first script in the real native regression. Avoid attaching
+// both container and page, which would prepare one page through two sessions.
+one('engine.js',
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "tab", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
+one('engine.js',
+ "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
+ join("          if (targetInfo.type === 'tab') {",
+ '            const prepared = waitingForDebugger && item.lycoNativeIdentity ? newTabGate.begin(sessionId, targetId) : null;',
+ "            await connection.command('Target.setAutoAttach', {",
+ '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
+ '              filter: [{type: "browser", exclude: true}, {}],',
+ '            }, {sessionId});',
+ '            if (prepared) await prepared;',
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
+one('engine.js',
+ '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
+ join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
+ '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
+one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
+ '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
+one('engine.js', '    const baseFp = fingerprint || item.fingerprint || buildFingerprint(enriched);',
+ '    const baseFp = nativeCanvasFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
+one('engine.js', '  async startWorkerFingerprintInjection(item, fingerprint) {', join(
+ '  async startWorkerFingerprintInjection(item, fingerprint) {',
+ '    fingerprint = nativeCanvasFingerprint(fingerprint, item?.lycoNativeIdentity);'));
+one('automation/fingerprint.js', "  } else if (CFG.canvas && CFG.canvas.mode === 'noise') {",
+ "  } else if (CFG.canvas && CFG.canvas.mode === 'noise' && !CFG.canvas.nativePixels) {");
+one('automation/fingerprint.js', "  } else if (CFG.canvas?.mode === 'noise') {",
+ "  } else if (CFG.canvas?.mode === 'noise' && !CFG.canvas.nativePixels) {");
+one('engine.js',
+ "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
+ join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
+ '    const documentStart = createDocumentStartGuard(Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe);'));
+one('engine.js', '        return await connection.command(method, params, { sessionId, timeout });', join(
+ '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
+ '        documentStart.succeeded(method, result);',
+ '        return result;'));
+one('engine.js',
+ '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {',
+ join('        documentStart.failed(method, err);',
+ '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {'));
+one('engine.js',
+ '    // Synchronize Blink physical layout scaling with target devicePixelRatio for desktop personas.',
+ join('    documentStart.assertReady();',
+ '    // Synchronize Blink physical layout scaling with target devicePixelRatio for desktop personas.'));
+one('engine.js', '    const completedInitialTargets = new Set();', join(
+ '    const completedInitialTargets = new Set();',
+ '    const newTabGate = createPausedTabGate({onRefused: (sessionId, targetId) => {',
+ '      connection.lycoIdentityRefusedSessions ||= new Set();',
+ '      connection.lycoIdentityRefusedSessions.add(sessionId);',
+ "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
+ '    }});'));
+one('engine.js',
+ 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
+ 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
+one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
+ '            newTabGate.ready(event.sessionId);',
+ '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
+one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
+ '        } catch (error) {',
+ '          if (item.lycoNativeIdentity && (waitingForDebugger || newTabGate.has(event.sessionId))) {',
+ '            connection.lycoIdentityRefusedSessions ||= new Set();',
+ '            connection.lycoIdentityRefusedSessions.add(sessionId);',
+ "            void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
+ '          }',
+ '          newTabGate.fail(sessionId, error);',
+ '          newTabGate.fail(event.sessionId, error);',
+ '          report(error, targetInfo);',
+ '          this.emit({'));
+one('engine.js',
+ '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
+ '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
 // Keep this inside the original injection try: injectionFailed is block-scoped.
@@ -133,6 +209,9 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
+ '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
+ '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',
  '        });',
  '      } catch (error) {',
  '        item.lycoNativeIdentityFailed = true;',

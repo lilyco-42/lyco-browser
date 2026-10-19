@@ -64,8 +64,34 @@ function pageTargets(tabs, port) {
   });
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false}) {
+function declaredSettings(settings = {}) {
+  const result = {};
+  if (settings.languages !== undefined) {
+    if (!Array.isArray(settings.languages) || !settings.languages.length || settings.languages.length > 16
+        || settings.languages.some(value => typeof value !== 'string' || !value.length || value.length > 64 || /[^A-Za-z0-9-]/.test(value))) {
+      throw Error('环境语言设置无效，原生身份未应用');
+    }
+    result.languages = [...settings.languages]; result.language = result.languages[0];
+  }
+  for (const key of ['hardwareConcurrency', 'deviceMemory']) {
+    const value = settings[key];
+    if (value === undefined) continue;
+    if (!Number.isFinite(value) || value <= 0 || value > 256 || (key === 'hardwareConcurrency' && !Number.isInteger(value))) {
+      throw Error('环境硬件设置无效，原生身份未应用');
+    }
+    result[key] = key === 'deviceMemory' ? Math.min(8, value) : value;
+  }
+  if (settings.timezone !== undefined) {
+    if (typeof settings.timezone !== 'string' || !settings.timezone || settings.timezone.length > 128) throw Error('环境时区设置无效');
+    try { new Intl.DateTimeFormat('en', {timeZone: settings.timezone}); } catch { throw Error('环境时区设置无效'); }
+    result.timezone = settings.timezone;
+  }
+  return result;
+}
+
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings}) {
   if (!enabled) return null; // Stock Chromium and legacy kernels retain their own path.
+  const declared = declaredSettings(settings);
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535) throw Error('原生身份环境参数无效');
   const root = await fs.realpath(profileRoot);
@@ -82,6 +108,10 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     device = fingerprint(result?.fingerprint ?? result);
     await writeCache(file, profileId, device);
   }
+  // Retain the complete saved device/noise and its original cache bytes. These
+  // explicit UI settings must agree in the native engine and document script;
+  // otherwise a new document initially exposes the saved device's defaults.
+  device = {...device, ...declared};
   const applied = new Set();
   const apply = async tabs => {
     const current = pageTargets(tabs, port);
@@ -96,7 +126,36 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     }
   };
   await apply(targets);
-  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), apply};
+  const applySession = async (connection, sessionId, targetInfo = {}) => {
+    if (targetInfo.type !== 'page') return;
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId || '') || !/^[A-Za-z0-9_-]{1,128}$/.test(targetInfo.targetId || '')) {
+      throw Error('新页面的原生身份目标无效');
+    }
+    try {
+      // The engine's existing flattened auto-attach connection owns this
+      // paused target. Restore the complete saved device before resuming it.
+      await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+    } catch {
+      connection.lycoIdentityRefusedSessions ||= new Set();
+      connection.lycoIdentityRefusedSessions.add(sessionId);
+      // Never resume a refused page, even if target closure itself fails.
+      await connection.command('Target.closeTarget', {targetId: targetInfo.targetId}).catch(() => {});
+      const error = Error('新页面原生身份恢复失败，已阻止该页面运行');
+      error.code = 'LYCO_NATIVE_IDENTITY_REFUSED';
+      throw error;
+    }
+  };
+  const seed = device.canvasNoiseSeed;
+  const ownsCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
+    && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
+  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), ownsCanvasNoise, apply, applySession};
 }
 
-module.exports = {prepareNativeIdentity};
+function nativeCanvasFingerprint(value, identity) {
+  if (!identity?.ownsCanvasNoise || value?.canvas?.mode !== 'noise' || value.canvas.nativePixels === true) return value;
+  // Keep the declared noise mode, mark, seed and all other surfaces. The
+  // restored native canvasNoiseSeed owns pixels, not a second late JS layer.
+  return {...value, canvas: {...value.canvas, nativePixels: true}};
+}
+
+module.exports = {prepareNativeIdentity, nativeCanvasFingerprint};

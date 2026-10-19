@@ -77,6 +77,8 @@ try {
   const require=process.mainModule.require.bind(process.mainModule);
   const {LycoNetwork}=require(appRoot+'/lyco/network.js');
   globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork);
+  globalThis.__lycoTargetEvidence=require(observer.replace('core-startup-observer.cjs','browser-target-observer.cjs'))
+   .installBrowserTargetObserver({BrowserEngine:require(appRoot+'/engine.js').BrowserEngine,cdp:require(appRoot+'/cdp.js')});
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await application.evaluate(async({shell},port)=>{
   globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
@@ -336,11 +338,19 @@ try {
  report.failure=String(error.stack||error);
  if(application) {
   try {const p=await application.firstWindow();report.feedback=await p.locator('#lyco-feedback').textContent();report.state=await p.evaluate(()=>window.ops.lycoStatus());await p.screenshot({path:path.join(evidence,'windows-failure.png')});}catch{}
+  try {
+   const p=await application.firstWindow();
+   report.browserFailures=await p.evaluate(async()=> (await window.ops.profileStatus()).map(row=>({
+    running:row.running,starting:row.starting,verificationBlocked:row.verificationBlocked,
+    cdpError:row.cdpError,startStage:row.startStage,startMessage:row.startMessage,
+   })));
+  }catch{}
  }
  throw error;
 } finally {
  report.profileAudit=profileProbe.snapshot();
  if(application)try{report.coreStartup=await application.evaluate(()=>globalThis.__lycoCoreStartupEvidence||[])}catch{}
+ if(application)try{report.targetTrace=await application.evaluate(()=>globalThis.__lycoTargetEvidence||[])}catch{}
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();

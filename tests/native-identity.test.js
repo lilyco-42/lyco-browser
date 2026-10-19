@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const {prepareNativeIdentity} = require('../src/native-identity');
+const {prepareNativeIdentity, nativeCanvasFingerprint} = require('../src/native-identity');
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-identity-'));
@@ -47,6 +47,27 @@ test('a damaged or wrong-owner cache fails without silently replacing the identi
   assert.equal(f.calls.length, 0);
 });
 
+test('a paused new page gets the complete saved native device on its original session', async t => {
+  const f = await fixture(t), identity = await prepareNativeIdentity(f.args);
+  const original = f.calls.find(call => call.method === 'Wayfern.setFingerprint').params;
+  const sent = [], connection = {command: async (...args) => {sent.push(args); return {};}};
+  await identity.applySession(connection, 'session-new', {type: 'page', targetId: 'page-new'});
+  assert.deepEqual(sent, [['Wayfern.setFingerprint', original, {sessionId: 'session-new', timeout: 5000}]]);
+  await identity.applySession(connection, 'worker-session', {type: 'worker', targetId: 'worker'});
+  assert.equal(sent.length, 1, 'Do not send page-only native commands to worker targets');
+});
+
+test('a refused new page is closed and marked not to resume even when closing fails', async t => {
+  const f = await fixture(t), identity = await prepareNativeIdentity(f.args);
+  const sent = [], connection = {command: async (...args) => {sent.push(args); throw Error('CI refusal');}};
+  await assert.rejects(identity.applySession(connection, 'session-new', {type: 'page', targetId: 'page-new'}),
+    error => error.code === 'LYCO_NATIVE_IDENTITY_REFUSED');
+  assert.equal(connection.lycoIdentityRefusedSessions.has('session-new'), true);
+  assert.deepEqual(sent[1], ['Target.closeTarget', {targetId: 'page-new'}]);
+  assert.equal(sent.some(([method]) => method === 'Runtime.runIfWaitingForDebugger'), false);
+  assert.equal(f.calls.filter(call => call.method === 'Wayfern.getFingerprint').length, 1, 'Failure must not mint a different device');
+});
+
 test('explicit refresh can capture another identity while separate profile IDs stay independent', async t => {
   const f = await fixture(t);
   const first = await prepareNativeIdentity(f.args);
@@ -76,4 +97,59 @@ test('foreign CDP addresses, invalid payloads and rejected restores cannot becom
 
 test('non-Wayfern kernels are not given foreign native APIs', async () => {
   assert.equal(await prepareNativeIdentity({enabled: false}), null);
+});
+
+test('declared settings reach native pages without changing saved device/noise or accepting unrelated overrides', async t => {
+  const f = await fixture(t);
+  await prepareNativeIdentity(f.args);
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const before = await fs.readFile(file, 'utf8');
+  f.calls.length = 0;
+  const identity = await prepareNativeIdentity({...f.args, settings: {
+    languages: ['en-GB', 'en'], timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4,
+    canvasSeed: 999, fonts: 'untrusted',
+  }});
+  const expected = {...JSON.parse(before).fingerprint, language: 'en-GB', languages: ['en-GB', 'en'],
+    timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4};
+  assert.deepEqual(f.calls[0].params, expected);
+  assert.equal(f.calls.some(call => call.method === 'Wayfern.getFingerprint'), false);
+  const sent = [];
+  await identity.applySession({command: async (...args) => sent.push(args)}, 'new-session', {type: 'page', targetId: 'new-page'});
+  assert.deepEqual(sent[0][1], expected);
+  assert.equal(await fs.readFile(file, 'utf8'), before);
+  f.calls.length = 0;
+  await prepareNativeIdentity({...f.args, settings: {languages: ['fr-FR', 'fr'], hardwareConcurrency: 8}});
+  assert.equal(f.calls[0].params.canvasSeed, expected.canvasSeed);
+  assert.equal(await fs.readFile(file, 'utf8'), before);
+});
+
+test('invalid native UI settings fail before reading or changing the saved identity', async t => {
+  const f = await fixture(t);
+  for (const settings of [{languages: []}, {languages: ['en-GB\n']}, {hardwareConcurrency: 0},
+    {hardwareConcurrency: 1.5}, {deviceMemory: Infinity}, {timezone: 'not/a/timezone'}]) {
+    await assert.rejects(prepareNativeIdentity({...f.args, settings}));
+  }
+  assert.equal(f.calls.length, 0);
+});
+
+test('native canvas ownership retains the actual saved seed, declared noise and every other surface', async t => {
+  const f = await fixture(t);
+  f.cdp.call = async (_target, method, params) => {
+    f.calls.push({method, params});
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: {canvasNoiseSeed: 1234567, unknownNoise: {keep: true}}} : {};
+  };
+  const identity = await prepareNativeIdentity(f.args);
+  assert.equal(identity.ownsCanvasNoise, true);
+  assert.equal(f.calls.find(row => row.method === 'Wayfern.setFingerprint').params.canvasNoiseSeed, 1234567);
+  const fp = {canvas: {mode: 'noise', mark: 7}, webgl: {mode: 'noise'}, audio: {mode: 'noise'}, seed: 'unchanged'};
+  const runtime = nativeCanvasFingerprint(fp, identity);
+  assert.deepEqual(runtime.canvas, {mode: 'noise', mark: 7, nativePixels: true});
+  assert.deepEqual(fp.canvas, {mode: 'noise', mark: 7});
+  assert.equal(runtime.webgl, fp.webgl); assert.equal(runtime.audio, fp.audio); assert.equal(runtime.seed, fp.seed);
+  assert.equal(nativeCanvasFingerprint(fp, null), fp, 'Other kernels keep their complete JS noise');
+  assert.equal(nativeCanvasFingerprint(fp, {ownsCanvasNoise: false}), fp);
+  for (const mode of ['blocked', 'real']) {
+    const other = {...fp, canvas: {mode}};
+    assert.equal(nativeCanvasFingerprint(other, identity), other, 'Do not change other user canvas policies');
+  }
 });

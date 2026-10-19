@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
+import {readOnlyProfileProbeSource} from './browser-profile-fixture.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -23,11 +24,16 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const profiles = {A: profile, B: second};
   const profileRoots = {};
   const results = {};
+  const nativeSettings = (device, expected) => Object.fromEntries([
+    ['language', expected.language], ['timezone', expected.timezone],
+    ['hardwareConcurrency', expected.cores], ['deviceMemory', expected.memory],
+  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key), matches: device?.[key] === expectedValue}]));
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
   const cdp = requireApp('./cdp');
   report.profileRuntime = {};
   report.startupPages = {};
+  report.newTabs = {};
   for (const [phase, owner] of [['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B']]) {
     const expected = settings[owner];
     const target = `http://127.0.0.1:${originPort}/profile-probe?phase=${phase}`;
@@ -83,7 +89,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         const raw = result?.fingerprint ?? result;
         const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
         report.profileRuntime[phase].nativeFingerprint = {available: true,
-          digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas)};
+          digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas),
+          declared: nativeSettings(native, expected)};
       } catch {
         report.profileRuntime[phase].nativeFingerprint = {available: false};
       }
@@ -125,6 +132,49 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         assert.ok(targets.some(tab => tab.url === target) && targets.some(tab => tab.url === extraTarget),
           `${phase}: multiple configured startup pages were closed or replaced`);
         report.startupPages[phase] = {mainPresent: true, extraPresent: true, extra};
+        // Open an actual new target at the user URL, without a harness-created
+        // blank page, pause, manual injection or delayed navigation. The real
+        // engine must prepare a page opened after startup before its first JS.
+        const newPhase = phase + '-new-tab';
+        const newTarget = `http://127.0.0.1:${originPort}/profile-probe?phase=${newPhase}`;
+        await checkpoint(newPhase + ':open');
+        const opener = targets.find(tab => tab.url === target);
+        const opened = await cdp.call(opener.webSocketDebuggerUrl, 'Target.createTarget', {url: newTarget});
+        assert.ok(opened?.targetId, `${newPhase}: Chromium did not create a real target`);
+        const newDeadline = Date.now() + 30000;
+        while (Date.now() < newDeadline && !fixture.result(newPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
+        const newTab = fixture.result(newPhase);
+        report.newTabs[phase] = newTab || null;
+        // Read-only diagnosis, never inject/repair/reload the page. Keep the
+        // original first-script observation and all assertions unchanged.
+        try {
+          const socket = (await cdp.tabs(state.port)).find(tab => tab.id === opened.targetId)?.webSocketDebuggerUrl;
+          if (!socket) throw Error('New target unavailable for read-only observation');
+          const nativeResult = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
+          const raw = nativeResult?.fingerprint ?? nativeResult;
+          const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          report.newTabNative ||= {};
+          report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+          report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
+          const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
+            expression: readOnlyProfileProbeSource()}, 3000);
+          const later = current?.result?.value;
+          report.newTabNative[phase].currentPage = nativeSettings({...later, hardwareConcurrency: later?.cores, deviceMemory: later?.memory}, expected);
+          report.newTabNative[phase].laterCanvas = later?.canvas;
+          report.newTabNative[phase].laterShape = later?.canvasControl;
+        } catch {
+          report.newTabNative ||= {};
+          report.newTabNative[phase] = {available: false};
+        }
+        await checkpoint(newPhase + ':observed');
+        assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
+        assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
+        for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
+          assert.deepEqual(newTab.value[field], value[field], `${newPhase}: first script saw a different ${field}`);
+        }
+        assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
+        assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
+        assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
       }
       results[phase] = value;
     } catch (error) {
@@ -139,9 +189,12 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     }
   }
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
+  assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
+    'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
   report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
-    'native-multiple-startup-pages-retained-with-first-script-profile');
+    'native-multiple-startup-pages-retained-with-first-script-profile',
+    'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);
