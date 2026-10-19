@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -104,7 +104,8 @@ one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity } = require('./lyco/native-identity');",
- "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
+ "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
+ "const { createPausedTabGate } = require('./lyco/new-tab-gate');"));
 // Modern Chromium introduces a `tab` container above a page. The protocol's
 // default filter excludes it, so later top-level tabs can miss the original
 // document-start barrier and receive only the delayed running-watch fallback.
@@ -114,15 +115,36 @@ one('engine.js',
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
+ '            const prepared = waitingForDebugger && item.lycoNativeIdentity ? newTabGate.begin(sessionId, targetId) : null;',
  "            await connection.command('Target.setAutoAttach', {",
  '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
  '              filter: [{type: "browser", exclude: true}, {}],',
  '            }, {sessionId});',
+ '            if (prepared) await prepared;',
  "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
+one('engine.js', '    const completedInitialTargets = new Set();', join(
+ '    const completedInitialTargets = new Set();',
+ '    const newTabGate = createPausedTabGate({onRefused: (sessionId, targetId) => {',
+ '      connection.lycoIdentityRefusedSessions ||= new Set();',
+ '      connection.lycoIdentityRefusedSessions.add(sessionId);',
+ "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
+ '    }});'));
+one('engine.js',
+ 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
+ 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
+one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
+ '            newTabGate.ready(event.sessionId);',
+ '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
+one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
+ '        } catch (error) {',
+ '          newTabGate.fail(sessionId, error);',
+ '          newTabGate.fail(event.sessionId, error);',
+ '          report(error, targetInfo);',
+ '          this.emit({'));
 one('engine.js',
  '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
  '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
