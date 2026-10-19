@@ -4,6 +4,7 @@ const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
+  ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
 ]);
 
 async function observeProfile(marker, readOnly = false) {
@@ -66,7 +67,8 @@ export function createBrowserProfileFixture() {
       entry.pageProxied = Boolean(proxied);
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
-      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(phase.endsWith('-extra')) + ')'
+      const readOnly = phase.endsWith('-extra') || phase.endsWith('-new-tab');
+      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(readOnly) + ')'
         + '.then(' + post + ').catch(error=>(' + post + ')({error:String(error)}));';
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
       res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title><script>' + script + '</script>');
