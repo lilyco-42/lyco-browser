@@ -106,12 +106,13 @@ one('engine.js',
  "const { prepareNativeIdentity } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
-// Modern Chromium introduces a `tab` container above a page. The protocol's
-// default filter excludes it, so later top-level tabs can miss the original
-// document-start barrier and receive only the delayed running-watch fallback.
+// Pause page targets themselves. A paused tab container may expose a child
+// page with waitingForDebugger=false; holding the container did not protect
+// that page's first script in the real native regression. Avoid attaching
+// both container and page, which would prepare one page through two sessions.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "page", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "tab", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
