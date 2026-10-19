@@ -47,6 +47,27 @@ test('a damaged or wrong-owner cache fails without silently replacing the identi
   assert.equal(f.calls.length, 0);
 });
 
+test('a paused new page gets the complete saved native device on its original session', async t => {
+  const f = await fixture(t), identity = await prepareNativeIdentity(f.args);
+  const original = f.calls.find(call => call.method === 'Wayfern.setFingerprint').params;
+  const sent = [], connection = {command: async (...args) => {sent.push(args); return {};}};
+  await identity.applySession(connection, 'session-new', {type: 'page', targetId: 'page-new'});
+  assert.deepEqual(sent, [['Wayfern.setFingerprint', original, {sessionId: 'session-new', timeout: 5000}]]);
+  await identity.applySession(connection, 'worker-session', {type: 'worker', targetId: 'worker'});
+  assert.equal(sent.length, 1, 'Do not send page-only native commands to worker targets');
+});
+
+test('a refused new page is closed and marked not to resume even when closing fails', async t => {
+  const f = await fixture(t), identity = await prepareNativeIdentity(f.args);
+  const sent = [], connection = {command: async (...args) => {sent.push(args); throw Error('CI refusal');}};
+  await assert.rejects(identity.applySession(connection, 'session-new', {type: 'page', targetId: 'page-new'}),
+    error => error.code === 'LYCO_NATIVE_IDENTITY_REFUSED');
+  assert.equal(connection.lycoIdentityRefusedSessions.has('session-new'), true);
+  assert.deepEqual(sent[1], ['Target.closeTarget', {targetId: 'page-new'}]);
+  assert.equal(sent.some(([method]) => method === 'Runtime.runIfWaitingForDebugger'), false);
+  assert.equal(f.calls.filter(call => call.method === 'Wayfern.getFingerprint').length, 1, 'Failure must not mint a different device');
+});
+
 test('explicit refresh can capture another identity while separate profile IDs stay independent', async t => {
   const f = await fixture(t);
   const first = await prepareNativeIdentity(f.args);

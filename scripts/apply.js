@@ -105,6 +105,27 @@ one('engine.js',
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');"));
+// Modern Chromium introduces a `tab` container above a page. The protocol's
+// default filter excludes it, so later top-level tabs can miss the original
+// document-start barrier and receive only the delayed running-watch fallback.
+one('engine.js',
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        filter: [{type: "browser", exclude: true}, {}],\n      });');
+one('engine.js',
+ "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
+ join("          if (targetInfo.type === 'tab') {",
+ "            await connection.command('Target.setAutoAttach', {",
+ '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
+ '              filter: [{type: "browser", exclude: true}, {}],',
+ '            }, {sessionId});',
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
+one('engine.js',
+ '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
+ join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
+ '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
+one('engine.js',
+ '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
+ '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
 // Keep this inside the original injection try: injectionFailed is block-scoped.

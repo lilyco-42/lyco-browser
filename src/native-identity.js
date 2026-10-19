@@ -96,7 +96,26 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     }
   };
   await apply(targets);
-  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), apply};
+  const applySession = async (connection, sessionId, targetInfo = {}) => {
+    if (targetInfo.type !== 'page') return;
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId || '') || !/^[A-Za-z0-9_-]{1,128}$/.test(targetInfo.targetId || '')) {
+      throw Error('新页面的原生身份目标无效');
+    }
+    try {
+      // The engine's existing flattened auto-attach connection owns this
+      // paused target. Restore the complete saved device before resuming it.
+      await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+    } catch {
+      connection.lycoIdentityRefusedSessions ||= new Set();
+      connection.lycoIdentityRefusedSessions.add(sessionId);
+      // Never resume a refused page, even if target closure itself fails.
+      await connection.command('Target.closeTarget', {targetId: targetInfo.targetId}).catch(() => {});
+      const error = Error('新页面原生身份恢复失败，已阻止该页面运行');
+      error.code = 'LYCO_NATIVE_IDENTITY_REFUSED';
+      throw error;
+    }
+  };
+  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), apply, applySession};
 }
 
 module.exports = {prepareNativeIdentity};
