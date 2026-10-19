@@ -105,8 +105,13 @@ one('engine.js',
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
- "const { openSavedSession } = require('./lyco/session-restore');",
+ "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
  "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
+// The owning connection already handles its Workers. Do not inject module-wide
+// latestFingerprint into the privileged local session service (or other profiles).
+one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
+ "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
+one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
 // Pause page targets themselves. A paused tab container may expose a child
 // page with waitingForDebugger=false; holding the container did not protect
 // that page's first script in the real native regression. Avoid attaching
@@ -224,16 +229,20 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '      }'));
 // A restored page can run while the original engine is still connecting CDP.
 // Bring up the same kernel/profile without windows, install its original
-// page/worker auto-attach handling, then request Chromium's own session restore.
+// page/worker auto-attach handling, then request Chromium's own session service.
 one('engine.js', '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;', join(
  '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;',
  '    const lycoDeferredRestore = Boolean(restoreSession && isWayfernKernel(browser));'));
+one('engine.js', '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;', join(
+ '    const lycoSessionBridge = lycoDeferredRestore ? await prepareSessionBridge(root) : null;',
+ '    if (lycoSessionBridge) loadPaths.push(lycoSessionBridge.directory);',
+ '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;'));
 one('engine.js', "    if (restoreSession) args.push('--restore-last-session');",
  "    if (lycoDeferredRestore) args.push('--no-startup-window');\n    else if (restoreSession) args.push('--restore-last-session');");
 one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucceeded;', join(
  '      if (lycoDeferredRestore && injectSucceeded && workerSucceeded) {',
  '        try {',
- '          await openSavedSession({binary: launchBinary, root, spawn,',
+ '          await openSavedSession({bridge: lycoSessionBridge, port: item.port, cdp,',
  '            assertActive: () => {',
  '              this.assertStartGenerationActive(profile.id, lifecycleGeneration);',
  '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
