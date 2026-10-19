@@ -68,7 +68,7 @@ function declaredSettings(settings = {}) {
   const result = {};
   if (settings.languages !== undefined) {
     if (!Array.isArray(settings.languages) || !settings.languages.length || settings.languages.length > 16
-        || settings.languages.some(value => typeof value !== 'string' || !/^[A-Za-z0-9-]{1,64}$/.test(value))) {
+        || settings.languages.some(value => typeof value !== 'string' || !value.length || value.length > 64 || /[^A-Za-z0-9-]/.test(value))) {
       throw Error('环境语言设置无效，原生身份未应用');
     }
     result.languages = [...settings.languages]; result.language = result.languages[0];
