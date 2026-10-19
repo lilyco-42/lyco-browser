@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {inspectNativeWorkerCapability} from './native-worker-capability.mjs';
+import {readOnlyConcurrentRealmSource} from './browser-concurrent-fixture.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -108,6 +109,44 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     }
     // Preserve both complete observations before asserting: one failing
     // surface must not conceal what the other live environment actually saw.
+    evidence.nativeCanvasControls = {};
+    for (const owner of ['A', 'B']) {
+      const current = active[owner], state = (await statuses()).find(row => row.id === current.id);
+      try {
+        const socket = (await cdp.tabs(state.port)).find(tab => tab.url === current.target)?.webSocketDebuggerUrl;
+        assert.ok(socket, owner + ': control requires the actual existing page');
+        const tree = await cdp.call(socket, 'Page.getFrameTree', {}, 3000);
+        const frameId = tree.frameTree?.frame?.id;
+        assert.equal(typeof frameId, 'string');
+        // A new isolated JS world has its own globals/prototypes. The app
+        // registers its document scripts in the default world only. Native
+        // frame settings remain in force; no fingerprint setting is changed.
+        // This runs AFTER the ordinary page/Workers' first-script captures.
+        const context = await cdp.call(socket, 'Page.createIsolatedWorld',
+          {frameId, worldName: 'lyco-native-canvas-control-' + owner}, 3000);
+        assert.ok(Number.isInteger(context.executionContextId) && context.executionContextId > 0);
+        const result = await cdp.call(socket, 'Runtime.evaluate', {contextId: context.executionContextId,
+          expression: readOnlyConcurrentRealmSource(), returnByValue: true}, 3000);
+        assert.equal(result.exceptionDetails, undefined);
+        const value = result.result?.value;
+        assert.match(value?.opaquePixels || '', /^[0-9a-f]{8}$/);
+        evidence.nativeCanvasControls[owner] = value;
+        const initial = current.initial, expected = settings[owner];
+        console.log(JSON.stringify({nativeCanvasControl: {owner,
+          scalarMatchesOwner: value.language === expected.language && value.cores === expected.cores
+            && value.memory === expected.memory && value.timezone === expected.timezone,
+          htmlMatchesProduct: value.shapePixels === initial.shapePixels,
+          opaqueHtmlMatchesProduct: value.opaquePixels === initial.opaquePixels,
+          offscreenMatchesProduct: value.offscreenPixels === initial.offscreenPixels,
+          opaqueOffscreenMatchesProduct: value.offscreenOpaquePixels === initial.offscreenOpaquePixels,
+          nativeHtmlEqualsOffscreen: value.shapePixels === value.offscreenPixels,
+          nativeOpaqueHtmlEqualsOffscreen: value.opaquePixels === value.offscreenOpaquePixels,
+        }}));
+      } catch {
+        evidence.nativeCanvasControls[owner] = {unavailable: true};
+        console.log(JSON.stringify({nativeCanvasControl: {owner, unavailable: true}}));
+      }
+    }
     evidence.readbackRelations = {};
     for (const owner of ['A', 'B']) {
       const value = evidence.profiles[owner].workers;

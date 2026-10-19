@@ -28,6 +28,10 @@ function readRealm() {
     offscreenPixels: draw(true, false), opaquePixels: draw(offscreen, true), offscreenOpaquePixels: draw(true, true)};
 }
 
+// Reuse the exact detached-canvas drawing/readback in a diagnostic context.
+// The source contains readers only, with no application overrides or URLs.
+export function readOnlyConcurrentRealmSource() { return '(' + readRealm.toString() + ')()'; }
+
 function pageProbe(read, phase) {
   const initial = read();
   const key = 'lyco_native_profile_storage';
