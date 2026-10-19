@@ -1,5 +1,6 @@
 // CI-owned pages observe the real bundled browser. They do not patch navigator,
 // storage, canvas, Chromium, or the application's production fingerprint code.
+import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
@@ -62,6 +63,7 @@ export function readOnlyProfileProbeSource() {
 export function createBrowserProfileFixture() {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const observations = new Map();
+  const concurrent = createConcurrentBrowserFixture();
   function route(req, res, proxied) {
     const url = new URL(req.url, 'http://ci.invalid');
     if (!['/profile-probe', '/profile-report'].includes(url.pathname)) return false;
@@ -92,5 +94,7 @@ export function createBrowserProfileFixture() {
     });
     return true;
   }
-  return {route, snapshot: () => Object.fromEntries(observations), result: phase => observations.get(phase)};
+  return {route: (req, res, proxied) => concurrent.route(req, res, proxied) || route(req, res, proxied),
+    snapshot: () => ({...Object.fromEntries(observations), concurrent: concurrent.snapshot()}),
+    result: phase => observations.get(phase), concurrent};
 }
