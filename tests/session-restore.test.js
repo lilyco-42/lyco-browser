@@ -14,6 +14,7 @@ function fixture(restored = true) {
     async command(method, params, options) {
       calls.push({method, params, options});
       if (method === 'Target.attachToTarget') return {sessionId: 'bridge-session'};
+      if (method === 'Target.createTarget') return {targetId: 'trusted-bootstrap'};
       if (method === 'Runtime.evaluate') return {result: {value: params.expression.startsWith('typeof') ? true : {restored, tabCount: 2}}};
       return {};
     }
@@ -29,9 +30,12 @@ function fixture(restored = true) {
 test('only the exact local extension session can request native window restoration once', async () => {
   const f = fixture();
   await openSavedSession(f.args);
-  assert.deepEqual(f.calls.map(row => row.method), ['Target.attachToTarget', 'Runtime.evaluate', 'Runtime.evaluate', 'Target.detachFromTarget']);
-  assert.equal(f.calls[2].params.expression, 'globalThis.lycoRestoreSavedWindow()');
-  assert.equal(f.calls[2].options.sessionId, 'bridge-session');
+  assert.deepEqual(f.calls.map(row => row.method), ['Target.attachToTarget', 'Runtime.evaluate', 'Target.createTarget',
+    'Runtime.evaluate', 'Target.closeTarget', 'Target.detachFromTarget']);
+  assert.deepEqual(f.calls[2].params, {url: 'about:blank', newWindow: true});
+  assert.equal(f.calls[3].params.expression, 'globalThis.lycoRestoreSavedWindow()');
+  assert.equal(f.calls[3].options.sessionId, 'bridge-session');
+  assert.deepEqual(f.calls[4].params, {targetId: 'trusted-bootstrap'});
   assert.equal(f.state.closed, true);
 });
 
@@ -45,6 +49,7 @@ test('never requests restore before protection or after a lifecycle cancellation
 test('no closed native window, missing prepared page and dropped protection fail closed', async () => {
   const refused = fixture(false);
   await assert.rejects(openSavedSession(refused.args), /没有可恢复/);
+  assert.equal(refused.calls.filter(row => row.method === 'Target.closeTarget').length, 1);
   assert.equal(refused.state.closed, true);
   const f = fixture();
   await assert.rejects(openSavedSession({...f.args, hasPreparedPage: () => false}), /未完成身份准备/);
@@ -76,6 +81,7 @@ test('the local bridge keeps a stable per-profile identity and requests sessions
   for (const field of ['host_permissions', 'content_scripts', 'externally_connectable']) assert.equal(manifest[field], undefined);
   const script = await fs.readFile(path.join(a.directory, 'restore.js'), 'utf8');
   assert.match(script, /chrome\.sessions\.restore/);
+  assert.match(script, /chrome\.sessions\.onChanged\.addListener/);
   assert.doesNotMatch(script, /fetch\(|XMLHttpRequest|\.url\b|\.title\b/);
   const otherRoot = path.join(root, 'other'); await fs.mkdir(otherRoot);
   assert.notEqual((await prepareSessionBridge(otherRoot)).workerUrl, a.workerUrl);

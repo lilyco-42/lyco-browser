@@ -8,9 +8,18 @@ const {generateKeyPairSync, createPublicKey, createHash, randomUUID} = require('
 const background = `'use strict';
 chrome.runtime.onInstalled.addListener(() => {});
 chrome.runtime.onStartup.addListener(() => {});
+// Registering the native event router loads the previous session entries.
+// getRecentlyClosed alone only reads the service's current in-memory list.
+chrome.sessions.onChanged.addListener(() => {});
 globalThis.lycoRestoreSavedWindow = async function () {
-  const entries = await chrome.sessions.getRecentlyClosed({maxResults: 25});
-  const windows = entries.filter(entry => entry.window && typeof entry.window.sessionId === 'string');
+  let windows = [];
+  const deadline = Date.now() + 5000;
+  do {
+    const entries = await chrome.sessions.getRecentlyClosed({maxResults: 25});
+    windows = entries.filter(entry => entry.window && typeof entry.window.sessionId === 'string');
+    if (windows.length) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  } while (Date.now() < deadline);
   windows.sort((left, right) => right.lastModified - left.lastModified);
   if (!windows.length) return {restored: false, reason: 'no-closed-window'};
   const restored = await chrome.sessions.restore(windows[0].window.sessionId);
@@ -61,7 +70,7 @@ async function openSavedSession({bridge, port, cdp, assertActive, isPrepared, ha
       || typeof hasPreparedPage !== 'function' || !(timeoutMs > 0 && timeoutMs <= 30000)) throw Error('会话恢复参数无效');
   assertActive();
   if (!isPrepared()) throw Error('会话恢复保护尚未就绪，环境未启动');
-  let connection, sessionId;
+  let connection, sessionId, bootstrapId;
   try {
     const deadline = Date.now() + timeoutMs;
     let target;
@@ -96,18 +105,30 @@ async function openSavedSession({bridge, port, cdp, assertActive, isPrepared, ha
     if (!ready) throw Error('会话恢复组件初始化超时');
     assertActive();
     if (!isPrepared()) throw Error('会话恢复保护已断开');
+    // The native sessions API requires a live browser/tab context even when
+    // restoring a whole window. This blank context belongs to this operation,
+    // opens no external URL, and is closed on every success/failure path.
+    const bootstrap = await connection.command('Target.createTarget', {url: 'about:blank', newWindow: true});
+    bootstrapId = bootstrap?.targetId;
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(bootstrapId || '')) throw Error('会话恢复上下文创建失败');
+    assertActive();
+    if (!isPrepared()) throw Error('会话恢复保护已断开');
     const result = await connection.command('Runtime.evaluate',
       {expression: 'globalThis.lycoRestoreSavedWindow()', awaitPromise: true, returnByValue: true}, {sessionId, timeout: timeoutMs});
-    if (result.exceptionDetails || result.result?.value?.restored !== true) throw Error('没有可恢复的完整窗口，请保留环境数据');
+    if (result.exceptionDetails) throw Error('浏览器会话恢复接口执行失败，环境未启动');
+    if (result.result?.value?.restored !== true) throw Error('没有可恢复的完整窗口，请保留环境数据');
     const pageDeadline = Date.now() + timeoutMs;
     while (Date.now() < pageDeadline) {
       assertActive();
       if (!isPrepared()) throw Error('会话恢复保护已断开');
-      if (hasPreparedPage()) return;
+      if (hasPreparedPage(bootstrapId)) return;
       await new Promise(resolve => setTimeout(resolve, 50));
     }
     throw Error('恢复页面未完成身份准备，环境未启动');
   } finally {
+    if (connection && /^[A-Za-z0-9_-]{1,128}$/.test(bootstrapId || '')) {
+      await connection.command('Target.closeTarget', {targetId: bootstrapId}, {timeout: 3000}).catch(() => {});
+    }
     if (connection && sessionId) await connection.command('Target.detachFromTarget', {sessionId}, {timeout: 3000}).catch(() => {});
     connection?.close();
   }

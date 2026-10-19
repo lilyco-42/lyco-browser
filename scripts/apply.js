@@ -248,7 +248,7 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
  '            },',
  '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
- '            hasPreparedPage: () => Boolean(item.lycoPreparedPageTargets?.size),',
+ '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude)),',
  '          });',
  '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
  '      }',
