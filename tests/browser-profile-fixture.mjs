@@ -6,6 +6,7 @@ const phases = new Map([
   ['a-corrupt', 'A'], ['a-recover', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
   ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
+  ['a-session-restore', 'A'], ['a-session-restore-extra', 'A'],
 ]);
 
 async function observeProfile(marker, readOnly = false) {
@@ -96,5 +97,5 @@ export function createBrowserProfileFixture() {
   }
   return {route: (req, res, proxied) => concurrent.route(req, res, proxied) || route(req, res, proxied),
     snapshot: () => ({...Object.fromEntries(observations), concurrent: concurrent.snapshot()}),
-    result: phase => observations.get(phase), concurrent};
+    result: phase => observations.get(phase), clear: phase => observations.delete(phase), concurrent};
 }

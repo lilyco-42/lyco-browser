@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {readOnlyProfileProbeSource} from './browser-profile-fixture.mjs';
 import {verifyConcurrentWorkerProfiles} from './native-concurrent-profile-contract.mjs';
+import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -196,6 +197,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
+  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
+    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   await verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort,
     fixture: fixture.concurrent, report, checkpoint, cdp});
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
