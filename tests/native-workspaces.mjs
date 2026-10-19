@@ -336,6 +336,13 @@ try {
  report.failure=String(error.stack||error);
  if(application) {
   try {const p=await application.firstWindow();report.feedback=await p.locator('#lyco-feedback').textContent();report.state=await p.evaluate(()=>window.ops.lycoStatus());await p.screenshot({path:path.join(evidence,'windows-failure.png')});}catch{}
+  try {
+   const p=await application.firstWindow();
+   report.browserFailures=await p.evaluate(async()=> (await window.ops.profileStatus()).map(row=>({
+    running:row.running,starting:row.starting,verificationBlocked:row.verificationBlocked,
+    cdpError:row.cdpError,startStage:row.startStage,startMessage:row.startMessage,
+   })));
+  }catch{}
  }
  throw error;
 } finally {

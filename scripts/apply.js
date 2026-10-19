@@ -110,7 +110,7 @@ one('engine.js',
 // document-start barrier and receive only the delayed running-watch fallback.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        filter: [{type: "browser", exclude: true}, {}],\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        filter: [{type: "page", exclude: true}, {type: "browser", exclude: true}, {}],\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
