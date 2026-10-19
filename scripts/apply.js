@@ -1,12 +1,12 @@
 'use strict';
 // Applied ONLY by GitHub Actions to the pinned upstream checkout.
 const fs=require('node:fs'),path=require('node:path');
+const {replaceOne}=require('./source-patch');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
 function one(file,from,to){
- const p=path.join(app,file),s=fs.readFileSync(p,'utf8'),count=s.split(from).length-1;
- if(count!==1)throw Error(file+': upstream anchor mismatch: '+from.slice(0,80)+' ('+count+')');
- fs.writeFileSync(p,s.replace(from,to),'utf8');
+ const p=path.join(app,file),s=fs.readFileSync(p,'utf8');
+ fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
 for(const file of ['network.js','profiles.js','native-identity.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
