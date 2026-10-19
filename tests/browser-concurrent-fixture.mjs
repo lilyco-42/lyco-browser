@@ -38,6 +38,7 @@ function pageProbe(read, phase) {
   void send('page', {initial, before});
   document.getElementById('read-workers').onclick = async function () {
     this.disabled = true;
+    const releaseButton = document.getElementById('release-workers');
     let dedicated, registration;
     try {
       const current = read();
@@ -66,12 +67,23 @@ function pageProbe(read, phase) {
         service.postMessage({kind: 'read-first-script'}, [channel.port2]);
       });
       await send('workers', {windowStart: initial, windowNow: current, dedicated: firstDedicated, service: firstService});
+      // Keep the actual workers alive only after their first-script report.
+      // The normal page button releases them after the read-only protocol query.
+      await new Promise(resolve => {
+        const finish = () => {clearTimeout(timer); releaseButton.disabled = true; releaseButton.onclick = null; resolve();};
+        const timer = setTimeout(finish, 45000);
+        releaseButton.disabled = false;
+        releaseButton.onclick = finish;
+      });
     } catch (error) {
       await send('workers', {error: String(error)});
     } finally {
       dedicated?.terminate();
       await registration?.unregister();
+      releaseButton.disabled = true;
+      releaseButton.onclick = null;
       this.disabled = false;
+      await send('released', {complete: true});
     }
   };
 }
@@ -87,7 +99,7 @@ export function createConcurrentBrowserFixture() {
     if (url.pathname === '/concurrent-probe') {
       entry.pageProxied = Boolean(proxied);
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
-      res.end('<!doctype html><meta charset="utf-8"><button id="read-workers">Read workers</button><script>('
+      res.end('<!doctype html><meta charset="utf-8"><button id="read-workers">Read workers</button><button id="release-workers" disabled>Release workers</button><script>('
         + pageProbe.toString() + ')(' + readRealm.toString() + ',' + JSON.stringify(phase) + ')</script>');
       return true;
     }
@@ -102,7 +114,7 @@ export function createConcurrentBrowserFixture() {
         : 'self.postMessage(first);'));
       return true;
     }
-    if (req.method !== 'POST' || !['page', 'workers'].includes(kind)) {res.writeHead(405); res.end(); return true;}
+    if (req.method !== 'POST' || !['page', 'workers', 'released'].includes(kind)) {res.writeHead(405); res.end(); return true;}
     let body = '';
     req.on('data', chunk => {body += chunk; if (body.length > 8192) req.destroy();});
     req.on('end', () => {
@@ -114,5 +126,5 @@ export function createConcurrentBrowserFixture() {
     return true;
   }
   return {route, result: phase => observations.get(phase), snapshot: () => Object.fromEntries(observations),
-    clearWorkers(phase) {const entry = observations.get(phase); if (entry) {delete entry.workers; delete entry.workersReportProxied; entry.requests = [];}}};
+    clearWorkers(phase) {const entry = observations.get(phase); if (entry) {delete entry.workers; delete entry.workersReportProxied; delete entry.released; entry.requests = [];}}};
 }

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {inspectNativeWorkerCapability} from './native-worker-capability.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -45,7 +46,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     assert.notEqual(running[0].port, running[1].port); assert.notEqual(running[0].profileDirectory, running[1].profileDirectory);
     evidence.bothRunning = true;
     await checkpoint('concurrent:both-running');
-    const readWorkers = async owner => {
+    const readWorkers = async (owner, stage = 'parallel') => {
       const current = active[owner], expected = settings[owner];
       const state = (await statuses()).find(item => item.id === current.id);
       assert.ok(state?.running, owner + ' must remain running during worker creation');
@@ -56,6 +57,20 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       // No fingerprint override, reload, or direct worker evaluation by the harness.
       await cdp.call(socket, 'Runtime.evaluate', {expression: 'document.getElementById("read-workers").click()'}, 2000);
       await wait(() => fixture.result(current.phase)?.workers);
+      try {
+        evidence.nativeWorkerCapability ||= {};
+        evidence.nativeWorkerCapability[stage] ||= {};
+        try {
+          evidence.nativeWorkerCapability[stage][owner] = await inspectNativeWorkerCapability({cdp, port: state.port,
+            pageSocket: socket, pageUrl: current.target, phase: current.phase, expected});
+        } catch {evidence.nativeWorkerCapability[stage][owner] = {probeFailed: true};}
+        // This new capability information is only booleans, never native
+        // opaque payloads, customer data, seeds or account credentials.
+        console.log(JSON.stringify({nativeWorkerCapability: {owner, stage, ...evidence.nativeWorkerCapability[stage][owner]}}));
+      } finally {
+        await cdp.call(socket, 'Runtime.evaluate', {expression: 'document.getElementById("release-workers").click()'}, 2000);
+        await wait(() => fixture.result(current.phase)?.released?.complete);
+      }
       return structuredClone(fixture.result(current.phase));
     };
     const checkWorkers = (owner, entry) => {
@@ -84,7 +99,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     assert.notEqual(active.A.initial.shapePixels, active.B.initial.shapePixels, 'Parallel environments lost distinct shape noise');
     await page.evaluate(id => window.ops.stopProfile(id), active.B.id);
     await wait(async () => !(await statuses()).find(item => item.id === active.B.id)?.running);
-    evidence.afterStoppingB = await readWorkers('A');
+    evidence.afterStoppingB = await readWorkers('A', 'after-stopping-B');
     checkWorkers('A', evidence.afterStoppingB);
     report.checks.push('native-concurrent-profiles-first-script-worker-storage-and-proxy-isolation');
     await checkpoint('concurrent:passed');
