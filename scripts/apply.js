@@ -178,9 +178,22 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
+// A restored page can be attached before its renderer is initialized. Prepare
+// the paused parent before enabling related-target auto-attach, but keep both
+// operations before Fetch readiness and the original debugger resume.
+const relatedPageAttach = join(
+ '            // Nested attach so workers/iframes under this page also pause for inject.',
+ "            await connection.command('Target.setAutoAttach', {",
+ '              autoAttach: true,',
+ '              waitForDebuggerOnStart: true,',
+ '              flatten: true,',
+ '            }, { sessionId }).catch(() => {});');
+one('engine.js', relatedPageAttach,
+ '            // Prepare the paused parent before attaching its related targets.');
 one('engine.js',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
- 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
+ join('await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });',
+ relatedPageAttach));
 one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
  '            item.lycoPreparedPageTargets ||= new Set();',
  '            if (targetInfo.type === "page") item.lycoPreparedPageTargets.add(targetId);',
