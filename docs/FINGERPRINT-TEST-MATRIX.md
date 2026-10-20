@@ -28,10 +28,10 @@ Actions工件保存完整报告和截图，且在严格原生Canvas门禁前先�
 
 | 项目与固定版本 | 用途、入口 | 当前状态 |
 | --- | --- | --- |
-| [CreepJS](https://github.com/abrahamjuliot/creepjs/tree/10aa6724cd33a1015db1574211890518cd04f0cc) | 原型矛盾、Window/Worker、Canvas/WebGL、字体、音频等；读取 `window.Fingerprint` / `window.Creep` | 已核源码与MIT，尚未在产品执行 |
-| [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs/tree/d43c48aeffd66165e102036af79e956b1fbbf4e1) | `load({monitoring:false})` / `get()`；保存 visitorId 与 components，测同环境稳定与不同环境差异 | 已核源码与MIT，适配器待Actions执行 |
-| [BotD](https://github.com/fingerprintjs/BotD/tree/66da86e9d9e7206e817a0f7fdbdfa8fe37f3cd47) | `load({monitoring:false})` / `detect()`、`getComponents()`、`getDetections()`；自动化识别 | 已核源码与MIT，适配器待Actions执行 |
-| [claude-tester](https://github.com/gokuscraper/claude-tester/tree/58a93a7b0304e40723c42f7fbe18035c1f353fdd) | 点击 `#scan-btn`，读取结果分数、风险档与每项信号 | 已核源码；README称MIT但没有LICENSE文件，不打入商品包；尚未在产品执行 |
+| [CreepJS](https://github.com/abrahamjuliot/creepjs/tree/10aa6724cd33a1015db1574211890518cd04f0cc) | 原型矛盾、Window/Worker、Canvas/WebGL、字体、音频等；读取 `window.Fingerprint` / `window.Creep` | 252f2bc实际预检三场景各67项异常，未通过 |
+| [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs/tree/d43c48aeffd66165e102036af79e956b1fbbf4e1) | `load({monitoring:false})` / `get()`；保存 visitorId 与 components，测同环境稳定与不同环境差异 | 252f2bc实际预检三场景SDK组件门禁通过；原始ID显示A重开稳定、B不同，整体门禁未过 |
+| [BotD](https://github.com/fingerprintjs/BotD/tree/66da86e9d9e7206e817a0f7fdbdfa8fe37f3cd47) | `load({monitoring:false})` / `detect()`、`getComponents()`、`getDetections()`；自动化识别 | 252f2bc实际预检三场景均bot:false；整体门禁未过 |
+| [claude-tester](https://github.com/gokuscraper/claude-tester/tree/58a93a7b0304e40723c42f7fbe18035c1f353fdd) | 点击 `#scan-btn`，读取结果分数、风险档与每项信号 | 252f2bc三场景界面仍为idle，未取得分数；改为前台真实点击并采集脚本异常，待新CI；README称MIT但无LICENSE文件，不打入商品包 |
 
 FingerprintJS 的 visitorId 不是“真人通过”结论；BotD 的 bot 判定也不是
 地区或账号可用性证明。CreepJS 不发布同名公共镜像，保留来源和商标声明。
@@ -88,6 +88,24 @@ FingerprintJS/BotD按各自Yarn锁文件构建，ESM bundle在同一私有来源
 关闭monitoring；原始components/detections保留。关键组件缺失或报错、BotD判为
 bot、A重开的visitorId改变、A与B的visitorId相同，均阻止通过。SDK不进入商品包。
 
-此适配器代码尚待当前提交的Actions运行；没有第三方通过记录。全套普通浏览
-兼容性仍待完成。外部HTTP被私有代理拒绝，
+252f2bc已完成第一轮独立采集，但整体门禁未通过。当前getter/点击修复仍待
+新提交的Actions运行，全套普通浏览兼容性仍待完成。外部HTTP被私有代理拒绝，
 Google Fonts不能下载；Google STUN不纳入本套通过结论，另有本地UDP正反控制。
+
+## 第一轮独立运行的证据与后续修复
+
+[Actions39449928094](https://github.com/lilyco-42/lyco-browser/actions/runs/39449928094)
+对应252f2bc，实际预检完整采集A、B并发、A重开三个场景，综合门禁失败，
+便携包和安装验收未执行。Actions工件SHA256为
+`d71f31a11492fe87fccea6632f67aefc10e2a80b777f566a5292537eb94cfc2c`。
+
+CreepJS的67项来自七个Navigator属性各9项、DOMRect三项、AudioBuffer一项。
+源码核对发现UA脚本用Navigator.prototype作为原生getter的接收者做相等性检查，
+该调用按Web IDL规则会抛错，导致原本已经匹配配置的getter也被重复替换。
+后续修复改用同一realm的真实navigator检查；原生值匹配则保留原getter，
+确有差异时仍用既有配置回退。不伪造检测结果、不删除音频/Canvas噪声，
+DOMRect和音频异常仍待处理，新修复必须另经CI验收。
+
+社区检测的失败截图为idle，页面已complete；初始0分不是检测结果。适配器
+改用Page.bringToFront与真实鼠标输入，记录click监听和Runtime/Log异常，并保留
+未修改的三个绝对音频资源路径。不会直接调用scanner函数或写入页面结果。

@@ -2,6 +2,7 @@
 // Applied ONLY by GitHub Actions to the pinned upstream checkout.
 const fs=require('node:fs'),path=require('node:path');
 const {replaceOne}=require('./source-patch');
+const {nativeGetterMatches}=require('../src/native-navigator');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
 function one(file,from,to){
@@ -9,6 +10,24 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// Preserve native UA getters when CDP/native settings already match. The
+// upstream checks the prototype as a receiver, which throws by design and
+// unnecessarily replaces valid Web IDL getters (actual CreepJS: 63 findings).
+one('automation/user-agent.js', '  const sameValue = (obj, key, expected) => {', join(
+ '  const lycoNativeGetterMatches = '+nativeGetterMatches.toString()+';',
+ '  const sameValue = (obj, key, expected, receiver) => {',
+ '    if (receiver) return lycoNativeGetterMatches(obj, key, receiver, expected);'));
+one('automation/user-agent.js', '  const define = (obj, key, getter) => {\n    if (sameValue(obj, key, getter())) return true;',
+ '  const define = (obj, key, getter, receiver) => {\n    if (sameValue(obj, key, getter(), receiver)) return true;');
+one('automation/user-agent.js', '  const applyNavPatches = (proto) => {',
+ '  const applyNavPatches = (proto, receiver = typeof navigator !== "undefined" ? navigator : null) => {');
+one('automation/user-agent.js', '        applyNavPatches(subWin.Navigator.prototype);',
+ '        applyNavPatches(subWin.Navigator.prototype, subWin.navigator);');
+for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersion'],['platform','U.platform'],['vendor','U.vendor'],
+ ['appCodeName','"Mozilla"'],['appName','"Netscape"'],['product','"Gecko"'],['productSub','"20030107"'],['vendorSub','""']]) {
+ one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
+  'define(proto, "'+key+'", () => '+value+', receiver);');
+}
 for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);

@@ -21,7 +21,7 @@ export async function createIndependentAuditFixture(workspace) {
   ];
   const types = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
     '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png',
-    '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2'};
+    '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.ogg': 'audio/ogg'};
   const requests = [];
   const hashes = {};
   for (const [name, file] of [['creepjs', path.join(roots[0].root, 'creep.js')],
@@ -54,7 +54,10 @@ export async function createIndependentAuditFixture(workspace) {
         </script>`);
       return true;
     }
-    const source = roots.find(row => url.pathname.startsWith(row.prefix));
+    // scanner/audio.ts intentionally uses absolute /audio/{1,2,3}.ogg URLs;
+    // preserve those three original assets without rewriting detector code.
+    const source = roots.find(row => url.pathname.startsWith(row.prefix))
+      || (/^\/audio\/[123]\.ogg$/.test(url.pathname) ? {prefix: '/', root: roots[1].root} : null);
     if (!source) return false;
     const entry = {path: url.pathname, proxied, status: null}; requests.push(entry);
     (async () => {
@@ -192,16 +195,47 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
           } else if (suite === 'sdk') {
             row.raw = await observe(socket, 'window.independentSdkResults || null', 30000);
           } else {
-            await observe(socket, `!!document.querySelector('#scan-btn:not(:disabled)')`, 12000);
-            await evaluate(socket, `document.getElementById('scan-btn').click(); true`);
-            row.raw = await observe(socket, `(() => {
+            // A real foreground mouse click grants the same activation as a
+            // person using this audio-enabled UI. Do not invoke scanner.run(),
+            // synthesize scores or treat an idle initial zero as a result.
+            row.browserErrors = [];
+            const observer = await new cdp.PersistentConnection(socket, {onEvent: event => {
+              if (row.browserErrors.length >= 30) return;
+              if (event.method === 'Runtime.exceptionThrown') {
+                const details = event.params?.exceptionDetails || {};
+                row.browserErrors.push({kind: 'exception', message: String(details.exception?.description || details.text || '').slice(0, 1200)});
+              } else if (event.method === 'Log.entryAdded') {
+                const entry = event.params?.entry || {};
+                if (entry.level === 'error') row.browserErrors.push({kind: 'log', message: String(entry.text || '').slice(0, 1200)});
+              }
+            }}).open(3000);
+            try {
+              await observer.command('Runtime.enable', {}, {timeout: 3000});
+              await observer.command('Log.enable', {}, {timeout: 3000}).catch(() => {});
+              await observer.command('Page.bringToFront', {}, {timeout: 3000});
+              await observe(socket, `document.readyState === 'complete' && !!document.querySelector('#scan-btn:not(:disabled)')`, 12000);
+              row.uiState = await evaluate(socket, `(() => {const button=document.getElementById('scan-btn');const r=button.getBoundingClientRect();
+                return {visibility: document.visibilityState, focused: document.hasFocus(), x:r.x+r.width/2, y:r.y+r.height/2,
+                  width:r.width, height:r.height};})()`);
+              assert.equal(row.uiState.visibility, 'visible');
+              assert.ok(row.uiState.width > 0 && row.uiState.height > 0);
+              const object = await observer.command('Runtime.evaluate', {expression: `document.getElementById('scan-btn')`, objectGroup: 'lyco-locale-audit'}, {timeout: 3000});
+              try {
+                const listeners = await observer.command('DOMDebugger.getEventListeners', {objectId: object.result.objectId}, {timeout: 3000});
+                row.clickListenerPresent = listeners.listeners.some(listener => listener.type === 'click');
+              } catch {row.listenerInspectionUnavailable = true;}
+              const pointer = {x: row.uiState.x, y: row.uiState.y, button: 'left', clickCount: 1};
+              await observer.command('Input.dispatchMouseEvent', {...pointer, type: 'mousePressed'}, {timeout: 3000});
+              await observer.command('Input.dispatchMouseEvent', {...pointer, type: 'mouseReleased'}, {timeout: 3000});
+              row.raw = await observe(socket, `(() => {
               if (!document.querySelector('#scan-btn:not(:disabled)') || !document.getElementById('result') || document.getElementById('result').hidden) return null;
               return {score: Number(document.getElementById('score-value').textContent),
                 band: document.getElementById('score-gauge').dataset.band,
                 signals: [...document.querySelectorAll('[data-signal]')].map(node => ({id: node.dataset.signal,
                   verdict: node.dataset.verdict, value: node.querySelector('[data-field="value"]')?.textContent,
                   contribution: node.querySelector('[data-field="contrib"]')?.textContent}))};
-            })()`, 12000);
+              })()`, 12000);
+            } finally {observer.close();}
           }
           const shot = await cdp.call(socket, 'Page.captureScreenshot', {format: 'png'}, 5000);
           assert.ok(shot.data); row.screenshot = `independent-${phase}-${suite}.png`;
