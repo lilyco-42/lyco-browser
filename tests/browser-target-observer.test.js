@@ -63,3 +63,23 @@ test('failed preparation records bounded error classes rather than leaking raw e
     assert.doesNotMatch(JSON.stringify(trace), /CI_PRIVATE_PAYLOAD|message|stack/);
   }
 });
+
+test('one-shot native calls retain only fixed failure metadata and forward the original result/error', async () => {
+  class BrowserEngine {startWorkerFingerprintInjection() {}}
+  const secret = 'CI_PRIVATE_NATIVE_RESPONSE', result = {fingerprint: secret};
+  const params = {licence: secret}; const failure = Error('CDP timeout: ' + secret);
+  let rejected = false;
+  const cdp = {async connect() {}, async call(socket, method, input, timeout) {
+    assert.equal(socket, secret); assert.equal(input, params); assert.equal(timeout, 5000);
+    if (rejected) throw failure;
+    return result;
+  }};
+  const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+  assert.equal(await cdp.call(secret, 'Wayfern.setFingerprint', params, 5000), result);
+  rejected = true;
+  await assert.rejects(cdp.call(secret, 'Emulation.setHardwareConcurrencyOverride', params, 5000), error => error === failure);
+  assert.equal(trace.nativeCalls.length, 2);
+  assert.equal(trace.nativeCalls[0].failed, false); assert.equal(trace.nativeCalls[1].reason, 'timeout');
+  assert.equal(trace.nativeCalls[1].done, true);
+  assert.doesNotMatch(JSON.stringify(trace.nativeCalls), /CI_PRIVATE_NATIVE_RESPONSE|licence|params|stack/);
+});

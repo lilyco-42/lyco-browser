@@ -10,6 +10,11 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// Preserve authored silence inside an otherwise audible rendered buffer.
+// Adding noise to every zero creates samples before a scheduled source starts
+// and after it stops; nonzero samples retain the original per-profile noise.
+one('automation/fingerprint.js', '                    if (inAuthoredSpan(spans, i)) continue;',
+ '                    if (inAuthoredSpan(spans, i) || data[i] === 0) continue;');
 // Preserve native UA getters when CDP/native settings already match. The
 // upstream checks the prototype as a receiver, which throws by design and
 // unnecessarily replaces valid Web IDL getters (actual CreepJS: 63 findings).

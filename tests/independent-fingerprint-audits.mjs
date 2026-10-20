@@ -46,6 +46,24 @@ export async function createIndependentAuditFixture(workspace) {
             (async () => {try {const detector = await BotD.load({monitoring: false});
               results.botd = {detection: detector.detect(), components: detector.getComponents(), detections: detector.getDetections()};
               } catch (e) {results.botd = {failed: String(e)};}})(),
+            (async () => {try {
+              const context = new OfflineAudioContext(1, 2048, 44100);
+              const oscillator = context.createOscillator();
+              oscillator.frequency.value = 440;
+              oscillator.connect(context.destination);
+              oscillator.start(512 / context.sampleRate);
+              oscillator.stop(1536 / context.sampleRate);
+              const buffer = await context.startRendering();
+              const data = buffer.getChannelData(0), copy = new Float32Array(data.length);
+              buffer.copyFromChannel(copy, 0);
+              const active = data.slice(512, 1536);
+              const digest = await crypto.subtle.digest('SHA-256', active.buffer);
+              results.audio = {leadSilent: data.slice(0, 512).every(value => value === 0),
+                tailSilent: data.slice(1536).every(value => value === 0),
+                signalPresent: active.some(value => value !== 0),
+                copiesMatch: data.every((value, index) => Object.is(value, copy[index])),
+                activeHash: Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, '0')).join('')};
+            } catch (e) {results.audio = {failed: String(e)};}})(),
           ]);
           const json = JSON.stringify(results, (_key, value) => value instanceof Error
             ? {name: value.name, message: value.message, stack: value.stack} : value);
@@ -93,6 +111,11 @@ export function assertIndependentResult(suite, value, expected) {
     assert.ok(botd?.components && Object.keys(botd.components).length > 0, 'BotD components missing');
     assert.ok(botd?.detections && Object.keys(botd.detections).length > 0, 'BotD detections missing');
     assert.equal(botd.detection?.bot, false, 'BotD identified automation; keep the real detection details');
+    assert.equal(value.audio?.failed, undefined);
+    for (const field of ['leadSilent', 'tailSilent', 'signalPresent', 'copiesMatch']) {
+      assert.equal(value.audio?.[field], true, 'Scheduled audio preservation failed: ' + field);
+    }
+    assert.match(value.audio?.activeHash || '', /^[0-9a-f]{64}$/);
     return;
   }
   if (suite === 'locale') {
@@ -115,7 +138,8 @@ export function assertIndependentResult(suite, value, expected) {
   }
   assert.equal(suite, 'creepjs');
   const fp = value.fingerprint;
-  for (const key of ['navigator', 'workerScope', 'timezone', 'fonts', 'lies', 'canvas2d', 'headless']) {
+  for (const key of ['navigator', 'workerScope', 'timezone', 'fonts', 'lies', 'canvas2d', 'headless',
+    'clientRects', 'offlineAudioContext', 'capturedErrors']) {
     assert.ok(fp?.[key] && typeof fp[key] === 'object', 'CreepJS missing surface: ' + key);
   }
   assert.equal(fp.navigator.hardwareConcurrency, expected.cores, 'CreepJS Window CPU mismatch');
@@ -124,6 +148,18 @@ export function assertIndependentResult(suite, value, expected) {
   assert.equal(fp.workerScope.deviceMemory, expected.memory, 'CreepJS Worker memory mismatch');
   assert.equal(fp.workerScope.timezoneLocation, expected.timezone, 'CreepJS Worker timezone mismatch');
   assert.equal(fp.workerScope.language, expected.language, 'CreepJS Worker language mismatch');
+  for (const key of ['elementClientRects', 'elementBoundingClientRect', 'rangeClientRects', 'rangeBoundingClientRect']) {
+    assert.equal(fp.clientRects[key]?.length, 12, 'CreepJS geometry probe incomplete: ' + key);
+    for (const rect of fp.clientRects[key]) for (const field of ['x', 'y', 'width', 'height', 'top', 'right', 'bottom', 'left']) {
+      assert.ok(Number.isFinite(rect[field]), 'CreepJS geometry probe failed: ' + key + '.' + field);
+    }
+  }
+  assert.ok(Number.isFinite(fp.offlineAudioContext.sampleSum) && fp.offlineAudioContext.sampleSum > 0, 'CreepJS audio did not render');
+  assert.equal(fp.offlineAudioContext.binsSample?.length, 100, 'CreepJS audio samples missing');
+  assert.ok(fp.offlineAudioContext.binsSample.every(Number.isFinite), 'CreepJS audio samples are invalid');
+  assert.deepEqual(fp.offlineAudioContext.copySample, fp.offlineAudioContext.binsSample, 'AudioBuffer copy and direct reads disagree');
+  assert.equal(fp.offlineAudioContext.noise, 0, 'AudioBuffer changed silent or authored samples');
+  assert.deepEqual(fp.capturedErrors.data, [], 'CreepJS captured an execution error');
   assert.ok(Number.isInteger(fp.lies.totalLies), 'CreepJS omitted prototype/consistency result');
   assert.equal(fp.lies.totalLies, 0, 'CreepJS reports contradictions; raw lies remain in the private evidence');
   assert.equal(fp.navigator.lied, false, 'CreepJS rejects Navigator consistency');
@@ -276,5 +312,8 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
   const visitor = phase => result.runs[phase].suites.sdk.raw.fingerprintjs.visitorId;
   assert.equal(visitor('a-first'), visitor('a-reopen'), 'FingerprintJS identity changed after reopening A');
   assert.notEqual(visitor('a-first'), visitor('b-parallel'), 'FingerprintJS did not distinguish the two configured environments');
+  const audio = phase => result.runs[phase].suites.sdk.raw.audio.activeHash;
+  assert.equal(audio('a-first'), audio('a-reopen'), 'Audible samples changed after reopening the same environment');
+  assert.notEqual(audio('a-first'), audio('b-parallel'), 'Audible samples lost the per-profile audio identity');
   report.checks.push('independent-creepjs-locale-fingerprintjs-botd-on-real-product');
 }

@@ -3,12 +3,39 @@
 // fingerprint parameters, scripts, responses, credentials or environment.
 function installBrowserTargetObserver({BrowserEngine, cdp}) {
   const records = [], sessions = new Map();
+  const nativeCalls = [];
+  Object.defineProperty(records, 'nativeCalls', {value: nativeCalls});
+  const nativeMethods = new Set(['Wayfern.getFingerprint', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
+  const reasonFor = error => {
+    const message = String(error?.message || '');
+    return /timed?\s*out|timeout/i.test(message) ? 'timeout'
+      : /session.*(?:not found|not exist|closed)|no session/i.test(message) ? 'session-unavailable'
+      : /target.*closed|connection.*closed|socket.*closed/i.test(message) ? 'target-or-connection-closed'
+      : /(?:method|command).*(?:not found|not supported)|wasn't found/i.test(message) ? 'method-unavailable'
+      : /execution context/i.test(message) ? 'execution-context-unavailable'
+      : /license|licence|authoriz|permission/i.test(message) ? 'authorization'
+      : /invalid.*param/i.test(message) ? 'invalid-parameters' : 'other';
+  };
   const id = value => {
     if (!value) return null;
     if (!sessions.has(value) && sessions.size < 2048) sessions.set(value, sessions.size + 1);
     return sessions.get(value) || 0;
   };
   const record = value => { if (records.length < 1200) records.push(value); };
+  // Initial identity preparation uses one-shot page calls, not cdp.connect.
+  // Keep these bounded, separate diagnostics so busy iframe traces cannot
+  // hide which native operation failed. Never retain params/results/raw errors.
+  const call = cdp.call;
+  if (typeof call === 'function') cdp.call = async function (socket, method, params, timeout) {
+    if (!nativeMethods.has(method)) return call.call(this, socket, method, params, timeout);
+    const event = {kind: 'native-call', transport: 'page', target: id(socket), method,
+      startedAt: Date.now(), done: false, failed: false};
+    if (nativeCalls.length < 256) nativeCalls.push(event);
+    const started = Date.now();
+    try {const result = await call.call(this, socket, method, params, timeout); event.done = true; return result;}
+    catch (error) {event.done = true; event.failed = true; event.reason = reasonFor(error); throw error;}
+    finally {event.elapsedMs = Math.max(0, Date.now() - started);}
+  };
   const connect = cdp.connect;
   cdp.connect = async function (socket, options = {}) {
     const onEvent = options.onEvent;
@@ -27,28 +54,24 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
     }});
     const command = connection.command;
     connection.command = async function (method, params, options) {
-      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
+      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
         return command.call(this, method, params, options);
       }
-      const event = {kind: 'command', method, session: id(options?.sessionId), done: false, failed: false};
+      const event = {kind: 'command', method, session: id(options?.sessionId), startedAt: Date.now(), done: false, failed: false};
       if (method === 'Page.addScriptToEvaluateOnNewDocument') event.immediate = params?.runImmediately === true;
       if (method === 'Target.setAutoAttach') {
         event.pause = Boolean(params?.waitForDebuggerOnStart);
         event.filter = params?.filter?.map(row => ({type: row.type, exclude: Boolean(row.exclude)}));
       }
       record(event);
+      if (nativeMethods.has(method) && nativeCalls.length < 256) nativeCalls.push(event);
       const started = Date.now();
       try { const result = await command.call(this, method, params, options); event.done = true; return result; }
       catch (error) {
         event.done = true; event.failed = true;
         // Fixed enums only: raw errors may include URLs, source or credentials.
         // A failed command alone does not prove timeout or renderer deadlock.
-        const message = String(error?.message || '');
-        event.reason = /timed?\s*out|timeout/i.test(message) ? 'timeout'
-          : /session.*(?:not found|not exist|closed)|no session/i.test(message) ? 'session-unavailable'
-          : /target.*closed|connection.*closed|socket.*closed/i.test(message) ? 'target-or-connection-closed'
-          : /(?:method|command).*(?:not found|not supported)|wasn't found/i.test(message) ? 'method-unavailable'
-          : /execution context/i.test(message) ? 'execution-context-unavailable' : 'other';
+        event.reason = reasonFor(error);
         throw error;
       } finally { event.elapsedMs = Math.max(0, Date.now() - started); }
     };

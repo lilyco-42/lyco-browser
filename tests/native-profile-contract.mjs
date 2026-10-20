@@ -92,8 +92,16 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         const result = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
         const raw = result?.fingerprint ?? result;
         const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const cached = JSON.parse(await fs.readFile(path.join(state.profileDirectory,
+          `lyco-native-identity-${profiles[owner].id}.json`), 'utf8')).fingerprint;
+        const hasNativeSeed = Object.hasOwn(native || {}, 'canvasNoiseSeed');
+        const hasSavedSeed = Object.hasOwn(cached || {}, 'canvasNoiseSeed');
         report.profileRuntime[phase].nativeFingerprint = {available: true,
           digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas),
+          canvasSeed: {nativePresent: hasNativeSeed, savedPresent: hasSavedSeed,
+            nativeType: typeof native?.canvasNoiseSeed, savedType: typeof cached?.canvasNoiseSeed,
+            matchesSaved: hasNativeSeed && hasSavedSeed && native.canvasNoiseSeed === cached.canvasNoiseSeed,
+            nativeDigest: digest(native?.canvasNoiseSeed), savedDigest: digest(cached?.canvasNoiseSeed)},
           declared: nativeSettings(native, expected)};
       } catch {
         report.profileRuntime[phase].nativeFingerprint = {available: false};

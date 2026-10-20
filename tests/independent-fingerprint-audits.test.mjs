@@ -11,6 +11,10 @@ const creep = () => ({fingerprint: {
   navigator: {hardwareConcurrency: 6, deviceMemory: 4, lied: false},
   workerScope: {hardwareConcurrency: 6, deviceMemory: 4, language: 'en-GB', timezoneLocation: 'Asia/Tokyo', lied: false},
   lies: {totalLies: 0}, fonts: {}, timezone: {}, canvas2d: {}, headless: {},
+  clientRects: Object.fromEntries(['elementClientRects', 'elementBoundingClientRect', 'rangeClientRects', 'rangeBoundingClientRect']
+    .map(key => [key, Array.from({length: 12}, () => ({x: 0, y: 0, left: 0, top: 0, width: 1, height: 1, right: 1, bottom: 1}))])),
+  offlineAudioContext: {sampleSum: 1, noise: 0, binsSample: Array(100).fill(0.1), copySample: Array(100).fill(0.1)},
+  capturedErrors: {data: []},
 }});
 
 test('missing detector data and suppressed signal errors cannot be called a pass', () => {
@@ -40,7 +44,11 @@ test('CreepJS contradictions and missing Worker surfaces remain failures', () =>
   for (const alter of [value => delete value.fingerprint.workerScope, value => value.fingerprint.lies.totalLies = 1,
     value => value.fingerprint.workerScope.hardwareConcurrency = 8, value => value.fingerprint.navigator.lied = true,
     value => value.fingerprint.workerScope.timezoneLocation = 'Europe/Paris',
-    value => delete value.fingerprint.workerScope.lied]) {
+    value => delete value.fingerprint.workerScope.lied,
+    value => value.fingerprint.clientRects.elementClientRects = [],
+    value => value.fingerprint.offlineAudioContext.noise = 0.001,
+    value => value.fingerprint.offlineAudioContext.copySample[0] = 0.2,
+    value => value.fingerprint.capturedErrors.data.push('failed')]) {
     const value = creep(); alter(value);
     assert.throws(() => assertIndependentResult('creepjs', value, expected));
   }
@@ -50,11 +58,14 @@ test('SDKs must actually collect critical components and cannot suppress a bot v
   const sdk = () => ({fingerprintjs: {visitorId: 'a'.repeat(32), version: '5.3.0', confidence: {score: 0.6},
     components: Object.fromEntries(Object.entries({canvas: {}, fonts: [], languages: [['en-GB']],
       timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4}).map(([key, value]) => [key, {value}]))},
-  botd: {detection: {bot: false}, components: {webdriver: {value: false}}, detections: {webdriver: {bot: false}}}});
+  botd: {detection: {bot: false}, components: {webdriver: {value: false}}, detections: {webdriver: {bot: false}}},
+  audio: {leadSilent: true, tailSilent: true, signalPresent: true, copiesMatch: true, activeHash: 'a'.repeat(64)}});
   assert.doesNotThrow(() => assertIndependentResult('sdk', sdk(), expected));
   for (const alter of [value => value.botd.detection.bot = true, value => value.botd.components = {},
     value => delete value.fingerprintjs.components.canvas, value => value.fingerprintjs.components.fonts.error = {message: 'failed'},
-    value => value.fingerprintjs.visitorId = '', value => value.fingerprintjs.components.hardwareConcurrency.value = 8]) {
+    value => value.fingerprintjs.visitorId = '', value => value.fingerprintjs.components.hardwareConcurrency.value = 8,
+    value => value.audio.leadSilent = false, value => value.audio.tailSilent = false,
+    value => value.audio.signalPresent = false, value => value.audio.copiesMatch = false]) {
     const value = sdk(); alter(value);
     assert.throws(() => assertIndependentResult('sdk', value, expected));
   }

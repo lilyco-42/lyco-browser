@@ -28,10 +28,10 @@ Actions工件保存完整报告和截图，且在严格原生Canvas门禁前先�
 
 | 项目与固定版本 | 用途、入口 | 当前状态 |
 | --- | --- | --- |
-| [CreepJS](https://github.com/abrahamjuliot/creepjs/tree/10aa6724cd33a1015db1574211890518cd04f0cc) | 原型矛盾、Window/Worker、Canvas/WebGL、字体、音频等；读取 `window.Fingerprint` / `window.Creep` | 252f2bc实际预检三场景各67项异常，未通过 |
-| [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs/tree/d43c48aeffd66165e102036af79e956b1fbbf4e1) | `load({monitoring:false})` / `get()`；保存 visitorId 与 components，测同环境稳定与不同环境差异 | 252f2bc实际预检三场景SDK组件门禁通过；原始ID显示A重开稳定、B不同，整体门禁未过 |
-| [BotD](https://github.com/fingerprintjs/BotD/tree/66da86e9d9e7206e817a0f7fdbdfa8fe37f3cd47) | `load({monitoring:false})` / `detect()`、`getComponents()`、`getDetections()`；自动化识别 | 252f2bc实际预检三场景均bot:false；整体门禁未过 |
-| [claude-tester](https://github.com/gokuscraper/claude-tester/tree/58a93a7b0304e40723c42f7fbe18035c1f353fdd) | 点击 `#scan-btn`，读取结果分数、风险档与每项信号 | 252f2bc三场景界面仍为idle，未取得分数；改为前台真实点击并采集脚本异常，待新CI；README称MIT但无LICENSE文件，不打入商品包 |
+| [CreepJS](https://github.com/abrahamjuliot/creepjs/tree/10aa6724cd33a1015db1574211890518cd04f0cc) | 原型矛盾、Window/Worker、Canvas/WebGL、字体、音频等；读取 `window.Fingerprint` / `window.Creep` | c3bd8b5实际A环境从67降为4项异常；B启动失败，未通过 |
+| [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs/tree/d43c48aeffd66165e102036af79e956b1fbbf4e1) | `load({monitoring:false})` / `get()`；保存 visitorId 与 components，测同环境稳定与不同环境差异 | c3bd8b5的A组件门禁通过；252f2bc原始ID显示A重开稳定、B不同，整体门禁未过 |
+| [BotD](https://github.com/fingerprintjs/BotD/tree/66da86e9d9e7206e817a0f7fdbdfa8fe37f3cd47) | `load({monitoring:false})` / `detect()`、`getComponents()`、`getDetections()`；自动化识别 | c3bd8b5的A为bot:false，B未采集；252f2bc三场景均bot:false；整体未过 |
+| [claude-tester](https://github.com/gokuscraper/claude-tester/tree/58a93a7b0304e40723c42f7fbe18035c1f353fdd) | 点击 `#scan-btn`，读取结果分数、风险档与每项信号 | c3bd8b5的A真实结果23分/low，B未采集；README称MIT但无LICENSE文件，不打入商品包 |
 
 FingerprintJS 的 visitorId 不是“真人通过”结论；BotD 的 bot 判定也不是
 地区或账号可用性证明。CreepJS 不发布同名公共镜像，保留来源和商标声明。
@@ -109,3 +109,27 @@ DOMRect和音频异常仍待处理，新修复必须另经CI验收。
 社区检测的失败截图为idle，页面已complete；初始0分不是检测结果。适配器
 改用Page.bringToFront与真实鼠标输入，记录click监听和Runtime/Log异常，并保留
 未修改的三个绝对音频资源路径。不会直接调用scanner函数或写入页面结果。
+
+## 第二轮：原生getter与真实点击的实际结果
+
+`c3bd8b5` / [Actions39453809394](https://github.com/lilyco-42/lyco-browser/actions/runs/39453809394)
+整体仍失败，当前不是可发布版本。工件SHA256已核验为
+`a6b863e95000bf09170df5641020cea4fba9c442e0dc620e47e00a78388eda96`。
+
+A环境实际CreepJS异常从67降为4，七个Navigator属性的63项消失；剩余是
+DOMRect三项和AudioBuffer一项。社区页实际完成六项检测，23分、low：
+时区/语言/Intl/偏移为0，保留中文字体贡献20、Microsoft风格贡献3。
+没有删字体或改分数。SDK组件检查也通过；但B启动时原生身份恢复失败，
+所以B和A重开均未采集，不能把A的结果当作全矩阵通过。
+
+下一补丁保留渲染音频中原本为0的采样，避免给音源开始前和停止后的静音
+添加杂音；非零采样仍用原环境噪声。新增实际OfflineAudioContext回归：
+2048帧中512帧静音前导、512帧静音尾部，中段有声；两种读取一致，中段
+散列同环境重开稳定、跨环境不同。并补充CreepJS几何/音频/执行错误的完整性
+门禁，防止缺失这些模块后意外判绿。此补丁待新CI，未声称剩余4项已解决。
+
+另外补充原生初始一次性CDP调用的独立诊断，记录固定方法名、时间、成功/
+失败类别，不记录设备、参数、响应、URL或原始错误；原有1200条目标追踪
+可能遗漏这条启动路径。并在既有只读native getter处比对Canvas种子与保存
+缓存的散列/类型/相等性，避免仅凭“像素相同”猜测原因。未重试、延长超时、
+绕过授权或改变身份失败时关闭页面的行为。
