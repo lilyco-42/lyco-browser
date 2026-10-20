@@ -84,6 +84,26 @@ changed. This failed run does not establish whether the readiness fix works.
 References: https://www.w3.org/TR/device-memory/#webidl-interface and
 https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy.
 
+Run39403795843 confirms same-origin and cross-site parser-frame identity and
+proxy checks on both initial start and reopen. Bootstrap preparation/resume now
+finishes before the restore call, but the two actual restored pages still time
+out on their first `Runtime.enable` (8000ms). The readiness gap is corrected,
+but is not the sole cause of the restored-renderer stall.
+
+The next candidate uses browser -> tab -> page attachment. Root page/iframe
+exclusion prevents duplicate preparation through root and tab sessions. Paused
+tab preparation and actual parent debugger-resume acknowledgement are separate
+promises: a child is not reported ready until both complete. Failure, close,
+detach or missing resume acknowledgement refuse that parent's children. First
+script, native identity and script-registration checks remain unchanged.
+
+An independent report on the same149 kernel describes premature direct-page
+attachment and a working tab-level attachment hierarchy:
+https://github.com/sheying2013/OpenBrowser/issues/36 . It is supporting evidence,
+not proof that this candidate passes. The maintainer's timeout/resume-first
+workaround is deliberately not adopted because it would weaken the first-script
+preparation contract. Actual Actions acceptance decides this candidate.
+
 ## Scope and residual risk
 
 The root cause inside restored-target initialization is still unresolved.

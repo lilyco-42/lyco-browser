@@ -3,31 +3,56 @@
 // A Chromium tab can be paused while its child page reports waiting=false.
 // Keep the parent paused until the existing page preparation has completed.
 function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
-  const pending = new Map();
+  const pending = new Map(), resumptions = new Map(), refused = new Map();
   const finish = (sessionId, failed, error) => {
-    const entry = pending.get(sessionId);
+    const entry = pending.get(sessionId) || (failed ? resumptions.get(sessionId) : null);
     if (!entry) return;
-    pending.delete(sessionId); clearTimeout(entry.timer);
+    pending.delete(sessionId); clearTimeout(entry.timer); clearTimeout(entry.resumeTimer);
     if (failed) {
+      resumptions.delete(sessionId);
+      refused.set(sessionId, entry);
+      const failure = error || Error('新标签身份准备失败，已阻止该标签运行');
       try { onRefused(sessionId, entry.targetId); } catch {}
-      entry.reject(error || Error('新标签身份准备失败，已阻止该标签运行'));
-    } else entry.resolve();
+      entry.reject(failure); entry.rejectResume(failure);
+    } else {
+      entry.resolve();
+      entry.resumeTimer = setTimeout(() => finish(sessionId, true,
+        Error('新标签解除暂停确认超时，环境未就绪')), timeoutMs);
+    }
   };
   return {
     begin(sessionId, targetId) {
-      if (pending.has(sessionId)) return pending.get(sessionId).promise;
+      if (refused.has(sessionId)) return refused.get(sessionId).resumed;
+      if (resumptions.has(sessionId)) return resumptions.get(sessionId).promise;
       const entry = {targetId};
       entry.promise = new Promise((resolve, reject) => {entry.resolve = resolve; entry.reject = reject;});
+      entry.resumed = new Promise((resolve, reject) => {entry.resolveResume = resolve; entry.rejectResume = reject;});
       // A child may fail while the parent's setAutoAttach command is pending.
       // Keep rejection handled until the parent reaches its explicit await.
       entry.promise.catch(() => {});
+      entry.resumed.catch(() => {});
       entry.timer = setTimeout(() => finish(sessionId, true, Error('新标签身份准备超时，已阻止该标签运行')), timeoutMs);
       pending.set(sessionId, entry);
+      resumptions.set(sessionId, entry);
       return entry.promise;
     },
     has: sessionId => pending.has(sessionId),
     ready: sessionId => finish(sessionId, false),
     fail: (sessionId, error) => finish(sessionId, true, error),
+    whenResumed: sessionId => resumptions.get(sessionId)?.resumed || refused.get(sessionId)?.resumed || Promise.resolve(),
+    resumed(sessionId) {
+      const entry = resumptions.get(sessionId);
+      if (!entry) return;
+      if (pending.has(sessionId)) {
+        finish(sessionId, true, Error('子页面准备尚未完成，不能确认标签就绪')); return;
+      }
+      clearTimeout(entry.resumeTimer); resumptions.delete(sessionId); entry.resolveResume();
+    },
+    targetClosed(targetId) {
+      for (const [sessionId, entry] of resumptions) {
+        if (entry.targetId === targetId) finish(sessionId, true, Error('标签已关闭，环境未就绪'));
+      }
+    },
   };
 }
 // Observe only protocol metadata on the owning connection. A restored target

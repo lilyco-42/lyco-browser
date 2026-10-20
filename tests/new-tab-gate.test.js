@@ -11,6 +11,7 @@ test('parent remains paused while a child with waiting=false is being prepared',
   await Promise.resolve(); assert.equal(released, false);
   gate.ready('unrelated'); await Promise.resolve(); assert.equal(released, false);
   gate.ready('parent'); await pending;
+  gate.resumed('parent');
   assert.equal(released, true); assert.equal(gate.has('parent'), false);
   assert.deepEqual(refused, []);
 });
@@ -22,7 +23,7 @@ test('failed child preparation refuses only its parent before the wait rejects',
   gate.fail('parent-a', Error('native refusal'));
   assert.deepEqual(refused, [['parent-a', 'tab-a']]);
   assert.equal(gate.has('parent-b'), true);
-  await failed; gate.ready('parent-b'); await second;
+  await failed; gate.ready('parent-b'); await second; gate.resumed('parent-b');
 });
 
 test('a missing child has a bounded failure and is never treated as ready', async () => {
@@ -36,6 +37,52 @@ test('a failed child without an error object is not mistaken for readiness', asy
   const gate = createPausedTabGate();
   const failed = assert.rejects(gate.begin('parent', 'new-tab'), /失败/);
   gate.fail('parent', null); await failed;
+});
+
+test('child preparation alone does not acknowledge parent debugger resume', async () => {
+  const gate = createPausedTabGate();
+  const prepared = gate.begin('parent', 'tab');
+  let released = false;
+  const resumed = gate.whenResumed('parent').then(() => {released = true;});
+  gate.ready('parent'); await prepared; await Promise.resolve();
+  assert.equal(released, false);
+  gate.resumed('unrelated'); await Promise.resolve(); assert.equal(released, false);
+  gate.resumed('parent'); await resumed; assert.equal(released, true);
+  await gate.whenResumed(undefined);
+});
+
+test('a failed resume after child readiness rejects the child release wait', async () => {
+  const refused = [], gate = createPausedTabGate({onRefused: (...args) => refused.push(args)});
+  const prepared = gate.begin('parent', 'tab'), resumed = gate.whenResumed('parent');
+  const failed = assert.rejects(resumed, /resume refused/);
+  gate.ready('parent'); await prepared;
+  gate.fail('parent', Error('resume refused')); await failed;
+  assert.deepEqual(refused, [['parent', 'tab']]);
+  // A child event delivered after refusal must not see an unknown/safe parent.
+  await assert.rejects(gate.whenResumed('parent'), /resume refused/);
+  await assert.rejects(gate.begin('parent', 'tab'), /resume refused/);
+});
+
+test('a parent cannot be reported resumed before its child is prepared', async () => {
+  const gate = createPausedTabGate(), prepared = gate.begin('parent', 'tab');
+  const failedPreparation = assert.rejects(prepared, /尚未完成/);
+  const failedResume = assert.rejects(gate.whenResumed('parent'), /尚未完成/);
+  gate.resumed('parent'); await failedPreparation; await failedResume;
+});
+
+test('missing parent resume acknowledgement has its own bounded refusal', async () => {
+  const gate = createPausedTabGate({timeoutMs: 20}), prepared = gate.begin('parent', 'tab');
+  const failedResume = assert.rejects(gate.whenResumed('parent'), /确认超时/);
+  gate.ready('parent'); await prepared; await failedResume;
+});
+
+test('closing a parent rejects only its own pending child release', async () => {
+  const gate = createPausedTabGate(), a = gate.begin('parent-a', 'tab-a'), b = gate.begin('parent-b', 'tab-b');
+  const failed = assert.rejects(a, /已关闭/);
+  const failedRelease = assert.rejects(gate.whenResumed('parent-a'), /已关闭/);
+  gate.targetClosed('tab-a'); await failed; await failedRelease;
+  assert.equal(gate.has('parent-b'), true);
+  gate.ready('parent-b'); await b; gate.resumed('parent-b');
 });
 
 test('paused native pages register for the existing context without changing script source', () => {

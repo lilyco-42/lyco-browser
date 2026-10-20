@@ -112,23 +112,24 @@ one('engine.js',
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
  "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
 one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
-// Pause page targets themselves. A paused tab container may expose a child
-// page with waitingForDebugger=false; holding the container did not protect
-// that page's first script in the real native regression. Avoid attaching
-// both container and page, which would prepare one page through two sessions.
+// Attach browser -> tab -> page. Restored page targets can be announced before
+// their renderer can answer Page/Runtime commands when attached directly.
+// Root page/iframe exclusion avoids preparing a page via two owner sessions.
+// The parent tab remains paused until its child has complete document setup.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "tab", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
  '            const prepared = waitingForDebugger && item.lycoNativeIdentity ? newTabGate.begin(sessionId, targetId) : null;',
  "            await connection.command('Target.setAutoAttach', {",
  '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
- '              filter: [{type: "browser", exclude: true}, {}],',
+ '              filter: [{type: "browser", exclude: true}, {type: "tab", exclude: true}, {}],',
  '            }, {sessionId});',
  '            if (prepared) await prepared;',
- "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
+ '            const parentResumed = newTabGate.whenResumed(event.sessionId);'));
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
@@ -176,11 +177,13 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '    }});'));
 one('engine.js', '        const destroyedId = event.params?.targetId;', join(
  '        const destroyedId = event.params?.targetId;',
+ '        newTabGate.targetClosed(destroyedId);',
  '        item.lycoPreparedPageTargets?.delete(destroyedId);',
  '        item.lycoResumedPageTargets?.delete(destroyedId);'));
 one('engine.js',
  '        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
  join('        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ '        newTabGate.fail(detachedSessionId, Error("标签调试连接已断开"));',
  '        item.lycoPreparedPageTargets?.delete(detachedTargetId);',
  '        item.lycoResumedPageTargets?.delete(detachedTargetId);'));
 one('engine.js',
@@ -201,6 +204,7 @@ one('engine.js', join(
  '                if (item.lycoNativeIdentity) throw error;',
  '              });',
  '            }',
+ '            await parentResumed;',
  '            item.lycoResumedPageTargets ||= new Set();',
  '            if (targetInfo.type === "page") item.lycoResumedPageTargets.add(targetId);',
  "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"));
@@ -218,6 +222,12 @@ one('engine.js', '        } catch (error) {\n          report(error, targetInfo)
 one('engine.js',
  '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
  '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
+one('engine.js', join(
+ "            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .catch((error) => report(error, targetInfo));'),
+ join("            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .then(() => newTabGate.resumed(sessionId))',
+ '              .catch((error) => { newTabGate.fail(sessionId, error); report(error, targetInfo); });'));
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
 // Keep this inside the original injection try: injectionFailed is block-scoped.
