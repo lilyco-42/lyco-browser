@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {createPausedTabGate, createDocumentStartGuard} = require('../src/new-tab-gate');
+const {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext} = require('../src/new-tab-gate');
 
 test('parent remains paused while a child with waiting=false is being prepared', async () => {
   const refused = [], gate = createPausedTabGate({onRefused: (...args) => refused.push(args)});
@@ -53,4 +53,32 @@ test('a swallowed registration failure or missing receipt cannot release a nativ
   assert.throws(() => guard.assertReady(), /refused/);
   guard.succeeded(method, {}); assert.throws(() => guard.assertReady(), /未确认/);
   guard.succeeded(method, {identifier: 'real-script-id'}); assert.doesNotThrow(() => guard.assertReady());
+});
+
+test('future documents register without waiting for a nonexistent context and still require a receipt', () => {
+  const connection = {}, method = 'Page.addScriptToEvaluateOnNewDocument';
+  const guard = createDocumentStartGuard(true, () => hasDefaultExecutionContext(connection, 'page', 'root'));
+  assert.deepEqual(guard.parameters(method, {source: 'original'}), {source: 'original', runImmediately: false});
+  guard.succeeded(method, {}); assert.throws(() => guard.assertReady(), /未确认/);
+  guard.succeeded(method, {identifier: 'future-document-script'}); guard.assertReady();
+  const created = (id, frameId, isDefault) => observeExecutionContexts(connection, {
+    sessionId: 'page', method: 'Runtime.executionContextCreated',
+    params: {context: {id, uniqueId: `unique-${id}`, auxData: {frameId, isDefault}}},
+  });
+  created(1, 'root', false); created(2, 'child', true);
+  assert.equal(guard.parameters(method, {}).runImmediately, false);
+  created(3, 'root', true);
+  assert.equal(guard.parameters(method, {}).runImmediately, true);
+  assert.equal(hasDefaultExecutionContext({}, 'page', 'root'), false);
+  assert.equal(hasDefaultExecutionContext(connection, 'other-page', 'root'), false);
+  observeExecutionContexts(connection, {sessionId: 'page', method: 'Runtime.executionContextDestroyed', params: {executionContextId: 1}});
+  assert.equal(guard.parameters(method, {}).runImmediately, true);
+  observeExecutionContexts(connection, {sessionId: 'page', method: 'Runtime.executionContextDestroyed', params: {executionContextUniqueId: 'unique-3'}});
+  assert.equal(guard.parameters(method, {}).runImmediately, false);
+  created(4, 'root', true);
+  observeExecutionContexts(connection, {sessionId: 'page', method: 'Runtime.executionContextsCleared'});
+  assert.equal(guard.parameters(method, {}).runImmediately, false);
+  created(5, 'root', true);
+  observeExecutionContexts(connection, {method: 'Target.detachedFromTarget', params: {sessionId: 'page'}});
+  assert.equal(guard.parameters(method, {}).runImmediately, false);
 });

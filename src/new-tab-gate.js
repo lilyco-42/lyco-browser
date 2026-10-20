@@ -30,11 +30,45 @@ function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
     fail: (sessionId, error) => finish(sessionId, true, error),
   };
 }
-function createDocumentStartGuard(enabled) {
+// Observe only protocol metadata on the owning connection. A restored target
+// can be paused before it has a default context; runImmediately then waits for
+// a context that cannot be created until that same target is resumed.
+const defaultContexts = new WeakMap();
+function observeExecutionContexts(connection, event) {
+  if (!connection || !event) return;
+  const sessionId = event.sessionId;
+  if (event.method === 'Target.detachedFromTarget') {
+    defaultContexts.get(connection)?.delete(event.params?.sessionId);
+    return;
+  }
+  if (!sessionId) return;
+  let sessions = defaultContexts.get(connection);
+  if (!sessions) { sessions = new Map(); defaultContexts.set(connection, sessions); }
+  if (event.method === 'Runtime.executionContextsCleared') { sessions.delete(sessionId); return; }
+  if (event.method === 'Runtime.executionContextDestroyed') {
+    const contexts = sessions.get(sessionId), params = event.params || {};
+    if (!contexts) return;
+    for (const [id, context] of contexts) {
+      if (id === params.executionContextId || (params.executionContextUniqueId && context.uniqueId === params.executionContextUniqueId)) contexts.delete(id);
+    }
+    if (!contexts.size) sessions.delete(sessionId);
+    return;
+  }
+  if (event.method !== 'Runtime.executionContextCreated') return;
+  const context = event.params?.context;
+  if (!context?.auxData?.isDefault || !context.auxData.frameId || context.id == null) return;
+  let contexts = sessions.get(sessionId);
+  if (!contexts) { contexts = new Map(); sessions.set(sessionId, contexts); }
+  contexts.set(context.id, {frameId: context.auxData.frameId, uniqueId: context.uniqueId});
+}
+function hasDefaultExecutionContext(connection, sessionId, frameId) {
+  return Boolean(frameId && [...defaultContexts.get(connection)?.get(sessionId)?.values() || []].some(context => context.frameId === frameId));
+}
+function createDocumentStartGuard(enabled, hasExistingContext = () => true) {
   let failure = null;
   const applies = method => enabled && method === 'Page.addScriptToEvaluateOnNewDocument';
   return {
-    parameters(method, params) { return applies(method) ? {...params, runImmediately: true} : params; },
+    parameters(method, params) { return applies(method) ? {...params, runImmediately: Boolean(hasExistingContext())} : params; },
     succeeded(method, result) {
       if (applies(method)) failure = typeof (result?.identifier ?? result?.result?.identifier) === 'string'
         ? null : Error('内核未确认页面初始化脚本，已阻止页面运行');
@@ -43,4 +77,4 @@ function createDocumentStartGuard(enabled) {
     assertReady() { if (failure) throw failure; },
   };
 }
-module.exports = {createPausedTabGate, createDocumentStartGuard};
+module.exports = {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext};

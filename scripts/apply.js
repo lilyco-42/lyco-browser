@@ -106,7 +106,7 @@ one('engine.js',
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
- "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
+ "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
 // The owning connection already handles its Workers. Do not inject module-wide
 // latestFingerprint into the privileged local session service (or other profiles).
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
@@ -147,7 +147,13 @@ one('automation/fingerprint.js', "  } else if (CFG.canvas?.mode === 'noise') {",
 one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
- '    const documentStart = createDocumentStartGuard(Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe);'));
+ '    const needsDocumentStartGuard = Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe;',
+ '    const mainFrame = needsDocumentStartGuard ? (await connection.command("Page.getFrameTree", {}, {sessionId, timeout: 8000}))?.frameTree?.frame?.id : null;',
+ '    if (needsDocumentStartGuard && !mainFrame) throw Error("无法确认页面主框架，已阻止页面运行");',
+ '    const documentStart = createDocumentStartGuard(needsDocumentStartGuard, () => hasDefaultExecutionContext(connection, sessionId, mainFrame));'));
+one('engine.js', '    const onAttached = (event, connection) => {', join(
+ '    const onAttached = (event, connection) => {',
+ '      observeExecutionContexts(connection, event);'));
 one('engine.js', '        return await connection.command(method, params, { sessionId, timeout });', join(
  '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
  '        documentStart.succeeded(method, result);',
