@@ -31,8 +31,8 @@ function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
   };
 }
 // Observe only protocol metadata on the owning connection. A restored target
-// can be paused before it has a default context; runImmediately then waits for
-// a context that cannot be created until that same target is resumed.
+// can be paused before it has a default context. Request immediate execution
+// only for known existing contexts; keep registration for future documents.
 const defaultContexts = new WeakMap();
 function observeExecutionContexts(connection, event) {
   if (!connection || !event) return;

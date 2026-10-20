@@ -132,6 +132,10 @@ one('engine.js',
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
+ '    if (item?.lycoNativeIdentity && targetInfo.type === "page" && targetInfo.waitingForDebugger) {',
+ '      await connection.command("Page.enable", {}, {sessionId, timeout: 8000});',
+ '      await connection.command("Runtime.enable", {}, {sessionId, timeout: 8000});',
+ '    }',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
 one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
  '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
@@ -159,10 +163,6 @@ one('engine.js', '        return await connection.command(method, params, { sess
  '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
  '        documentStart.succeeded(method, result);',
  '        return result;'));
-one('engine.js',
- '    const fontBlobBridge = injectFp?.fontBlobBridge || baseFp?.fontBlobBridge || item?.fontBlobBridge || item?.fingerprint?.fontBlobBridge;',
- join('    if (needsDocumentStartGuard) await sessionCall("Page.enable", {});',
- '    const fontBlobBridge = injectFp?.fontBlobBridge || baseFp?.fontBlobBridge || item?.fontBlobBridge || item?.fingerprint?.fontBlobBridge;'));
 one('engine.js',
  '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {',
  join('        documentStart.failed(method, err);',
