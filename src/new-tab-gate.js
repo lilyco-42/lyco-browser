@@ -62,7 +62,8 @@ function observeExecutionContexts(connection, event) {
   contexts.set(context.id, {frameId: context.auxData.frameId, uniqueId: context.uniqueId});
 }
 function hasDefaultExecutionContext(connection, sessionId, frameId) {
-  return Boolean(frameId && [...defaultContexts.get(connection)?.get(sessionId)?.values() || []].some(context => context.frameId === frameId));
+  return [...defaultContexts.get(connection)?.get(sessionId)?.values() || []]
+    .some(context => frameId === undefined || context.frameId === frameId);
 }
 function createDocumentStartGuard(enabled, hasExistingContext = () => true) {
   let failure = null;

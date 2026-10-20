@@ -148,9 +148,10 @@ one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  '    const needsDocumentStartGuard = Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe;',
- '    const mainFrame = needsDocumentStartGuard ? (await connection.command("Page.getFrameTree", {}, {sessionId, timeout: 8000}))?.frameTree?.frame?.id : null;',
- '    if (needsDocumentStartGuard && !mainFrame) throw Error("无法确认页面主框架，已阻止页面运行");',
- '    const documentStart = createDocumentStartGuard(needsDocumentStartGuard, () => hasDefaultExecutionContext(connection, sessionId, mainFrame));'));
+ // The command injects into existing default contexts and registers for all
+ // future documents. Do not request a frame tree from a paused restored page:
+ // the renderer may not serve that command until it has been resumed.
+ '    const documentStart = createDocumentStartGuard(needsDocumentStartGuard, () => hasDefaultExecutionContext(connection, sessionId));'));
 one('engine.js', '    const onAttached = (event, connection) => {', join(
  '    const onAttached = (event, connection) => {',
  '      observeExecutionContexts(connection, event);'));

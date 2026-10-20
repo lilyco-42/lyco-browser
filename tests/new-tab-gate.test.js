@@ -67,6 +67,10 @@ test('future documents register without waiting for a nonexistent context and st
   });
   created(1, 'root', false); created(2, 'child', true);
   assert.equal(guard.parameters(method, {}).runImmediately, false);
+  // Without a frame restriction the protocol command covers every existing
+  // default context, including child documents; future main documents still
+  // receive the same registered source before their first script.
+  assert.equal(hasDefaultExecutionContext(connection, 'page'), true);
   created(3, 'root', true);
   assert.equal(guard.parameters(method, {}).runImmediately, true);
   assert.equal(hasDefaultExecutionContext({}, 'page', 'root'), false);
@@ -81,4 +85,5 @@ test('future documents register without waiting for a nonexistent context and st
   created(5, 'root', true);
   observeExecutionContexts(connection, {method: 'Target.detachedFromTarget', params: {sessionId: 'page'}});
   assert.equal(guard.parameters(method, {}).runImmediately, false);
+  assert.equal(hasDefaultExecutionContext(connection, 'page'), false);
 });
