@@ -85,7 +85,8 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     assert.equal(restoring.advanced.tabMode, 'restore');
     assert.equal(restoring.advanced.startUrls, '');
     await checkpoint('session-restore:reopen');
-    await page.evaluate(source => window.ops.startProfile(source), restoring);
+    const reopened = await page.evaluate(source => window.ops.startProfile(source), restoring);
+    evidence.startAcknowledgement = {ok: reopened?.ok, success: reopened?.success};
     await readPages(evidence.restored);
     const current = await status();
     assert.equal(current.profileDirectory, profileRoot, 'Restore used a different profile directory');
@@ -102,6 +103,22 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     evidence.sameProfileDirectory = true; evidence.savedIdentityBytesUnchanged = true;
     report.checks.push('native-session-restore-two-tabs-first-script-identity-storage-and-proxy');
     await checkpoint('session-restore:passed');
+  } catch (error) {
+    // Capture the real failure BEFORE the ordinary Stop finally removes the
+    // running status/targets. Export enums/booleans only, never URLs, page
+    // content, native devices, startup stderr or authentication data.
+    const current = await status().catch(() => null);
+    evidence.failureState = {running: current?.running === true, starting: current?.starting === true,
+      verificationBlocked: current?.verificationBlocked === true, cdpErrorPresent: Boolean(current?.cdpError)};
+    const targets = current?.port ? await cdp.tabs(current.port).catch(() => []) : [];
+    evidence.failureTargets = targets.map(tab => ({page: tab.type === 'page', blank: tab.url === 'about:blank',
+      expectedFirst: tab.url === urls[0], expectedSecond: tab.url === urls[1],
+      internal: /^(chrome|chrome-extension|devtools):/i.test(tab.url || ''),
+      dataDocument: /^data:text\/html/i.test(tab.url || '')}));
+    console.log(JSON.stringify({sessionRestoreFailure: {acknowledgement: evidence.startAcknowledgement,
+      state: evidence.failureState, targets: evidence.failureTargets}}));
+    await checkpoint('session-restore:failed-before-cleanup');
+    throw error;
   } finally {
     await page.evaluate(id => window.ops.stopProfile(id), profile.id).catch(() => {});
     await page.evaluate(source => window.adoptLycoProfile(source), profile);

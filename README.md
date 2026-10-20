@@ -8,6 +8,8 @@
 
 > **已知限制（2026-10-19）：** 新回归已复现：环境启动后直接打开的新标签，第一段脚本可能读到默认语言、CPU、内存、时区及不同的原生 Canvas。Cookie 和代理正确不代表页面身份正确；现有包仍是实验预览，不能用于依赖完整身份隔离的场景。[修正 PR #22](https://github.com/lilyco-42/lyco-browser/pull/22) 尚待完整验收，[复现记录](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)。
 
+> **当前候选的兼容性范围（2026-10-20）：** 会话恢复修复已单独通过 [Windows 原生、便携包与实际安装验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39405949786)，账户引导与并发 Worker 隔离仍须合并后重新验收。Wayfern149 的 HTML Canvas 与 OffscreenCanvas 像素并不保证一致，不能据此宣传完整指纹一致或不可检测；同一 API 的归属、并发隔离和反例检查见[兼容性与验收范围](docs/FINGERPRINT-COMPATIBILITY.md)。此处公开下载仍指向旧预览包。
+
 | 系统 | 下载 | 说明 |
 | --- | --- | --- |
 | Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |

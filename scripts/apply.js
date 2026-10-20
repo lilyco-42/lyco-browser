@@ -9,7 +9,7 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -105,30 +105,31 @@ one('engine.js',
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
- "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
-// This connection already owns complete page/worker preparation below. The
-// module-wide legacy wrapper otherwise injects latestFingerprint from another
-// environment into ServiceWorker before the owning handler can run.
+ "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
+ "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
+// The owning connection already handles its Workers. Do not inject module-wide
+// latestFingerprint into the privileged local session service (or other profiles).
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
  "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
 one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
-// Pause page targets themselves. A paused tab container may expose a child
-// page with waitingForDebugger=false; holding the container did not protect
-// that page's first script in the real native regression. Avoid attaching
-// both container and page, which would prepare one page through two sessions.
+// Attach browser -> tab -> page. Restored page targets can be announced before
+// their renderer can answer Page/Runtime commands when attached directly.
+// Root page/iframe exclusion avoids preparing a page via two owner sessions.
+// The parent tab remains paused until its child has complete document setup.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "tab", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
  '            const prepared = waitingForDebugger && item.lycoNativeIdentity ? newTabGate.begin(sessionId, targetId) : null;',
  "            await connection.command('Target.setAutoAttach', {",
  '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
- '              filter: [{type: "browser", exclude: true}, {}],',
+ '              filter: [{type: "browser", exclude: true}, {type: "tab", exclude: true}, {}],',
  '            }, {sessionId});',
  '            if (prepared) await prepared;',
- "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
+ '            const parentResumed = newTabGate.whenResumed(event.sessionId);'));
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
@@ -158,7 +159,14 @@ one('automation/fingerprint.js', "        if (gpuQueueProto && typeof gpuQueuePr
 one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
- '    const documentStart = createDocumentStartGuard(Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe);'));
+ '    const needsDocumentStartGuard = Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe;',
+ // The command injects into existing default contexts and registers for all
+ // future documents. Do not request a frame tree from a paused restored page:
+ // the renderer may not serve that command until it has been resumed.
+ '    const documentStart = createDocumentStartGuard(needsDocumentStartGuard, () => hasDefaultExecutionContext(connection, sessionId));'));
+one('engine.js', '    const onAttached = (event, connection) => {', join(
+ '    const onAttached = (event, connection) => {',
+ '      observeExecutionContexts(connection, event);'));
 one('engine.js', '        return await connection.command(method, params, { sessionId, timeout });', join(
  '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
  '        documentStart.succeeded(method, result);',
@@ -178,12 +186,39 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
+one('engine.js', '        const destroyedId = event.params?.targetId;', join(
+ '        const destroyedId = event.params?.targetId;',
+ '        newTabGate.targetClosed(destroyedId);',
+ '        item.lycoPreparedPageTargets?.delete(destroyedId);',
+ '        item.lycoResumedPageTargets?.delete(destroyedId);'));
+one('engine.js',
+ '        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ join('        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ '        newTabGate.fail(detachedSessionId, Error("标签调试连接已断开"));',
+ '        item.lycoPreparedPageTargets?.delete(detachedTargetId);',
+ '        item.lycoResumedPageTargets?.delete(detachedTargetId);'));
 one('engine.js',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
 one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
+ '            item.lycoPreparedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoPreparedPageTargets.add(targetId);',
  '            newTabGate.ready(event.sessionId);',
  '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
+one('engine.js', join(
+ '            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId }).catch(() => {});",
+ '            }',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"),
+ join('            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, {sessionId}).catch(error => {",
+ '                if (item.lycoNativeIdentity) throw error;',
+ '              });',
+ '            }',
+ '            await parentResumed;',
+ '            item.lycoResumedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoResumedPageTargets.add(targetId);',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"));
 one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
  '        } catch (error) {',
  '          if (item.lycoNativeIdentity && (waitingForDebugger || newTabGate.has(event.sessionId))) {',
@@ -198,6 +233,12 @@ one('engine.js', '        } catch (error) {\n          report(error, targetInfo)
 one('engine.js',
  '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
  '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
+one('engine.js', join(
+ "            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .catch((error) => report(error, targetInfo));'),
+ join("            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .then(() => newTabGate.resumed(sessionId))',
+ '              .catch((error) => { newTabGate.fail(sessionId, error); report(error, targetInfo); });'));
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
 // Keep this inside the original injection try: injectionFailed is block-scoped.
@@ -226,6 +267,7 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '          deferredRestore: lycoDeferredRestore,',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
  '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',
@@ -235,6 +277,35 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.verificationBlocked = true;',
  '        throw error;',
  '      }'));
+// A restored page can run while the original engine is still connecting CDP.
+// Bring up the same kernel/profile without windows, install its original
+// page/worker auto-attach handling, then request Chromium's own session service.
+one('engine.js', '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;', join(
+ '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;',
+ '    const lycoDeferredRestore = Boolean(restoreSession && isWayfernKernel(browser));'));
+one('engine.js', '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;', join(
+ '    const lycoSessionBridge = lycoDeferredRestore ? await prepareSessionBridge(root) : null;',
+ '    if (lycoSessionBridge) loadPaths.push(lycoSessionBridge.directory);',
+ '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;'));
+one('engine.js', "    if (restoreSession) args.push('--restore-last-session');",
+ "    if (lycoDeferredRestore) args.push('--no-startup-window');\n    else if (restoreSession) args.push('--restore-last-session');");
+one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucceeded;', join(
+ '      if (lycoDeferredRestore && injectSucceeded && workerSucceeded) {',
+ '        try {',
+ '          await openSavedSession({bridge: lycoSessionBridge, port: item.port, cdp,',
+ '            assertActive: () => {',
+ '              this.assertStartGenerationActive(profile.id, lifecycleGeneration);',
+ '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
+ '            },',
+ '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection?.opened && !item.workerFingerprintConnection.closed && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
+ '            isPagePrepared: id => Boolean(item.lycoPreparedPageTargets?.has(id) && item.lycoResumedPageTargets?.has(id)),',
+ '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude && item.lycoResumedPageTargets?.has(id))),',
+ '          });',
+ '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
+ '      }',
+ '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
+one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',
+ '    item.workerFingerprintConnection = connection;\n    item.workerFingerprintConnectionReady = connection;\n    return connection;');
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(

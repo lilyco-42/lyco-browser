@@ -177,6 +177,32 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
         assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
         assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
+        const frameDeadline = Date.now() + 30000;
+        while (Date.now() < frameDeadline && !['same', 'cross'].every(realm => fixture.frameResult(newPhase, realm)?.value)) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        report.parserFrames ||= {};
+        report.parserFrames[newPhase] = Object.fromEntries(['same', 'cross'].map(realm => [realm, fixture.frameResult(newPhase, realm) || null]));
+        await checkpoint(newPhase + ':parser-frames-observed');
+        for (const realm of ['same', 'cross']) {
+          const frame = report.parserFrames[newPhase][realm];
+          assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
+          assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
+          assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
+          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
+            assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);
+          }
+          // Device Memory is [SecureContext]; loopback HTTP is trustworthy,
+          // ordinary HTTP on the cross-site fixture is not. Preserve both the
+          // configured value in secure frames and native API absence elsewhere.
+          // https://www.w3.org/TR/device-memory/#webidl-interface
+          // https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy
+          const secure = realm === 'same';
+          assert.equal(frame.value.secureContext, secure, `${newPhase}: ${realm} unexpected security context`);
+          assert.equal(frame.value.memoryAvailable, secure, `${newPhase}: ${realm} deviceMemory exposure violates its security context`);
+          assert.equal(frame.value.memory, secure ? value.memory : undefined, `${newPhase}: ${realm} unexpected deviceMemory`);
+        }
+        report.checks.push(newPhase + ':same-and-cross-site-parser-frames-first-script-identity-and-proxy');
       }
       results[phase] = value;
     } catch (error) {
@@ -190,6 +216,28 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       await checkpoint(phase + ':stopped');
     }
   }
+  const nativeDevices = {};
+  for (const owner of ['A', 'B']) {
+    nativeDevices[owner] = JSON.parse(await fs.readFile(path.join(profileRoots[owner],
+      `lyco-native-identity-${profiles[owner].id}.json`), 'utf8')).fingerprint;
+  }
+  // New private-cache diagnostics expose only availability/type/equality, not
+  // the seed values or the complete native device. A prior run failed before
+  // reaching restoration because two separately captured devices drew alike.
+  const seedPresent = owner => Object.hasOwn(nativeDevices[owner], 'canvasNoiseSeed');
+  report.nativeCanvasOwnership = {
+    seedPresent: {A: seedPresent('A'), B: seedPresent('B')},
+    seedTypes: {A: typeof nativeDevices.A.canvasNoiseSeed, B: typeof nativeDevices.B.canvasNoiseSeed},
+    distinctCapturedSeeds: seedPresent('A') && seedPresent('B')
+      && nativeDevices.A.canvasNoiseSeed !== nativeDevices.B.canvasNoiseSeed,
+    distinctHtmlShape: results['a-first'].canvasControl[0] !== results['b-first'].canvasControl[0],
+    distinctHtmlText: results['a-first'].canvas[0] !== results['b-first'].canvas[0],
+  };
+  console.log(JSON.stringify({nativeCanvasOwnership: report.nativeCanvasOwnership}));
+  // Collect the independent saved-session behavior before asserting the
+  // cross-profile Canvas result. All original strict assertions remain below.
+  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
+    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
     'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
@@ -197,12 +245,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
-  // Collect the independent native-vs-product Canvas control before the known
-  // session-restore race can mask it. Both strict acceptance checks remain.
   await verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort,
     fixture: fixture.concurrent, report, checkpoint, cdp});
-  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
-    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);

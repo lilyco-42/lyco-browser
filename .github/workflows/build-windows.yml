@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - name: Reject session and ownership regressions before downloading the browser kernel
-        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/startup-pages.test.js tests/new-tab-gate.test.js tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js
+        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/startup-pages.test.js tests/session-restore.test.js tests/new-tab-gate.test.js tests/canvas-ownership-contract.test.mjs tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js
 
   windows-x64:
     needs: integration-guards
@@ -79,7 +79,7 @@ jobs:
       - name: Isolated LYCO proxy and Billing integration tests
         shell: pwsh
         run: |
-          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/session-restore.test.js
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - uses: actions/setup-python@v5

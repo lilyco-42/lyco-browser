@@ -89,7 +89,7 @@ function declaredSettings(settings = {}) {
   return result;
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings}) {
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false}) {
   if (!enabled) return null; // Stock Chromium and legacy kernels retain their own path.
   const declared = declaredSettings(settings);
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
@@ -98,7 +98,9 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   const file = path.join(root, 'lyco-native-identity-' + profileId + '.json');
   const saved = await readCache(file, profileId);
   const targets = pageTargets(await cdp.tabs(port), port);
-  if (!targets.length) throw Error('内核尚未提供页面目标，原生身份未应用');
+  if (!targets.length && !(deferredRestore && saved && !refresh)) {
+    throw Error('内核尚未提供页面目标，原生身份未应用；首次启动或刷新身份请使用空白页模式');
+  }
   let device = saved;
   if (!saved || refresh) {
     let result;
