@@ -6,6 +6,8 @@ const phases = new Map([
   ['a-corrupt', 'A'], ['a-recover', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
   ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
+  ['a-first-new-tab-2', 'A'], ['a-reopen-new-tab-2', 'A'],
+  ['a-first-new-tab-3', 'A'], ['a-reopen-new-tab-3', 'A'],
   ['a-session-restore', 'A'], ['a-session-restore-extra', 'A'],
 ]);
 
@@ -72,7 +74,8 @@ export function createBrowserProfileFixture() {
     const phase = url.searchParams.get('phase');
     if (!phases.has(phase)) { res.writeHead(400); res.end('Unknown CI phase'); return true; }
     const frame = url.pathname.startsWith('/profile-frame'), realm = url.searchParams.get('realm');
-    if (frame && (!phase.endsWith('-new-tab') || !['same', 'cross'].includes(realm))) {
+    const newTab = /-new-tab(?:-[23])?$/.test(phase);
+    if (frame && (!newTab || !['same', 'cross'].includes(realm))) {
       res.writeHead(400); res.end('Unknown CI frame'); return true;
     }
     const entries = frame ? frameObservations : observations, key = frame ? phase + ':' + realm : phase;
@@ -97,13 +100,13 @@ export function createBrowserProfileFixture() {
       entry.pageProxied = Boolean(proxied);
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
-      const readOnly = phase.endsWith('-extra') || phase.endsWith('-new-tab');
+      const readOnly = phase.endsWith('-extra') || newTab;
       const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(readOnly) + ')'
         + '.then(' + post + ').catch(error=>(' + post + ')({error:String(error)}));';
       // Place both frames before the parent's first script to exercise parser
       // startup, including a different site mapped ONLY by the CI proxy.
       const port = new URL('http://' + req.headers.host).port;
-      const frames = phase.endsWith('-new-tab') ? ['same', 'cross'].map(realm => {
+      const frames = newTab ? ['same', 'cross'].map(realm => {
         const host = realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid';
         return '<iframe title="' + realm + ' origin probe" src="http://' + host + ':' + port
           + '/profile-frame?phase=' + encodeURIComponent(phase) + '&amp;realm=' + realm + '"></iframe>';

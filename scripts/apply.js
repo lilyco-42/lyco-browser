@@ -113,13 +113,13 @@ one('engine.js',
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
  "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
 one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
-// Attach browser -> tab -> page. Restored page targets can be announced before
-// their renderer can answer Page/Runtime commands when attached directly.
-// Root page/iframe exclusion avoids preparing a page via two owner sessions.
-// The parent tab remains paused until its child has complete document setup.
+// Use tab-level attachment only for native session restoration: those pages
+// cannot answer early direct-page commands. Ordinary launches retain the
+// original direct Page pause. A Tab pause alone did not reliably stop a new
+// renderer's first script in packaged Actions39410773730.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity && item.lycoDeferredRestore ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
@@ -264,6 +264,7 @@ one('engine.js', '      // Brand window title as 环境 N (not generic Chrome)',
 '      // Brand window title as 环境 N (not generic Chrome)'));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
+ '      item.lycoDeferredRestore = lycoDeferredRestore;',
  '      try {',
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',

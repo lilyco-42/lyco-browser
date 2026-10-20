@@ -137,72 +137,74 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         // Open an actual new target at the user URL, without a harness-created
         // blank page, pause, manual injection or delayed navigation. The real
         // engine must prepare a page opened after startup before its first JS.
-        const newPhase = phase + '-new-tab';
-        const newTarget = `http://127.0.0.1:${originPort}/profile-probe?phase=${newPhase}`;
-        await checkpoint(newPhase + ':open');
-        const opener = targets.find(tab => tab.url === target);
-        const opened = await cdp.call(opener.webSocketDebuggerUrl, 'Target.createTarget', {url: newTarget});
-        assert.ok(opened?.targetId, `${newPhase}: Chromium did not create a real target`);
-        const newDeadline = Date.now() + 30000;
-        while (Date.now() < newDeadline && !fixture.result(newPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
-        const newTab = fixture.result(newPhase);
-        report.newTabs[phase] = newTab || null;
-        // Read-only diagnosis, never inject/repair/reload the page. Keep the
-        // original first-script observation and all assertions unchanged.
-        try {
-          const socket = (await cdp.tabs(state.port)).find(tab => tab.id === opened.targetId)?.webSocketDebuggerUrl;
-          if (!socket) throw Error('New target unavailable for read-only observation');
-          const nativeResult = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
-          const raw = nativeResult?.fingerprint ?? nativeResult;
-          const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
-          report.newTabNative ||= {};
-          report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
-          report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
-          const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
-            expression: readOnlyProfileProbeSource()}, 3000);
-          const later = current?.result?.value;
-          report.newTabNative[phase].currentPage = nativeSettings({...later, hardwareConcurrency: later?.cores, deviceMemory: later?.memory}, expected);
-          report.newTabNative[phase].laterCanvas = later?.canvas;
-          report.newTabNative[phase].laterShape = later?.canvasControl;
-        } catch {
-          report.newTabNative ||= {};
-          report.newTabNative[phase] = {available: false};
-        }
-        await checkpoint(newPhase + ':observed');
-        assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
-        assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
-        for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
-          assert.deepEqual(newTab.value[field], value[field], `${newPhase}: first script saw a different ${field}`);
-        }
-        assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
-        assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
-        assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
-        const frameDeadline = Date.now() + 30000;
-        while (Date.now() < frameDeadline && !['same', 'cross'].every(realm => fixture.frameResult(newPhase, realm)?.value)) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        report.parserFrames ||= {};
-        report.parserFrames[newPhase] = Object.fromEntries(['same', 'cross'].map(realm => [realm, fixture.frameResult(newPhase, realm) || null]));
-        await checkpoint(newPhase + ':parser-frames-observed');
-        for (const realm of ['same', 'cross']) {
-          const frame = report.parserFrames[newPhase][realm];
-          assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
-          assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
-          assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
-          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
-            assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);
+        for (const attempt of [1, 2, 3]) {
+          const newPhase = phase + '-new-tab' + (attempt === 1 ? '' : '-' + attempt);
+          const newTarget = `http://127.0.0.1:${originPort}/profile-probe?phase=${newPhase}`;
+          await checkpoint(newPhase + ':open');
+          const opener = targets.find(tab => tab.url === target);
+          const opened = await cdp.call(opener.webSocketDebuggerUrl, 'Target.createTarget', {url: newTarget});
+          assert.ok(opened?.targetId, `${newPhase}: Chromium did not create a real target`);
+          const newDeadline = Date.now() + 30000;
+          while (Date.now() < newDeadline && !fixture.result(newPhase)?.value) await new Promise(resolve => setTimeout(resolve, 100));
+          const newTab = fixture.result(newPhase);
+          report.newTabs[phase] = newTab || null;
+          // Read-only diagnosis, never inject/repair/reload the page. Keep the
+          // original first-script observation and all assertions unchanged.
+          try {
+            const socket = (await cdp.tabs(state.port)).find(tab => tab.id === opened.targetId)?.webSocketDebuggerUrl;
+            if (!socket) throw Error('New target unavailable for read-only observation');
+            const nativeResult = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 2000);
+            const raw = nativeResult?.fingerprint ?? nativeResult;
+            const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            report.newTabNative ||= {};
+            report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+            report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
+            const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
+              expression: readOnlyProfileProbeSource()}, 3000);
+            const later = current?.result?.value;
+            report.newTabNative[phase].currentPage = nativeSettings({...later, hardwareConcurrency: later?.cores, deviceMemory: later?.memory}, expected);
+            report.newTabNative[phase].laterCanvas = later?.canvas;
+            report.newTabNative[phase].laterShape = later?.canvasControl;
+          } catch {
+            report.newTabNative ||= {};
+            report.newTabNative[phase] = {available: false};
           }
-          // Device Memory is [SecureContext]; loopback HTTP is trustworthy,
-          // ordinary HTTP on the cross-site fixture is not. Preserve both the
-          // configured value in secure frames and native API absence elsewhere.
-          // https://www.w3.org/TR/device-memory/#webidl-interface
-          // https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy
-          const secure = realm === 'same';
-          assert.equal(frame.value.secureContext, secure, `${newPhase}: ${realm} unexpected security context`);
-          assert.equal(frame.value.memoryAvailable, secure, `${newPhase}: ${realm} deviceMemory exposure violates its security context`);
-          assert.equal(frame.value.memory, secure ? value.memory : undefined, `${newPhase}: ${realm} unexpected deviceMemory`);
+          await checkpoint(newPhase + ':observed');
+          assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
+          assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
+          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
+            assert.deepEqual(newTab.value[field], value[field], `${newPhase}: first script saw a different ${field}`);
+          }
+          assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
+          assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
+          assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
+          const frameDeadline = Date.now() + 30000;
+          while (Date.now() < frameDeadline && !['same', 'cross'].every(realm => fixture.frameResult(newPhase, realm)?.value)) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          report.parserFrames ||= {};
+          report.parserFrames[newPhase] = Object.fromEntries(['same', 'cross'].map(realm => [realm, fixture.frameResult(newPhase, realm) || null]));
+          await checkpoint(newPhase + ':parser-frames-observed');
+          for (const realm of ['same', 'cross']) {
+            const frame = report.parserFrames[newPhase][realm];
+            assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
+            assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
+            assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
+            for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
+              assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);
+            }
+            // Device Memory is [SecureContext]; loopback HTTP is trustworthy,
+            // ordinary HTTP on the cross-site fixture is not. Preserve both the
+            // configured value in secure frames and native API absence elsewhere.
+            // https://www.w3.org/TR/device-memory/#webidl-interface
+            // https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy
+            const secure = realm === 'same';
+            assert.equal(frame.value.secureContext, secure, `${newPhase}: ${realm} unexpected security context`);
+            assert.equal(frame.value.memoryAvailable, secure, `${newPhase}: ${realm} deviceMemory exposure violates its security context`);
+            assert.equal(frame.value.memory, secure ? value.memory : undefined, `${newPhase}: ${realm} unexpected deviceMemory`);
+          }
+          report.checks.push(newPhase + ':same-and-cross-site-parser-frames-first-script-identity-and-proxy');
         }
-        report.checks.push(newPhase + ':same-and-cross-site-parser-frames-first-script-identity-and-proxy');
       }
       results[phase] = value;
     } catch (error) {

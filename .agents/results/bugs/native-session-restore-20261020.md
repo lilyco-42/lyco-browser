@@ -106,7 +106,20 @@ preparation contract. Actual Actions acceptance decides this candidate.
 
 ## Scope and residual risk
 
-The root cause inside restored-target initialization is still unresolved.
+Actions39405949786 passed the tab-hierarchy restoration fix in all three real
+Windows stages. It is not evidence that the same attachment strategy is safe
+for every ordinary new-tab path: combined Actions39410773730 passed preflight,
+then its portable package exposed host4CPU/8GB in a new page and same-site
+parser frame before later reading the configured6CPU/4GB. Language, timezone,
+native Canvas and proxy were already correct; a parent Tab pause alone did not
+hold all document script execution until the full JS setup completed.
+
+The next candidate limits the restoration hierarchy to restore launches and
+retains the original direct Page pause for ordinary launches. The actual
+new-target test now repeats three times both before and after reopening, with
+same/cross-site parser frames and unchanged first-script assertions each time.
+This candidate remains unverified until its own full Actions acceptance.
+
 Do not extend timeouts, resume before preparation, weaken first-script checks,
 reset saved identity, or turn a failing run into a release. Full multi-window
 preservation and failure recovery are separate unverified requirements.
