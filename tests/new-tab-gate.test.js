@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext} = require('../src/new-tab-gate');
+const {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext, activatePausedRestoredPage} = require('../src/new-tab-gate');
 
 test('parent remains paused while a child with waiting=false is being prepared', async () => {
   const refused = [], gate = createPausedTabGate({onRefused: (...args) => refused.push(args)});
@@ -13,6 +13,19 @@ test('parent remains paused while a child with waiting=false is being prepared',
   gate.ready('parent'); await pending;
   assert.equal(released, true); assert.equal(gate.has('parent'), false);
   assert.deepEqual(refused, []);
+});
+
+test('only an owned paused page in the active restore phase is activated, never resumed or navigated', async () => {
+  const calls = [], connection = {async command(...args) {calls.push(args);}};
+  const args = {connection, restoring: true, waitingForDebugger: true, targetInfo: {type: 'page', targetId: 'owned-page'}};
+  await activatePausedRestoredPage({...args, restoring: false});
+  await activatePausedRestoredPage({...args, waitingForDebugger: false});
+  await activatePausedRestoredPage({...args, targetInfo: {type: 'service_worker'}});
+  assert.equal(calls.length, 0);
+  await activatePausedRestoredPage(args);
+  assert.deepEqual(calls, [['Target.activateTarget', {targetId: 'owned-page'}, {timeout: 5000}]]);
+  await assert.rejects(activatePausedRestoredPage({...args, targetInfo: {type: 'page', targetId: ''}}), /目标无效/);
+  await assert.rejects(activatePausedRestoredPage({...args, connection: {async command() {throw Error('activation refused');}}}), /activation refused/);
 });
 
 test('failed child preparation refuses only its parent before the wait rejects', async () => {

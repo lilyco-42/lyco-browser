@@ -34,6 +34,14 @@ function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
 // can be paused before it has a default context; runImmediately then waits for
 // a context that cannot be created until that same target is resumed.
 const defaultContexts = new WeakMap();
+async function activatePausedRestoredPage({connection, restoring, waitingForDebugger, targetInfo}) {
+  if (!restoring || !waitingForDebugger || targetInfo?.type !== 'page') return;
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(targetInfo.targetId || '')) throw Error('恢复标签目标无效');
+  // Native session restoration can leave a tab's renderer uninitialized.
+  // Activate the actual paused target; never navigate it, inject a substitute
+  // page or resume its debugger before the normal identity preparation.
+  await connection.command('Target.activateTarget', {targetId: targetInfo.targetId}, {timeout: 5000});
+}
 function observeExecutionContexts(connection, event) {
   if (!connection || !event) return;
   const sessionId = event.sessionId;
@@ -78,4 +86,4 @@ function createDocumentStartGuard(enabled, hasExistingContext = () => true) {
     assertReady() { if (failure) throw failure; },
   };
 }
-module.exports = {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext};
+module.exports = {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext, activatePausedRestoredPage};
