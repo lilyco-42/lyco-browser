@@ -119,6 +119,27 @@ test('non-Wayfern kernels are not given foreign native APIs', async () => {
   assert.equal(await prepareNativeIdentity({enabled: false}), null);
 });
 
+test('a session-restored page is not reset by the subsequent direct-page runtime pass', async t => {
+  const f = await fixture(t);
+  const identity = await prepareNativeIdentity({...f.args, settings: {hardwareConcurrency: 6}});
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const before = await fs.readFile(file);
+  const page = {type: 'page', webSocketDebuggerUrl: 'ws://localhost:19341/devtools/page/new-owned'};
+  f.tabs.push(page);
+  const sent = [];
+  await identity.applySession({command: async (...args) => sent.push(args)}, 'session-owned',
+    {type: 'page', targetId: 'new-owned'});
+  assert.deepEqual(sent.map(([method]) => method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
+  f.calls.length = 0;
+  await identity.apply(f.tabs);
+  assert.equal(f.calls.length, 0, 'The owner already applied both native settings; do not reset the page');
+  assert.deepEqual(await fs.readFile(file), before);
+  // Once the target is gone, a genuinely new target must still be prepared.
+  f.tabs.pop(); await identity.apply(f.tabs);
+  f.tabs.push(page); await identity.apply(f.tabs);
+  assert.deepEqual(f.calls.map(row => row.method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
+});
+
 test('declared settings reach native pages without changing saved device/noise or accepting unrelated overrides', async t => {
   const f = await fixture(t);
   await prepareNativeIdentity(f.args);

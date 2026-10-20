@@ -115,12 +115,16 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // otherwise a new document initially exposes the saved device's defaults.
   device = {...device, ...declared};
   const applied = new Set();
+  // A target has both a direct-page URL and an owning flattened session. Use
+  // its protocol path so localhost aliases cannot cause a second identity
+  // reset after that session has already restored the complete device.
+  const targetKey = tab => new URL(tab.webSocketDebuggerUrl).pathname;
   const apply = async tabs => {
     const current = pageTargets(tabs, port);
-    const live = new Set(current.map(tab => tab.webSocketDebuggerUrl));
+    const live = new Set(current.map(targetKey));
     for (const target of applied) if (!live.has(target)) applied.delete(target);
     for (const tab of current) {
-      if (applied.has(tab.webSocketDebuggerUrl)) continue;
+      if (applied.has(targetKey(tab))) continue;
       try {
         await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
         // Wayfern's saved payload alone can leave an isolated world's CPU at
@@ -133,7 +137,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       } catch {
         throw Error('原生身份恢复失败，环境未启动；已保存身份不会被重置');
       }
-      applied.add(tab.webSocketDebuggerUrl);
+      applied.add(targetKey(tab));
     }
   };
   await apply(targets);
@@ -150,6 +154,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
       }
+      applied.add('/devtools/page/' + targetInfo.targetId);
     } catch {
       connection.lycoIdentityRefusedSessions ||= new Set();
       connection.lycoIdentityRefusedSessions.add(sessionId);

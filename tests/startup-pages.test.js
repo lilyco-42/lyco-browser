@@ -44,6 +44,42 @@ test('runtime rejection or a foreign target closes only new blanks without navig
   }
 });
 
+test('discovered paused pages wait for their owning session before direct runtime work', async () => {
+  const f = fixture(), prepared = new Set(), resumed = new Set();
+  let readinessChecks = 0;
+  f.args.isPrepared = id => {
+    readinessChecks++;
+    return prepared.has(id) && resumed.has(id);
+  };
+  f.args.prepare = async () => {
+    assert.ok(f.tabs.every(tab => prepared.has(tab.id) && resumed.has(tab.id)),
+      'Do not send a competing direct-page command while the owner is paused');
+    f.calls.push({method: 'prepare-original-runtime'});
+  };
+  const pending = openPreparedStartupPages(f.args);
+  await new Promise(resolve => setTimeout(resolve, 35));
+  f.tabs.forEach(tab => prepared.add(tab.id));
+  assert.equal(f.calls.some(row => row.method === 'prepare-original-runtime'), false);
+  assert.equal(f.calls.some(row => row.method === 'Page.navigate'), false);
+  await new Promise(resolve => setTimeout(resolve, 35));
+  assert.equal(f.calls.some(row => row.method === 'prepare-original-runtime'), false,
+    'Preparation without the resume acknowledgement is still not ready');
+  f.tabs.forEach(tab => resumed.add(tab.id));
+  await pending;
+  assert.ok(readinessChecks > 2);
+  assert.equal(f.calls.filter(row => row.method === 'Page.navigate').length, 2);
+});
+
+test('cancelled owner preparation closes new targets without direct commands', async () => {
+  const f = fixture();
+  let waiting = false;
+  f.args.isPrepared = () => {waiting = true; return false;};
+  f.args.assertActive = () => {if (waiting) throw Error('owner preparation cancelled');};
+  await assert.rejects(openPreparedStartupPages(f.args), /owner preparation cancelled/);
+  assert.equal(f.calls.some(row => ['prepare-original-runtime', 'Page.navigate'].includes(row.method)), false);
+  assert.deepEqual(f.calls.filter(row => row.method === 'Target.closeTarget').map(row => row.params.targetId), ['page-1', 'page-2']);
+});
+
 test('lifecycle cancellation and navigation errors retain the original failure and clean new targets', async () => {
   const f = fixture();
   f.args.cdp.call = async () => ({errorText: 'navigation failed'});

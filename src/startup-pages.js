@@ -2,7 +2,7 @@
 
 // Keep the existing engine's profile and runtime setup. Extra user URLs must
 // never be process arguments: every target starts blank and is prepared first.
-async function openPreparedStartupPages({urls, port, connection, cdp, prepare, assertActive = () => {}}) {
+async function openPreparedStartupPages({urls, port, connection, cdp, prepare, isPrepared, assertActive = () => {}}) {
   if (!Array.isArray(urls) || urls.length > 19 || urls.some(url => typeof url !== 'string' || !url.trim())
       || !Number.isInteger(port) || port < 1024 || port > 65535 || typeof prepare !== 'function') {
     throw Error('额外启动页面参数无效');
@@ -37,6 +37,18 @@ async function openPreparedStartupPages({urls, port, connection, cdp, prepare, a
       }
       return {...row, socket: tab.webSocketDebuggerUrl};
     });
+    // Discovery is not readiness. The owning auto-attach session can still be
+    // preparing a paused page: a second, direct page command then waits for a
+    // renderer which cannot run yet. Observe the owner's preparation AND
+    // resume acknowledgement before the ordinary runtime pass/navigation.
+    if (isPrepared) {
+      const readyDeadline = Date.now() + 8000; // Same bounded owner barrier as new-tab-gate.
+      while (!created.every(row => isPrepared(row.id))) {
+        assertActive();
+        if (Date.now() >= readyDeadline) throw Error('额外启动页身份准备未完成，环境未就绪');
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
+    }
     assertActive();
     await prepare();
     for (const page of pages) {

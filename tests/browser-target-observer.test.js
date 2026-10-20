@@ -3,6 +3,31 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {installBrowserTargetObserver} = require('./browser-target-observer.cjs');
 
+test('readiness diagnostics observe existing probes and preserve the original failure without leaking endpoints', async t => {
+  const fs = require('node:fs/promises'), os = require('node:os'), path = require('node:path');
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-private-readiness-'));
+  t.after(() => fs.rm(root, {recursive: true, force: true}));
+  const secret = 'CI_PRIVATE_READINESS', failure = Error('CDP timeout ' + secret);
+  await fs.writeFile(path.join(root, 'DevToolsActivePort'), '19341\n/devtools/browser/private-browser-id');
+  let requests = 0;
+  const cdp = {async json() {requests++; throw failure;}, async connect() {}};
+  class BrowserEngine {
+    startWorkerFingerprintInjection() {}
+    async waitForPort(inputRoot, timeout, child) {
+      assert.equal(inputRoot, root); assert.equal(timeout, 30000); assert.ok(child);
+      await cdp.json('http://127.0.0.1:19341/json/version');
+    }
+  }
+  const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+  await assert.rejects(new BrowserEngine().waitForPort(root, 30000,
+    {_startupDiagnostic: {stderr: 'DevTools listening on ws://127.0.0.1:19341/devtools/browser/' + secret}}), error => error === failure);
+  assert.equal(requests, 1, 'Diagnostics must not add readiness attempts');
+  const row = trace.startupReadiness[0];
+  assert.equal(row.failed, true); assert.equal(row.fileMatchesListeningPort, true);
+  assert.equal(row.validBrowserPath, true); assert.deepEqual(row.probes, {attempts: 1, failures: 1, lastReason: 'timeout'});
+  assert.doesNotMatch(JSON.stringify(trace.startupReadiness), /CI_PRIVATE_READINESS|private-browser-id|19341|DevToolsActivePort|lyco-private-readiness/);
+});
+
 test('browser trace keeps protocol ordering without parameters, responses or URLs', async () => {
   let forwarded = 0;
   const calls = [], secret = 'CI_PRIVATE_PAYLOAD';

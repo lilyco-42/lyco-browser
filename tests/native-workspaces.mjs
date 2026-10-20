@@ -87,6 +87,7 @@ try {
   globalThis.__lycoTargetEvidence=require(observer.replace('core-startup-observer.cjs','browser-target-observer.cjs'))
    .installBrowserTargetObserver({BrowserEngine:require(appRoot+'/engine.js').BrowserEngine,cdp:require(appRoot+'/cdp.js')});
   globalThis.__lycoNativeIdentityEvidence=globalThis.__lycoTargetEvidence.nativeCalls;
+  globalThis.__lycoStartupReadinessEvidence=globalThis.__lycoTargetEvidence.startupReadiness;
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await application.evaluate(async({shell},port)=>{
   globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
@@ -368,6 +369,7 @@ try {
  if(application)try{report.coreStartup=await application.evaluate(()=>globalThis.__lycoCoreStartupEvidence||[])}catch{}
  if(application)try{report.targetTrace=await application.evaluate(()=>globalThis.__lycoTargetEvidence||[])}catch{}
  if(application)try{report.nativeIdentityCalls=await application.evaluate(()=>globalThis.__lycoNativeIdentityEvidence||[])}catch{}
+ if(application)try{report.startupReadiness=await application.evaluate(()=>globalThis.__lycoStartupReadinessEvidence||[])}catch{}
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();
