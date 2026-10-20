@@ -3,6 +3,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {replaceOne}=require('./source-patch');
 const {nativeGetterMatches}=require('../src/native-navigator');
+const {noisyRectGeometry}=require('../src/rect-geometry');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
 function one(file,from,to){
@@ -15,6 +16,23 @@ const join=(...parts)=>parts.join('\n');
 // and after it stops; nonzero samples retain the original per-profile noise.
 one('automation/fingerprint.js', '                    if (inAuthoredSpan(spans, i)) continue;',
  '                    if (inAuthoredSpan(spans, i) || data[i] === 0) continue;');
+one('automation/fingerprint.js', '  // --- client rects ---',
+ '  const lycoNoisyRectGeometry = '+noisyRectGeometry.toString()+';\n  // --- client rects ---');
+one('automation/fingerprint.js', join(
+ '                const x = rect.x + noisePx, y = rect.y + noisePx;',
+ '                const width = rect.width === 0 ? 0 : Math.max(0, rect.width + noiseSize);',
+ '                const height = rect.height === 0 ? 0 : Math.max(0, rect.height + noiseSize);',
+ '                return TargetDOMRect && TargetDOMRect.fromRect ? TargetDOMRect.fromRect({ x, y, width, height }) : rect;'),
+ join('                const geometry = lycoNoisyRectGeometry(rect, noisePx, noiseSize);',
+ '                return TargetDOMRect && TargetDOMRect.fromRect ? TargetDOMRect.fromRect(geometry) : rect;'));
+one('automation/fingerprint.js', join(
+ '                  const width = rect.width === 0 ? 0 : Math.max(0, rect.width + noiseSize);',
+ '                  const height = rect.height === 0 ? 0 : Math.max(0, rect.height + noiseSize);',
+ '                  rects.push(TargetDOMRect && TargetDOMRect.fromRect',
+ '                    ? TargetDOMRect.fromRect({ x: rect.x + noisePx, y: rect.y + noisePx, width, height })'),
+ join('                  const geometry = lycoNoisyRectGeometry(rect, noisePx, noiseSize);',
+ '                  rects.push(TargetDOMRect && TargetDOMRect.fromRect',
+ '                    ? TargetDOMRect.fromRect(geometry)'));
 // Preserve native UA getters when CDP/native settings already match. The
 // upstream checks the prototype as a receiver, which throws by design and
 // unnecessarily replaces valid Web IDL getters (actual CreepJS: 63 findings).
