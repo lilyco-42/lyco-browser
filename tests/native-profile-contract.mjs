@@ -197,10 +197,12 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
-  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
-    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
+  // Collect the independent native-vs-product Canvas control before the known
+  // session-restore race can mask it. Both strict acceptance checks remain.
   await verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort,
     fixture: fixture.concurrent, report, checkpoint, cdp});
+  await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
+    profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);
