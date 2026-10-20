@@ -99,6 +99,46 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
         phase + ': no actual second navigation through the proxy');
       inspect(evidence.restored[phase], 'restored ' + phase, evidence.initial[phase]);
     }
+    // Restore mode retains a different owning attachment path. Passing the
+    // restored documents does not prove a new page created afterwards is safe.
+    // Exercise normal new-URL target creation without injecting, delaying,
+    // reloading or repairing its document. Only observe the page's own report.
+    evidence.newTargets = {};
+    const opener = tabs.find(tab => tab.url === urls[0]);
+    assert.ok(opener?.webSocketDebuggerUrl, 'Restored opener is missing');
+    for (const attempt of [1, 2, 3]) {
+      const phase = 'a-restored-new-tab' + (attempt === 1 ? '' : '-' + attempt);
+      const url = `http://127.0.0.1:${originPort}/profile-probe?phase=${phase}`;
+      await checkpoint(phase + ':open');
+      const opened = await cdp.call(opener.webSocketDebuggerUrl, 'Target.createTarget', {url});
+      assert.ok(opened?.targetId, phase + ': real target was not created');
+      const entry = await wait(() => fixture.result(phase)?.value && fixture.result(phase), phase + ': page did not report');
+      evidence.newTargets[phase] = structuredClone(entry);
+      await checkpoint(phase + ':observed');
+      inspect(entry, phase, evidence.initial[phases[0]]);
+      const frames = {};
+      for (const realm of ['same', 'cross']) {
+        const frame = await wait(() => fixture.frameResult(phase, realm)?.value && fixture.frameResult(phase, realm),
+          phase + ': ' + realm + ' frame did not report');
+        frames[realm] = structuredClone(frame);
+      }
+      evidence.newTargets[phase].parserFrames = frames;
+      await checkpoint(phase + ':parser-frames-observed');
+      for (const realm of ['same', 'cross']) {
+        const frame = frames[realm], secure = realm === 'same';
+        assert.equal(frame.pageProxied, true, phase + ': ' + realm + ' frame navigation bypassed proxy');
+        assert.equal(frame.reportProxied, true, phase + ': ' + realm + ' frame report bypassed proxy');
+        assert.equal(frame.value.isTop, false);
+        assert.equal(frame.value.host, secure ? '127.0.0.1' : 'lyco-fixture.invalid');
+        for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
+          assert.deepEqual(frame.value[field], entry.value[field], phase + ': ' + realm + ' first-script ' + field);
+        }
+        assert.equal(frame.value.secureContext, secure);
+        assert.equal(frame.value.memoryAvailable, secure);
+        assert.equal(frame.value.memory, secure ? expected.memory : undefined);
+      }
+      report.checks.push(phase + ':first-script-identity-parser-frames-storage-canvas-and-proxy');
+    }
     assert.deepEqual(await fs.readFile(identityPath), identityBefore, 'Restore replaced the saved identity');
     evidence.sameProfileDirectory = true; evidence.savedIdentityBytesUnchanged = true;
     report.checks.push('native-session-restore-two-tabs-first-script-identity-storage-and-proxy');

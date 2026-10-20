@@ -9,6 +9,7 @@ const phases = new Map([
   ['a-first-new-tab-2', 'A'], ['a-reopen-new-tab-2', 'A'],
   ['a-first-new-tab-3', 'A'], ['a-reopen-new-tab-3', 'A'],
   ['a-session-restore', 'A'], ['a-session-restore-extra', 'A'],
+  ['a-restored-new-tab', 'A'], ['a-restored-new-tab-2', 'A'], ['a-restored-new-tab-3', 'A'],
 ]);
 
 async function observeProfile(marker, readOnly = false) {
