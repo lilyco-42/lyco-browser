@@ -63,11 +63,12 @@ async function prepareSessionBridge(root) {
 
 // Use the real session service after the original page preparation connection
 // is ready. No Sessions rewriting or recreating pages from a list of URLs.
-async function openSavedSession({bridge, port, cdp, assertActive, isPrepared, hasPreparedPage, timeoutMs = 15000}) {
+async function openSavedSession({bridge, port, cdp, assertActive, isPrepared, isPagePrepared, hasPreparedPage, timeoutMs = 15000}) {
   if (!/^chrome-extension:\/\/[a-p]{32}\/restore\.js$/.test(bridge?.workerUrl || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535 || !cdp?.PersistentConnection
       || typeof assertActive !== 'function' || typeof isPrepared !== 'function'
-      || typeof hasPreparedPage !== 'function' || !(timeoutMs > 0 && timeoutMs <= 30000)) throw Error('会话恢复参数无效');
+      || typeof isPagePrepared !== 'function' || typeof hasPreparedPage !== 'function'
+      || !(timeoutMs > 0 && timeoutMs <= 30000)) throw Error('会话恢复参数无效');
   assertActive();
   if (!isPrepared()) throw Error('会话恢复保护尚未就绪，环境未启动');
   let connection, sessionId, bootstrapId;
@@ -111,6 +112,16 @@ async function openSavedSession({bridge, port, cdp, assertActive, isPrepared, ha
     const bootstrap = await connection.command('Target.createTarget', {url: 'about:blank', newWindow: true});
     bootstrapId = bootstrap?.targetId;
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(bootstrapId || '')) throw Error('会话恢复上下文创建失败');
+    // A target ID proves allocation, not a usable live tab. Wait for this exact
+    // owned blank page's complete identity/Fetch preparation and resume receipt
+    // before asking the native session service to create restored windows.
+    const bootstrapDeadline = Date.now() + timeoutMs;
+    while (!isPagePrepared(bootstrapId)) {
+      assertActive();
+      if (!isPrepared()) throw Error('会话恢复保护已断开');
+      if (Date.now() >= bootstrapDeadline) throw Error('会话恢复上下文尚未就绪，环境未启动');
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
     assertActive();
     if (!isPrepared()) throw Error('会话恢复保护已断开');
     const result = await connection.command('Runtime.evaluate',

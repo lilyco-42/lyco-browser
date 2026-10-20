@@ -63,13 +63,33 @@ export function readOnlyProfileProbeSource() {
 export function createBrowserProfileFixture() {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const observations = new Map();
+  const frameObservations = new Map();
   function route(req, res, proxied) {
     const url = new URL(req.url, 'http://ci.invalid');
-    if (!['/profile-probe', '/profile-report'].includes(url.pathname)) return false;
+    if (!['/profile-probe', '/profile-report', '/profile-frame', '/profile-frame-report'].includes(url.pathname)) return false;
     const phase = url.searchParams.get('phase');
     if (!phases.has(phase)) { res.writeHead(400); res.end('Unknown CI phase'); return true; }
-    const entry = observations.get(phase) || {};
-    observations.set(phase, entry);
+    const frame = url.pathname.startsWith('/profile-frame'), realm = url.searchParams.get('realm');
+    if (frame && (!phase.endsWith('-new-tab') || !['same', 'cross'].includes(realm))) {
+      res.writeHead(400); res.end('Unknown CI frame'); return true;
+    }
+    const entries = frame ? frameObservations : observations, key = frame ? phase + ':' + realm : phase;
+    const entry = entries.get(key) || {};
+    entries.set(key, entry);
+    if (url.pathname === '/profile-frame') {
+      entry.pageProxied = Boolean(proxied);
+      const endpoint = '/profile-frame-report?phase=' + encodeURIComponent(phase) + '&realm=' + realm;
+      // Synchronous first-script reads in actual parser-created documents.
+      // No storage writes, parent messages, injection or harness navigation.
+      const script = `const initial={userAgent:navigator.userAgent,platform:navigator.platform,
+        language:navigator.language,languages:Array.from(navigator.languages),cores:navigator.hardwareConcurrency,
+        memory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+        host:location.hostname,isTop:window===window.top};
+        fetch(${JSON.stringify(endpoint)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(initial)});`;
+      res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
+      res.end('<!doctype html><meta charset="utf-8"><title>LYCO parser frame</title><script>' + script + '</script>');
+      return true;
+    }
     if (url.pathname === '/profile-probe') {
       entry.pageProxied = Boolean(proxied);
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
@@ -77,8 +97,16 @@ export function createBrowserProfileFixture() {
       const readOnly = phase.endsWith('-extra') || phase.endsWith('-new-tab');
       const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(readOnly) + ')'
         + '.then(' + post + ').catch(error=>(' + post + ')({error:String(error)}));';
+      // Place both frames before the parent's first script to exercise parser
+      // startup, including a different site mapped ONLY by the CI proxy.
+      const port = new URL('http://' + req.headers.host).port;
+      const frames = phase.endsWith('-new-tab') ? ['same', 'cross'].map(realm => {
+        const host = realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid';
+        return '<iframe title="' + realm + ' origin probe" src="http://' + host + ':' + port
+          + '/profile-frame?phase=' + encodeURIComponent(phase) + '&amp;realm=' + realm + '"></iframe>';
+      }).join('') : '';
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
-      res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title><script>' + script + '</script>');
+      res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title>' + frames + '<script>' + script + '</script>');
       return true;
     }
     if (req.method !== 'POST') { res.writeHead(405); res.end(); return true; }
@@ -93,6 +121,7 @@ export function createBrowserProfileFixture() {
     });
     return true;
   }
-  return {route, snapshot: () => Object.fromEntries(observations), result: phase => observations.get(phase),
+  return {route, snapshot: () => ({...Object.fromEntries(observations), parserFrames: Object.fromEntries(frameObservations)}), result: phase => observations.get(phase),
+    frameResult: (phase, realm) => frameObservations.get(phase + ':' + realm),
     clear: phase => observations.delete(phase)};
 }

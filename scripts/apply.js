@@ -132,10 +132,6 @@ one('engine.js',
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
- '    if (item?.lycoNativeIdentity && targetInfo.type === "page" && targetInfo.waitingForDebugger) {',
- '      await connection.command("Page.enable", {}, {sessionId, timeout: 8000});',
- '      await connection.command("Runtime.enable", {}, {sessionId, timeout: 8000});',
- '    }',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
 one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
  '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
@@ -178,27 +174,36 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
-// A restored page can be attached before its renderer is initialized. Prepare
-// the paused parent before enabling related-target auto-attach, but keep both
-// operations before Fetch readiness and the original debugger resume.
-const relatedPageAttach = join(
- '            // Nested attach so workers/iframes under this page also pause for inject.',
- "            await connection.command('Target.setAutoAttach', {",
- '              autoAttach: true,',
- '              waitForDebuggerOnStart: true,',
- '              flatten: true,',
- '            }, { sessionId }).catch(() => {});');
-one('engine.js', relatedPageAttach,
- '            // Prepare the paused parent before attaching its related targets.');
+one('engine.js', '        const destroyedId = event.params?.targetId;', join(
+ '        const destroyedId = event.params?.targetId;',
+ '        item.lycoPreparedPageTargets?.delete(destroyedId);',
+ '        item.lycoResumedPageTargets?.delete(destroyedId);'));
+one('engine.js',
+ '        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ join('        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ '        item.lycoPreparedPageTargets?.delete(detachedTargetId);',
+ '        item.lycoResumedPageTargets?.delete(detachedTargetId);'));
 one('engine.js',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
- join('await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });',
- relatedPageAttach));
+ 'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
 one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
  '            item.lycoPreparedPageTargets ||= new Set();',
  '            if (targetInfo.type === "page") item.lycoPreparedPageTargets.add(targetId);',
  '            newTabGate.ready(event.sessionId);',
  '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
+one('engine.js', join(
+ '            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId }).catch(() => {});",
+ '            }',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"),
+ join('            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, {sessionId}).catch(error => {",
+ '                if (item.lycoNativeIdentity) throw error;',
+ '              });',
+ '            }',
+ '            item.lycoResumedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoResumedPageTargets.add(targetId);',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"));
 one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
  '        } catch (error) {',
  '          if (item.lycoNativeIdentity && (waitingForDebugger || newTabGate.has(event.sessionId))) {',
@@ -272,7 +277,8 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
  '            },',
  '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection?.opened && !item.workerFingerprintConnection.closed && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
- '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude)),',
+ '            isPagePrepared: id => Boolean(item.lycoPreparedPageTargets?.has(id) && item.lycoResumedPageTargets?.has(id)),',
+ '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude && item.lycoResumedPageTargets?.has(id))),',
  '          });',
  '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
  '      }',

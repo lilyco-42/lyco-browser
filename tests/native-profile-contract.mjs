@@ -176,6 +176,23 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
         assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
         assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
+        const frameDeadline = Date.now() + 30000;
+        while (Date.now() < frameDeadline && !['same', 'cross'].every(realm => fixture.frameResult(newPhase, realm)?.value)) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        report.parserFrames ||= {};
+        report.parserFrames[newPhase] = Object.fromEntries(['same', 'cross'].map(realm => [realm, fixture.frameResult(newPhase, realm) || null]));
+        await checkpoint(newPhase + ':parser-frames-observed');
+        for (const realm of ['same', 'cross']) {
+          const frame = report.parserFrames[newPhase][realm];
+          assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
+          assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
+          assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
+          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
+            assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);
+          }
+        }
+        report.checks.push(newPhase + ':same-and-cross-site-parser-frames-first-script-identity-and-proxy');
       }
       results[phase] = value;
     } catch (error) {

@@ -23,7 +23,7 @@ function fixture(restored = true) {
   const args = {bridge: {workerUrl}, port: 19341, cdp: {PersistentConnection: Connection,
     targets: async () => [{type: 'service_worker', targetId: 'owned-bridge', url: workerUrl}],
     browserSocket: async () => 'ws://127.0.0.1:19341/devtools/browser/owner'},
-    assertActive() {}, isPrepared: () => true, hasPreparedPage: () => true, timeoutMs: 100};
+    assertActive() {}, isPrepared: () => true, isPagePrepared: () => true, hasPreparedPage: () => true, timeoutMs: 100};
   return {args, calls, state};
 }
 
@@ -44,6 +44,28 @@ test('never requests restore before protection or after a lifecycle cancellation
   await assert.rejects(openSavedSession({...f.args, isPrepared: () => false}), /未就绪/);
   await assert.rejects(openSavedSession({...f.args, assertActive() {throw Error('cancelled');}}), /cancelled/);
   assert.equal(f.calls.length, 0);
+});
+
+test('allocating the blank target cannot trigger restore until that exact page is ready', async () => {
+  const f = fixture(), inspected = [];
+  let prepared = false;
+  const pending = openSavedSession({...f.args, timeoutMs: 1000,
+    isPagePrepared(id) {inspected.push(id); return prepared;}});
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(f.calls.some(row => row.method === 'Target.createTarget'), true);
+  assert.equal(f.calls.some(row => row.params?.expression === 'globalThis.lycoRestoreSavedWindow()'), false);
+  assert.ok(inspected.length > 0 && inspected.every(id => id === 'trusted-bootstrap'));
+  prepared = true;
+  await pending;
+  assert.equal(f.calls.filter(row => row.params?.expression === 'globalThis.lycoRestoreSavedWindow()').length, 1);
+});
+
+test('a blank context that never completes preparation is closed without requesting restore', async () => {
+  const f = fixture();
+  await assert.rejects(openSavedSession({...f.args, isPagePrepared: () => false}), /上下文尚未就绪/);
+  assert.equal(f.calls.some(row => row.params?.expression === 'globalThis.lycoRestoreSavedWindow()'), false);
+  assert.equal(f.calls.filter(row => row.method === 'Target.closeTarget').length, 1);
+  assert.equal(f.state.closed, true);
 });
 
 test('no closed native window, missing prepared page and dropped protection fail closed', async () => {
