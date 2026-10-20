@@ -106,7 +106,7 @@ one('engine.js',
  "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
- "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext, activatePausedRestoredPage } = require('./lyco/new-tab-gate');"));
+ "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
 // The owning connection already handles its Workers. Do not inject module-wide
 // latestFingerprint into the privileged local session service (or other profiles).
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
@@ -128,8 +128,7 @@ one('engine.js',
  '              filter: [{type: "browser", exclude: true}, {}],',
  '            }, {sessionId});',
  '            if (prepared) await prepared;',
- "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
- '            await activatePausedRestoredPage({connection, restoring: item.lycoRestoringSession, waitingForDebugger, targetInfo});'));
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
@@ -249,7 +248,6 @@ one('engine.js', "    if (restoreSession) args.push('--restore-last-session');",
  "    if (lycoDeferredRestore) args.push('--no-startup-window');\n    else if (restoreSession) args.push('--restore-last-session');");
 one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucceeded;', join(
  '      if (lycoDeferredRestore && injectSucceeded && workerSucceeded) {',
- '        item.lycoRestoringSession = true;',
  '        try {',
  '          await openSavedSession({bridge: lycoSessionBridge, port: item.port, cdp,',
  '            assertActive: () => {',
@@ -260,7 +258,6 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude)),',
  '          });',
  '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
- '        finally { item.lycoRestoringSession = false; }',
  '      }',
  '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
 one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',

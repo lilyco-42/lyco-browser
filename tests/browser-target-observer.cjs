@@ -27,7 +27,7 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
     }});
     const command = connection.command;
     connection.command = async function (method, params, options) {
-      if (!['Target.setAutoAttach', 'Target.activateTarget', 'Wayfern.setFingerprint', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
+      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
         return command.call(this, method, params, options);
       }
       const event = {kind: 'command', method, session: id(options?.sessionId), done: false, failed: false};
@@ -37,8 +37,20 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
         event.filter = params?.filter?.map(row => ({type: row.type, exclude: Boolean(row.exclude)}));
       }
       record(event);
+      const started = Date.now();
       try { const result = await command.call(this, method, params, options); event.done = true; return result; }
-      catch (error) { event.done = true; event.failed = true; throw error; }
+      catch (error) {
+        event.done = true; event.failed = true;
+        // Fixed enums only: raw errors may include URLs, source or credentials.
+        // A failed command alone does not prove timeout or renderer deadlock.
+        const message = String(error?.message || '');
+        event.reason = /timed?\s*out|timeout/i.test(message) ? 'timeout'
+          : /session.*(?:not found|not exist|closed)|no session/i.test(message) ? 'session-unavailable'
+          : /target.*closed|connection.*closed|socket.*closed/i.test(message) ? 'target-or-connection-closed'
+          : /(?:method|command).*(?:not found|not supported)|wasn't found/i.test(message) ? 'method-unavailable'
+          : /execution context/i.test(message) ? 'execution-context-unavailable' : 'other';
+        throw error;
+      } finally { event.elapsedMs = Math.max(0, Date.now() - started); }
     };
     return connection;
   };

@@ -43,3 +43,23 @@ test('page diagnostics retain only configuration comparisons and fixed exception
   assert.equal(trace[1].type, 'TypeError');
   assert.doesNotMatch(JSON.stringify(trace), /CI_PRIVATE_DEVICE|description|exceptionDetails|url/);
 });
+
+test('failed preparation records bounded error classes rather than leaking raw errors', async () => {
+  const secret = 'CI_PRIVATE_PAYLOAD';
+  for (const [message, reason] of [
+    ['CDP command timed out', 'timeout'], ['No session with given id', 'session-unavailable'],
+    ['Target closed', 'target-or-connection-closed'], ["Method wasn't found", 'method-unavailable'],
+    ['Cannot find execution context', 'execution-context-unavailable'], ['unclassified', 'other'],
+  ]) {
+    class BrowserEngine { startWorkerFingerprintInjection() {} }
+    const failure = Error(message + ' ' + secret);
+    const cdp = {async connect() {return {async command() {throw failure;}};}};
+    const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+    const connection = await cdp.connect(secret);
+    await assert.rejects(connection.command('Runtime.enable', {}, {sessionId: secret}), error => error === failure);
+    assert.equal(trace[0].reason, reason);
+    assert.equal(trace[0].failed, true); assert.equal(trace[0].done, true);
+    assert.ok(Number.isFinite(trace[0].elapsedMs) && trace[0].elapsedMs >= 0);
+    assert.doesNotMatch(JSON.stringify(trace), /CI_PRIVATE_PAYLOAD|message|stack/);
+  }
+});
