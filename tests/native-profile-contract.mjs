@@ -188,9 +188,18 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
           assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
           assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
-          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
+          for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
             assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);
           }
+          // Device Memory is [SecureContext]; loopback HTTP is trustworthy,
+          // ordinary HTTP on the cross-site fixture is not. Preserve both the
+          // configured value in secure frames and native API absence elsewhere.
+          // https://www.w3.org/TR/device-memory/#webidl-interface
+          // https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy
+          const secure = realm === 'same';
+          assert.equal(frame.value.secureContext, secure, `${newPhase}: ${realm} unexpected security context`);
+          assert.equal(frame.value.memoryAvailable, secure, `${newPhase}: ${realm} deviceMemory exposure violates its security context`);
+          assert.equal(frame.value.memory, secure ? value.memory : undefined, `${newPhase}: ${realm} unexpected deviceMemory`);
         }
         report.checks.push(newPhase + ':same-and-cross-site-parser-frames-first-script-identity-and-proxy');
       }

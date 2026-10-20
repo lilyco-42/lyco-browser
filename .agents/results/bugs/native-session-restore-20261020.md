@@ -70,6 +70,20 @@ call after readiness, and cleanup with zero calls if readiness never arrives.
 Actual native acceptance is still required to establish whether this resolves
 the stalled restored renderers.
 
+Run39402864676 passed the cheap readiness tests but failed the new cross-site
+frame assertion before reaching session restoration. Its captured cross-site
+UA, language, CPU, timezone, frame host and proxy path match expectations, but
+`deviceMemory` is absent on ordinary HTTP. That absence is required by its
+`[SecureContext]` API definition, whereas loopback HTTP is trustworthy and exposes
+the configured value. The test originally assumed equal API availability across
+these contexts. Corrected coverage records and asserts `isSecureContext` and
+property presence, retaining the configured memory assertion for the secure
+frame and requiring absence in the insecure frame. Product behavior is not
+changed. This failed run does not establish whether the readiness fix works.
+
+References: https://www.w3.org/TR/device-memory/#webidl-interface and
+https://www.w3.org/TR/secure-contexts/#is-origin-trustworthy.
+
 ## Scope and residual risk
 
 The root cause inside restored-target initialization is still unresolved.

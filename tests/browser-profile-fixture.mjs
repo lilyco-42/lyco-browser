@@ -84,7 +84,8 @@ export function createBrowserProfileFixture() {
       const script = `const initial={userAgent:navigator.userAgent,platform:navigator.platform,
         language:navigator.language,languages:Array.from(navigator.languages),cores:navigator.hardwareConcurrency,
         memory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
-        host:location.hostname,isTop:window===window.top};
+        host:location.hostname,isTop:window===window.top,secureContext:isSecureContext,
+        memoryAvailable:'deviceMemory' in navigator};
         fetch(${JSON.stringify(endpoint)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(initial)});`;
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
       res.end('<!doctype html><meta charset="utf-8"><title>LYCO parser frame</title><script>' + script + '</script>');
