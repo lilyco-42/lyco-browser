@@ -9,6 +9,7 @@ import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
+import {createIndependentAuditFixture} from './independent-fingerprint-audits.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -18,6 +19,8 @@ const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolv
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
 const profileProbe=createBrowserProfileFixture();
+const independentAudit=process.env.LYCO_INDEPENDENT_AUDITS==='true'
+ ? await createIndependentAuditFixture(process.env.GITHUB_WORKSPACE) : null;
 const checkpoint=async stage=>{
  report.stage=stage;report.stageAt=new Date().toISOString();report.profileAudit=profileProbe.snapshot();
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
@@ -25,6 +28,7 @@ const checkpoint=async stage=>{
 const origin=http.createServer((req,res)=>{
  const proxied=tunnelPorts.has(req.socket.remotePort)||req.headers['x-ci-proxy']==='yes';
  report.proxyRequests.push({path:req.url,proxied});
+ if(independentAudit?.route(req,res,proxied))return;
  if(privacyProbe.route(req,res,proxied))return;
  if(profileProbe.route(req,res,proxied))return;
  res.end('LYCO browser fixture reached through proxy');
@@ -38,7 +42,9 @@ const geo=http.createServer((_req,res)=>{
 const geoPort=await listen(geo);
 const proxy=http.createServer((req,res)=>{
  const url=new URL(req.url);
- if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));return;}
+ if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {
+  if(independentAudit){res.writeHead(403);res.end('CI audit external HTTP blocked');return;}
+  res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));return;}
  url.hostname='127.0.0.1';
  const upstream=http.request(url,{headers:{...req.headers,'x-ci-proxy':'yes'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res)});
  upstream.on('error',()=>{res.writeHead(502);res.end()});req.pipe(upstream);
@@ -319,7 +325,8 @@ try {
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
  await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
- await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot});
+ await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot,
+  independentAudit,evidence});
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});

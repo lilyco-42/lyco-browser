@@ -6,10 +6,12 @@ import {createRequire} from 'node:module';
 import {readOnlyProfileProbeSource} from './browser-profile-fixture.mjs';
 import {verifyConcurrentWorkerProfiles} from './native-concurrent-profile-contract.mjs';
 import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs';
+import {verifyIndependentAudits} from './independent-fingerprint-audits.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
-export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report, checkpoint, appRoot}) {
+export async function verifyNativeProfileIsolation({page, profile, originPort, fixture, report, checkpoint, appRoot,
+  independentAudit, evidence}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
   const settings = {
@@ -249,6 +251,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
   await verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort,
     fixture: fixture.concurrent, report, checkpoint, cdp});
+  if (independentAudit) await verifyIndependentAudits({page, profiles, settings, ua, originPort, cdp,
+    fixture: independentAudit, profileRoots, report, checkpoint, evidence});
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);
