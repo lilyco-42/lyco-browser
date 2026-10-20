@@ -242,6 +242,19 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   // cross-profile Canvas result. All original strict assertions remain below.
   await verifyNativeSessionRestore({page, profile, expected: settings.A, ua, originPort,
     profileRoot: profileRoots.A, fixture, report, checkpoint, cdp});
+  // Collect independent diagnostics before the strict native Canvas gate can
+  // stop the run. Preserve that gate and retain a detector failure as fatal;
+  // an unrelated native failure must not erase all third-party observations.
+  let independentFailure;
+  if (independentAudit) {
+    try {await verifyIndependentAudits({page, profiles, settings, ua, originPort, cdp,
+      fixture: independentAudit, profileRoots, report, checkpoint, evidence});}
+    catch (error) {
+      independentFailure = error;
+      report.independentAuditFailure = String(error.stack || error);
+      await checkpoint('independent:failed');
+    }
+  }
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
     'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
@@ -251,8 +264,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');
   await verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort,
     fixture: fixture.concurrent, report, checkpoint, cdp});
-  if (independentAudit) await verifyIndependentAudits({page, profiles, settings, ua, originPort, cdp,
-    fixture: independentAudit, profileRoots, report, checkpoint, evidence});
+  if (independentFailure) throw independentFailure;
   // Exercise the REAL engine's nested startup catch, not only the cache helper:
   // no last-chance navigation, ready state or stranded lock on a rejected file.
   const identityPath = path.join(profileRoots.A, `lyco-native-identity-${profile.id}.json`);

@@ -203,8 +203,10 @@ jobs:
         # Retain sequential A/B and new-target checks, then seed and restore a
         # genuine two-tab session. Allow those two extra native launches while
         # keeping each individual operation and the whole step bounded.
-        timeout-minutes: 12
+        timeout-minutes: 18
         shell: pwsh
+        env:
+          LYCO_INDEPENDENT_AUDITS: 'true'
         run: |
           npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
           if ($LASTEXITCODE -ne 0) { exit 1 }
@@ -250,8 +252,20 @@ jobs:
         shell: pwsh
         run: ./lyco/tests/windows-installer.ps1
 
+      - name: Preserve native diagnostics even when a PR cannot create releases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            lyco-native-preflight/
+            lyco-native-evidence/
+            lyco-native-installed/
+
       - name: Preserve native acceptance evidence in an unpublished draft
-        if: always() && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
+        if: always() && github.event_name != 'pull_request' && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
         shell: pwsh
         run: |
           $directories=@('lyco-native-preflight','lyco-native-evidence','lyco-native-installed') | Where-Object {Test-Path $_}
