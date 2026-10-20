@@ -8,6 +8,7 @@ import {parseConnection} from '../extensions/lain42/connection.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
+import {verifyNativeAccountPanel} from './native-account-panel.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -119,10 +120,12 @@ try {
   assert.equal(await page.locator('#lyco-password').getAttribute('placeholder'),'网站密码');
  }
  report.checks.push('localized-panel-survives-upstream-language-switch');
+ await verifyNativeAccountPanel({page,report,evidence});
  assert.equal(await page.locator('#lyco-create-profile').isDisabled(),true);
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);
+ assert.equal(await page.locator('#lyco-account-chip').textContent(),'月卡可用');
  report.checks.push('native-login-valid-entitlement');
  const connections=await page.evaluate(()=>Promise.all([window.ops.lycoConnect(),window.ops.lycoConnect()]));
  assert.equal(connections[0].port,connections[1].port);
@@ -132,6 +135,7 @@ try {
  const connection=parseConnection(await application.evaluate(({clipboard})=>clipboard.readText()));
  assert.equal(connection.port,connections[0].port);
  assert.equal(connection.scheme,'http');report.checks.push('real-main-process-extension-handoff-no-account-secrets');
+ assert.equal(await page.locator('#lyco-network-chip').textContent(),'已连接');
  await page.evaluate(()=>{const adopt=window.adoptLycoProfile;window.adoptLycoProfile=p=>{const value=adopt(p);window.__lycoCreated=value;return value}});
  await page.locator('#lyco-create-profile').click();
  await page.waitForFunction(()=>Boolean(window.__lycoCreated));
@@ -332,6 +336,10 @@ try {
  await page.locator('#lyco-refresh').click();await page.waitForFunction(async()=>!(await window.ops.lycoStatus()).connected);
  assert.equal(await page.locator('#lyco-create-profile').isDisabled(),true);
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).connected,false);
+ await page.waitForFunction(()=>document.getElementById('lyco-account-chip').textContent==='待购买或续费'
+  && document.getElementById('lyco-network-chip').textContent==='未连接'
+  && document.getElementById('view-lyco').getAttribute('aria-busy')==='false');
+ report.checks.push('native-account-state-reflects-login-connection-and-expiry');
  report.checks.push('official-purchase-link-no-payment','cross-account-start-rejected','expired-entitlement-disconnects');
  await page.screenshot({path:path.join(evidence,'windows-expired-membership.png')});
 } catch(error) {
