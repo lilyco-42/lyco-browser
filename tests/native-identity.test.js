@@ -132,15 +132,48 @@ test('declared settings reach native pages without changing saved device/noise o
   const expected = {...JSON.parse(before).fingerprint, language: 'en-GB', languages: ['en-GB', 'en'],
     timezone: 'Asia/Tokyo', hardwareConcurrency: 6, deviceMemory: 4};
   assert.deepEqual(f.calls[0].params, expected);
+  assert.deepEqual(f.calls[1], {target: f.tabs[0].webSocketDebuggerUrl,
+    method: 'Emulation.setHardwareConcurrencyOverride', params: {hardwareConcurrency: 6}});
   assert.equal(f.calls.some(call => call.method === 'Wayfern.getFingerprint'), false);
   const sent = [];
   await identity.applySession({command: async (...args) => sent.push(args)}, 'new-session', {type: 'page', targetId: 'new-page'});
   assert.deepEqual(sent[0][1], expected);
+  assert.deepEqual(sent[1], ['Emulation.setHardwareConcurrencyOverride', {hardwareConcurrency: 6},
+    {sessionId: 'new-session', timeout: 5000}]);
   assert.equal(await fs.readFile(file, 'utf8'), before);
   f.calls.length = 0;
   await prepareNativeIdentity({...f.args, settings: {languages: ['fr-FR', 'fr'], hardwareConcurrency: 8}});
   assert.equal(f.calls[0].params.canvasSeed, expected.canvasSeed);
   assert.equal(await fs.readFile(file, 'utf8'), before);
+});
+
+test('a rejected native CPU override cannot ready a target or reset its saved identity', async t => {
+  const f = await fixture(t);
+  await prepareNativeIdentity(f.args);
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const bytes = await fs.readFile(file);
+  const originalCall = f.cdp.call;
+  f.cdp.call = async (...args) => {
+    if (args[1] === 'Emulation.setHardwareConcurrencyOverride') throw Error('unsupported or refused');
+    return originalCall(...args);
+  };
+  await assert.rejects(prepareNativeIdentity({...f.args, settings: {hardwareConcurrency: 6}}), /恢复失败/);
+  assert.deepEqual(await fs.readFile(file), bytes);
+  f.cdp.call = originalCall;
+  const identity = await prepareNativeIdentity({...f.args, settings: {hardwareConcurrency: 6}});
+  const sent = [], connection = {command: async (...args) => {
+    sent.push(args);
+    if (args[0] === 'Emulation.setHardwareConcurrencyOverride') throw Error('unsupported or refused');
+    return {};
+  }};
+  await assert.rejects(identity.applySession(connection, 'cpu-refused', {type: 'page', targetId: 'page-refused'}),
+    error => error.code === 'LYCO_NATIVE_IDENTITY_REFUSED');
+  assert.deepEqual(sent.map(([method]) => method),
+    ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride', 'Target.closeTarget']);
+  assert.equal(connection.lycoIdentityRefusedSessions.has('cpu-refused'), true);
+  assert.equal(sent.some(([method]) => method === 'Runtime.runIfWaitingForDebugger'), false);
+  assert.deepEqual(await fs.readFile(file), bytes);
+  assert.equal(f.calls.filter(call => call.method === 'Wayfern.getFingerprint').length, 1);
 });
 
 test('invalid native UI settings fail before reading or changing the saved identity', async t => {

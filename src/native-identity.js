@@ -121,7 +121,16 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     for (const target of applied) if (!live.has(target)) applied.delete(target);
     for (const tab of current) {
       if (applied.has(tab.webSocketDebuggerUrl)) continue;
-      try { await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000); } catch {
+      try {
+        await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
+        // Wayfern's saved payload alone can leave an isolated world's CPU at
+        // the host value. Apply the explicit setting through Chromium as well,
+        // before this page is ready; do not depend on a main-world JS getter.
+        if (declared.hardwareConcurrency !== undefined) {
+          await cdp.call(tab.webSocketDebuggerUrl, 'Emulation.setHardwareConcurrencyOverride',
+            {hardwareConcurrency: declared.hardwareConcurrency}, 5000);
+        }
+      } catch {
         throw Error('原生身份恢复失败，环境未启动；已保存身份不会被重置');
       }
       applied.add(tab.webSocketDebuggerUrl);
@@ -137,6 +146,10 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       // The engine's existing flattened auto-attach connection owns this
       // paused target. Restore the complete saved device before resuming it.
       await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+      if (declared.hardwareConcurrency !== undefined) {
+        await connection.command('Emulation.setHardwareConcurrencyOverride',
+          {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
+      }
     } catch {
       connection.lycoIdentityRefusedSessions ||= new Set();
       connection.lycoIdentityRefusedSessions.add(sessionId);
