@@ -160,6 +160,10 @@ one('engine.js', '        return await connection.command(method, params, { sess
  '        documentStart.succeeded(method, result);',
  '        return result;'));
 one('engine.js',
+ '    const fontBlobBridge = injectFp?.fontBlobBridge || baseFp?.fontBlobBridge || item?.fontBlobBridge || item?.fingerprint?.fontBlobBridge;',
+ join('    if (needsDocumentStartGuard) await sessionCall("Page.enable", {});',
+ '    const fontBlobBridge = injectFp?.fontBlobBridge || baseFp?.fontBlobBridge || item?.fontBlobBridge || item?.fingerprint?.fontBlobBridge;'));
+one('engine.js',
  '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {',
  join('        documentStart.failed(method, err);',
  '        if (isSubframe && /Command can only be executed on top-level targets|Cannot find default execution context/i.test(String(err?.message || err))) {'));
@@ -254,7 +258,7 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '              this.assertStartGenerationActive(profile.id, lifecycleGeneration);',
  '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
  '            },',
- '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
+ '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection?.opened && !item.workerFingerprintConnection.closed && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
  '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude)),',
  '          });',
  '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
