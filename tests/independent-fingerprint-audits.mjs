@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {beginCpuDiagnostic} from './audit-cpu-diagnostic.mjs';
 
 export const auditVersions = Object.freeze({
   creepjs: '10aa6724cd33a1015db1574211890518cd04f0cc',
@@ -222,7 +223,7 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
       }
       for (const suite of ['creepjs', 'locale', 'sdk']) {
         const row = result.runs[phase].suites[suite] = {};
-        let socket;
+        let socket, cpuDiagnostic;
         try {
           socket = (await cdp.tabs(state.port)).find(tab => tab.url === urls[suite])?.webSocketDebuggerUrl;
           assert.ok(socket, suite + ': actual native page missing');
@@ -296,6 +297,26 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
             } catch {row.failureScreenshotUnavailable = true;}
           }
           result.failures.push({phase, suite, error: row.error});
+          // Only after the original scenario has failed: profiling cannot
+          // change its acceptance timing or turn a failed observation green.
+          // No reload, resume, scanner call or second detector attempt.
+          if (socket) {
+            cpuDiagnostic = await beginCpuDiagnostic(cdp, socket);
+            if (cpuDiagnostic.available) await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } finally {
+          if (cpuDiagnostic) {
+            const diagnostic = await cpuDiagnostic.finish();
+            const {profile, ...metadata} = diagnostic;
+            row.cpuDiagnostic = metadata;
+            if (profile) {
+              const file = `independent-${phase}-${suite}-cpu.json`;
+              try {
+                await fs.writeFile(path.join(evidence, file), JSON.stringify(profile));
+                row.cpuDiagnostic.file = file;
+              } catch {row.cpuDiagnostic.saveFailed = true;}
+            }
+          }
         }
         result.requests = [...fixture.requests];
         await checkpoint('independent:' + phase + ':' + suite + ':observed');

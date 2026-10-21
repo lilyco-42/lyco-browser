@@ -5,6 +5,19 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`e9fc0ab` / [Actions39536470665](https://github.com/lilyco-42/lyco-browser/actions/runs/39536470665)
+已完整写出报告，仍失败（5个独立场景/检测失败）。B确已启动、A/B同时在线，
+两份原身份缓存字节不变，原生34项检查通过。A初次和重开均在DPR1保留旋转
+矩形异常，地区23/low及SDK通过。B的DPR1.25与CSS匹配，但Creep未完成，
+地区扫描读取超时，SDK已采集原始结果后截图超时；不能将B算作通过。
+官方与本地工件SHA-256均为
+`81f9650ecc85a28464f7151346faf6278696064947c05a5c90faaf7836fee872`。
+
+当前只在原场景已失败后采集一秒CPU诊断：裸CDP页面连接执行Profiler命令，
+不注入脚本、不加断点、不解除暂停、不重载或重试检测。原失败状态保留，
+全绿场景不启用Profiler。保存调用树/采样/固定来源类别，删除URL与额外字段，
+不捕获局部变量；不可用/超时明确记录。用来定位无响应页面，不冒称产品修复。
+
 `7d6ae33` / [Actions39534105163](https://github.com/lilyco-42/lyco-browser/actions/runs/39534105163)
 被测试进程未处理的Socket `ECONNRESET` 中断，最后快照停在B启动，不能判定
 逐页启动修复是否生效。A三组通过，但只读DPR=1.5：固定旋转的DPR=1分支
