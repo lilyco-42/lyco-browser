@@ -5,6 +5,26 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`0297a62` / [Actions39576572023](https://github.com/lilyco-42/lyco-browser/actions/runs/39576572023)
+原生预检通过并记录42项，SDK联合断言实际通过，A重开visitor/audio稳定且B不同。
+读取工件后确认三个Creep场景DPR分别为1.5/2/1.5，没有覆盖DPR1已知旋转失败。
+为补覆盖缺口，在压缩阶段主动取消这轮；保存了预检原始数据，不宣称整轮通过。
+官方与本地工件SHA-256均为
+`8db0c19f18c1ef7c310838c7791928d3d98b9969aa570cfa8101e8eafbe12a13`。
+字体声明实际为JSON-string、300项；十个候选在原生隔离世界和网页世界结果相同，
+但没有宿主正控制，不能根据几个未安装字体被拒绝就证明额外宿主字体受到隔离。
+
+下一轮A初次和重开明确保存DPR1配置，并要求实际DPR及CSS resolution一致；
+不修改产品默认、原检测分数、噪声、身份cache或此前的联合/并行/恢复门禁。
+预检证据将先上传，再进行压缩，便于及时检查覆盖范围。
+字体正控制只允许github-hosted临时Windows runner，使用固定源码与SHA-256的
+OFL字体，重新命名为独立测试名称，在不受配置注入的工作台确认local加载成功且
+ASCII测宽与fallback不同，再比较配置页面两种世界中是否能看到该额外字体。
+超时/声明未知不能算成功隔离；单个字体对照也不等于所有字体API已通过。
+字体与授权文本来源固定在google/fonts的
+[`3b99d83`提交](https://github.com/google/fonts/tree/3b99d83d2625944fc0b8bd328d793fa819b92381/ofl/abel)，
+测试字体不进入产品包，结束时只清理本次文件及注册项。
+
 `1e06235` / [Actions39540863316](https://github.com/lilyco-42/lyco-browser/actions/runs/39540863316)
 获得完整A初次/B并行/A重开：三次地区23/low及SDK通过，原生34项完成；
 原身份cache不变。所有Creep页最初hidden/focused=false，选中后实际可见且

@@ -1,6 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fontCandidates, summarizeFontDeclaration, observeNativeFonts} from './native-font-observation.mjs';
+import {fontCandidates, hostFontControlFamily, summarizeFontDeclaration, observeNativeFonts,
+  compareHostFontControl, observeHostFontControl} from './native-font-observation.mjs';
+
+test('a missing or unreadable host control cannot certify a negative font observation', async () => {
+  assert.deepEqual(compareHostFontControl({}, [], [], null), {status: 'host-positive-control-missing'});
+  const page = {evaluate: async () => [{family: hostFontControlFamily, local: 'rejected'}]};
+  await assert.rejects(observeHostFontControl(page, hostFontControlFamily), /could not load/);
+});
+
+test('denied FontFace alone cannot conceal leaked host font metrics, and timeouts remain unknown', () => {
+  const declaration = summarizeFontDeclaration(['Arial']);
+  const host = {positive: true, family: hostFontControlFamily};
+  const blocked = [{family: hostFontControlFamily, local: 'rejected', fallback: [1, 2, 3], requested: [1, 2, 3]}];
+  const leaked = [{...blocked[0], requested: [10, 2, 3]}];
+  assert.deepEqual(compareHostFontControl(declaration, blocked, leaked, host),
+    {status: 'observed', declared: false, nativeExtraBlocked: true, productExtraBlocked: false});
+  assert.equal(compareHostFontControl(declaration, [{...blocked[0], local: 'timeout'}], blocked, host).nativeExtraBlocked, null);
+  assert.equal(compareHostFontControl(summarizeFontDeclaration([hostFontControlFamily]), blocked, blocked, host).status,
+    'control-declared-or-unknown');
+});
 
 test('font declaration evidence includes only fixed public candidate membership', () => {
   const result = summarizeFontDeclaration('["Arial","PRIVATE_USER_FONT","SimSun"]');

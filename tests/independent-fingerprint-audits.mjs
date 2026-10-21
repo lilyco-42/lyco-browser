@@ -220,19 +220,26 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
         for (const item of Object.values(profiles)) await page.evaluate(id => window.ops.stopProfile(id), item.id);
       }
       const expected = settings[owner];
+      // Exercise the known hard branch deterministically. This is an explicit
+      // CI-profile setting, not a product default change or a DPR chosen to
+      // evade the pinned detector's DPR=1 rotation check.
+      const forcedDpr = owner === 'A' ? 1 : null;
       const urls = {creepjs: `http://127.0.0.1:${originPort}/independent/creepjs/index.html?phase=${phase}`,
         locale: `http://127.0.0.1:${originPort}/independent/locale/index.html?phase=${phase}`,
         sdk: `http://127.0.0.1:${originPort}/independent/sdk/index.html?phase=${phase}`};
-      const configured = await page.evaluate(({source, expected, ua, urls}) => window.adoptLycoProfile({
+      const configured = await page.evaluate(({source, expected, ua, urls, forcedDpr}) => window.adoptLycoProfile({
         ...source, os: 'Windows', language: expected.language, userAgent: ua,
         startUrl: urls.creepjs, platform: {type: 'other', startUrl: urls.creepjs},
         advanced: {...source.advanced, startUrls: Object.values(urls).join('\n'), saveCookies: true},
-        fingerprint: {...source.fingerprint, cores: expected.cores, memory: expected.memory},
+        fingerprint: {...source.fingerprint, cores: expected.cores, memory: expected.memory,
+          ...(forcedDpr === null ? {} : {devicePixelRatio: forcedDpr})},
         privacy: {...source.privacy, deviceProfile: 'default', cores: expected.cores, memory: expected.memory,
+          ...(forcedDpr === null ? {} : {fingerprint: {...(source.privacy?.fingerprint || source.fingerprint),
+            cores: expected.cores, memory: expected.memory, devicePixelRatio: forcedDpr}}),
           languageMode: 'profile', uiLanguage: 'profile', langFromIp: false, timezoneFromIp: false, geoFromIp: false,
           timezoneMode: 'custom', timezone: expected.timezone, canvas: 'noise', refreshFingerprintOnStart: false},
-      }), {source: profiles[owner], expected, ua, urls});
-      result.runs[phase] = {expected, suites: {}};
+      }), {source: profiles[owner], expected, ua, urls, forcedDpr});
+      result.runs[phase] = {expected, forcedDpr, suites: {}};
       await checkpoint('independent:' + phase + ':start');
       await page.evaluate(source => window.ops.startProfile(source), configured);
       const state = await page.evaluate(async id => (await window.ops.profileStatus()).find(row => row.id === id), configured.id);
@@ -258,6 +265,8 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
             // of the DPR=1 branch. Observe only, never change the profile/DPR.
             row.environment = await evaluate(socket, `({devicePixelRatio: window.devicePixelRatio,
               resolutionMatches: matchMedia('(resolution: ' + window.devicePixelRatio + 'dppx)').matches})`);
+            if (forcedDpr !== null) assert.equal(row.environment.devicePixelRatio, forcedDpr, 'Required DPR1 branch not configured');
+            assert.equal(row.environment.resolutionMatches, true, 'Declared DPR contradicts CSS resolution');
             row.raw = await observe(socket, `window.Fingerprint && window.Creep && ({fingerprint: window.Fingerprint, stable: window.Creep})`, 45000);
           } else if (suite === 'sdk') {
             row.raw = await observe(socket, 'window.independentSdkResults || null', 30000);

@@ -130,7 +130,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
         evidence.nativeFontObservations ||= {};
         try {
           evidence.nativeFontObservations[owner] = await observeNativeFonts({cdp, socket,
-            contextId: context.executionContextId});
+            contextId: context.executionContextId, hostControl: report.hostFontControl});
         } catch {evidence.nativeFontObservations[owner] = {unavailable: true, privacyCertified: false};}
         const initial = current.initial, expected = settings[owner];
         console.log(JSON.stringify({nativeCanvasControl: {owner,

@@ -151,6 +151,11 @@ jobs:
           python lyco/scripts/build-icons.py
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      - name: Install distinctly named host font positive control in disposable runner
+        timeout-minutes: 4
+        shell: pwsh
+        run: ./lyco/tests/install-host-font-control.ps1
+
       - name: Install upstream dependencies
         shell: pwsh
         working-directory: upstream/Browserapp
@@ -219,6 +224,15 @@ jobs:
           node lyco/tests/native-workspaces.mjs $binary upstream/Browserapp lyco-native-preflight
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      - name: Preserve preflight evidence before archive compression
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-preflight-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: lyco-native-preflight/
+
       - name: Build Windows portable ZIP and installer
         shell: pwsh
         working-directory: upstream/Browserapp
@@ -263,6 +277,12 @@ jobs:
             lyco-native-preflight/
             lyco-native-evidence/
             lyco-native-installed/
+
+      - name: Remove the job-owned font control
+        if: always()
+        timeout-minutes: 1
+        shell: pwsh
+        run: ./lyco/tests/install-host-font-control.ps1 -Action Remove
 
       - name: Preserve native acceptance evidence in an unpublished draft
         if: always() && github.event_name != 'pull_request' && github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner

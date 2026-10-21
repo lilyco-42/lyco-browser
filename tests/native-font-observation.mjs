@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 
 // Public, fixed controls only. Never enumerate or upload a user's font payload.
+export const hostFontControlFamily = 'LYCO Audit Control 20261021';
 export const fontCandidates = Object.freeze(['Arial', 'Calibri', 'Cambria', 'Consolas',
-  'Segoe UI Emoji', 'Microsoft YaHei', 'SimSun', 'Noto Sans CJK SC', 'Papyrus', 'Helvetica Neue']);
+  'Segoe UI Emoji', 'Microsoft YaHei', 'SimSun', 'Noto Sans CJK SC', 'Papyrus', 'Helvetica Neue', hostFontControlFamily]);
 
 export function summarizeFontDeclaration(fonts) {
   const encoding = typeof fonts === 'string' ? 'json-string' : Array.isArray(fonts) ? 'array' : typeof fonts;
@@ -44,7 +45,34 @@ function fontObservation(candidates) {
   }));
 }
 
-export async function observeNativeFonts({cdp, socket, contextId}) {
+export async function observeHostFontControl(page, family) {
+  if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Host font controls only run in Actions');
+  assert.equal(family, hostFontControlFamily, 'The Actions host font control is not installed');
+  const [value] = await page.evaluate(fontObservation, [family]);
+  assert.equal(value?.family, family);
+  assert.equal(value?.local, 'loaded', 'The unconfigured workbench could not load the host font control');
+  for (const key of ['fallback', 'requested']) {
+    assert.ok(Array.isArray(value[key]) && value[key].length === 3 && value[key].every(Number.isFinite));
+  }
+  assert.notEqual(value.requested[0], value.fallback[0], 'The host font control did not change ASCII metrics');
+  return {...value, positive: true};
+}
+
+export function compareHostFontControl(declaration, native, product, hostControl) {
+  if (hostControl?.positive !== true || hostControl.family !== hostFontControlFamily) return {status: 'host-positive-control-missing'};
+  if (!declaration.recognized) return {status: 'declaration-unrecognized'};
+  if (declaration.candidates[hostFontControlFamily] !== false) return {status: 'control-declared-or-unknown'};
+  const nativeRow = native.find(row => row.family === hostFontControlFamily);
+  const productRow = product.find(row => row.family === hostFontControlFamily);
+  if (!nativeRow || !productRow) return {status: 'observations-incomplete'};
+  const blocked = row => {
+    if (!['loaded', 'rejected'].includes(row.local)) return null;
+    return row.local === 'rejected' && row.requested.every((width, index) => width === row.fallback[index]);
+  };
+  return {status: 'observed', declared: false, nativeExtraBlocked: blocked(nativeRow), productExtraBlocked: blocked(productRow)};
+}
+
+export async function observeNativeFonts({cdp, socket, contextId, hostControl}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Native font observation only runs in Actions');
   assert.ok(Number.isInteger(contextId) && contextId > 0);
   const response = await cdp.call(socket, 'Wayfern.getFingerprint', {}, 3000);
@@ -71,6 +99,6 @@ export async function observeNativeFonts({cdp, socket, contextId}) {
   // settings. No setFingerprint, style mutation, installed font or mode change.
   const native = await read(true);
   const product = await read(false);
-  return {declaration, native, product, privacyCertified: false,
-    limitation: 'No unconfigured host positive control; this is capability evidence, not font isolation acceptance'};
+  return {declaration, native, product, hostExtra: compareHostFontControl(declaration, native, product, hostControl),
+    privacyCertified: false, limitation: 'This finite font control does not certify all font APIs or frame/worker isolation'};
 }
