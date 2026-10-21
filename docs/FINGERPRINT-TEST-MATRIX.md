@@ -5,6 +5,14 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`7d6ae33` / [Actions39534105163](https://github.com/lilyco-42/lyco-browser/actions/runs/39534105163)
+被测试进程未处理的Socket `ECONNRESET` 中断，最后快照停在B启动，不能判定
+逐页启动修复是否生效。A三组通过，但只读DPR=1.5：固定旋转的DPR=1分支
+没有覆盖。原始工件SHA-256为
+`3430c82e8e79ffd5340602476c92eb525f2e06f2453f75b4070019311ce27b65`。
+当前修复保证CI代理拒绝CONNECT的早退分支也有Socket错误处理，并记录有界的
+错误代码；不改变网络白名单、响应、检测结果或通过条件，普通编程异常仍抛出。
+
 `d27233f` / [Actions39532311213](https://github.com/lilyco-42/lyco-browser/actions/runs/39532311213)
 仍为失败：普通新标签与重开检查已运行通过，A独立检测的音频、地区23/low和SDK
 门禁通过，但CreepJS保留1项 `unknown rotate dimensions`；B两个额外空白页在

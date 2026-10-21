@@ -10,6 +10,7 @@ import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
 import {createIndependentAuditFixture} from './independent-fingerprint-audits.mjs';
+import {protectConnectHandler} from './connect-handler.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -51,7 +52,7 @@ const proxy=http.createServer((req,res)=>{
 });
 // Mihomo's HTTP adapter uses CONNECT even for HTTP targets. Permit ONLY the
 // ephemeral CI origin, never a general-purpose tunnel or public listener.
-proxy.on('connect',(req,socket,head)=>{
+proxy.on('connect',protectConnectHandler((req,socket,head)=>{
  const targetPort=req.url==='ip-api.com:80'?geoPort:
   [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:null;
  if(!targetPort) {
@@ -69,7 +70,7 @@ proxy.on('connect',(req,socket,head)=>{
  upstream.on('error',()=>socket.destroy());socket.on('error',()=>upstream.destroy());
  socket.once('close',()=>{tunnelSockets.delete(socket);upstream.destroy()});
  upstream.once('close',()=>{tunnelSockets.delete(upstream);socket.destroy()});
-});
+},row=>{(report.tunnelErrors||=[]).length<30&&report.tunnelErrors.push(row)}));
 const proxyPort=await listen(proxy);
 let application;
 try {

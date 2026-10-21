@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - name: Reject session and ownership regressions before downloading the browser kernel
-        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/native-navigator.test.js tests/rect-geometry.test.js tests/startup-pages.test.js tests/session-restore.test.js tests/new-tab-gate.test.js tests/canvas-ownership-contract.test.mjs tests/independent-fingerprint-audits.test.mjs tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js
+        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/native-navigator.test.js tests/rect-geometry.test.js tests/startup-pages.test.js tests/session-restore.test.js tests/new-tab-gate.test.js tests/canvas-ownership-contract.test.mjs tests/independent-fingerprint-audits.test.mjs tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js tests/connect-handler.test.mjs
 
   windows-x64:
     needs: integration-guards
