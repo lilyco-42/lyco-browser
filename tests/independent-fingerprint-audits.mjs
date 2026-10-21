@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {beginCpuDiagnostic} from './audit-cpu-diagnostic.mjs';
+import {prepareAuditForeground, readAuditPageState} from './audit-page-lifecycle.mjs';
 
 export const auditVersions = Object.freeze({
   creepjs: '10aa6724cd33a1015db1574211890518cd04f0cc',
@@ -227,6 +228,10 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
         try {
           socket = (await cdp.tabs(state.port)).find(tab => tab.url === urls[suite])?.webSocketDebuggerUrl;
           assert.ok(socket, suite + ': actual native page missing');
+          // All three existing pages remain open in both running profiles.
+          // Select the page under observation, as a real tab click would do;
+          // record before/after instead of assuming background pages execute.
+          row.foreground = await prepareAuditForeground(cdp, socket);
           if (suite === 'creepjs') {
             // The pinned detector's fixed-rotation check runs only at DPR=1.
             // Keep that scope visible; zero lies at another DPR is not proof
@@ -286,14 +291,19 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
           row.status = 'passed';
         } catch (error) {
           row.status = 'failed'; row.error = String(error.stack || error);
+          if (socket) {
+            let observer;
+            try {
+              observer = await new cdp.PersistentConnection(socket).open(1200);
+              row.pageState = await readAuditPageState(observer);
+            } catch {row.failureStateUnavailable = true;}
+            finally {observer?.close();}
+          }
           if (socket && !row.screenshot) {
             try {
               const shot = await cdp.call(socket, 'Page.captureScreenshot', {format: 'png'}, 5000);
               assert.ok(shot.data); row.screenshot = `independent-${phase}-${suite}-failed.png`;
               await fs.writeFile(path.join(evidence, row.screenshot), Buffer.from(shot.data, 'base64'));
-              row.pageState = await evaluate(socket, `({title: document.title, ready: document.readyState,
-                fingerprintPresent: !!window.Fingerprint, creepPresent: !!window.Creep,
-                scanButtonPresent: !!document.getElementById('scan-btn')})`);
             } catch {row.failureScreenshotUnavailable = true;}
           }
           result.failures.push({phase, suite, error: row.error});
