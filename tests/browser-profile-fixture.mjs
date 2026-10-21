@@ -5,6 +5,7 @@ import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} fro
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
+  ['a-korean-egress-extra', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
   ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
   ['a-first-new-tab-2', 'A'], ['a-reopen-new-tab-2', 'A'],
@@ -112,6 +113,7 @@ export function createBrowserProfileFixture() {
     }
     if (url.pathname === '/profile-probe') {
       entry.pageProxied = Boolean(proxied);
+      entry.requestLanguage = req.headers['accept-language'] || '';
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
       const readOnly = phase.endsWith('-extra') || newTab;

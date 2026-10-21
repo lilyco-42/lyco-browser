@@ -12,6 +12,7 @@ import {verifyNativeAccountPanel} from './native-account-panel.mjs';
 import {createIndependentAuditFixture} from './independent-fingerprint-audits.mjs';
 import {protectConnectHandler} from './connect-handler.mjs';
 import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
+import {verifyNativeEgressLocale} from './native-egress-locale-contract.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -36,17 +37,19 @@ const origin=http.createServer((req,res)=>{
  res.end('LYCO browser fixture reached through proxy');
 });
 const originPort=await listen(origin);
+const defaultGeo={status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0};
+let geoResponse=defaultGeo;
 const geo=http.createServer((_req,res)=>{
  report.geoProbeRequests=(report.geoProbeRequests||0)+1;
  res.writeHead(200,{'Content-Type':'application/json'});
- res.end(JSON.stringify({status:'success',query:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));
+ res.end(JSON.stringify(geoResponse));
 });
 const geoPort=await listen(geo);
 const proxy=http.createServer((req,res)=>{
  const url=new URL(req.url);
  if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {
   if(independentAudit){res.writeHead(403);res.end('CI audit external HTTP blocked');return;}
-  res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));return;}
+  res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(geoResponse));return;}
  url.hostname='127.0.0.1';
  const upstream=http.request(url,{headers:{...req.headers,'x-ci-proxy':'yes'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res)});
  upstream.on('error',()=>{res.writeHead(502);res.end()});req.pipe(upstream);
@@ -347,8 +350,12 @@ try {
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
  await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
- await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot,
+ const profileIsolation=await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot,
   independentAudit,evidence});
+ try {
+  geoResponse={...defaultGeo,countryCode:'KR',country:'CI-Korea',lat:37.5665,lon:126.9780};delete geoResponse.timezone;
+  await verifyNativeEgressLocale({page,profile,profileRoot:profileIsolation.profileRoot,originPort,fixture:profileProbe,report,checkpoint});
+ } finally {geoResponse=defaultGeo;}
  await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).click({button:'right'});
  await page.locator('#lyco-profile-menu [data-lyco-action="edit"]').click();
  await page.locator('#view-profile-editor').waitFor({state:'visible'});

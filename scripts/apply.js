@@ -11,6 +11,12 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// A newly discovered country cannot confirm the country of a stale/default
+// saved timezone. Preserve valid exact network timezones and explicit custom
+// settings; only let IP-mode fallback derive from the newly known country.
+one('automation/locale-from-country.js',
+ '  const countryChanged = Boolean(netCountry && profCountry && netCountry !== profCountry);',
+ '  const countryChanged = Boolean(netCountry && netCountry !== profCountry);');
 // An explicit native layout policy uses the restored kernel's font isolation
 // and CSS geometry. Preserve the legacy random and real policies unchanged.
 one('engine/profile-sanitizer.js',

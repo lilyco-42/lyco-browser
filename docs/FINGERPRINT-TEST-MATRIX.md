@@ -5,6 +5,18 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`1915bc4` / [Actions39589128909](https://github.com/lilyco-42/lyco-browser/actions/runs/39589128909)
+原生预检44项已通过，整轮仍在构建安装包，不能算完整发行验收。PR的实际merge
+commit是`b6d48a477a580ab4d08a3238f1b97646c09030ae`，其parent已核对包含1915。
+预检工件SHA-256官方与本地匹配：
+`035e2800e8f3c452c1602aefc9d9284c2c70405e2cebf96a673c608476a20f47`。
+A初次/重开实际配置DPR1；A初次、B并行、A重开的Creep、地区、SDK九个场景
+均通过，SDK联合稳定性/差异性断言全true，A/B原生cache字节不变。
+宿主额外字体在Canvas/DOM/local加载三条路径真实可见，产品原生/默认世界、
+parser frames、Dedicated/ServiceWorker及停B后的A负控制均通过。
+HTML/Offscreen像素parity仍为false并记录已知限制，不据此宣称全API一致。
+源码中的新增出口国家/缺失时区回归还未由这轮预检覆盖，需下一提交实际验收。
+
 `1f124e0` / [Actions39582554021](https://github.com/lilyco-42/lyco-browser/actions/runs/39582554021)
 已结束失败。独立宿主 Edge 的固定额外字体真实加载成功，ASCII 宽度不同于
 fallback；两个原生环境的隔离世界和网页世界均拒绝该 local 字体并回退测宽。

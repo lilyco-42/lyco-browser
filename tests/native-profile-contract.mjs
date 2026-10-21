@@ -332,4 +332,5 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   // Restore the original environment as the existing ownership/expiry target.
   await checkpoint('profile:restore-original');
   await page.evaluate(source => window.adoptLycoProfile(source), profile);
+  return {profileRoot: profileRoots.A};
 }
