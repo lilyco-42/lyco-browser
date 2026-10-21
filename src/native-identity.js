@@ -114,17 +114,16 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // explicit UI settings must agree in the native engine and document script;
   // otherwise a new document initially exposes the saved device's defaults.
   device = {...device, ...declared};
+  // Keep direct-page readiness independent from a paused-session ACK. Native
+  // Actions exposed memory 8 instead of configured 4 when those records were
+  // coalesced. Both paths retain the same device; neither mints a new seed.
   const applied = new Set();
-  // A target has both a direct-page URL and an owning flattened session. Use
-  // its protocol path so localhost aliases cannot cause a second identity
-  // reset after that session has already restored the complete device.
-  const targetKey = tab => new URL(tab.webSocketDebuggerUrl).pathname;
   const apply = async tabs => {
     const current = pageTargets(tabs, port);
-    const live = new Set(current.map(targetKey));
+    const live = new Set(current.map(tab => tab.webSocketDebuggerUrl));
     for (const target of applied) if (!live.has(target)) applied.delete(target);
     for (const tab of current) {
-      if (applied.has(targetKey(tab))) continue;
+      if (applied.has(tab.webSocketDebuggerUrl)) continue;
       try {
         await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
         // Wayfern's saved payload alone can leave an isolated world's CPU at
@@ -137,7 +136,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       } catch {
         throw Error('原生身份恢复失败，环境未启动；已保存身份不会被重置');
       }
-      applied.add(targetKey(tab));
+      applied.add(tab.webSocketDebuggerUrl);
     }
   };
   await apply(targets);
@@ -154,7 +153,6 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
       }
-      applied.add('/devtools/page/' + targetInfo.targetId);
     } catch {
       connection.lycoIdentityRefusedSessions ||= new Set();
       connection.lycoIdentityRefusedSessions.add(sessionId);

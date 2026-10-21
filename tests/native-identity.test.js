@@ -119,7 +119,7 @@ test('non-Wayfern kernels are not given foreign native APIs', async () => {
   assert.equal(await prepareNativeIdentity({enabled: false}), null);
 });
 
-test('a session-restored page is not reset by the subsequent direct-page runtime pass', async t => {
+test('a session acknowledgement cannot suppress the independent live-page native preparation', async t => {
   const f = await fixture(t);
   const identity = await prepareNativeIdentity({...f.args, settings: {hardwareConcurrency: 6}});
   const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
@@ -132,8 +132,13 @@ test('a session-restored page is not reset by the subsequent direct-page runtime
   assert.deepEqual(sent.map(([method]) => method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
   f.calls.length = 0;
   await identity.apply(f.tabs);
-  assert.equal(f.calls.length, 0, 'The owner already applied both native settings; do not reset the page');
+  assert.deepEqual(f.calls.map(row => row.method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride'],
+    'A paused session acknowledgement does not certify the later live-page native state');
+  assert.deepEqual(f.calls[0].params, sent[0][1], 'Both paths restore the same saved identity and declared settings');
   assert.deepEqual(await fs.readFile(file), before);
+  f.calls.length = 0;
+  await identity.apply(f.tabs);
+  assert.equal(f.calls.length, 0, 'A completed direct-page pass remains idempotent');
   // Once the target is gone, a genuinely new target must still be prepared.
   f.tabs.pop(); await identity.apply(f.tabs);
   f.tabs.push(page); await identity.apply(f.tabs);
