@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {inspectNativeWorkerCapability} from './native-worker-capability.mjs';
 import {readOnlyConcurrentRealmSource} from './browser-concurrent-fixture.mjs';
 import {assertCanvasOwnership} from './canvas-ownership-contract.mjs';
+import {observeNativeFonts} from './native-font-observation.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -126,6 +127,11 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
         const value = result.result?.value;
         assert.match(value?.opaquePixels || '', /^[0-9a-f]{8}$/);
         evidence.nativeCanvasControls[owner] = value;
+        evidence.nativeFontObservations ||= {};
+        try {
+          evidence.nativeFontObservations[owner] = await observeNativeFonts({cdp, socket,
+            contextId: context.executionContextId});
+        } catch {evidence.nativeFontObservations[owner] = {unavailable: true, privacyCertified: false};}
         const initial = current.initial, expected = settings[owner];
         console.log(JSON.stringify({nativeCanvasControl: {owner,
           scalarMatchesOwner: value.language === expected.language && value.cores === expected.cores

@@ -170,6 +170,26 @@ export function assertIndependentResult(suite, value, expected) {
   assert.ok(fp.workerScope.lied === 0 || fp.workerScope.lied === false, 'CreepJS rejects Worker consistency');
 }
 
+export function assertSdkContinuity(runs) {
+  const phases = ['a-first', 'b-parallel', 'a-reopen'];
+  for (const phase of phases) assert.equal(runs?.[phase]?.suites?.sdk?.status, 'passed', 'SDK scenario is incomplete: ' + phase);
+  const visitor = phase => runs[phase].suites.sdk.raw?.fingerprintjs?.visitorId;
+  const audio = phase => runs[phase].suites.sdk.raw?.audio?.activeHash;
+  for (const phase of phases) {
+    assert.match(visitor(phase) || '', /^[0-9a-f]{32}$/, 'SDK visitor identity missing');
+    assert.match(audio(phase) || '', /^[0-9a-f]{64}$/, 'SDK audio identity missing');
+  }
+  const relations = {visitorAStable: visitor('a-first') === visitor('a-reopen'),
+    visitorDistinct: visitor('a-first') !== visitor('b-parallel'),
+    audioAStable: audio('a-first') === audio('a-reopen'),
+    audioDistinct: audio('a-first') !== audio('b-parallel')};
+  assert.ok(relations.visitorAStable, 'FingerprintJS identity changed after reopening A');
+  assert.ok(relations.visitorDistinct, 'FingerprintJS did not distinguish the two configured environments');
+  assert.ok(relations.audioAStable, 'Audible samples changed after reopening the same environment');
+  assert.ok(relations.audioDistinct, 'Audible samples lost the per-profile audio identity');
+  return relations;
+}
+
 export async function verifyIndependentAudits({page, profiles, settings, ua, originPort, cdp,
   fixture, profileRoots, report, checkpoint, evidence}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Independent product acceptance only runs in Actions');
@@ -344,12 +364,13 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
   }
   assert.ok(result.requests.length > 0 && result.requests.every(row => row.proxied), 'Independent audit assets bypassed Mihomo');
   assert.ok(Object.values(result.cacheUnchanged).every(Boolean), 'Independent audit replaced a saved native identity');
+  // A CreepJS finding must not suppress the independent SDK continuity gate.
+  // Missing/failed SDK scenarios never count as continuity evidence, and any
+  // original detector failure still remains fatal below.
+  if (['a-first', 'b-parallel', 'a-reopen'].every(phase => result.runs[phase]?.suites.sdk?.status === 'passed')) {
+    result.sdkRelations = assertSdkContinuity(result.runs);
+  }
   assert.equal(result.failures.length, 0, 'Independent detector failed; inspect the raw results instead of claiming full compatibility');
-  const visitor = phase => result.runs[phase].suites.sdk.raw.fingerprintjs.visitorId;
-  assert.equal(visitor('a-first'), visitor('a-reopen'), 'FingerprintJS identity changed after reopening A');
-  assert.notEqual(visitor('a-first'), visitor('b-parallel'), 'FingerprintJS did not distinguish the two configured environments');
-  const audio = phase => result.runs[phase].suites.sdk.raw.audio.activeHash;
-  assert.equal(audio('a-first'), audio('a-reopen'), 'Audible samples changed after reopening the same environment');
-  assert.notEqual(audio('a-first'), audio('b-parallel'), 'Audible samples lost the per-profile audio identity');
+  assert.ok(result.sdkRelations, 'SDK continuity evidence is incomplete');
   report.checks.push('independent-creepjs-locale-fingerprintjs-botd-on-real-product');
 }

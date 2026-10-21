@@ -1,8 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertIndependentResult} from './independent-fingerprint-audits.mjs';
+import {assertIndependentResult, assertSdkContinuity} from './independent-fingerprint-audits.mjs';
 
 const expected = {language: 'en-GB', timezone: 'Asia/Tokyo', cores: 6, memory: 4};
+test('SDK continuity requires all genuine scenarios and rejects cross-owner or reopened identity drift', () => {
+  const runs = () => Object.fromEntries(['a-first', 'b-parallel', 'a-reopen'].map(phase => {
+    const marker = phase === 'b-parallel' ? 'b' : 'a';
+    return [phase, {suites: {sdk: {status: 'passed', raw: {
+      fingerprintjs: {visitorId: marker.repeat(32)}, audio: {activeHash: marker.repeat(64)},
+    }}}}];
+  }));
+  assert.deepEqual(assertSdkContinuity(runs()), {visitorAStable: true, visitorDistinct: true, audioAStable: true, audioDistinct: true});
+  for (const alter of [value => value['b-parallel'].suites.sdk.status = 'failed',
+    value => value['a-reopen'].suites.sdk.raw.fingerprintjs.visitorId = 'c'.repeat(32),
+    value => value['b-parallel'].suites.sdk.raw.audio.activeHash = 'a'.repeat(64),
+    value => delete value['a-first'].suites.sdk.raw.audio]) {
+    const value = runs(); alter(value);
+    assert.throws(() => assertSdkContinuity(value));
+  }
+});
 const locale = () => ({score: 0, band: 'low', signals: [
   ['timezone', 'Asia/Tokyo'], ['language', 'en-GB, en'], ['fonts', 'none'],
   ['intlLocale', 'en-GB'], ['timezoneOffset', '-540'], ['emoji', 'Windows'],

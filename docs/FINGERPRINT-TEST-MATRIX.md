@@ -5,6 +5,21 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`1e06235` / [Actions39540863316](https://github.com/lilyco-42/lyco-browser/actions/runs/39540863316)
+获得完整A初次/B并行/A重开：三次地区23/low及SDK通过，原生34项完成；
+原身份cache不变。所有Creep页最初hidden/focused=false，选中后实际可见且
+完成采集。之前的卡住和关闭失败本轮未出现。剩下三个失败均是DPR1下
+`Element.getClientRects: unknown rotate dimensions`，不能发布。
+原始数据静态比对显示SDK visitor/audio同A重开稳定、与B不同；原联合断言
+被较早的Creep失败截断，下一轮将先独立执行该联合断言，再保留Creep fatal。
+官方及本地工件SHA-256为
+`53b261f50caccfb870af625eb309a11f466e036641b75f7b45521262a021c786`。
+
+下一轮只增加原生字体观测：在已经存在的同一页面分别测默认世界和隔离世界，
+使用固定公开候选字体和ASCII/CJK/emoji测宽，记录native声明的编码和候选成员。
+不写入原生身份、不安装字体、不改变现有噪声。缺少无配置宿主正控制，故报告
+明确`privacyCertified=false`，不能把能力观测当成字体隔离已经通过。
+
 `d33db46` / [Actions39538713275](https://github.com/lilyco-42/lyco-browser/actions/runs/39538713275)
 仍失败。原生34项完成，A在DPR1.25完成三组，B在DPR1.5的SDK完成，
 但B Creep未完成、地区扫描读取超时；关闭B未确认，A重开未执行。
