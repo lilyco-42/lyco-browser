@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
+import {hostFontControlFamily, fontControlProbeSource, assertHostFontLayout} from './browser-font-control.mjs';
 
 // Public, fixed controls only. Never enumerate or upload a user's font payload.
-export const hostFontControlFamily = 'LYCO Audit Control 20261021';
+export {hostFontControlFamily};
 export const fontCandidates = Object.freeze(['Arial', 'Calibri', 'Cambria', 'Consolas',
   'Segoe UI Emoji', 'Microsoft YaHei', 'SimSun', 'Noto Sans CJK SC', 'Papyrus', 'Helvetica Neue', hostFontControlFamily]);
 
@@ -64,6 +65,8 @@ export async function observeHostFontControl(page, family) {
   try {
     assert.equal(value.local, 'loaded', 'The unconfigured host browser could not load the host font control');
     assert.notEqual(value.requested[0], value.fallback[0], 'The host font control did not change ASCII metrics');
+    value.layout = await page.evaluate(fontControlProbeSource());
+    assertHostFontLayout(value.layout);
   } catch (error) {
     // Preserve the exact failed positive control, never call it isolation.
     error.observation = {...value, positive: false};

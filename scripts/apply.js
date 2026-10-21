@@ -11,6 +11,20 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// An explicit native layout policy uses the restored kernel's font isolation
+// and CSS geometry. Preserve the legacy random and real policies unchanged.
+one('engine/profile-sanitizer.js',
+ 'clientRects: allowed(privacyValue.clientRects, ["real", "noise"], privacyValue.clientRects === "real" ? "real" : "noise"),',
+ 'clientRects: allowed(privacyValue.clientRects, ["real", "noise", "native"], privacyValue.clientRects === "real" ? "real" : "noise"),');
+one('automation/fingerprint.js',
+ "  const clientRectsMode = mode('clientRects', ['real', 'noise'], 'noise');",
+ "  const clientRectsMode = mode('clientRects', ['real', 'noise', 'native'], 'noise');");
+one('index.html',
+ '<label>ClientRects<select id="editor-client-rects"><option value="noise">随机微扰</option><option value="real">真实直通</option></select></label>',
+ '<label>布局保护<select id="editor-client-rects"><option value="noise">随机微扰（旧模式）</option><option value="native" title="使用受支持内核隔离本机额外字体，保留正常页面布局">一致保护（原生字体）</option><option value="real">真实直通</option></select></label>');
+one('renderer.js',
+ "['ClientRects', privacy.clientRects === 'real' ? '真实' : '随机'],",
+ "['布局保护', privacy.clientRects === 'native' ? '原生字体与一致布局' : (privacy.clientRects === 'real' ? '真实' : '随机微扰（旧）')],");
 // Preserve authored silence inside an otherwise audible rendered buffer.
 // Adding noise to every zero creates samples before a scheduled source starts
 // and after it stops; nonzero samples retain the original per-profile noise.
@@ -65,7 +79,7 @@ one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">'
 one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
 one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
 one('index.html','<button class="nav" data-view="proxies">',join(
- '<button class="nav" data-view="lyco" lang="zh-CN" translate="no"><i data-lucide="shield-check"></i><span>LYCO 代理与会员</span></button>',
+ '<button class="nav" data-view="lyco" lang="zh-CN" translate="no" aria-label="LYCO 账户与代理" title="LYCO 账户与代理"><i data-lucide="shield-check"></i><span class="lyco-nav-label">账户与代理</span></button>',
  '<button class="nav" data-view="proxies">'));
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
@@ -146,7 +160,7 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
+ "const { prepareNativeIdentity, nativeRuntimeFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
  "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
@@ -178,12 +192,12 @@ one('engine.js',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
 one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
- '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
+ '    const fp = nativeRuntimeFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
 one('engine.js', '    const baseFp = fingerprint || item.fingerprint || buildFingerprint(enriched);',
- '    const baseFp = nativeCanvasFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
+ '    const baseFp = nativeRuntimeFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
 one('engine.js', '  async startWorkerFingerprintInjection(item, fingerprint) {', join(
  '  async startWorkerFingerprintInjection(item, fingerprint) {',
- '    fingerprint = nativeCanvasFingerprint(fingerprint, item?.lycoNativeIdentity);'));
+ '    fingerprint = nativeRuntimeFingerprint(fingerprint, item?.lycoNativeIdentity);'));
 // Suppress only the HTML 2D/export layer actually owned by the restored native
 // device. Keep original window OffscreenCanvas and Worker JS noise; neither
 // Worker target supports the native protocol in the actual capability probe.
@@ -313,6 +327,7 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
  '          deferredRestore: lycoDeferredRestore,',
+ '          requireNativeFontLayout: profile.privacy.clientRects === "native",',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
  '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',

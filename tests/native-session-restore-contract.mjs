@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {assertFontControlIsolation} from './browser-font-control.mjs';
 
 // Exercise the engine's ordinary Stop/Start and Chromium's own saved session.
 // The harness never reloads, creates, navigates or injects a restored target.
@@ -28,6 +29,7 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     assert.equal(entry.reportProxied, true, label + ': report bypassed Mihomo');
     const value = entry.value;
     assert.equal(value.error, undefined, label + ': ' + value.error);
+    assertFontControlIsolation(value.fontControl, report.hostFontControl, label);
     const fields = {userAgent: ua, platform: 'Win32', language: expected.language,
       languages: [expected.language, expected.language.split('-')[0]],
       timezone: expected.timezone, cores: expected.cores, memory: expected.memory};

@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const {prepareNativeIdentity, nativeCanvasFingerprint} = require('../src/native-identity');
+const {prepareNativeIdentity, nativeCanvasFingerprint, nativeRuntimeFingerprint, hasNativeFontInventory} = require('../src/native-identity');
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-identity-'));
@@ -18,6 +18,44 @@ async function fixture(t) {
   }};
   return {root, tabs, calls, cdp, args: {enabled: true, profileRoot: root, profileId: 'owner-profile', port: 19341, cdp}};
 }
+
+test('native layout requires a supported kernel and a valid complete font inventory', async t => {
+  const f = await fixture(t);
+  await assert.rejects(prepareNativeIdentity({...f.args, enabled: false, requireNativeFontLayout: true}), /需要支持原生字体隔离/);
+  assert.equal(f.calls.length, 0);
+  const identity = await prepareNativeIdentity({...f.args, requireNativeFontLayout: true});
+  assert.equal(identity.hasNativeFontInventory, true);
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const bytes = await fs.readFile(file);
+  await prepareNativeIdentity({...f.args, requireNativeFontLayout: true});
+  assert.deepEqual(await fs.readFile(file), bytes, 'Selecting native layout must not regenerate an existing device');
+  for (const fonts of [undefined, '', '[]', '[invalid', [], [''], ['Arial\n'], [42], Array(2049).fill('Arial')]) {
+    assert.equal(hasNativeFontInventory(fonts), false);
+  }
+  assert.equal(hasNativeFontInventory('["Arial","SimSun"]'), true);
+  assert.equal(hasNativeFontInventory(['Arial']), true);
+  const broken = JSON.parse(bytes); delete broken.fingerprint.fonts;
+  await fs.writeFile(file, JSON.stringify(broken));
+  f.calls.length = 0;
+  await assert.rejects(prepareNativeIdentity({...f.args, requireNativeFontLayout: true}), /未提供有效的字体隔离/);
+  assert.equal(f.calls.length, 0, 'Invalid saved font configuration cannot be sent to a page');
+  assert.deepEqual(JSON.parse(await fs.readFile(file)), broken, 'Failure cannot reset the saved device');
+});
+
+test('native layout preserves unrelated noise while legacy geometry policies remain explicit', () => {
+  const fp = {clientRects: {mode: 'native', mark: 17}, canvas: {mode: 'noise', mark: 9},
+    audio: {mode: 'noise', mark: 5}, seed: 'existing', worker: {keep: true}};
+  assert.throws(() => nativeRuntimeFingerprint(fp, null), /缺少原生字体/);
+  const runtime = nativeRuntimeFingerprint(fp, {hasNativeFontInventory: true, ownsHtmlCanvasNoise: true});
+  assert.deepEqual(runtime.clientRects, {mode: 'native', mark: 17, nativeFontLayout: true});
+  assert.deepEqual(runtime.canvas, {mode: 'noise', mark: 9, nativeHtmlPixels: true});
+  assert.equal(runtime.audio, fp.audio); assert.equal(runtime.worker, fp.worker); assert.equal(runtime.seed, fp.seed);
+  assert.deepEqual(fp.clientRects, {mode: 'native', mark: 17});
+  for (const mode of ['noise', 'real']) {
+    const previous = {...fp, clientRects: {mode, mark: 17}};
+    assert.equal(nativeRuntimeFingerprint(previous, null), previous, 'Never silently migrate an existing geometry policy');
+  }
+});
 
 test('restores the complete native identity across process sessions without minting another device', async t => {
   const f = await fixture(t);

@@ -89,8 +89,21 @@ function declaredSettings(settings = {}) {
   return result;
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false}) {
-  if (!enabled) return null; // Stock Chromium and legacy kernels retain their own path.
+function hasNativeFontInventory(fonts) {
+  let value = fonts;
+  if (typeof value === 'string') {
+    try {value = JSON.parse(value);} catch {return false;}
+  }
+  return Array.isArray(value) && value.length > 0 && value.length <= 2048
+    && value.every(family => typeof family === 'string' && family.trim().length > 0
+      && family.length <= 256 && !/[\x00-\x1f\x7f]/.test(family));
+}
+
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false, requireNativeFontLayout = false}) {
+  if (!enabled) {
+    if (requireNativeFontLayout) throw Error('一致布局保护需要支持原生字体隔离的内核，环境未启动');
+    return null; // Stock Chromium and legacy kernels retain their own path.
+  }
   const declared = declaredSettings(settings);
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535) throw Error('原生身份环境参数无效');
@@ -114,6 +127,10 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // explicit UI settings must agree in the native engine and document script;
   // otherwise a new document initially exposes the saved device's defaults.
   device = {...device, ...declared};
+  const fontInventoryAvailable = hasNativeFontInventory(device.fonts);
+  if (requireNativeFontLayout && !fontInventoryAvailable) {
+    throw Error('内核未提供有效的字体隔离配置，一致布局保护未启动');
+  }
   // Keep direct-page readiness independent from a paused-session ACK. Native
   // Actions exposed memory 8 instead of configured 4 when those records were
   // coalesced. Both paths retain the same device; neither mints a new seed.
@@ -166,7 +183,8 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   const seed = device.canvasNoiseSeed;
   const ownsHtmlCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
     && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
-  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'), ownsHtmlCanvasNoise, apply, applySession};
+  return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'),
+    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession};
 }
 
 function nativeCanvasFingerprint(value, identity) {
@@ -177,4 +195,16 @@ function nativeCanvasFingerprint(value, identity) {
   return {...value, canvas: {...value.canvas, nativeHtmlPixels: true}};
 }
 
-module.exports = {prepareNativeIdentity, nativeCanvasFingerprint};
+function nativeRuntimeFingerprint(value, identity) {
+  const result = nativeCanvasFingerprint(value, identity);
+  if (result?.clientRects?.mode !== 'native') return result;
+  if (identity?.hasNativeFontInventory !== true) {
+    throw Error('一致布局保护缺少原生字体配置，页面未放行');
+  }
+  // Keep actual rendered geometry. Native font isolation protects the local
+  // font surface; numeric jitter contradicts CSS-only shapes and cancels in
+  // relative font measurements. Canvas/audio/worker noise stays independent.
+  return {...result, clientRects: {...result.clientRects, nativeFontLayout: true}};
+}
+
+module.exports = {prepareNativeIdentity, nativeCanvasFingerprint, nativeRuntimeFingerprint, hasNativeFontInventory};

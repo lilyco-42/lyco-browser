@@ -1,6 +1,8 @@
 // Ordinary CI pages/workers read their own first-script values. No navigator,
 // native identity, canvas implementation, or application setting is patched.
-function readRealm() {
+import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} from './browser-font-control.mjs';
+
+function readRealm(readFonts, family) {
   const draw = (offscreen, opaquePattern) => {
     const canvas = offscreen ? new OffscreenCanvas(320, 100) : document.createElement('canvas');
     canvas.width = 320; canvas.height = 100;
@@ -25,27 +27,32 @@ function readRealm() {
   return {language: navigator.language, languages: Array.from(navigator.languages),
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, shapePixels: draw(offscreen, false),
-    offscreenPixels: draw(true, false), opaquePixels: draw(offscreen, true), offscreenOpaquePixels: draw(true, true)};
+    offscreenPixels: draw(true, false), opaquePixels: draw(offscreen, true), offscreenOpaquePixels: draw(true, true),
+    fontControl: readFonts(family)};
 }
 
 // Reuse the exact detached-canvas drawing/readback in a diagnostic context.
 // The source contains readers only, with no application overrides or URLs.
-export function readOnlyConcurrentRealmSource() { return '(' + readRealm.toString() + ')()'; }
+export function readOnlyConcurrentRealmSource() {
+  return '(' + readRealm.toString() + ')(' + readFontControlMetrics.toString() + ',' + JSON.stringify(hostFontControlFamily) + ')';
+}
 
-function pageProbe(read, phase) {
+function pageProbe(read, readLocal, family, phase) {
   const initial = read();
+  const localFont = readLocal(family);
   const key = 'lyco_native_profile_storage';
   const before = {local: localStorage.getItem(key), cookie: document.cookie.split(';').map(part => part.trim())
     .find(part => part.startsWith(key + '='))?.slice(key.length + 1) ?? null};
   const send = (kind, value) => fetch('/concurrent-report?phase=' + phase + '&kind=' + kind,
     {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(value)});
-  void send('page', {initial, before});
+  void localFont.then(face => {initial.fontControl.face = face; return send('page', {initial, before});});
   document.getElementById('read-workers').onclick = async function () {
     this.disabled = true;
     const releaseButton = document.getElementById('release-workers');
     let dedicated, registration;
     try {
       const current = read();
+      current.fontControl.face = await readLocal(family);
       const firstDedicated = await new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(Error('Dedicated worker did not report')), 15000);
         dedicated = new Worker('/concurrent-worker.js?phase=' + phase + '&kind=dedicated');
@@ -104,7 +111,8 @@ export function createConcurrentBrowserFixture() {
       entry.pageProxied = Boolean(proxied);
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
       res.end('<!doctype html><meta charset="utf-8"><button id="read-workers">Read workers</button><button id="release-workers" disabled>Release workers</button><script>('
-        + pageProbe.toString() + ')(' + readRealm.toString() + ',' + JSON.stringify(phase) + ')</script>');
+        + pageProbe.toString() + ')(()=>(' + readOnlyConcurrentRealmSource() + '),'
+        + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily) + ',' + JSON.stringify(phase) + ')</script>');
       return true;
     }
     const kind = url.searchParams.get('kind');
@@ -112,10 +120,12 @@ export function createConcurrentBrowserFixture() {
       if (!['dedicated', 'service'].includes(kind)) {res.writeHead(400); res.end(); return true;}
       entry.requests.push({kind, proxied: Boolean(proxied), language: req.headers['accept-language'] || ''});
       res.writeHead(200, {'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store'});
-      const first = 'const first=(' + readRealm.toString() + ')();';
+      const first = 'const first=' + readOnlyConcurrentRealmSource() + ';const ready=('
+        + readLocalFontControl.toString() + ')(' + JSON.stringify(hostFontControlFamily)
+        + ').then(face=>{first.fontControl.face=face;return first;});';
       res.end(first + (kind === 'service'
-        ? 'self.addEventListener("install",event=>event.waitUntil(self.skipWaiting()));self.addEventListener("message",event=>event.ports[0]?.postMessage(first));'
-        : 'self.postMessage(first);'));
+        ? 'self.addEventListener("install",event=>event.waitUntil(self.skipWaiting()));self.addEventListener("message",event=>event.waitUntil(ready.then(value=>event.ports[0]?.postMessage(value))));'
+        : 'ready.then(value=>self.postMessage(value));'));
       return true;
     }
     if (req.method !== 'POST' || !['page', 'workers', 'released'].includes(kind)) {res.writeHead(405); res.end(); return true;}

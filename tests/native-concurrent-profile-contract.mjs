@@ -3,6 +3,7 @@ import {inspectNativeWorkerCapability} from './native-worker-capability.mjs';
 import {readOnlyConcurrentRealmSource} from './browser-concurrent-fixture.mjs';
 import {assertCanvasOwnership} from './canvas-ownership-contract.mjs';
 import {observeNativeFonts} from './native-font-observation.mjs';
+import {assertFontControlIsolation} from './browser-font-control.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -14,7 +15,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     throw Error('Actual concurrent browser observation timed out');
   };
   const statuses = () => page.evaluate(() => window.ops.profileStatus());
-  const checkRealm = (value, expected, label) => {
+  const checkRealm = (value, expected, label, options) => {
     assert.ok(value, label + ' did not produce a first-script observation');
     assert.equal(value.language, expected.language, label + ' language crossed environments');
     assert.deepEqual(value.languages, [expected.language, expected.language.split('-')[0]], label + ' languages crossed environments');
@@ -22,6 +23,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     assert.equal(value.memory, expected.memory, label + ' memory crossed environments');
     assert.equal(value.timezone, expected.timezone, label + ' timezone crossed environments');
     assert.match(value.shapePixels, /^[0-9a-f]{8}$/);
+    assertFontControlIsolation(value.fontControl, report.hostFontControl, label, options);
   };
   try {
     for (const owner of ['A', 'B']) {
@@ -86,9 +88,12 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       const current = active[owner], expected = settings[owner], workers = entry.workers;
       assert.equal(workers.error, undefined, owner + ': ' + workers.error);
       for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
-        checkRealm(workers[realm], expected, owner + ' ' + realm);
+        checkRealm(workers[realm], expected, owner + ' ' + realm, {requireDom: realm.startsWith('window')});
       }
-      checkRealm(evidence.nativeCanvasControls[owner], expected, owner + ' native control');
+      checkRealm(evidence.nativeCanvasControls[owner], expected, owner + ' native control', {requireFace: false});
+      const extra = evidence.nativeFontObservations[owner]?.hostExtra;
+      assert.equal(extra?.nativeExtraBlocked, true, owner + ': native FontFace/local control failed');
+      assert.equal(extra?.productExtraBlocked, true, owner + ': product FontFace/local control failed');
       assertCanvasOwnership(current.initial, workers, evidence.nativeCanvasControls[owner], owner);
       assert.equal(entry.workersReportProxied, true);
       for (const kind of ['dedicated', 'service']) {
@@ -191,6 +196,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     for (const realm of ['windowStart', 'dedicated', 'service']) assert.ok(distinct(realm), realm + ': parallel OffscreenCanvas lost per-profile noise');
     checkWorkers('A', evidence.afterStoppingB);
     report.checks.push('native-concurrent-profiles-first-script-worker-storage-and-proxy-isolation');
+    report.checks.push('host-extra-font-isolated-in-native-default-frame-and-worker-realms');
     await checkpoint('concurrent:passed');
   } finally {
     for (const profile of Object.values(profiles)) await page.evaluate(id => window.ops.stopProfile(id), profile.id).catch(() => {});

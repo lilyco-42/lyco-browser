@@ -5,6 +5,21 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`1f124e0` / [Actions39582554021](https://github.com/lilyco-42/lyco-browser/actions/runs/39582554021)
+已结束失败。独立宿主 Edge 的固定额外字体真实加载成功，ASCII 宽度不同于
+fallback；两个原生环境的隔离世界和网页世界均拒绝该 local 字体并回退测宽。
+A初次/重开DPR1仍各有一个旋转几何 finding；B DPR1.25 无该 finding。
+SDK联合断言实际执行通过，A重开稳定、B不同。工件SHA-256已核对：
+`19be9a64070a2bf9e375ae2bfedc83c76dd7806e19623de50537b50d5b1b1009`。
+
+当前候选增加明确的“一致保护（原生字体）”布局模式，新建LYCO环境使用此模式，
+已有环境的noise/real选择、完整原生设备cache和其他噪声设置保持不变。
+缺少受支持内核或有效原生字体配置时拒绝启动，不降级为未保护的直通模式。
+候选必须在普通页、新标签、同源/跨域parser frame、恢复页、两类Worker及
+原生隔离世界验证额外宿主字体的DOM/Canvas/local加载隔离；宿主必须先有
+DOM/Canvas/FontFace三项真实正控制。超时、未知和不完整观测均不能算通过。
+原始独立检测和DPR1覆盖保留。此模式及新增验收尚未获当前完整CI证明。
+
 `7a5188b` / [Actions39580674040](https://github.com/lilyco-42/lyco-browser/actions/runs/39580674040)
 字体安装及清理均通过，但工作台的FontFace local正控制被拒绝，原生预检提前失败。
 没有获得DPR1检测或配置页额外字体隔离结果，不能把正控制失败当成有效保护。

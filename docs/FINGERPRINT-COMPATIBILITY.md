@@ -43,6 +43,22 @@ that this particular kernel's perturbation algorithms have pixel parity.
 
 ## Other boundaries
 
+The candidate native-font layout policy preserves actual CSS geometry instead
+of adding post-layout numeric jitter. It requires a supported native kernel and
+a valid saved font inventory; unsupported configurations fail closed. New LYCO
+profiles select it explicitly, while existing `noise`/`real` choices are retained.
+This changes the geometry protection strategy, not the saved device/noise seed.
+The Actions gate now requires a genuinely installed host-font positive control
+and negative Canvas/DOM/local-font observations across pages, parser frames and
+Workers. Passing a finite control is not a universal font-privacy certification.
+The prior candidate still failed CreepJS at DPR1; this replacement awaits the
+complete current preflight, portable and installed acceptance.
+
+Net.Coffee live pages are a separate requested network acceptance surface.
+Their scores are third-party estimates, not OpenAI/Anthropic eligibility results.
+An external page result must identify the actual product/egress tested; a stock
+browser or GitHub runner's public IP cannot certify the customer's proxy route.
+
 The Windows native, portable and installed EXE acceptance must pass on the exact
 candidate commit. macOS/Linux packaging alone is not native UI acceptance.
 Local STUN/ICE and proxy failure fixtures cover only their stated cases, not

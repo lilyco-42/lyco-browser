@@ -7,6 +7,7 @@ import {readOnlyProfileProbeSource} from './browser-profile-fixture.mjs';
 import {verifyConcurrentWorkerProfiles} from './native-concurrent-profile-contract.mjs';
 import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs';
 import {verifyIndependentAudits} from './independent-fingerprint-audits.mjs';
+import {assertFontControlIsolation} from './browser-font-control.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -108,6 +109,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       }
       await checkpoint(phase + ':runtime-recorded');
       assert.equal(value.error, undefined, `${phase}: ${value.error}`);
+      assertFontControlIsolation(value.fontControl, report.hostFontControl, phase);
       assert.equal(value.userAgent, ua, `${phase}: saved User-Agent not applied`);
       assert.equal(value.platform, 'Win32', `${phase}: Windows platform not applied`);
       assert.equal(value.language, expected.language, `${phase}: saved language not applied`);
@@ -135,6 +137,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           cdpError: startup?.cdpError, blocked: startup?.verificationBlocked};
         assert.ok(extra?.value && extra.pageProxied && extra.reportProxied, `${phase}: extra startup page did not reach the proxy fixture`);
         assert.equal(extra.value.error, undefined, `${phase}: ${extra.value.error}`);
+        assertFontControlIsolation(extra.value.fontControl, report.hostFontControl, extraPhase);
         for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
           assert.deepEqual(extra.value[field], value[field], `${phase}: extra page first script saw a different ${field}`);
         }
@@ -182,6 +185,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           await checkpoint(newPhase + ':observed');
           assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
           assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
+          assertFontControlIsolation(newTab.value.fontControl, report.hostFontControl, newPhase);
           for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
             assert.deepEqual(newTab.value[field], value[field], `${newPhase}: first script saw a different ${field}`);
           }
@@ -199,6 +203,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             const frame = report.parserFrames[newPhase][realm];
             assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
             assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
+            assertFontControlIsolation(frame.value.fontControl, report.hostFontControl, newPhase + ':' + realm);
             assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
             for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
               assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);

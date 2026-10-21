@@ -144,7 +144,7 @@ try {
   assert.equal(await page.evaluate(locale=>window.OpenBrowserI18n.setLocale(locale),locale),locale);
   assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证月卡');
   assert.equal(await page.locator('#lyco-copy-extension').textContent(),'复制浏览器插件连接码');
-  assert.equal(await page.locator('[data-view="lyco"] span').textContent(),'LYCO 代理与会员');
+  assert.equal(await page.locator('[data-view="lyco"] span').textContent(),'账户与代理');
   assert.equal(await page.locator('#lyco-password').getAttribute('placeholder'),'网站密码');
  }
  report.checks.push('localized-panel-survives-upstream-language-switch');
