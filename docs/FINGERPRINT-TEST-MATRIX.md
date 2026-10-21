@@ -5,6 +5,11 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`8029d5d` / [Actions39579814625](https://github.com/lilyco-42/lyco-browser/actions/runs/39579814625)
+guards通过，Windows在字体夹具安装前期失败：Get-ItemPropertyValue读取缺失的
+独立测试注册项抛终止异常。没有进入浏览器验收，无DPR1/宿主控制运行结果。
+修复使用RegistryKey.GetValue的明确缺失默认值；仍拒绝覆盖已有文件或注册项。
+
 `0297a62` / [Actions39576572023](https://github.com/lilyco-42/lyco-browser/actions/runs/39576572023)
 原生预检通过并记录42项，SDK联合断言实际通过，A重开visitor/audio稳定且B不同。
 读取工件后确认三个Creep场景DPR分别为1.5/2/1.5，没有覆盖DPR1已知旋转失败。

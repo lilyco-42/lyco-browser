@@ -26,9 +26,16 @@ function Broadcast-FontChange {
   $result=[IntPtr]::Zero
   [void][LycoHostFontControl]::SendMessageTimeout([IntPtr]0xffff,0x001d,[IntPtr]::Zero,[IntPtr]::Zero,2,1000,[ref]$result)
 }
+function Read-ControlRegistration {
+  if (-not (Test-Path -LiteralPath $registryPath)) {return $null}
+  # Get-ItemPropertyValue throws a terminating error for an absent value even
+  # with SilentlyContinue. RegistryKey.GetValue explicitly returns the default.
+  $key=Get-Item -LiteralPath $registryPath
+  try {return $key.GetValue($registryName,$null)} finally {$key.Close()}
+}
 if ($Action -eq 'Remove') {
   if (-not (Test-Path -LiteralPath $marker)) {return}
-  $registration=Get-ItemPropertyValue -LiteralPath $registryPath -Name $registryName -ErrorAction SilentlyContinue
+  $registration=Read-ControlRegistration
   if ($registration -and $registration -ne $installedFile) {throw 'Refuse to remove an unrecognized font registration'}
   # Only remove the exact fixture owned by this job; never enumerate fonts.
   if (Test-Path -LiteralPath $installedFile) {
@@ -45,7 +52,7 @@ if ($Action -eq 'Remove') {
 }
 if (Test-Path -LiteralPath $installedFile) {throw 'Refuse to replace an existing font'}
 if (Test-Path -LiteralPath $registryPath) {
-  $registration=Get-ItemPropertyValue -LiteralPath $registryPath -Name $registryName -ErrorAction SilentlyContinue
+  $registration=Read-ControlRegistration
   if ($registration) {throw 'Refuse to replace an existing font registration'}
 }
 New-Item -ItemType Directory -Path $fixtureRoot -Force | Out-Null
