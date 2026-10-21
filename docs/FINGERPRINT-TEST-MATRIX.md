@@ -5,6 +5,18 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`d27233f` / [Actions39532311213](https://github.com/lilyco-42/lyco-browser/actions/runs/39532311213)
+仍为失败：普通新标签与重开检查已运行通过，A独立检测的音频、地区23/low和SDK
+门禁通过，但CreepJS保留1项 `unknown rotate dimensions`；B两个额外空白页在
+会话准备中同时超时，未获得B/A重开独立结果。原始工件SHA-256已核对为
+`9cf2e84eec886f37a9d6bc03576b7c921f7e6c5ad1a85a861d30d4a683aa1a23`。
+当前补丁依次创建空白页、等待owner就绪、准备和导航，再创建下一页；不删页面、
+不换检测器或延长native调用超时。是否解决共享renderer等待仍须下一轮实测。
+
+固定CreepJS源码只在DPR=1时核对Blink旋转形状的固定散列；84头的A零异常
+不能证明所有DPR都通过。当前增加只读DPR与CSS分辨率匹配记录，不改变DPR
+以跳过该分支。旋转形状与任意数值扰动的矛盾仍未解决，不移除严格门禁。
+
 最新已结束提交 `84ee857d32300ca2bd6e44efa655c19b09f7aa8d` 的
 [Actions39458558806](https://github.com/lilyco-42/lyco-browser/actions/runs/39458558806)
 中，真实 A 环境完成全部三组独立检测：CreepJS `totalLies=0`，社区地区检测

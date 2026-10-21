@@ -227,6 +227,11 @@ export async function verifyIndependentAudits({page, profiles, settings, ua, ori
           socket = (await cdp.tabs(state.port)).find(tab => tab.url === urls[suite])?.webSocketDebuggerUrl;
           assert.ok(socket, suite + ': actual native page missing');
           if (suite === 'creepjs') {
+            // The pinned detector's fixed-rotation check runs only at DPR=1.
+            // Keep that scope visible; zero lies at another DPR is not proof
+            // of the DPR=1 branch. Observe only, never change the profile/DPR.
+            row.environment = await evaluate(socket, `({devicePixelRatio: window.devicePixelRatio,
+              resolutionMatches: matchMedia('(resolution: ' + window.devicePixelRatio + 'dppx)').matches})`);
             row.raw = await observe(socket, `window.Fingerprint && window.Creep && ({fingerprint: window.Fingerprint, stable: window.Creep})`, 45000);
           } else if (suite === 'sdk') {
             row.raw = await observe(socket, 'window.independentSdkResults || null', 30000);
