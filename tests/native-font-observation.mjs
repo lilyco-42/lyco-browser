@@ -32,29 +32,43 @@ function fontObservation(candidates) {
     };
     const fallback = measure('16px monospace');
     const requested = measure('16px ' + JSON.stringify(family) + ', monospace');
-    let local;
+    let local, localError;
     try {
       const face = new FontFace('lyco-font-control', 'local(' + JSON.stringify(family) + ')');
       local = await Promise.race([
-        face.load().then(() => 'loaded', () => 'rejected'),
+        face.load().then(() => 'loaded', error => {
+          localError = ['NetworkError', 'NotSupportedError', 'SecurityError', 'InvalidStateError'].includes(error?.name) ? error.name : 'other';
+          return 'rejected';
+        }),
         new Promise(resolve => {timer = setTimeout(() => resolve('timeout'), 1200);}),
       ]);
     } catch {local = 'unavailable';}
     finally {clearTimeout(timer);}
-    return {family, local, fallback, requested};
+    return {family, local, ...(localError ? {localError} : {}), fallback, requested};
   }));
 }
 
-export async function observeHostFontControl(page, family) {
+export async function observeFontControlCandidate(page, family) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Host font controls only run in Actions');
   assert.equal(family, hostFontControlFamily, 'The Actions host font control is not installed');
   const [value] = await page.evaluate(fontObservation, [family]);
   assert.equal(value?.family, family);
-  assert.equal(value?.local, 'loaded', 'The unconfigured workbench could not load the host font control');
   for (const key of ['fallback', 'requested']) {
     assert.ok(Array.isArray(value[key]) && value[key].length === 3 && value[key].every(Number.isFinite));
   }
-  assert.notEqual(value.requested[0], value.fallback[0], 'The host font control did not change ASCII metrics');
+  return value;
+}
+
+export async function observeHostFontControl(page, family) {
+  const value = await observeFontControlCandidate(page, family);
+  try {
+    assert.equal(value.local, 'loaded', 'The unconfigured host browser could not load the host font control');
+    assert.notEqual(value.requested[0], value.fallback[0], 'The host font control did not change ASCII metrics');
+  } catch (error) {
+    // Preserve the exact failed positive control, never call it isolation.
+    error.observation = {...value, positive: false};
+    throw error;
+  }
   return {...value, positive: true};
 }
 

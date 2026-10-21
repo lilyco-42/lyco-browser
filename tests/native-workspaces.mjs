@@ -1,4 +1,4 @@
-import {_electron as electron} from 'playwright';
+import {_electron as electron, chromium} from 'playwright';
 import http from 'node:http';
 import net from 'node:net';
 import assert from 'node:assert/strict';
@@ -11,7 +11,7 @@ import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
 import {createIndependentAuditFixture} from './independent-fingerprint-audits.mjs';
 import {protectConnectHandler} from './connect-handler.mjs';
-import {observeHostFontControl} from './native-font-observation.mjs';
+import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -80,8 +80,24 @@ try {
  application=await electron.launch({executablePath:binary,args:[appRoot],timeout:60000,
   env:{...cleanEnv,OPENBROWSER_API_PORT:String(51000+Math.floor(Math.random()*1000))}});
  const page=await application.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
- report.hostFontControl=await observeHostFontControl(page,process.env.LYCO_FONT_CONTROL_FAMILY);
- report.checks.push('unconfigured-workbench-host-font-positive-control');
+ // The workbench's embedded host is not assumed to be a neutral font baseline.
+ // Keep its result while independently proving host availability in the
+ // runner's stock Edge. This control does not replace any product scenario.
+ try {report.workbenchFontControl=await observeFontControlCandidate(page,process.env.LYCO_FONT_CONTROL_FAMILY);}
+ catch {report.workbenchFontControl={unavailable:true};}
+ let hostControlBrowser;
+ try {
+  hostControlBrowser=await chromium.launch({channel:'msedge',headless:true,args:[
+   '--disable-background-networking','--disable-component-update','--no-first-run',
+   '--proxy-server=http://127.0.0.1:9','--proxy-bypass-list=<-loopback>',
+  ]});
+  const hostControlPage=await hostControlBrowser.newPage();
+  report.hostFontControl={...await observeHostFontControl(hostControlPage,process.env.LYCO_FONT_CONTROL_FAMILY),baseline:'unconfigured-msedge',version:hostControlBrowser.version()};
+ } catch(error) {
+  report.hostFontControl={...(error.observation||{}),positive:false,baseline:'unconfigured-msedge'};
+  throw error;
+ } finally {await hostControlBrowser?.close();}
+ report.checks.push('unconfigured-host-browser-font-positive-control');
  // Observe the actual installed/portable core without changing product files,
  // timeout, proxy selection or permissions. Raw output/secrets are discarded.
  await application.evaluate((_electron,{appRoot,observer})=>{

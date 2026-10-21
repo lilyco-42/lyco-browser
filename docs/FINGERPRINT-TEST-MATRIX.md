@@ -5,6 +5,14 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`7a5188b` / [Actions39580674040](https://github.com/lilyco-42/lyco-browser/actions/runs/39580674040)
+字体安装及清理均通过，但工作台的FontFace local正控制被拒绝，原生预检提前失败。
+没有获得DPR1检测或配置页额外字体隔离结果，不能把正控制失败当成有效保护。
+下一轮使用临时runner系统字体表（固定独立文件/注册项、仍严格核对后清理），
+并用预装、全新上下文、禁外网的Edge作独立宿主字体正对照；工作台结果仍保留。
+Edge仅证明字体在宿主可用，所有产品验收仍使用真实LYCO内核，不由Edge替代。
+正控制仍必须local加载成功且ASCII测宽不同；失败时原始观测随报告保存。
+
 `8029d5d` / [Actions39579814625](https://github.com/lilyco-42/lyco-browser/actions/runs/39579814625)
 guards通过，Windows在字体夹具安装前期失败：Get-ItemPropertyValue读取缺失的
 独立测试注册项抛终止异常。没有进入浏览器验收，无DPR1/宿主控制运行结果。

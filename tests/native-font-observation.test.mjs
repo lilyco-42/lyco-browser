@@ -5,8 +5,13 @@ import {fontCandidates, hostFontControlFamily, summarizeFontDeclaration, observe
 
 test('a missing or unreadable host control cannot certify a negative font observation', async () => {
   assert.deepEqual(compareHostFontControl({}, [], [], null), {status: 'host-positive-control-missing'});
-  const page = {evaluate: async () => [{family: hostFontControlFamily, local: 'rejected'}]};
-  await assert.rejects(observeHostFontControl(page, hostFontControlFamily), /could not load/);
+  const page = {evaluate: async () => [{family: hostFontControlFamily, local: 'rejected', fallback: [1,2,3], requested: [1,2,3]}]};
+  await assert.rejects(observeHostFontControl(page, hostFontControlFamily), error => {
+    assert.equal(error.observation.positive, false);
+    assert.equal(error.observation.local, 'rejected');
+    assert.deepEqual(error.observation.requested, [1,2,3]);
+    return /could not load/.test(error.message);
+  });
 });
 
 test('denied FontFace alone cannot conceal leaked host font metrics, and timeouts remain unknown', () => {

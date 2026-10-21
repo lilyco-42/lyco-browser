@@ -6,9 +6,9 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUN
 $manifestPath=Join-Path $PSScriptRoot 'fixtures/host-font-control.json'
 $manifest=Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 $fixtureRoot=Join-Path $env:RUNNER_TEMP 'lyco-host-font-control'
-$fontDirectory=Join-Path $env:LOCALAPPDATA 'Microsoft/Windows/Fonts'
+$fontDirectory=Join-Path $env:WINDIR 'Fonts'
 $installedFile=Join-Path $fontDirectory 'LYCOAuditControl20261021-Regular.ttf'
-$registryPath='HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
+$registryPath='HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
 $registryName='LYCO Audit Control 20261021 Regular (TrueType)'
 $marker=Join-Path $fixtureRoot 'installed.sha256'
 if (-not ('LycoHostFontControl' -as [type])) {
