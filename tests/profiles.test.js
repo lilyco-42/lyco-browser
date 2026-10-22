@@ -20,6 +20,7 @@ test('creates a paid-account environment with proxy already selected and no auto
  assert.equal(profile.proxy,'http://127.0.0.1:18001');assert.equal(profile.networkMode,'proxy');
  assert.equal(profile.proxyMeta.lycoManaged,true);assert.equal(profile.proxyMeta.directBypass,false);
  assert.equal(calls.starts.length,0);assert.equal(engine.profiles.size,1);
+ assert.equal(profile.privacy.clientRects,'native');
  assert.doesNotMatch(JSON.stringify(profile),/Bearer|sub_url|password/);
 });
 
@@ -46,6 +47,14 @@ test('ownership survives application restart and other user environments are pre
  const restarted={...engine,start:async p=>p};new LycoProfiles({...args,engine:restarted});
  state.username='owner-b';await assert.rejects(()=>restarted.start(profile),/另一网站账号/);
  assert.equal((await restarted.start({id:'existing'})).id,'existing');
+});
+
+test('launching an existing managed profile preserves its chosen geometry policy',async t=>{
+ const {service,engine}=setup(t);const {profile}=await service.create();
+ for(const mode of ['noise','real']) {
+  const started=await engine.start({...profile,privacy:{...profile.privacy,clientRects:mode}});
+  assert.equal(started.privacy.clientRects,mode);
+ }
 });
 test('logout closes managed browser windows and disconnects their proxy',async t=>{
  const {service,state,calls}=setup(t);const {profile}=await service.create();

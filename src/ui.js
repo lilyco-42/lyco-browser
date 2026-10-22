@@ -2,12 +2,17 @@
 (() => {
  let busy=false;
  const e = id => document.getElementById(id);
- const message = (value, err=false) => { e('lyco-feedback').textContent=String(value||'');e('lyco-feedback').style.color=err?'#f66':'inherit'; };
+ const message = (value, err=false) => { e('lyco-feedback').textContent=String(value||'');e('lyco-feedback').dataset.tone=err?'error':'status'; };
  async function render(x) {
   const s=x||await window.ops.lycoStatus();
+  e('view-lyco').setAttribute('aria-busy',String(busy));
   document.querySelectorAll('#view-lyco button').forEach(button=>button.disabled=false);
   e('lyco-account-status').textContent=s.logged_in ? (s.username+' · '+(s.entitled?'有效代理月卡':'暂无有效月卡')+(s.expires_at?' · 到期 '+new Date(s.expires_at).toLocaleString() : '')) : '尚未登录';
-  e('lyco-network-status').textContent=s.connected?('已连接 · 本地 HTTP 127.0.0.1:'+s.port):('未连接 · '+(s.has_core?'Mihomo 已配置':'尚未导入 Mihomo'));
+  e('lyco-network-status').textContent=s.connected?('已连接 · 本地 HTTP 127.0.0.1:'+s.port):('未连接 · '+(s.has_core?'网络组件已就绪':'请在高级设置中导入网络组件'));
+  e('lyco-account-chip').textContent=s.logged_in?(s.entitled?'月卡可用':'待购买或续费'):'待登录';
+  e('lyco-account-chip').dataset.state=s.entitled?'ready':'pending';
+  e('lyco-network-chip').textContent=s.connected?'已连接':'未连接';
+  e('lyco-network-chip').dataset.state=s.connected?'ready':'pending';
   e('lyco-import').disabled=!s.connected;
   e('lyco-create-profile').disabled=!s.entitled||!s.has_core;
   e('lyco-copy-extension').disabled=!s.entitled||!s.connected;
@@ -51,6 +56,7 @@
   return result;
  },'已保存到代理库，请在环境编辑页选择该代理');
  e('lyco-go-proxies').onclick=()=>{if(typeof switchView==='function')switchView('proxies')};
+ e('lyco-go-profiles').onclick=()=>{if(typeof switchView==='function')switchView('profiles')};
  e('lyco-buy').onclick=()=>run(()=>window.ops.lycoOpenShop(),'已在系统浏览器打开官方商城');
  e('lyco-account').onclick=()=>run(()=>window.ops.lycoOpenAccount(),'已打开官网个人中心');
  setInterval(()=>{if(!busy)render().catch(()=>{});},15000);

@@ -6,7 +6,9 @@
 
 [下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-12ae5a9377ba)
 
-> **已知限制（2026-10-19）：** 新回归已复现：环境启动后直接打开的新标签，第一段脚本可能读到默认语言、CPU、内存、时区及不同的原生 Canvas。Cookie 和代理正确不代表页面身份正确；现有包仍是实验预览，不能用于依赖完整身份隔离的场景。[修正 PR #22](https://github.com/lilyco-42/lyco-browser/pull/22) 尚待完整验收，[复现记录](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)。
+> **旧下载包的已知限制：** 上方旧预览包的新标签首段脚本可能读到默认语言、CPU、内存、时区及不同的原生 Canvas。Cookie 和代理正确不代表页面身份正确，不能用于依赖完整身份隔离的场景。修复、并发隔离和 UDA 外观已在 [PR #24](https://github.com/lilyco-42/lyco-browser/pull/24) 的 `3ff68c3` 通过完整 Windows 验收；新增检测入口仍待当前提交验收，公开下载尚未切换。[原始复现记录](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)。
+
+> **候选验收范围（2026-10-22）：** `3ff68c3` 的[完整 Windows 验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39768843099)通过预检46项、便携包46项、实际安装后45项及安装/图标/卸载6项；包括会话恢复、账户引导、并发 Worker、固定独立检测与 UDA 界面。新增环境检测入口和公网观察不能沿用旧提交的通过结果。Wayfern149 的 HTML Canvas 与 OffscreenCanvas 像素并不保证一致，不能据此宣传完整指纹一致或不可检测，见[兼容性与验收范围](docs/FINGERPRINT-COMPATIBILITY.md)。
 
 | 系统 | 下载 | 说明 |
 | --- | --- | --- |
@@ -15,6 +17,10 @@
 | Linux x64 | [tar.gz](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Linux-x64-MVP.tar.gz) | 桌面预览包 |
 
 此处固定到已验收的产品提交 `12ae5a9377ba7f22155ae2e7ef3b43ff77eab234`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`c842b091536f84dc986b25131fddbdd4b19821b4e70f58186f5894c8ef6222bb`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
+
+本分支新增：所有者本人、同仓库 PR 的完整门禁通过后，Actions 会把对应测试提交的
+EXE、ZIP 和 `SHA256SUMS.txt` 保留在未公开的 GitHub 草稿版本。它不会修改公开下载，
+也不会覆盖已发布的文件；草稿包用于所有者安装核对，仍须审阅实际公网结果。
 
 1. 下载并安装或解压，打开 **LYCO Browser**。
 2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
@@ -43,6 +49,25 @@ macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github
 Windows 安装器使用 LYCO Browser 名称、独立安装目录、开始菜单/桌面快捷方式及卸载登记，原程序二进制名称和第三方声明保留。原创图标同时嵌入安装器、应用和卸载程序。Actions 必须实际安装到含空格的目录、运行安装后的原生工作流，并验证卸载清理程序且保留用户数据；通过对应提交的门禁前仍属未验收改动。
 
 ## 核心能力
+
+### 环境检测（本分支新增，待当前 CI 验收）
+
+启动一个环境后，在环境列表点击 **环境检测**，选择正在运行的环境，再选择
+Claude、GPT / Codex、DNS 或 WebRTC。网页会在所选环境的新标签中打开，沿用
+该环境的代理、语言和时区；环境已停止时会提示重新选择，不自动换用其他环境。
+检测页面由 Net.Coffee 提供，结果仅供诊断，不能当作平台账号准入承诺。
+公网验收也通过这个真实界面操作，保留原始页面和未知结果，详见[检测范围](docs/NETWORK-ACCEPTANCE.md)。
+
+### 桌面外观
+
+UniDesktop/SDK 提供系统主题与强调色。在外观菜单选择“跟随系统”后使用系统主题，
+显式选择深色或浅色优先。账户页的“本机桌面外观”可查看状态和刷新；暂不可读时
+保留现有外观回退。以下是 `3ff68c3` 在 GitHub Actions 实际安装后的窗口，
+不是新增检测入口的验收截图：
+
+![UDA 实际安装窗口](docs/images/uda-installed-3ff68c3.png)
+
+### 浏览器与账户
 
 - 基于 [OpenBrowser](https://github.com/sheying2013/OpenBrowser) 固定提交 `5fa3b9d0bd218a948da15820b35fe598c362eba0` 集成已有的 Chromium 多环境隔离、指纹配置、代理库、扩展、自动化/API & MCP。参考紫鸟、战斧的多窗口管理产品体验，不复制其品牌或私有实现。
 - LYCO 专属「代理与会员」页面：网页登录 `https://lain42.top/studio/api/login`，通过 `/me` 确认有效 `proxy_1m` 权益，获取对应官网订阅，再使用官方 Mihomo 开启 `127.0.0.1:<随机端口>` HTTP 代理。

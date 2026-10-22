@@ -3,6 +3,31 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {installBrowserTargetObserver} = require('./browser-target-observer.cjs');
 
+test('readiness diagnostics observe existing probes and preserve the original failure without leaking endpoints', async t => {
+  const fs = require('node:fs/promises'), os = require('node:os'), path = require('node:path');
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-private-readiness-'));
+  t.after(() => fs.rm(root, {recursive: true, force: true}));
+  const secret = 'CI_PRIVATE_READINESS', failure = Error('CDP timeout ' + secret);
+  await fs.writeFile(path.join(root, 'DevToolsActivePort'), '19341\n/devtools/browser/private-browser-id');
+  let requests = 0;
+  const cdp = {async json() {requests++; throw failure;}, async connect() {}};
+  class BrowserEngine {
+    startWorkerFingerprintInjection() {}
+    async waitForPort(inputRoot, timeout, child) {
+      assert.equal(inputRoot, root); assert.equal(timeout, 30000); assert.ok(child);
+      await cdp.json('http://127.0.0.1:19341/json/version');
+    }
+  }
+  const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+  await assert.rejects(new BrowserEngine().waitForPort(root, 30000,
+    {_startupDiagnostic: {stderr: 'DevTools listening on ws://127.0.0.1:19341/devtools/browser/' + secret}}), error => error === failure);
+  assert.equal(requests, 1, 'Diagnostics must not add readiness attempts');
+  const row = trace.startupReadiness[0];
+  assert.equal(row.failed, true); assert.equal(row.fileMatchesListeningPort, true);
+  assert.equal(row.validBrowserPath, true); assert.deepEqual(row.probes, {attempts: 1, failures: 1, lastReason: 'timeout'});
+  assert.doesNotMatch(JSON.stringify(trace.startupReadiness), /CI_PRIVATE_READINESS|private-browser-id|19341|DevToolsActivePort|lyco-private-readiness/);
+});
+
 test('browser trace keeps protocol ordering without parameters, responses or URLs', async () => {
   let forwarded = 0;
   const calls = [], secret = 'CI_PRIVATE_PAYLOAD';
@@ -42,4 +67,44 @@ test('page diagnostics retain only configuration comparisons and fixed exception
   assert.equal(trace[0].declaredMemory, true); assert.equal(trace[0].declaredTimezone, true);
   assert.equal(trace[1].type, 'TypeError');
   assert.doesNotMatch(JSON.stringify(trace), /CI_PRIVATE_DEVICE|description|exceptionDetails|url/);
+});
+
+test('failed preparation records bounded error classes rather than leaking raw errors', async () => {
+  const secret = 'CI_PRIVATE_PAYLOAD';
+  for (const [message, reason] of [
+    ['CDP command timed out', 'timeout'], ['No session with given id', 'session-unavailable'],
+    ['Target closed', 'target-or-connection-closed'], ["Method wasn't found", 'method-unavailable'],
+    ['Cannot find execution context', 'execution-context-unavailable'], ['unclassified', 'other'],
+  ]) {
+    class BrowserEngine { startWorkerFingerprintInjection() {} }
+    const failure = Error(message + ' ' + secret);
+    const cdp = {async connect() {return {async command() {throw failure;}};}};
+    const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+    const connection = await cdp.connect(secret);
+    await assert.rejects(connection.command('Runtime.enable', {}, {sessionId: secret}), error => error === failure);
+    assert.equal(trace[0].reason, reason);
+    assert.equal(trace[0].failed, true); assert.equal(trace[0].done, true);
+    assert.ok(Number.isFinite(trace[0].elapsedMs) && trace[0].elapsedMs >= 0);
+    assert.doesNotMatch(JSON.stringify(trace), /CI_PRIVATE_PAYLOAD|message|stack/);
+  }
+});
+
+test('one-shot native calls retain only fixed failure metadata and forward the original result/error', async () => {
+  class BrowserEngine {startWorkerFingerprintInjection() {}}
+  const secret = 'CI_PRIVATE_NATIVE_RESPONSE', result = {fingerprint: secret};
+  const params = {licence: secret}; const failure = Error('CDP timeout: ' + secret);
+  let rejected = false;
+  const cdp = {async connect() {}, async call(socket, method, input, timeout) {
+    assert.equal(socket, secret); assert.equal(input, params); assert.equal(timeout, 5000);
+    if (rejected) throw failure;
+    return result;
+  }};
+  const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+  assert.equal(await cdp.call(secret, 'Wayfern.setFingerprint', params, 5000), result);
+  rejected = true;
+  await assert.rejects(cdp.call(secret, 'Emulation.setHardwareConcurrencyOverride', params, 5000), error => error === failure);
+  assert.equal(trace.nativeCalls.length, 2);
+  assert.equal(trace.nativeCalls[0].failed, false); assert.equal(trace.nativeCalls[1].reason, 'timeout');
+  assert.equal(trace.nativeCalls[1].done, true);
+  assert.doesNotMatch(JSON.stringify(trace.nativeCalls), /CI_PRIVATE_NATIVE_RESPONSE|licence|params|stack/);
 });
