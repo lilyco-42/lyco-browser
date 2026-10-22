@@ -18,6 +18,10 @@
 
 此处固定到已验收的产品提交 `12ae5a9377ba7f22155ae2e7ef3b43ff77eab234`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`c842b091536f84dc986b25131fddbdd4b19821b4e70f58186f5894c8ef6222bb`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
 
+本分支新增：所有者本人、同仓库 PR 的完整门禁通过后，Actions 会把对应测试提交的
+EXE、ZIP 和 `SHA256SUMS.txt` 保留在未公开的 GitHub 草稿版本。它不会修改公开下载，
+也不会覆盖已发布的文件；草稿包用于所有者安装核对，仍须审阅实际公网结果。
+
 1. 下载并安装或解压，打开 **LYCO Browser**。
 2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
 3. 本站月卡用户点击 **一键创建专属代理环境**；购买或续费由你主动打开[官网商城](https://lain42.top/shop/#proxy_1m)完成。

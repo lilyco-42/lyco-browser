@@ -28,6 +28,7 @@ jobs:
         run: |
           node --check src/diagnostics-ui.js
           node --test tests/diagnostics-controller.test.js
+          node --test tests/release-preview.test.js
 
   windows-x64:
     needs: integration-guards
@@ -349,6 +350,18 @@ jobs:
             gh release upload $tag "$env:RUNNER_TEMP/lyco-native-evidence.zip" --repo $env:GITHUB_REPOSITORY
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
+
+      - name: Retain a gate-validated owner PR package in an unpublished draft
+        if: success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor == github.repository_owner
+        timeout-minutes: 10
+        shell: bash
+        env:
+          PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          LYCO_NATIVE_GATES_PASSED: 'true'
+        run: |
+          bash lyco/scripts/ci-retain-windows-preview.sh \
+            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.zip \
+            upstream/Browserapp/dist/LYCO-Browser-Windows-x64-MVP.exe
 
       - name: Upload Windows portable ZIP and EXE to GitHub prerelease
         if: github.event_name != 'pull_request'
