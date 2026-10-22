@@ -10,12 +10,12 @@ export async function verifyNativeAccountPanel({page, report, evidence}) {
   await page.locator('#lyco-go-profiles').click();
   await page.locator('#view-profiles').waitFor({state: 'visible'});
   await page.locator('[data-view="lyco"]').click();
-  await page.locator('.lyco-panel-advanced>summary').click();
+  await page.locator('#lyco-network-advanced>summary').click();
   assert.equal(await page.locator('#lyco-pick-core').isVisible(), true);
   await page.locator('#lyco-go-proxies').click();
   await page.locator('#view-proxies').waitFor({state: 'visible'});
   await page.locator('[data-view="lyco"]').click();
-  await page.locator('.lyco-panel-advanced>summary').click();
+  await page.locator('#lyco-network-advanced>summary').click();
   const result = report.accountPanel = {realNavigationRoutes: true, layouts: [], surfaces: {}};
   for (const mode of ['light', 'dark']) {
     await page.locator('#theme-trigger').click();
