@@ -25,7 +25,17 @@ scratch=$(mktemp -d)
 manifest="$scratch/SHA256SUMS.txt"
 notes="$scratch/notes.md"
 trap 'rm -f -- "$manifest" "$notes"; rmdir -- "$scratch"' EXIT
-sha256sum -- "$1" "$2" | sed 's#  .*/#  #' > "$manifest"
+: > "$manifest"
+for package_file in "$1" "$2"; do
+  # Git Bash can emit "hash *path" while Linux emits "hash  path".
+  # Normalize both to the actual download basename, not a runner-only path.
+  package_digest=$(sha256sum -- "$package_file")
+  package_digest="${package_digest:0:64}"
+  if [[ ! "$package_digest" =~ ^[a-f0-9]{64}$ ]]; then
+    echo 'Invalid package checksum output.' >&2; exit 2
+  fi
+  printf '%s  %s\n' "$package_digest" "${package_file##*/}" >> "$manifest"
+done
 cat > "$notes" <<EOF
 Unpublished Windows CI review package.
 

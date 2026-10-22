@@ -347,6 +347,8 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '          deferredRestore: lycoDeferredRestore,',
  '          requireNativeFontLayout: profile.privacy.clientRects === "native",',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
+ '            ...(fingerprint.webgl?.mode !== "blocked" && ["noise", "custom"].includes(fingerprint.webgl?.metaMode)',
+ '              ? {webglVendor: fingerprint.webgl.vendor, webglRenderer: fingerprint.webgl.renderer} : {}),',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
  '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',
  '        });',

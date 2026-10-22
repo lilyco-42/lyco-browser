@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const {spawnSync} = require('node:child_process');
+const {createHash} = require('node:crypto');
 
 function run(t, overrides = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lyco-review-release-'));
@@ -17,9 +18,13 @@ if [[ "$1 $2" == 'release view' ]]; then
  echo "$LYCO_TEST_DRAFT"
 elif [[ "$1" == api ]]; then
  echo "$LYCO_TEST_TARGET"
+elif [[ "$1 $2" == 'release upload' ]]; then
+ cp -- "\${@: -1}" "$LYCO_TEST_MANIFEST"
 fi
 exit 0
 `, {mode: 0o755});
+  // Reproduce Git Bash's binary-marker output in the Linux guard job.
+  fs.writeFileSync(path.join(dir, 'sha256sum'), '#!/bin/bash\nexec /usr/bin/sha256sum --binary "$@"\n', {mode: 0o755});
   const zip = path.join(dir, 'LYCO-Browser-Windows-x64-MVP.zip');
   const exe = path.join(dir, 'LYCO-Browser-Windows-x64-MVP.exe');
   fs.writeFileSync(zip, 'CI fixture only'); fs.writeFileSync(exe, 'CI fixture only');
@@ -27,19 +32,24 @@ exit 0
     GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'pull_request', GITHUB_REPOSITORY: 'lilyco-42/lyco-browser',
     PR_HEAD_REPOSITORY: 'lilyco-42/lyco-browser', GITHUB_REPOSITORY_OWNER: 'lilyco-42', GITHUB_ACTOR: 'lilyco-42',
     GITHUB_SHA: 'a'.repeat(40), GITHUB_RUN_ID: '123456', GITHUB_RUN_ATTEMPT: '1', LYCO_NATIVE_GATES_PASSED: 'true',
-    LYCO_TEST_CALLS: calls, LYCO_TEST_EXISTING: 'no', LYCO_TEST_DRAFT: 'true', LYCO_TEST_TARGET: 'a'.repeat(40), ...overrides};
+    LYCO_TEST_CALLS: calls, LYCO_TEST_MANIFEST: path.join(dir, 'uploaded-manifest.txt'),
+    LYCO_TEST_EXISTING: 'no', LYCO_TEST_DRAFT: 'true', LYCO_TEST_TARGET: 'a'.repeat(40), ...overrides};
   const result = spawnSync('bash', [path.join(__dirname, '../scripts/ci-retain-windows-preview.sh'), zip, exe], {env, encoding: 'utf8'});
-  return {result, calls: fs.existsSync(calls) ? fs.readFileSync(calls, 'utf8').trim().split('\n') : []};
+  return {result, manifest: fs.existsSync(env.LYCO_TEST_MANIFEST) ? fs.readFileSync(env.LYCO_TEST_MANIFEST, 'utf8') : null,
+    calls: fs.existsSync(calls) ? fs.readFileSync(calls, 'utf8').trim().split('\n') : []};
 }
 
 test('retains only a draft and checksum manifest, with no asset replacement or publish operation', t => {
-  const {result, calls} = run(t);
+  const {result, calls, manifest} = run(t);
   assert.equal(result.status, 0, result.stderr);
   assert.match(calls.find(line => line.startsWith('release create ')), /--draft/);
   const upload = calls.find(line => line.startsWith('release upload '));
   assert.match(upload, /SHA256SUMS\.txt/);
   assert.doesNotMatch(upload, /--clobber/);
   assert.equal(calls.some(line => line.startsWith('release edit ')), false);
+  const digest = createHash('sha256').update('CI fixture only').digest('hex');
+  assert.equal(manifest, digest + '  LYCO-Browser-Windows-x64-MVP.zip\n'
+    + digest + '  LYCO-Browser-Windows-x64-MVP.exe\n', 'Downloaded packages must be checkable without runner directories');
 });
 
 test('refuses forks, other actors, failed gates, non-PR execution and local execution before calling GitHub', t => {

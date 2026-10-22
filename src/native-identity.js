@@ -86,6 +86,18 @@ function declaredSettings(settings = {}) {
     try { new Intl.DateTimeFormat('en', {timeZone: settings.timezone}); } catch { throw Error('环境时区设置无效'); }
     result.timezone = settings.timezone;
   }
+  const hasGpuVendor = settings.webglVendor !== undefined;
+  const hasGpuRenderer = settings.webglRenderer !== undefined;
+  if (hasGpuVendor || hasGpuRenderer) {
+    if (!hasGpuVendor || !hasGpuRenderer) throw Error('环境显卡配置不完整，原生身份未应用');
+    for (const key of ['webglVendor', 'webglRenderer']) {
+      const value = settings[key];
+      if (typeof value !== 'string' || !value.trim() || value.length > 512 || /[\x00-\x1f\x7f]/.test(value)) {
+        throw Error('环境显卡配置无效，原生身份未应用');
+      }
+      result[key] = value;
+    }
+  }
   return result;
 }
 

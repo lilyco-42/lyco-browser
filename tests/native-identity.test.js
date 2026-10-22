@@ -240,10 +240,34 @@ test('a rejected native CPU override cannot ready a target or reset its saved id
   assert.equal(f.calls.filter(call => call.method === 'Wayfern.getFingerprint').length, 1);
 });
 
+test('configured GPU metadata reaches every native page without replacing the saved device or its GPU parameters', async t => {
+  const f = await fixture(t);
+  const saved = {canvasNoiseSeed: 'existing-noise', webglVendor: 'Saved GPU vendor', webglRenderer: 'Saved GPU renderer',
+    webglParameters: '{"nativeParameter":123}', webgl2Parameters: '{"nativeParameter":456}', fonts: '["Arial"]'};
+  f.cdp.call = async (target, method, params) => {
+    f.calls.push({target, method, params});
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: saved} : {};
+  };
+  await prepareNativeIdentity(f.args);
+  const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
+  const bytes = await fs.readFile(file);
+  f.calls.length = 0;
+  const selected = {webglVendor: 'Configured vendor', webglRenderer: 'Configured renderer'};
+  const identity = await prepareNativeIdentity({...f.args, settings: selected});
+  assert.deepEqual(f.calls[0].params, {...saved, ...selected});
+  assert.equal(f.calls.some(row => row.method === 'Wayfern.getFingerprint'), false);
+  const sent = [];
+  await identity.applySession({command: async (...args) => sent.push(args)}, 'gpu-page-session', {type: 'page', targetId: 'gpu-page'});
+  assert.deepEqual(sent[0], ['Wayfern.setFingerprint', {...saved, ...selected}, {sessionId: 'gpu-page-session', timeout: 5000}]);
+  assert.deepEqual(await fs.readFile(file), bytes, 'An explicit UI GPU override must not rewrite the saved device/noise');
+});
+
 test('invalid native UI settings fail before reading or changing the saved identity', async t => {
   const f = await fixture(t);
   for (const settings of [{languages: []}, {languages: ['en-GB\n']}, {hardwareConcurrency: 0},
-    {hardwareConcurrency: 1.5}, {deviceMemory: Infinity}, {timezone: 'not/a/timezone'}]) {
+    {hardwareConcurrency: 1.5}, {deviceMemory: Infinity}, {timezone: 'not/a/timezone'},
+    {webglVendor: 'vendor'}, {webglRenderer: 'renderer'}, {webglVendor: '', webglRenderer: 'renderer'},
+    {webglVendor: 'vendor', webglRenderer: 'renderer\n'}, {webglVendor: 'vendor', webglRenderer: 'x'.repeat(513)}]) {
     await assert.rejects(prepareNativeIdentity({...f.args, settings}));
   }
   assert.equal(f.calls.length, 0);

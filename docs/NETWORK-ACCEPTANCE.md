@@ -54,6 +54,23 @@ when a real response status is missing, and records its source or keeps unknown.
 Neither the green job nor the retained unpublished package proves this blocker
 is fixed. Public release/download remain unchanged.
 
+The next strict regression (`307bfee` / Actions39812770802) reproduced this at
+the first ordinary new tab: startup pages reported the configured Intel GPU;
+the new tab and same-origin parser frame first reported the saved native AMD
+GPU, while a later main-world read reported Intel again. A read-only isolated
+world still reported AMD. Native identity/cache and declared CPU/locale stayed
+unchanged. This locates an initial native-versus-script metadata disagreement,
+not a detector-score problem. Verified raw artifact SHA256:
+`38fb139c0138e933280d490092b1901b5f5345b41a04801907332ba791bd9e5e`.
+
+The candidate fix applies the already-selected GPU vendor/renderer to the
+native page and paused-session identity before page execution, alongside the
+existing explicit CPU/locale settings. The saved device file, seeds and opaque
+GPU parameters remain unchanged. Real/blocked metadata policies are preserved.
+The strict first-script, frame, session and public-page assertions remain; only
+current Actions execution can prove the fix. Download checksums also use actual
+file basenames across Git Bash/Linux output formats rather than runner paths.
+
 The first execution on `6cb8525` / Actions39773041895 reached all four pages
 with HTTP200 and preserved one native cache. Claude/GPT summary pages reported
 en-US/Chicago timezone consistency, score74, DNS "no leak detected" and WebRTC
