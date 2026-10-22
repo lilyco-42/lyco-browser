@@ -97,9 +97,24 @@ try {
     try {
       try {await target.waitForLoadState('domcontentloaded', {timeout: 35000});}
       catch(error) {row.navigationError = String(error.message).slice(0, 1000);}
-      // Let the unchanged site's bounded parallel DNS/STUN/network checks run.
-      // One observation interval; no reload/retry or forced success text.
-      await target.waitForTimeout(18000);
+      // The standalone pages require their own normal button click. Merely
+      // reaching their landing pages does not run their DNS/STUN checks.
+      if(route === 'dns' || route === 'webrtc') {
+        const selector = route === 'dns' ? '#btnStandard' : '#testBtn';
+        row.siteAction = {kind: route === 'dns' ? 'standard-dns' : 'webrtc', clicked: false, completed: false};
+        const trigger = target.locator(selector);
+        if(await trigger.count() === 1) {
+          await trigger.click({timeout: 5000}); row.siteAction.clicked = true;
+          try {
+            await target.waitForFunction(selector => document.querySelector(selector)?.disabled === false, selector, {timeout: 30000});
+            row.siteAction.completed = true;
+          } catch(error) {row.siteAction.error = String(error.message).slice(0, 1000);}
+        } else {row.siteAction.unavailable = 'Original site test button missing or page challenged';}
+      } else {
+        // Summary pages run their own bounded parallel checks automatically.
+        // One observation interval; no reload/retry or forced success text.
+        await target.waitForTimeout(18000);
+      }
       row.status = documents.get(target)?.status ?? null;
       row.title = await target.title();
       const finalLocation = new URL(target.url());
@@ -110,7 +125,9 @@ try {
       const settings = await target.evaluate(() => ({language: navigator.language,
         languages: Array.from(navigator.languages), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         offset: new Date().getTimezoneOffset(), userAgent: navigator.userAgent,
-        cookieEnabled: navigator.cookieEnabled}));
+        cookieEnabled: navigator.cookieEnabled,
+        viewport: {width: innerWidth, height: innerHeight, clientWidth: document.documentElement.clientWidth,
+          clientHeight: document.documentElement.clientHeight, dpr: devicePixelRatio}}));
       report.settings.push({route, ...settings});
       // This is consistency with the engine's selected IP-mode configuration,
       // not an independent oracle for geographic correctness. The original
@@ -125,11 +142,14 @@ try {
         catch {assert.fail('Observed or selected timezone is invalid');}
       };
       assert.equal(canonical(settings.timezone), canonical(report.product.resolvedTimezone), 'Public navigation lost the selected timezone');
-      for (const cell of ['deviceContent', 'ipAddr', 'ipAddrClaude', 'ipAddrGPT', 'dnsLeakContent', 'udpLeakContent', 'gaugeScore']) {
+      for (const cell of ['deviceContent', 'ipAddr', 'ipAddrClaude', 'ipAddrGPT', 'dnsLeakContent', 'udpLeakContent', 'gaugeScore',
+        'statusBar', 'verdictArea', 'dnsBody', 'rtcStatus', 'resultBody']) {
         const element = target.locator('#' + cell);
         if(await element.count()) {
           const text = (await element.innerText()).slice(0, 6000);
           row.cells[cell] = {text, classification: classifyPublicCell(text)};
+          if(text.trim() && ['deviceContent', 'verdictArea'].includes(cell))
+            await element.screenshot({path: path.join(evidence, `netcoffee-${route}-${cell}.png`)});
         }
       }
       await target.screenshot({path: path.join(evidence, `netcoffee-${route}.png`)});

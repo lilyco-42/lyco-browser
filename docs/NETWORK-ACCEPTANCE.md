@@ -31,6 +31,18 @@ manipulation is needed for these diagnostics.
 
 ## Public CI observation (new, pending execution)
 
+The first execution on `6cb8525` / Actions39773041895 reached all four pages
+with HTTP200 and preserved one native cache. Claude/GPT summary pages reported
+en-US/Chicago timezone consistency, score74, DNS "no leak detected" and WebRTC
+"disabled or no leak" on the Azure CI route. The latter is not a proven UDP
+egress match. Raw standalone DNS/WebRTC text still said to click their buttons:
+those landing-page observations did **not** execute those two standalone tests.
+Full raw artifact SHA256 was verified as
+`b27bc7454a8757d8d1aee0add6b1403a94ef058b3055f3ef58b592af8d0155e3`.
+The following UI-based execution now also clicks each site's original quick-DNS
+or WebRTC button once and records completion/timeout and actual verdict cells;
+this added behavior still needs current-commit acceptance.
+
 The workspace's **Environment checks** button lists only currently running,
 ready environments. Its four fixed actions open the corresponding page inside
 the selected environment through the existing trusted tab API. It never opens
