@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
+import {assertWebglIdentity} from './browser-webgl-identity.mjs';
 
 // Exercise the engine's ordinary Stop/Start and Chromium's own saved session.
 // The harness never reloads, creates, navigates or injects a restored target.
@@ -30,6 +31,7 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     const value = entry.value;
     assert.equal(value.error, undefined, label + ': ' + value.error);
     assertFontControlIsolation(value.fontControl, report.hostFontControl, label);
+    assertWebglIdentity(value.webgl, baseline?.value.webgl, label);
     const fields = {userAgent: ua, platform: 'Win32', language: expected.language,
       languages: [expected.language, expected.language.split('-')[0]],
       timezone: expected.timezone, cores: expected.cores, memory: expected.memory};
@@ -73,7 +75,7 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     await checkpoint('session-restore:seed');
     await page.evaluate(source => window.ops.startProfile(source), seeded);
     await readPages(evidence.initial);
-    for (const phase of phases) inspect(evidence.initial[phase], 'initial ' + phase);
+    for (const phase of phases) inspect(evidence.initial[phase], 'initial ' + phase, evidence.initial[phases[0]]);
     await page.evaluate(id => window.ops.stopProfile(id), profile.id);
     await wait(async () => !(await status())?.running, 'Initial session did not stop');
     assert.deepEqual(await fs.readFile(identityPath), identityBefore, 'Seeding replaced the existing native identity');

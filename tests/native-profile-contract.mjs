@@ -8,6 +8,7 @@ import {verifyConcurrentWorkerProfiles} from './native-concurrent-profile-contra
 import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs';
 import {verifyIndependentAudits} from './independent-fingerprint-audits.mjs';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
+import {assertWebglIdentity, readWebglIdentity} from './browser-webgl-identity.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -117,6 +118,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       assert.equal(value.timezone, expected.timezone, `${phase}: saved timezone not applied`);
       assert.equal(value.cores, expected.cores, `${phase}: saved CPU count not applied`);
       assert.equal(value.memory, expected.memory, `${phase}: saved memory not applied`);
+      assertWebglIdentity(value.webgl, results[owner.toLowerCase() + '-first']?.webgl, phase);
       const prior = phase.endsWith('first') ? null : owner;
       assert.deepEqual(value.before, {cookie: prior, local: prior}, `${phase}: storage crossed environments or failed to persist`);
       assert.deepEqual(value.after, {cookie: owner, local: owner}, `${phase}: real storage writes failed`);
@@ -143,6 +145,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         }
         assert.deepEqual(extra.value.canvasControl, value.canvasControl, `${phase}: extra page first-script native canvas differs`);
         assert.deepEqual(extra.value.canvas, value.canvas, `${phase}: extra page canvas differs`);
+        assertWebglIdentity(extra.value.webgl, value.webgl, phase + ':extra-startup');
         const targets = await cdp.tabs(state.port);
         assert.ok(targets.some(tab => tab.url === target) && targets.some(tab => tab.url === extraTarget),
           `${phase}: multiple configured startup pages were closed or replaced`);
@@ -178,6 +181,18 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             report.newTabNative[phase].currentPage = nativeSettings({...later, hardwareConcurrency: later?.cores, deviceMemory: later?.memory}, expected);
             report.newTabNative[phase].laterCanvas = later?.canvas;
             report.newTabNative[phase].laterShape = later?.canvasControl;
+            report.newTabNative[phase].laterWebgl = later?.webgl;
+            // Read native GPU metadata in a separate unpatched world only
+            // after the original document has reported its first-script data.
+            // Record names/types/hashes, never the complete saved device.
+            report.newTabNative[phase].gpuFields = Object.keys(native || {}).filter(key => /^(?:webgl|gpu)/i.test(key))
+              .map(key => ({key, type: typeof native[key], digest: digest(native[key])}));
+            const tree = await cdp.call(socket, 'Page.getFrameTree', {}, 2000);
+            const world = await cdp.call(socket, 'Page.createIsolatedWorld',
+              {frameId: tree.frameTree.frame.id, worldName: 'lyco-readonly-gpu-observation'}, 2000);
+            const gpu = await cdp.call(socket, 'Runtime.evaluate', {contextId: world.executionContextId,
+              expression: '(' + readWebglIdentity.toString() + ')()', returnByValue: true}, 2000);
+            report.newTabNative[phase].nativeWebgl = gpu?.result?.value;
           } catch {
             report.newTabNative ||= {};
             report.newTabNative[phase] = {available: false};
@@ -192,6 +207,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           assert.deepEqual(newTab.value.before, {cookie: owner, local: owner}, `${newPhase}: new tab lost its environment storage`);
           assert.deepEqual(newTab.value.canvasControl, value.canvasControl, `${newPhase}: first-script native canvas differs`);
           assert.deepEqual(newTab.value.canvas, value.canvas, `${newPhase}: native text canvas differs`);
+          assertWebglIdentity(newTab.value.webgl, value.webgl, newPhase);
           const frameDeadline = Date.now() + 30000;
           while (Date.now() < frameDeadline && !['same', 'cross'].every(realm => fixture.frameResult(newPhase, realm)?.value)) {
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -204,6 +220,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
             assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
             assertFontControlIsolation(frame.value.fontControl, report.hostFontControl, newPhase + ':' + realm);
+            assertWebglIdentity(frame.value.webgl, value.webgl, newPhase + ':' + realm);
             assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
             for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
               assert.deepEqual(frame.value[field], value[field], `${newPhase}: ${realm} parser frame first script saw a different ${field}`);

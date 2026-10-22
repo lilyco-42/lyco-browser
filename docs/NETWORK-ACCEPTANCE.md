@@ -31,6 +31,29 @@ manipulation is needed for these diagnostics.
 
 ## Public CI observation (new, pending execution)
 
+### Current review finding (aca866b, Actions39779882161)
+
+The complete Windows native/portable/installed workflow passed, including the
+normal manager UI opening all four pages and the original quick-DNS/WebRTC
+buttons completing. The unchanged site reported 81, locale consistency, 13 DNS
+resolvers with no detected DNS leak, and disabled/unexposed WebRTC. These are
+observations on the direct Azure CI route, not a customer route certificate.
+
+Review of the original screenshots uncovered a release blocker: Claude and GPT
+tabs in this same profile reported different GPU renderer strings (Intel versus
+AMD). Canvas remained stable. The previous controlled first-script suite did
+not compare GPU metadata across new tabs. The next candidate adds unmodified
+WebGL1/WebGL2 first-script observations across startup tabs, new tabs, parser
+frames and restored sessions, plus isolated native-world diagnostics, to locate
+the delivery error without changing detector results or saved identities.
+
+The native-created tab response listener also missed all four initial HTTP
+responses, so the JSON correctly retained null statuses rather than guessed
+200s. The next observer reads the browser's original navigation timing only
+when a real response status is missing, and records its source or keeps unknown.
+Neither the green job nor the retained unpublished package proves this blocker
+is fixed. Public release/download remain unchanged.
+
 The first execution on `6cb8525` / Actions39773041895 reached all four pages
 with HTTP200 and preserved one native cache. Claude/GPT summary pages reported
 en-US/Chicago timezone consistency, score74, DNS "no leak detected" and WebRTC

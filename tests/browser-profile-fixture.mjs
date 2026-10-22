@@ -2,6 +2,7 @@
 // storage, canvas, Chromium, or the application's production fingerprint code.
 import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
 import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} from './browser-font-control.mjs';
+import {readWebglIdentity} from './browser-webgl-identity.mjs';
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
@@ -14,7 +15,7 @@ const phases = new Map([
   ['a-restored-new-tab', 'A'], ['a-restored-new-tab-2', 'A'], ['a-restored-new-tab-3', 'A'],
 ]);
 
-async function observeProfile(marker, readOnly, readFonts, readLocal, family) {
+async function observeProfile(marker, readOnly, readFonts, readLocal, family, readGpu) {
   // Read these synchronously in the page's first script, before font readiness
   // or network awaits can hide a late runtime injection.
   const initial = {
@@ -22,6 +23,7 @@ async function observeProfile(marker, readOnly, readFonts, readLocal, family) {
     language: navigator.language, languages: Array.from(navigator.languages),
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    webgl: readGpu(),
   };
   const fontControl = readFonts(family);
   const localFont = readLocal(family);
@@ -71,7 +73,8 @@ export function readOnlyProfileProbeSource() {
 }
 
 function fontArguments() {
-  return readFontControlMetrics.toString() + ',' + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily);
+  return readFontControlMetrics.toString() + ',' + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily)
+    + ',' + readWebglIdentity.toString();
 }
 
 export function createBrowserProfileFixture() {
@@ -101,7 +104,7 @@ export function createBrowserProfileFixture() {
         language:navigator.language,languages:Array.from(navigator.languages),cores:navigator.hardwareConcurrency,
         memory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
         host:location.hostname,isTop:window===window.top,secureContext:isSecureContext,
-        memoryAvailable:'deviceMemory' in navigator};
+        memoryAvailable:'deviceMemory' in navigator,webgl:(${readWebglIdentity.toString()})()};
         initial.fontControl=(${readFontControlMetrics.toString()})(${JSON.stringify(hostFontControlFamily)});
         (${readLocalFontControl.toString()})(${JSON.stringify(hostFontControlFamily)}).then(face=>{
           initial.fontControl.face=face;

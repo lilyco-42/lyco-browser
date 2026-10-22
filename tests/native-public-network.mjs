@@ -8,6 +8,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {randomUUID, createHash} from 'node:crypto';
 import {classifyPublicPage, classifyPublicCell} from './public-network-result.mjs';
+import {readWebglIdentity, assertWebglIdentity} from './browser-webgl-identity.mjs';
 
 if(process.env.GITHUB_ACTIONS !== 'true') throw Error('Public product diagnostics run only in Actions');
 const binary = path.resolve(process.argv[2]);
@@ -116,6 +117,17 @@ try {
         await target.waitForTimeout(18000);
       }
       row.status = documents.get(target)?.status ?? null;
+      row.statusSource = row.status === null ? null : 'navigation-response';
+      if(row.status === null) {
+        // Tabs created through native IPC can finish their initial response
+        // before Playwright attaches. Read the browser's original navigation
+        // timing, not a guessed 200 or a second request taking another route.
+        const timingStatus = await target.evaluate(() => {
+          const status = performance.getEntriesByType('navigation')[0]?.responseStatus;
+          return Number.isInteger(status) && status >= 100 && status <= 599 ? status : null;
+        });
+        if(timingStatus !== null) {row.status = timingStatus; row.statusSource = 'navigation-timing';}
+      }
       row.title = await target.title();
       const finalLocation = new URL(target.url());
       row.finalLocation = {origin: finalLocation.origin, pathname: finalLocation.pathname};
@@ -129,6 +141,7 @@ try {
         viewport: {width: innerWidth, height: innerHeight, clientWidth: document.documentElement.clientWidth,
           clientHeight: document.documentElement.clientHeight, dpr: devicePixelRatio}}));
       report.settings.push({route, ...settings});
+      row.webgl = await target.evaluate('(' + readWebglIdentity.toString() + ')()');
       // This is consistency with the engine's selected IP-mode configuration,
       // not an independent oracle for geographic correctness. The original
       // site's warnings and actual public-IP observations remain below.
@@ -153,6 +166,12 @@ try {
         }
       }
       await target.screenshot({path: path.join(evidence, `netcoffee-${route}.png`)});
+      await save();
+      assertWebglIdentity(row.webgl, report.gpuIdentityFirst, route);
+      report.gpuIdentityFirst ||= row.webgl;
+      const rendered = row.cells.deviceContent?.text.match(/WebGL 渲染器\n([^\n]+)/)?.[1];
+      if(rendered) assert.equal(row.webgl.webgl.renderer, rendered,
+        'The original site saw a different first-read GPU than the later page read');
     } catch(error) {
       // Assertion failures are product regressions, not third-party outages.
       if(error.code === 'ERR_ASSERTION') throw error;
