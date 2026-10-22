@@ -51,8 +51,10 @@ This changes the geometry protection strategy, not the saved device/noise seed.
 The Actions gate now requires a genuinely installed host-font positive control
 and negative Canvas/DOM/local-font observations across pages, parser frames and
 Workers. Passing a finite control is not a universal font-privacy certification.
-The prior candidate still failed CreepJS at DPR1; this replacement awaits the
-complete current preflight, portable and installed acceptance.
+The native-font replacement passed DPR1 CreepJS in b2a9627's complete preflight
+and portable matrix (Actions39591446063); installed workflows and icon/uninstall
+acceptance also passed. The subsequent UDA integration has its own pending gate;
+the preceding green result cannot certify changed code.
 
 Net.Coffee live pages are a separate requested network acceptance surface.
 Their scores are third-party estimates, not OpenAI/Anthropic eligibility results.

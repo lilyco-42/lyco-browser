@@ -36,6 +36,7 @@ The matching public Rust SDK is
 Its desktop interfaces cover appearance, tray, notifications and similar OS
 features. Its appearance interface reads theme/accent/capabilities; it does not
 implement browser automation, IP reputation, DNS, WebRTC or per-profile locale.
-It is under source review, not integrated or claimed to pass these network
-checks. Browser settings must remain scoped to the selected profile so that
+The read-only Windows appearance bridge is implemented; its Actions acceptance
+is pending (see [desktop integration](DESKTOP-UDA.md)). It does not claim to pass
+these network checks. Browser settings must remain scoped to the selected profile so that
 concurrent profiles do not change each other's locale or the user's OS.

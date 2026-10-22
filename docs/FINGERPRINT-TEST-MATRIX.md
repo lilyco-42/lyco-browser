@@ -5,6 +5,22 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`b2a9627` / [Actions39591446063](https://github.com/lilyco-42/lyco-browser/actions/runs/39591446063)
+整轮成功。完整工件官方/本地 SHA-256 均为
+`37c61ca9ce187491f92914376ffe2746191da01deb79a7ff1381f9d107388be8`。
+PR merge `b5755657f7bea1034e23ec8aa749561fe8ef1b01` 的 parents 已核对包含
+main `eb0344` 和 head `b2a9627`。预检45、portable45、installed44项及实际
+安装/图标/快捷方式/卸载6项通过；portable 三组九个独立场景均 passed，
+Creep 原始 lies0/errors0、locale23/low、A/B cache 不变、稳定及差异断言全true。
+KR 缺确切 timezone 的受控正常启动在三个阶段均观测到首脚本 ko-KR、
+Asia/Seoul 以及匹配的请求语言；它不证明公网韩国出口已通过。
+以下旧1915/更早状态保留为历史，不代表当前候选。
+
+新 UDA 候选 `c3bac16` / Actions39765018460 已编译通过并通过 SDK appearance
+单测及 Node guards，但实际 Windows 强调色正控制失败，尚未进入产品预检。
+失败的原始读取值还未保存，因此下一提交保留注册表前后值及真实 helper 输出，
+继续严格校验，不降低断言。UDA 后续状态以对应提交的新 CI 为准。
+
 `1915bc4` / [Actions39589128909](https://github.com/lilyco-42/lyco-browser/actions/runs/39589128909)
 原生预检44项已通过，整轮仍在构建安装包，不能算完整发行验收。PR的实际merge
 commit是`b6d48a477a580ab4d08a3238f1b97646c09030ae`，其parent已核对包含1915。
@@ -15,7 +31,7 @@ A初次/重开实际配置DPR1；A初次、B并行、A重开的Creep、地区、
 宿主额外字体在Canvas/DOM/local加载三条路径真实可见，产品原生/默认世界、
 parser frames、Dedicated/ServiceWorker及停B后的A负控制均通过。
 HTML/Offscreen像素parity仍为false并记录已知限制，不据此宣称全API一致。
-源码中的新增出口国家/缺失时区回归还未由这轮预检覆盖，需下一提交实际验收。
+该轮1915不含出口国家/缺失时区回归；它随后由上述b2a完整验收覆盖。
 
 `1f124e0` / [Actions39582554021](https://github.com/lilyco-42/lyco-browser/actions/runs/39582554021)
 已结束失败。独立宿主 Edge 的固定额外字体真实加载成功，ASCII 宽度不同于
@@ -30,7 +46,7 @@ SDK联合断言实际执行通过，A重开稳定、B不同。工件SHA-256已�
 候选必须在普通页、新标签、同源/跨域parser frame、恢复页、两类Worker及
 原生隔离世界验证额外宿主字体的DOM/Canvas/local加载隔离；宿主必须先有
 DOM/Canvas/FontFace三项真实正控制。超时、未知和不完整观测均不能算通过。
-原始独立检测和DPR1覆盖保留。此模式及新增验收尚未获当前完整CI证明。
+原始独立检测和DPR1覆盖保留。此模式已由上述b2a完整CI覆盖；后续新增UDA仍待验收。
 
 `7a5188b` / [Actions39580674040](https://github.com/lilyco-42/lyco-browser/actions/runs/39580674040)
 字体安装及清理均通过，但工作台的FontFace local正控制被拒绝，原生预检提前失败。
