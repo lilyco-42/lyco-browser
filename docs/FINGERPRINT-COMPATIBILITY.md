@@ -43,7 +43,7 @@ that this particular kernel's perturbation algorithms have pixel parity.
 
 ## Other boundaries
 
-The candidate native-font layout policy preserves actual CSS geometry instead
+The native-font layout policy preserves actual CSS geometry instead
 of adding post-layout numeric jitter. It requires a supported native kernel and
 a valid saved font inventory; unsupported configurations fail closed. New LYCO
 profiles select it explicitly, while existing `noise`/`real` choices are retained.
@@ -51,10 +51,13 @@ This changes the geometry protection strategy, not the saved device/noise seed.
 The Actions gate now requires a genuinely installed host-font positive control
 and negative Canvas/DOM/local-font observations across pages, parser frames and
 Workers. Passing a finite control is not a universal font-privacy certification.
-The native-font replacement passed DPR1 CreepJS in b2a9627's complete preflight
-and portable matrix (Actions39591446063); installed workflows and icon/uninstall
-acceptance also passed. The subsequent UDA integration has its own pending gate;
-the preceding green result cannot certify changed code.
+The native-font policy and unchanged protection assertions are covered by the
+current `65b51ac` [complete Windows workflow](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404),
+with preflight47, portable47, installed46 and six installer checks. Its UDA
+appearance integration, new-tab GPU consistency and actual environment-check UI
+also passed their respective Windows checks; see the
+[fingerprint matrix](FINGERPRINT-TEST-MATRIX.md) and [UDA record](DESKTOP-UDA.md).
+This supersedes the older b2a9627 and pre-UDA candidate status.
 
 Net.Coffee live pages are a separate requested network acceptance surface.
 Their scores are third-party estimates, not OpenAI/Anthropic eligibility results.
@@ -65,5 +68,6 @@ The Windows native, portable and installed EXE acceptance must pass on the exact
 candidate commit. macOS/Linux packaging alone is not native UI acceptance.
 Local STUN/ICE and proxy failure fixtures cover only their stated cases, not
 every possible DNS, IPv6, UDP, extension or OS route. Saved-session multi-window
-and failure recovery require separate verification. No real-payment or account
+and failure recovery are included in the stated Windows matrix; untested kernels
+and platforms still require their own verification. No real-payment or account
 platform safety certification is implied by these tests.

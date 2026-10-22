@@ -35,15 +35,31 @@ tokens. Non-Windows packages explicitly report unsupported for this bridge.
   portable and installed runs. Real UI follow-system behavior, manual override,
   desktop panel screenshot and unchanged fingerprint/profile regression suites.
 
-Candidate `3ff68c3` fully passed Actions39768843099: preflight46, portable46,
-installed45 checks plus six install/icon/shortcut/uninstall checks. All three
-stages verified the same helper hash, packaged notices, actual follow-system UI
-and manual override behavior. The installed desktop screenshot and raw results
-were inspected. Full artifact SHA256 was verified as
-`2e079e27ae1a6a493809dc9fc30c4a2b217101db90b42a318d3b57a42af8a6d8`;
-PR merge132345a25ad0a8a43136ab8505454877b1d40df6 has3ff68c3 as a verified
-parent. The later environment-check UI and public-network observation need
-their own current-commit acceptance; this older result does not certify them.
+## Verified Windows preview (2026-10-23)
+
+Product source `65b51acdbf5bb7e8c2273ea219c82b3cb0547463` passed
+[Actions39814682404](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404):
+preflight47, portable47, installed46 native checks, plus six installer checks.
+Actual tested merge `46d7fde745a1fe6fcaa5054fbd526f5c0952eb45` contains this
+source head. PR24 is merged; main merge `3c03a10` has the same content tree.
+
+All three Windows stages report ready, verify the packaged notices, actual
+follow-system UI and manual override, and use the same helper SHA-256:
+`f66626b48aed877297358e829db3531adb902d40cc082472f5170301621d9ed4`.
+The raw JSON and installed screenshot were reviewed; the complete artifact's
+official and downloaded SHA-256 match:
+`62b9ec9bde59273aad7fa2328f74f63b6702ffbbe121032aec829c11f445d3b5`.
+
+![Actual portable desktop appearance panel](images/uda-desktop-65b51ac.png)
+
+[Image provenance](images/uda-desktop-65b51ac.source.json) identifies the exact
+run and original, unedited file. The independent fingerprint suites run in
+preflight and portable stages; the installed stage does not repeat all nine
+independent scenarios. Read-only appearance acceptance does not certify the
+profile's public egress, every OS event timing case, or non-Windows support.
+The public Windows preview is linked from the [README](../README.md).
+
+## Historical control diagnosis
 
 The first native control uncovered an asynchronous Windows theme/accent race.
 Actions39765928187 recorded the desired `0x7F332211` registry value and exact UDA

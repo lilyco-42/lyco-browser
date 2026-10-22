@@ -26,15 +26,19 @@ ordinary direct route. It is not an invisibility or anti-fraud bypass feature.
   before the original engine cleans the failed start. The real two-page test
   samples navigator values and a shape-only canvas in each page's first script,
   keeps both configured tabs open, and repeats after reopening the environment.
-  The [12ae5a9 Windows workflow](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)
-  verifies this two-page flow in preflight, portable and installed binaries.
-  A [new real-browser regression](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)
-  now proves that a target opened directly at a URL after startup can observe
-  default language, CPU, memory, timezone and a different native canvas in its
-  first script, despite correct cookies and proxy routing. The current preview
-  must not be treated as complete identity isolation. [PR #22](https://github.com/lilyco-42/lyco-browser/pull/22)
-  is a pending correction, not accepted release evidence. Native session restore
-  can also load before post-launch identity and still needs separate correction.
+  The historical [12ae5a9 workflow](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)
+  checked configured startup tabs only. A later
+  [real-browser regression](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)
+  exposed default first-script settings in ordinary new tabs and session restore.
+  Those old packages are no longer the default download. The current
+  [65b51ac Windows preview](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404)
+  passed preflight47, portable47, installed46 and six installer checks, including
+  first-script identity in ordinary new tabs, parser frames, Workers and restored
+  sessions, with unchanged saved caches. Configured GPU metadata is applied to
+  native page/paused-session identity before page execution; strict tests also
+  compare later and isolated-native readings. See the exact scope and retained
+  cross-API Canvas limitation in the [fingerprint matrix](FINGERPRINT-TEST-MATRIX.md).
+  These are tested contracts, not proof of universal identity isolation.
 - A paid, managed profile requires current entitlement and a live loopback
   Mihomo proxy before a browser window can launch.
 - Imported subscriptions cannot make a managed profile use built-in DIRECT,

@@ -2,128 +2,107 @@
 
 Net.Coffee's [Claude](https://ip.net.coffee/claude/),
 [GPT](https://ip.net.coffee/gpt/), [DNS](https://ip.net.coffee/dns/) and
-[WebRTC](https://ip.net.coffee/webrtc/) pages are requested external checks.
-They have not yet been verified on the current LYCO candidate's public egress.
-An old screenshot, a stock browser or the GitHub runner's own IP is not product
-acceptance. These third-party scores are not OpenAI or Anthropic verdicts.
+[WebRTC](https://ip.net.coffee/webrtc/) pages are external diagnostic checks.
+They are not OpenAI or Anthropic verdicts and cannot certify account access.
+The current Windows preview has actual product observations on a direct
+GitHub-hosted Azure route, described below. That is not the customer's
+subscription proxy route. No target-service login or paid model call is used.
+
+## Current verified observation
+
+Product source `65b51acdbf5bb7e8c2273ea219c82b3cb0547463` passed
+[Actions39814682404](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404).
+The tested merge is `46d7fde745a1fe6fcaa5054fbd526f5c0952eb45`; PR24 is
+merged and main `3c03a10` has the identical content tree. The full evidence
+artifact's official/downloaded SHA-256 is
+`62b9ec9bde59273aad7fa2328f74f63b6702ffbbe121032aec829c11f445d3b5`.
+Original JSON, page text and screenshots were reviewed before publishing the
+[Windows preview](../README.md). Observed at 2026-10-22 17:14:14–17:15:36 UTC.
+
+| Observation | Actual result | Boundary |
+| --- | --- | --- |
+| Normal manager UI | Four fixed actions opened four real environment tabs | No stock browser or harness navigation substituted |
+| HTTP | Four 200 statuses from original browser NavigationTiming | Status source retained; reachability is not a network pass |
+| Selected settings | en-US/en, America/New_York; four settings checks agree | Site locale/timezone consistency on this CI route only |
+| GPU / identity | Same RTX3060 renderer, Canvas `2FE73970`, WebGL `48C57369` in Claude/GPT | Same public profile; not all profiles must share this GPU |
+| Original IP rating | 54 / 良好 | Unchanged third-party score; no official service verdict |
+| Standalone DNS | Original button clicked and completed; 19 Azure resolver observations; site reports no detected leak | Not customer-route certification |
+| Standalone WebRTC | Original button clicked and completed; disabled/unexposed | No positive UDP egress-match claim |
+| Native identity cache | Unchanged | No reminting or detector-result editing |
+
+`allNetworkChecksPassed` remains unknown, rather than treating the green build
+or HTTP200 as a universal network pass. DNS observations, blocked WebRTC,
+unknown cells, geographic warnings and unavailable tests stay separate.
+
+## What the tests measure
 
 | Surface | Required evidence | What cannot count as a pass |
 | --- | --- | --- |
-| Browser settings | Actual profile's first-script UA/platform, language and request header, Date/Intl timezone | Changing the whole host's settings or editing a detector's result |
-| HTTPS egress | Actual LYCO profile/proxy route and timestamp, service-specific exit when available | A different browser or server-side request taking another route |
-| DNS | Resolver observations and test availability, separately recorded | No observations treated as proof of safe DNS routing |
-| WebRTC | Actual peer connection, IPv4/IPv6 candidates and UDP route or confirmed blocking | A timeout or unsupported API treated as successful egress matching |
+| Browser settings | Actual profile's first-script UA/platform, language/request header, Date/Intl timezone | Changing the host's settings or detector output |
+| HTTPS egress | Actual LYCO profile route and timestamp, service-specific exit when available | A different browser or server-side request using another route |
+| DNS | Resolver observations and test availability, separately recorded | No observations treated as safe DNS routing |
+| WebRTC | Actual peer connection/candidates and UDP route, or confirmed blocking | Timeout or unsupported API treated as successful egress matching |
 
-An IP-mode locale fix handles a specific missing-data case: when exit lookup
-discovers a country but has no exact timezone, an unconfirmed saved UTC default
-must not override that country's fallback. A known same-country regional
-timezone, a valid exact lookup result and an explicit custom choice are retained.
-The controlled Korea fixture checks the ordinary proxy-check/launch path,
-`ko-KR` request and Navigator language, `Asia/Seoul` in the first script, and
-unchanged saved native identity. It is labeled synthetic and cannot certify a
-real Korean proxy, Net.Coffee score, DNS or external STUN behavior.
+The workspace's **Environment checks** button lists only running, ready
+environments. Its four fixed actions use the existing trusted tab API inside
+the selected environment. It never falls back to another profile or the OS
+browser. Stopped/changed targets and duplicate in-flight clicks are rejected.
+An owner can inspect their own configured route without sharing credentials
+with CI. These UI paths are included in the current Windows acceptance.
 
-The existing native isolation suite keeps its external-network deny policy.
-Public-site checks need a separate, controlled public-egress scenario using the
-actual product. Network failures or site blocking must remain inconclusive,
-with the original result preserved. No service login, paid model call or score
-manipulation is needed for these diagnostics.
+`tests/native-public-network.mjs` uses the actual packaged application and
+licensed kernel with a fresh unowned profile in disposable runner app data,
+previous environments stopped, and no subscription account login. The ordinary
+IP-mode lookup/launch selects the configuration; lookup unavailability is
+retained. The test clicks the real UI, selects the target and invokes each
+fixed action, then clicks the original standalone DNS/WebRTC button once.
+Screenshots, page text, verdict cells and actual Navigator/Intl readings remain
+unmodified. Native-created tab response events can precede observer attachment;
+when no response status was captured, the observer reads the page's original
+NavigationTiming responseStatus and records its source, or retains unknown.
 
-## Public CI observation (new, pending execution)
+Controlled native isolation suites separately deny external HTTP. Their
+synthetic Korea fixture verifies that a country lookup without an exact
+timezone does not let an unconfirmed saved UTC override the country fallback.
+Known same-country regional timezones, exact lookups and explicit custom
+choices remain intact. The ordinary check/launch path yields ko-KR and
+Asia/Seoul at the first script without changing native cache. This synthetic
+fixture does not certify an actual Korean proxy, DNS, STUN or reputation.
 
-### Current review finding (aca866b, Actions39779882161)
+## Historical blocker and current fix
 
-The complete Windows native/portable/installed workflow passed, including the
-normal manager UI opening all four pages and the original quick-DNS/WebRTC
-buttons completing. The unchanged site reported 81, locale consistency, 13 DNS
-resolvers with no detected DNS leak, and disabled/unexposed WebRTC. These are
-observations on the direct Azure CI route, not a customer route certificate.
+`aca866b` / Actions39779882161 passed its then-existing suite, but review of
+original public screenshots found Intel and AMD renderers across the same
+profile's Claude/GPT tabs. That release remained unpublished; its score81 was
+not reused as current acceptance. Canvas stability alone had missed the GPU
+metadata mismatch.
 
-Review of the original screenshots uncovered a release blocker: Claude and GPT
-tabs in this same profile reported different GPU renderer strings (Intel versus
-AMD). Canvas remained stable. The previous controlled first-script suite did
-not compare GPU metadata across new tabs. The next candidate adds unmodified
-WebGL1/WebGL2 first-script observations across startup tabs, new tabs, parser
-frames and restored sessions, plus isolated native-world diagnostics, to locate
-the delivery error without changing detector results or saved identities.
-
-The native-created tab response listener also missed all four initial HTTP
-responses, so the JSON correctly retained null statuses rather than guessed
-200s. The next observer reads the browser's original navigation timing only
-when a real response status is missing, and records its source or keeps unknown.
-Neither the green job nor the retained unpublished package proves this blocker
-is fixed. Public release/download remain unchanged.
-
-The next strict regression (`307bfee` / Actions39812770802) reproduced this at
-the first ordinary new tab: startup pages reported the configured Intel GPU;
-the new tab and same-origin parser frame first reported the saved native AMD
-GPU, while a later main-world read reported Intel again. A read-only isolated
-world still reported AMD. Native identity/cache and declared CPU/locale stayed
-unchanged. This locates an initial native-versus-script metadata disagreement,
-not a detector-score problem. Verified raw artifact SHA256:
+`307bfee` / Actions39812770802 added strict first-script WebGL1/2 checks and
+failed at the first ordinary new tab: startup pages read configured Intel,
+while that new tab and its parser frame initially read saved native AMD.
+Later main-world reads returned Intel; a read-only isolated world remained AMD.
+Cache, CPU and locale stayed unchanged. Verified artifact SHA-256:
 `38fb139c0138e933280d490092b1901b5f5345b41a04801907332ba791bd9e5e`.
 
-The candidate fix applies the already-selected GPU vendor/renderer to the
-native page and paused-session identity before page execution, alongside the
-existing explicit CPU/locale settings. The saved device file, seeds and opaque
-GPU parameters remain unchanged. Real/blocked metadata policies are preserved.
-The strict first-script, frame, session and public-page assertions remain; only
-current Actions execution can prove the fix. Download checksums also use actual
-file basenames across Git Bash/Linux output formats rather than runner paths.
+Current `65b51ac` applies the profile-selected vendor/renderer to the native
+page and paused-session identity before page execution, alongside explicit
+CPU/locale settings. Saved device files, seeds and opaque GPU parameters stay
+unchanged, and real/blocked metadata policies remain intact. The strict
+startup/new-tab/frame/restore and isolated-world observations were retained and
+passed in preflight and packaged Windows runs. Current public Claude/GPT
+screenshots also agree. This result covers the tested matrix, not every future
+kernel or detector.
 
-The first execution on `6cb8525` / Actions39773041895 reached all four pages
-with HTTP200 and preserved one native cache. Claude/GPT summary pages reported
-en-US/Chicago timezone consistency, score74, DNS "no leak detected" and WebRTC
-"disabled or no leak" on the Azure CI route. The latter is not a proven UDP
-egress match. Raw standalone DNS/WebRTC text still said to click their buttons:
-those landing-page observations did **not** execute those two standalone tests.
-Full raw artifact SHA256 was verified as
-`b27bc7454a8757d8d1aee0add6b1403a94ef058b3055f3ef58b592af8d0155e3`.
-The following UI-based execution now also clicks each site's original quick-DNS
-or WebRTC button once and records completion/timeout and actual verdict cells;
-this added behavior still needs current-commit acceptance.
-
-The workspace's **Environment checks** button lists only currently running,
-ready environments. Its four fixed actions open the corresponding page inside
-the selected environment through the existing trusted tab API. It never opens
-the OS default browser or falls back to another environment; stopped/changed
-targets and duplicate in-flight clicks are rejected. This lets an owner inspect
-their actual configured route without giving CI their proxy credentials.
-
-`tests/native-public-network.mjs` uses the actual packaged LYCO application and
-its licensed kernel, with a new unowned profile in the disposable runner's
-app data on an explicitly **direct GitHub-hosted route**. It requires previous
-environments stopped and no subscription account login; it does not reuse a
-managed profile, its network permissions or account data. No stock
-browser is substituted. This is not the customer's subscription proxy route.
-
-The test clicks this actual UI entry, selects the new running environment via
-the real themed dropdown, and clicks each of its four actions. It observes real
-new kernel tabs; it does not substitute harness `page.goto` navigation. The
-unchanged Claude/GPT/DNS/WebRTC pages run once, with screenshots, page text,
-selected public diagnostic cells, response statuses and actual Navigator/Intl
-observations retained. The profile uses the ordinary IP-mode lookup/launch
-path; lookup unavailability remains recorded. Browser values must agree with
-the engine's selected configuration, while the actual site's observations and
-geographic warnings are retained unchanged. Configuration agreement alone is
-not an independent geographic oracle and does not certify IP-mode alignment on
-a real customer proxy (the separate KR fixture covers its specific regression).
-
-Challenges, HTTP errors, missing results, unexposed DNS, blocked WebRTC and
-reported warnings remain separate. A reached page is not a network pass.
-`allNetworkChecksPassed` stays unknown pending review of the original results.
-Actual selected-language/timezone regressions fail the job; external outages
-remain recorded as unavailable. No model login, paid call, score modification,
-detector interception or reused user credentials is involved.
+The earlier `6cb8525` / Actions39773041895 reached all four landing pages but did
+not click the standalone DNS/WebRTC buttons. Its score74 and landing-page text
+are historical observations, not completed standalone tests or current proof.
 
 ## UDA scope
 
-The matching public Rust SDK is
+The user-confirmed Rust SDK is
 [UniDesktop/SDK](https://github.com/UniDesktop/SDK/tree/a74bd2cf372efad2407d6be4b57739e682cf1d9a).
-Its desktop interfaces cover appearance, tray, notifications and similar OS
-features. Its appearance interface reads theme/accent/capabilities; it does not
-implement browser automation, IP reputation, DNS, WebRTC or per-profile locale.
-The read-only Windows appearance bridge is implemented; its Actions acceptance
-is pending (see [desktop integration](DESKTOP-UDA.md)). It does not claim to pass
-these network checks. Browser settings must remain scoped to the selected profile so that
-concurrent profiles do not change each other's locale or the user's OS.
+Its read-only Windows appearance bridge is implemented and accepted in all
+three current Windows stages; see [desktop integration](DESKTOP-UDA.md).
+It reads theme/accent/capabilities. It does not implement browser automation,
+IP reputation, DNS, WebRTC or per-profile locale. Browser settings remain
+scoped to profiles, independently of the user's OS and concurrent environments.
