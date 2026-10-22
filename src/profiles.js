@@ -73,7 +73,7 @@ class LycoProfiles {
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
         networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''},
         language:'en-US',startUrl:'https://www.youtube.com/',platform:{type:'other',startUrl:'https://www.youtube.com/'},
-        privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona'}};
+        privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona',clientRects:'native'}};
       this.bindings[id]={owner:state.username,proxyId:record.id};
       this.save();
       try { await this.engine.syncProfiles([...this.engine.profiles.values(),profile]); }

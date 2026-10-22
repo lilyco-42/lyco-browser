@@ -2,6 +2,8 @@
 // Applied ONLY by GitHub Actions to the pinned upstream checkout.
 const fs=require('node:fs'),path=require('node:path');
 const {replaceOne}=require('./source-patch');
+const {nativeGetterMatches}=require('../src/native-navigator');
+const {noisyRectGeometry}=require('../src/rect-geometry');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
 function one(file,from,to){
@@ -9,7 +11,67 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','view.html','ui.js','workbench.js','workbench.css']){
+// A newly discovered country cannot confirm the country of a stale/default
+// saved timezone. Preserve valid exact network timezones and explicit custom
+// settings; only let IP-mode fallback derive from the newly known country.
+one('automation/locale-from-country.js',
+ '  const countryChanged = Boolean(netCountry && profCountry && netCountry !== profCountry);',
+ '  const countryChanged = Boolean(netCountry && netCountry !== profCountry);');
+// An explicit native layout policy uses the restored kernel's font isolation
+// and CSS geometry. Preserve the legacy random and real policies unchanged.
+one('engine/profile-sanitizer.js',
+ 'clientRects: allowed(privacyValue.clientRects, ["real", "noise"], privacyValue.clientRects === "real" ? "real" : "noise"),',
+ 'clientRects: allowed(privacyValue.clientRects, ["real", "noise", "native"], privacyValue.clientRects === "real" ? "real" : "noise"),');
+one('automation/fingerprint.js',
+ "  const clientRectsMode = mode('clientRects', ['real', 'noise'], 'noise');",
+ "  const clientRectsMode = mode('clientRects', ['real', 'noise', 'native'], 'noise');");
+one('index.html',
+ '<label>ClientRects<select id="editor-client-rects"><option value="noise">随机微扰</option><option value="real">真实直通</option></select></label>',
+ '<label>布局保护<select id="editor-client-rects"><option value="noise">随机微扰（旧模式）</option><option value="native" title="使用受支持内核隔离本机额外字体，保留正常页面布局">一致保护（原生字体）</option><option value="real">真实直通</option></select></label>');
+one('renderer.js',
+ "['ClientRects', privacy.clientRects === 'real' ? '真实' : '随机'],",
+ "['布局保护', privacy.clientRects === 'native' ? '原生字体与一致布局' : (privacy.clientRects === 'real' ? '真实' : '随机微扰（旧）')],");
+// Preserve authored silence inside an otherwise audible rendered buffer.
+// Adding noise to every zero creates samples before a scheduled source starts
+// and after it stops; nonzero samples retain the original per-profile noise.
+one('automation/fingerprint.js', '                    if (inAuthoredSpan(spans, i)) continue;',
+ '                    if (inAuthoredSpan(spans, i) || data[i] === 0) continue;');
+one('automation/fingerprint.js', '  // --- client rects ---',
+ '  const lycoNoisyRectGeometry = '+noisyRectGeometry.toString()+';\n  // --- client rects ---');
+one('automation/fingerprint.js', join(
+ '                const x = rect.x + noisePx, y = rect.y + noisePx;',
+ '                const width = rect.width === 0 ? 0 : Math.max(0, rect.width + noiseSize);',
+ '                const height = rect.height === 0 ? 0 : Math.max(0, rect.height + noiseSize);',
+ '                return TargetDOMRect && TargetDOMRect.fromRect ? TargetDOMRect.fromRect({ x, y, width, height }) : rect;'),
+ join('                const geometry = lycoNoisyRectGeometry(rect, noisePx, noiseSize);',
+ '                return TargetDOMRect && TargetDOMRect.fromRect ? TargetDOMRect.fromRect(geometry) : rect;'));
+one('automation/fingerprint.js', join(
+ '                  const width = rect.width === 0 ? 0 : Math.max(0, rect.width + noiseSize);',
+ '                  const height = rect.height === 0 ? 0 : Math.max(0, rect.height + noiseSize);',
+ '                  rects.push(TargetDOMRect && TargetDOMRect.fromRect',
+ '                    ? TargetDOMRect.fromRect({ x: rect.x + noisePx, y: rect.y + noisePx, width, height })'),
+ join('                  const geometry = lycoNoisyRectGeometry(rect, noisePx, noiseSize);',
+ '                  rects.push(TargetDOMRect && TargetDOMRect.fromRect',
+ '                    ? TargetDOMRect.fromRect(geometry)'));
+// Preserve native UA getters when CDP/native settings already match. The
+// upstream checks the prototype as a receiver, which throws by design and
+// unnecessarily replaces valid Web IDL getters (actual CreepJS: 63 findings).
+one('automation/user-agent.js', '  const sameValue = (obj, key, expected) => {', join(
+ '  const lycoNativeGetterMatches = '+nativeGetterMatches.toString()+';',
+ '  const sameValue = (obj, key, expected, receiver) => {',
+ '    if (receiver) return lycoNativeGetterMatches(obj, key, receiver, expected);'));
+one('automation/user-agent.js', '  const define = (obj, key, getter) => {\n    if (sameValue(obj, key, getter())) return true;',
+ '  const define = (obj, key, getter, receiver) => {\n    if (sameValue(obj, key, getter(), receiver)) return true;');
+one('automation/user-agent.js', '  const applyNavPatches = (proto) => {',
+ '  const applyNavPatches = (proto, receiver = typeof navigator !== "undefined" ? navigator : null) => {');
+one('automation/user-agent.js', '        applyNavPatches(subWin.Navigator.prototype);',
+ '        applyNavPatches(subWin.Navigator.prototype, subWin.navigator);');
+for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersion'],['platform','U.platform'],['vendor','U.vendor'],
+ ['appCodeName','"Mozilla"'],['appName','"Netscape"'],['product','"Gecko"'],['productSub','"20030107"'],['vendorSub','""']]) {
+ one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
+  'define(proto, "'+key+'", () => '+value+', receiver);');
+}
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -23,11 +85,21 @@ one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">'
 one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
 one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
 one('index.html','<button class="nav" data-view="proxies">',join(
- '<button class="nav" data-view="lyco" lang="zh-CN" translate="no"><i data-lucide="shield-check"></i><span>LYCO 代理与会员</span></button>',
+ '<button class="nav" data-view="lyco" lang="zh-CN" translate="no" aria-label="LYCO 账户与代理" title="LYCO 账户与代理"><i data-lucide="shield-check"></i><span class="lyco-nav-label">账户与代理</span></button>',
  '<button class="nav" data-view="proxies">'));
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
-one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n</body>');
+one('index.html','</head>','<link rel="stylesheet" href="lyco/account.css">\n</head>');
+one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n<script src="lyco/desktop-ui.js"></script>\n<script src="lyco/diagnostics-controller.js"></script>\n<script src="lyco/diagnostics-ui.js"></script>\n</body>');
+// UDA reads the host desktop only. Profile-specific locale/fingerprint APIs are
+// untouched, and an explicit light/dark preference still wins over the OS.
+one('renderer.js', 'function systemPrefersDark() {', join(
+ 'function systemPrefersDark() {',
+ "  const theme = window.lycoDesktopAppearance?.theme;",
+ "  if (theme === 'light' || theme === 'dark') return theme === 'dark';"));
+one('renderer.js', 'let uiColorMode = resolveColorMode(uiColorPreference);', join(
+ 'let uiColorMode = resolveColorMode(uiColorPreference);',
+ "window.lycoApplySystemAppearance = () => { if (uiColorPreference === 'auto') applyColorMode('auto', false); };"));
 // The count already uses the parameterized catalogue. Auto-translation must
 // not restore its cached initial Chinese zero over a later English count.
 one('index.html','id="profile-selection-count"','id="profile-selection-count" translate="no"');
@@ -44,6 +116,7 @@ one('renderer.js','function viewMetaFor(view) {',join(
  'function viewMetaFor(view) {',
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
+ "  lycoDesktopAppearance: () => ipcRenderer.invoke('lyco:desktop-appearance'),",
  "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
  "  lycoCopyExtension: () => ipcRenderer.invoke('lyco:copy-extension'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
@@ -60,6 +133,7 @@ one('main.js',"const { randomUUID } = require('crypto');",join(
  "const { randomUUID } = require('crypto');",
  "const { LycoNetwork, SHOP: LYCO_SHOP, ACCOUNT: LYCO_ACCOUNT } = require('./lyco/network');",
  "const { LycoProfiles } = require('./lyco/profiles');",
+ "const lycoDesktopAppearance = require('./lyco/desktop-appearance').createDesktopAppearance({directory: path.join(__dirname, 'lyco')});",
  "let lycoProfiles = null;",
  "let lycoNetwork = null;"));
 one('main.js','app.whenReady().then(async () => {',join(
@@ -69,6 +143,7 @@ one('main.js','app.whenReady().then(async () => {',join(
  "    bundledCore: path.join(__dirname, 'lyco', 'core', process.platform === 'win32' ? 'mihomo.exe' : 'mihomo'),",
  '  });'));
 one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
+ "  registerTrustedIpc('lyco:desktop-appearance', () => lycoDesktopAppearance());",
  "  registerTrustedIpc('lyco:status', () => lycoNetwork.status());",
  "  registerTrustedIpc('lyco:login', (_event, credentials) => lycoProfiles.login(credentials || {}));",
  "  registerTrustedIpc('lyco:refresh', () => lycoNetwork.refresh());",
@@ -103,45 +178,70 @@ console.log('LYCO overlay applied to pinned upstream');
 one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
- "const { prepareNativeIdentity, nativeCanvasFingerprint } = require('./lyco/native-identity');",
+ "const { prepareNativeIdentity, nativeRuntimeFingerprint } = require('./lyco/native-identity');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
- "const { createPausedTabGate, createDocumentStartGuard } = require('./lyco/new-tab-gate');"));
-// Pause page targets themselves. A paused tab container may expose a child
-// page with waitingForDebugger=false; holding the container did not protect
-// that page's first script in the real native regression. Avoid attaching
-// both container and page, which would prepare one page through two sessions.
+ "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
+ "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
+// The owning connection already handles its Workers. Do not inject module-wide
+// latestFingerprint into the privileged local session service (or other profiles).
+one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
+ "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
+one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
+// Use tab-level attachment only for native session restoration: those pages
+// cannot answer early direct-page commands. Ordinary launches retain the
+// original direct Page pause. A Tab pause alone did not reliably stop a new
+// renderer's first script in packaged Actions39410773730.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "tab", exclude: true}, {type: "browser", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity && item.lycoDeferredRestore ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
  '            const prepared = waitingForDebugger && item.lycoNativeIdentity ? newTabGate.begin(sessionId, targetId) : null;',
  "            await connection.command('Target.setAutoAttach', {",
  '              autoAttach: true, waitForDebuggerOnStart: true, flatten: true,',
- '              filter: [{type: "browser", exclude: true}, {}],',
+ '              filter: [{type: "browser", exclude: true}, {type: "tab", exclude: true}, {}],',
  '            }, {sessionId});',
  '            if (prepared) await prepared;',
- "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {"));
+ "          } else if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
+ '            const parentResumed = newTabGate.whenResumed(event.sessionId);'));
 one('engine.js',
  '  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  join('  async applyFingerprintToSession(connection, sessionId, item, fingerprint, targetInfo = {}) {',
  '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);'));
 one('engine.js', '    const fp = fingerprint || buildFingerprint(enriched);',
- '    const fp = nativeCanvasFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
+ '    const fp = nativeRuntimeFingerprint(fingerprint || buildFingerprint(enriched), options.trackOn?.lycoNativeIdentity);');
 one('engine.js', '    const baseFp = fingerprint || item.fingerprint || buildFingerprint(enriched);',
- '    const baseFp = nativeCanvasFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
+ '    const baseFp = nativeRuntimeFingerprint(fingerprint || item.fingerprint || buildFingerprint(enriched), item.lycoNativeIdentity);');
 one('engine.js', '  async startWorkerFingerprintInjection(item, fingerprint) {', join(
  '  async startWorkerFingerprintInjection(item, fingerprint) {',
- '    fingerprint = nativeCanvasFingerprint(fingerprint, item?.lycoNativeIdentity);'));
-one('automation/fingerprint.js', "  } else if (CFG.canvas && CFG.canvas.mode === 'noise') {",
- "  } else if (CFG.canvas && CFG.canvas.mode === 'noise' && !CFG.canvas.nativePixels) {");
-one('automation/fingerprint.js', "  } else if (CFG.canvas?.mode === 'noise') {",
- "  } else if (CFG.canvas?.mode === 'noise' && !CFG.canvas.nativePixels) {");
+ '    fingerprint = nativeRuntimeFingerprint(fingerprint, item?.lycoNativeIdentity);'));
+// Suppress only the HTML 2D/export layer actually owned by the restored native
+// device. Keep original window OffscreenCanvas and Worker JS noise; neither
+// Worker target supports the native protocol in the actual capability probe.
+one('automation/fingerprint.js', '        hookGetAndPut(ctxProto);',
+ '        if (!CFG.canvas.nativeHtmlPixels) hookGetAndPut(ctxProto);');
+one('automation/fingerprint.js', '        if (canvasProto && canvasProto.toDataURL) {',
+ '        if (!CFG.canvas.nativeHtmlPixels && canvasProto && canvasProto.toDataURL) {');
+one('automation/fingerprint.js', '        if (canvasProto && canvasProto.toBlob) {',
+ '        if (!CFG.canvas.nativeHtmlPixels && canvasProto && canvasProto.toBlob) {');
+// Preserve the accepted native path for the other, not-yet-characterized
+// transfer APIs; do not introduce a second noise pass through an HTML copy.
+one('automation/fingerprint.js', "        if (videoFrameProto && typeof videoFrameProto.copyTo === 'function') {",
+ "        if (!CFG.canvas.nativeHtmlPixels && videoFrameProto && typeof videoFrameProto.copyTo === 'function') {");
+one('automation/fingerprint.js', "        if (gpuQueueProto && typeof gpuQueueProto.copyExternalImageToTexture === 'function') {",
+ "        if (!CFG.canvas.nativeHtmlPixels && gpuQueueProto && typeof gpuQueueProto.copyExternalImageToTexture === 'function') {");
 one('engine.js',
  "    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
  join("    const isWaiting = Boolean(targetInfo?.waitingForDebugger || targetInfo?.isWaiting || !targetInfo?.url || targetInfo?.url === 'about:blank');",
- '    const documentStart = createDocumentStartGuard(Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe);'));
+ '    const needsDocumentStartGuard = Boolean(item?.lycoNativeIdentity) && isWaiting && !isSubframe;',
+ // The command injects into existing default contexts and registers for all
+ // future documents. Do not request a frame tree from a paused restored page:
+ // the renderer may not serve that command until it has been resumed.
+ '    const documentStart = createDocumentStartGuard(needsDocumentStartGuard, () => hasDefaultExecutionContext(connection, sessionId));'));
+one('engine.js', '    const onAttached = (event, connection) => {', join(
+ '    const onAttached = (event, connection) => {',
+ '      observeExecutionContexts(connection, event);'));
 one('engine.js', '        return await connection.command(method, params, { sessionId, timeout });', join(
  '        const result = await connection.command(method, documentStart.parameters(method, params), {sessionId, timeout});',
  '        documentStart.succeeded(method, result);',
@@ -161,12 +261,39 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
+one('engine.js', '        const destroyedId = event.params?.targetId;', join(
+ '        const destroyedId = event.params?.targetId;',
+ '        newTabGate.targetClosed(destroyedId);',
+ '        item.lycoPreparedPageTargets?.delete(destroyedId);',
+ '        item.lycoResumedPageTargets?.delete(destroyedId);'));
+one('engine.js',
+ '        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ join('        const detachedTargetId = event.params?.targetId || (detachedSessionId ? workerSessionToTargetId.get(detachedSessionId) : null);',
+ '        newTabGate.fail(detachedSessionId, Error("标签调试连接已断开"));',
+ '        item.lycoPreparedPageTargets?.delete(detachedTargetId);',
+ '        item.lycoResumedPageTargets?.delete(detachedTargetId);'));
 one('engine.js',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger });',
  'await this.applyFingerprintToSession(connection, sessionId, item, fingerprint, { ...targetInfo, waitingForDebugger: waitingForDebugger || newTabGate.has(event.sessionId) });');
 one('engine.js', '            if (isInitial && !completedInitialTargets.has(targetId)) {', join(
+ '            item.lycoPreparedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoPreparedPageTargets.add(targetId);',
  '            newTabGate.ready(event.sessionId);',
  '            if (isInitial && !completedInitialTargets.has(targetId)) {'));
+one('engine.js', join(
+ '            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId }).catch(() => {});",
+ '            }',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"),
+ join('            if (waitingForDebugger) {',
+ "              await connection.command('Runtime.runIfWaitingForDebugger', {}, {sessionId}).catch(error => {",
+ '                if (item.lycoNativeIdentity) throw error;',
+ '              });',
+ '            }',
+ '            await parentResumed;',
+ '            item.lycoResumedPageTargets ||= new Set();',
+ '            if (targetInfo.type === "page") item.lycoResumedPageTargets.add(targetId);',
+ "          } else if (workerTypes.has(targetInfo.type) && !internalUrl.test(String(targetInfo.url || ''))) {"));
 one('engine.js', '        } catch (error) {\n          report(error, targetInfo);\n          this.emit({', join(
  '        } catch (error) {',
  '          if (item.lycoNativeIdentity && (waitingForDebugger || newTabGate.has(event.sessionId))) {',
@@ -181,6 +308,12 @@ one('engine.js', '        } catch (error) {\n          report(error, targetInfo)
 one('engine.js',
  '        } finally {\n          if (waitingForDebugger) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })',
  '        } finally {\n          if (waitingForDebugger && !connection.lycoIdentityRefusedSessions?.has(sessionId)) {\n            await connection.command(\'Runtime.runIfWaitingForDebugger\', {}, { sessionId })');
+one('engine.js', join(
+ "            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .catch((error) => report(error, targetInfo));'),
+ join("            await connection.command('Runtime.runIfWaitingForDebugger', {}, { sessionId })",
+ '              .then(() => newTabGate.resumed(sessionId))',
+ '              .catch((error) => { newTabGate.fail(sessionId, error); report(error, targetInfo); });'));
 one('engine.js', '      for (const extra of customStartUrls.slice(1)) args.push(extra);',
  '      // Extra URLs are opened only after the original runtime is ready.');
 // Keep this inside the original injection try: injectionFailed is block-scoped.
@@ -191,6 +324,7 @@ one('engine.js', '      // Brand window title as 环境 N (not generic Chrome)',
  '      await openPreparedStartupPages({',
  '        urls: customStartUrls.slice(1), port: item.port, connection, cdp,',
  '        assertActive: () => this.assertStartGenerationActive(profile.id, lifecycleGeneration),',
+ '        isPrepared: item.lycoNativeIdentity ? id => Boolean(item.lycoPreparedPageTargets?.has(id) && item.lycoResumedPageTargets?.has(id)) : undefined,',
  '        prepare: () => this.applyRuntimeSettings(item.port, profile,',
  '          item.nativeKernelFingerprint ? fingerprintForNativeKernelInject(item.fingerprint) : item.fingerprint, {',
  '            appliedTargetIds: item.fpAppliedTargets, appliedFingerprintHash: item.fpAppliedHash,',
@@ -205,11 +339,16 @@ one('engine.js', '      // Brand window title as 环境 N (not generic Chrome)',
 '      // Brand window title as 环境 N (not generic Chrome)'));
 one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
+ '      item.lycoDeferredRestore = lycoDeferredRestore;',
  '      try {',
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '          deferredRestore: lycoDeferredRestore,',
+ '          requireNativeFontLayout: profile.privacy.clientRects === "native",',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
+ '            ...(fingerprint.webgl?.mode !== "blocked" && ["noise", "custom"].includes(fingerprint.webgl?.metaMode)',
+ '              ? {webglVendor: fingerprint.webgl.vendor, webglRenderer: fingerprint.webgl.renderer} : {}),',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',
  '            timezone: profile.privacy.timezoneMode === "real" ? undefined : fingerprint.timezone},',
  '        });',
@@ -218,6 +357,35 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.verificationBlocked = true;',
  '        throw error;',
  '      }'));
+// A restored page can run while the original engine is still connecting CDP.
+// Bring up the same kernel/profile without windows, install its original
+// page/worker auto-attach handling, then request Chromium's own session service.
+one('engine.js', '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;', join(
+ '    const restoreSession = profile.advanced.tabMode === \'restore\' || profile.advanced.restoreSession;',
+ '    const lycoDeferredRestore = Boolean(restoreSession && isWayfernKernel(browser));'));
+one('engine.js', '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;', join(
+ '    const lycoSessionBridge = lycoDeferredRestore ? await prepareSessionBridge(root) : null;',
+ '    if (lycoSessionBridge) loadPaths.push(lycoSessionBridge.directory);',
+ '    const finalArgs = loadPaths.length ? mergeLoadExtensionArgs(args, loadPaths) : args;'));
+one('engine.js', "    if (restoreSession) args.push('--restore-last-session');",
+ "    if (lycoDeferredRestore) args.push('--no-startup-window');\n    else if (restoreSession) args.push('--restore-last-session');");
+one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucceeded;', join(
+ '      if (lycoDeferredRestore && injectSucceeded && workerSucceeded) {',
+ '        try {',
+ '          await openSavedSession({bridge: lycoSessionBridge, port: item.port, cdp,',
+ '            assertActive: () => {',
+ '              this.assertStartGenerationActive(profile.id, lifecycleGeneration);',
+ '              if (item.cleanedUp || item.stopping || item.childExitState?.exited) throw Error("会话恢复时环境已关闭");',
+ '            },',
+ '            isPrepared: () => Boolean(item.lycoNativeIdentity && item.workerFingerprintConnection?.opened && !item.workerFingerprintConnection.closed && item.workerFingerprintConnection === item.workerFingerprintConnectionReady),',
+ '            isPagePrepared: id => Boolean(item.lycoPreparedPageTargets?.has(id) && item.lycoResumedPageTargets?.has(id)),',
+ '            hasPreparedPage: exclude => Boolean([...item.lycoPreparedPageTargets || []].some(id => id !== exclude && item.lycoResumedPageTargets?.has(id))),',
+ '          });',
+ '        } catch (error) { item.lycoNativeIdentityFailed = true; throw error; }',
+ '      }',
+ '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
+one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',
+ '    item.workerFingerprintConnection = connection;\n    item.workerFingerprintConnectionReady = connection;\n    return connection;');
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(

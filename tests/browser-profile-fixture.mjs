@@ -1,14 +1,21 @@
 // CI-owned pages observe the real bundled browser. They do not patch navigator,
 // storage, canvas, Chromium, or the application's production fingerprint code.
+import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
+import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} from './browser-font-control.mjs';
+import {readWebglIdentity} from './browser-webgl-identity.mjs';
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
+  ['a-korean-egress-extra', 'A'],
   ['a-first-extra', 'A'], ['a-reopen-extra', 'A'],
   ['a-first-new-tab', 'A'], ['a-reopen-new-tab', 'A'],
+  ['a-first-new-tab-2', 'A'], ['a-reopen-new-tab-2', 'A'],
+  ['a-first-new-tab-3', 'A'], ['a-reopen-new-tab-3', 'A'],
   ['a-session-restore', 'A'], ['a-session-restore-extra', 'A'],
+  ['a-restored-new-tab', 'A'], ['a-restored-new-tab-2', 'A'], ['a-restored-new-tab-3', 'A'],
 ]);
 
-async function observeProfile(marker, readOnly = false) {
+async function observeProfile(marker, readOnly, readFonts, readLocal, family, readGpu) {
   // Read these synchronously in the page's first script, before font readiness
   // or network awaits can hide a late runtime injection.
   const initial = {
@@ -16,7 +23,10 @@ async function observeProfile(marker, readOnly = false) {
     language: navigator.language, languages: Array.from(navigator.languages),
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    webgl: readGpu(),
   };
+  const fontControl = readFonts(family);
+  const localFont = readLocal(family);
   const key = 'lyco_native_profile_storage';
   const cookie = () => document.cookie.split(';').map(part => part.trim())
     .find(part => part.startsWith(key + '='))?.slice(key.length + 1) ?? null;
@@ -47,8 +57,10 @@ async function observeProfile(marker, readOnly = false) {
   };
   const initialShape = [draw(false), draw(false)];
   await document.fonts.ready;
+  fontControl.face = await localFont;
   return {
     ...initial,
+    fontControl,
     before, after: {cookie: cookie(), local: localStorage.getItem(key)},
     canvas: [draw(), draw()], canvasControl: initialShape, textWidth,
   };
@@ -57,28 +69,69 @@ async function observeProfile(marker, readOnly = false) {
 // A second observation only: it never changes navigator, native settings,
 // storage, document scripts or navigation. Initial-page assertions stay intact.
 export function readOnlyProfileProbeSource() {
-  return '(' + observeProfile.toString() + ')("A",true)';
+  return '(' + observeProfile.toString() + ')("A",true,' + fontArguments() + ')';
+}
+
+function fontArguments() {
+  return readFontControlMetrics.toString() + ',' + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily)
+    + ',' + readWebglIdentity.toString();
 }
 
 export function createBrowserProfileFixture() {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('CI only');
   const observations = new Map();
+  const concurrent = createConcurrentBrowserFixture();
+  const frameObservations = new Map();
   function route(req, res, proxied) {
     const url = new URL(req.url, 'http://ci.invalid');
-    if (!['/profile-probe', '/profile-report'].includes(url.pathname)) return false;
+    if (!['/profile-probe', '/profile-report', '/profile-frame', '/profile-frame-report'].includes(url.pathname)) return false;
     const phase = url.searchParams.get('phase');
     if (!phases.has(phase)) { res.writeHead(400); res.end('Unknown CI phase'); return true; }
-    const entry = observations.get(phase) || {};
-    observations.set(phase, entry);
+    const frame = url.pathname.startsWith('/profile-frame'), realm = url.searchParams.get('realm');
+    const newTab = /-new-tab(?:-[23])?$/.test(phase);
+    if (frame && (!newTab || !['same', 'cross'].includes(realm))) {
+      res.writeHead(400); res.end('Unknown CI frame'); return true;
+    }
+    const entries = frame ? frameObservations : observations, key = frame ? phase + ':' + realm : phase;
+    const entry = entries.get(key) || {};
+    entries.set(key, entry);
+    if (url.pathname === '/profile-frame') {
+      entry.pageProxied = Boolean(proxied);
+      const endpoint = '/profile-frame-report?phase=' + encodeURIComponent(phase) + '&realm=' + realm;
+      // Synchronous first-script reads in actual parser-created documents.
+      // No storage writes, parent messages, injection or harness navigation.
+      const script = `const initial={userAgent:navigator.userAgent,platform:navigator.platform,
+        language:navigator.language,languages:Array.from(navigator.languages),cores:navigator.hardwareConcurrency,
+        memory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+        host:location.hostname,isTop:window===window.top,secureContext:isSecureContext,
+        memoryAvailable:'deviceMemory' in navigator,webgl:(${readWebglIdentity.toString()})()};
+        initial.fontControl=(${readFontControlMetrics.toString()})(${JSON.stringify(hostFontControlFamily)});
+        (${readLocalFontControl.toString()})(${JSON.stringify(hostFontControlFamily)}).then(face=>{
+          initial.fontControl.face=face;
+          return fetch(${JSON.stringify(endpoint)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(initial)});
+        });`;
+      res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
+      res.end('<!doctype html><meta charset="utf-8"><title>LYCO parser frame</title><script>' + script + '</script>');
+      return true;
+    }
     if (url.pathname === '/profile-probe') {
       entry.pageProxied = Boolean(proxied);
+      entry.requestLanguage = req.headers['accept-language'] || '';
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
-      const readOnly = phase.endsWith('-extra') || phase.endsWith('-new-tab');
-      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(readOnly) + ')'
+      const readOnly = phase.endsWith('-extra') || newTab;
+      const script = '(' + observeProfile.toString() + ')(' + JSON.stringify(phases.get(phase)) + ',' + String(readOnly) + ',' + fontArguments() + ')'
         + '.then(' + post + ').catch(error=>(' + post + ')({error:String(error)}));';
+      // Place both frames before the parent's first script to exercise parser
+      // startup, including a different site mapped ONLY by the CI proxy.
+      const port = new URL('http://' + req.headers.host).port;
+      const frames = newTab ? ['same', 'cross'].map(realm => {
+        const host = realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid';
+        return '<iframe title="' + realm + ' origin probe" src="http://' + host + ':' + port
+          + '/profile-frame?phase=' + encodeURIComponent(phase) + '&amp;realm=' + realm + '"></iframe>';
+      }).join('') : '';
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
-      res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title><script>' + script + '</script>');
+      res.end('<!doctype html><meta charset="utf-8"><title>LYCO CI profile probe</title>' + frames + '<script>' + script + '</script>');
       return true;
     }
     if (req.method !== 'POST') { res.writeHead(405); res.end(); return true; }
@@ -93,6 +146,9 @@ export function createBrowserProfileFixture() {
     });
     return true;
   }
-  return {route, snapshot: () => Object.fromEntries(observations), result: phase => observations.get(phase),
-    clear: phase => observations.delete(phase)};
+  return {route: (req, res, proxied) => concurrent.route(req, res, proxied) || route(req, res, proxied),
+    snapshot: () => ({...Object.fromEntries(observations), parserFrames: Object.fromEntries(frameObservations), concurrent: concurrent.snapshot()}),
+    result: phase => observations.get(phase), clear: phase => observations.delete(phase), concurrent,
+    frameResult: (phase, realm) => frameObservations.get(phase + ':' + realm),
+  };
 }

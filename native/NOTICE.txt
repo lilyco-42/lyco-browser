@@ -1,0 +1,12 @@
+LYCO Desktop Appearance Bridge
+
+Uses UniDesktop API (UDA), https://github.com/UniDesktop/SDK
+Pinned source revision: a74bd2cf372efad2407d6be4b57739e682cf1d9a
+License: MIT OR Apache-2.0. The unmodified upstream license texts are included
+alongside this notice as LICENSE-MIT-UDA.txt and LICENSE-APACHE-UDA.txt.
+
+The LYCO bridge is built in GitHub Actions from native/desktop-probe.rs, using
+the SDK's committed Cargo.lock. It invokes only the Windows appearance backend
+to read theme, accent color and appearance capabilities. No UDA session, power,
+wallpaper, notification, tray or network operations are invoked by this bridge.
+Source and build instructions: https://github.com/lilyco-42/lyco-browser

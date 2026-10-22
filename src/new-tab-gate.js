@@ -3,38 +3,98 @@
 // A Chromium tab can be paused while its child page reports waiting=false.
 // Keep the parent paused until the existing page preparation has completed.
 function createPausedTabGate({timeoutMs = 8000, onRefused = () => {}} = {}) {
-  const pending = new Map();
+  const pending = new Map(), resumptions = new Map(), refused = new Map();
   const finish = (sessionId, failed, error) => {
-    const entry = pending.get(sessionId);
+    const entry = pending.get(sessionId) || (failed ? resumptions.get(sessionId) : null);
     if (!entry) return;
-    pending.delete(sessionId); clearTimeout(entry.timer);
+    pending.delete(sessionId); clearTimeout(entry.timer); clearTimeout(entry.resumeTimer);
     if (failed) {
+      resumptions.delete(sessionId);
+      refused.set(sessionId, entry);
+      const failure = error || Error('新标签身份准备失败，已阻止该标签运行');
       try { onRefused(sessionId, entry.targetId); } catch {}
-      entry.reject(error || Error('新标签身份准备失败，已阻止该标签运行'));
-    } else entry.resolve();
+      entry.reject(failure); entry.rejectResume(failure);
+    } else {
+      entry.resolve();
+      entry.resumeTimer = setTimeout(() => finish(sessionId, true,
+        Error('新标签解除暂停确认超时，环境未就绪')), timeoutMs);
+    }
   };
   return {
     begin(sessionId, targetId) {
-      if (pending.has(sessionId)) return pending.get(sessionId).promise;
+      if (refused.has(sessionId)) return refused.get(sessionId).resumed;
+      if (resumptions.has(sessionId)) return resumptions.get(sessionId).promise;
       const entry = {targetId};
       entry.promise = new Promise((resolve, reject) => {entry.resolve = resolve; entry.reject = reject;});
+      entry.resumed = new Promise((resolve, reject) => {entry.resolveResume = resolve; entry.rejectResume = reject;});
       // A child may fail while the parent's setAutoAttach command is pending.
       // Keep rejection handled until the parent reaches its explicit await.
       entry.promise.catch(() => {});
+      entry.resumed.catch(() => {});
       entry.timer = setTimeout(() => finish(sessionId, true, Error('新标签身份准备超时，已阻止该标签运行')), timeoutMs);
       pending.set(sessionId, entry);
+      resumptions.set(sessionId, entry);
       return entry.promise;
     },
     has: sessionId => pending.has(sessionId),
     ready: sessionId => finish(sessionId, false),
     fail: (sessionId, error) => finish(sessionId, true, error),
+    whenResumed: sessionId => resumptions.get(sessionId)?.resumed || refused.get(sessionId)?.resumed || Promise.resolve(),
+    resumed(sessionId) {
+      const entry = resumptions.get(sessionId);
+      if (!entry) return;
+      if (pending.has(sessionId)) {
+        finish(sessionId, true, Error('子页面准备尚未完成，不能确认标签就绪')); return;
+      }
+      clearTimeout(entry.resumeTimer); resumptions.delete(sessionId); entry.resolveResume();
+    },
+    targetClosed(targetId) {
+      for (const [sessionId, entry] of resumptions) {
+        if (entry.targetId === targetId) finish(sessionId, true, Error('标签已关闭，环境未就绪'));
+      }
+    },
   };
 }
-function createDocumentStartGuard(enabled) {
+// Observe only protocol metadata on the owning connection. A restored target
+// can be paused before it has a default context. Request immediate execution
+// only for known existing contexts; keep registration for future documents.
+const defaultContexts = new WeakMap();
+function observeExecutionContexts(connection, event) {
+  if (!connection || !event) return;
+  const sessionId = event.sessionId;
+  if (event.method === 'Target.detachedFromTarget') {
+    defaultContexts.get(connection)?.delete(event.params?.sessionId);
+    return;
+  }
+  if (!sessionId) return;
+  let sessions = defaultContexts.get(connection);
+  if (!sessions) { sessions = new Map(); defaultContexts.set(connection, sessions); }
+  if (event.method === 'Runtime.executionContextsCleared') { sessions.delete(sessionId); return; }
+  if (event.method === 'Runtime.executionContextDestroyed') {
+    const contexts = sessions.get(sessionId), params = event.params || {};
+    if (!contexts) return;
+    for (const [id, context] of contexts) {
+      if (id === params.executionContextId || (params.executionContextUniqueId && context.uniqueId === params.executionContextUniqueId)) contexts.delete(id);
+    }
+    if (!contexts.size) sessions.delete(sessionId);
+    return;
+  }
+  if (event.method !== 'Runtime.executionContextCreated') return;
+  const context = event.params?.context;
+  if (!context?.auxData?.isDefault || !context.auxData.frameId || context.id == null) return;
+  let contexts = sessions.get(sessionId);
+  if (!contexts) { contexts = new Map(); sessions.set(sessionId, contexts); }
+  contexts.set(context.id, {frameId: context.auxData.frameId, uniqueId: context.uniqueId});
+}
+function hasDefaultExecutionContext(connection, sessionId, frameId) {
+  return [...defaultContexts.get(connection)?.get(sessionId)?.values() || []]
+    .some(context => frameId === undefined || context.frameId === frameId);
+}
+function createDocumentStartGuard(enabled, hasExistingContext = () => true) {
   let failure = null;
   const applies = method => enabled && method === 'Page.addScriptToEvaluateOnNewDocument';
   return {
-    parameters(method, params) { return applies(method) ? {...params, runImmediately: true} : params; },
+    parameters(method, params) { return applies(method) ? {...params, runImmediately: Boolean(hasExistingContext())} : params; },
     succeeded(method, result) {
       if (applies(method)) failure = typeof (result?.identifier ?? result?.result?.identifier) === 'string'
         ? null : Error('内核未确认页面初始化脚本，已阻止页面运行');
@@ -43,4 +103,4 @@ function createDocumentStartGuard(enabled) {
     assertReady() { if (failure) throw failure; },
   };
 }
-module.exports = {createPausedTabGate, createDocumentStartGuard};
+module.exports = {createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext};
