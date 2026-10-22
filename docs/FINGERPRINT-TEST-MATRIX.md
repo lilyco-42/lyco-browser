@@ -3,22 +3,53 @@
 本矩阵对应 Windows Wayfern149 原生浏览器。所有构建和浏览器运行只在
 GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不修改检测分数。
 
-## 当前证据
+## 当前证据（Windows 预览版，2026-10-23）
 
-`3ff68c3` / [Actions39768843099](https://github.com/lilyco-42/lyco-browser/actions/runs/39768843099)
-整轮成功；完整工件官方/local SHA-256 均为
-`2e079e27ae1a6a493809dc9fc30c4a2b217101db90b42a318d3b57a42af8a6d8`。
-PR merge `132345a25ad0a8a43136ab8505454877b1d40df6` 的 parents 已核对包含
-main `eb0344` 和 head `3ff68c3`。预检46、portable46、installed45项，以及实际
-安装/原创图标/快捷方式/卸载6项全部通过。三个阶段UDA helper hash/许可证、
-真实跟随系统主题和手动覆盖均通过，安装后的真实截图已检查。
-portable三组九个独立场景均passed，Creep lies0/errors0、locale23/low；DPR1/1.5/1，
-SDK四项联合断言与A/B cache不变全部true。未保证HTML/Offscreen跨API像素一致。
+产品源 `65b51acdbf5bb7e8c2273ea219c82b3cb0547463` / [Actions39814682404](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404)
+整轮成功；完整工件 SHA-256 官方与下载文件相同：
+`62b9ec9bde59273aad7fa2328f74f63b6702ffbbe121032aec829c11f445d3b5`。
+实际测试合并提交 `46d7fde745a1fe6fcaa5054fbd526f5c0952eb45` 的父提交包含
+main `eb0344` 与源 `65b51ac`；PR24 已合并，main `3c03a10` 与测试合并提交内容树相同。
+[Windows 预览版下载](../README.md)固定到此已验收包。
 
-本次新增“环境检测”入口及真实产品Net.Coffee公开页观察仍须当前提交实际验收，
-不能使用上述旧头通过来宣称新入口或公网检测已经通过。
+| 阶段 | 本版实际结果 | 范围 |
+| --- | --- | --- |
+| 原生预检 | 47项，通过 | 首脚本、新标签、frame、恢复、Worker、并行环境与独立检测 |
+| 便携包 | 47项，通过 | 打包后再次运行，独立A/B/A重开及缓存检查 |
+| 实际安装 | 46项，通过 | 安装后原生工作流；不冒称重跑全部独立九场景 |
+| 安装器 | 6项，通过 | 含空格目录、原创图标、快捷方式/卸载标识、安装后运行、卸载保留数据、不修改上游登记 |
+
+预检和便携包的 A初次、B并行、A重开三组独立场景均 passed：固定 CreepJS 原始
+lies0/errors0、BotD false、社区地区启发式23/low。此轮实际DPR为1/1/1；
+FingerprintJS visitor/audio 的 A重开稳定和 B差异四项联合断言均 true，A/B身份
+缓存字节不变。检测源码版本和内容哈希保留在原始 JSON，不修改原检测结果。
+社区 claude-tester 并非 Anthropic 官方国籍或账号准入测试。
+
+本版额外比较启动页、普通新标签、parser frame、会话恢复及后续读取的真实
+WebGL1/2 vendor/renderer，同时保留隔离原生世界的只读观测。配置 GPU 与保存
+native cache 元数据不一致时，在页面运行前应用已选择的 GPU 配置副本，不重建
+缓存或噪声种子。此前首次新标签 Intel/AMD 不一致在此矩阵不再出现；不同身份
+可以选择不同 GPU，不要求所有阶段或不同用户的显卡相同。
+
+UDA三个阶段的 helper摘要、许可、系统主题与手动覆盖均通过，见[UDA记录](DESKTOP-UDA.md)。
+真实管理界面打开公网四页并实际运行独立DNS/WebRTC按钮，具体原始观测与局限
+见[网络验收](NETWORK-ACCEPTANCE.md)。HTTP可达不等于网络安全通过，CI直连
+不代表客户订阅出口。HTML/Offscreen跨API像素一致仍不保证。
 
 ## 历史排查记录
+
+以下只记录各提交当时的结果，不能替代上方当前版本的验收。
+
+<details>
+<summary>展开历史失败与修复记录（按当时提交记录，非当前状态）</summary>
+
+
+`3ff68c3` / [Actions39768843099](https://github.com/lilyco-42/lyco-browser/actions/runs/39768843099)
+当时通过预检46、portable46、installed45和安装器6项，完整工件摘要
+`2e079e27ae1a6a493809dc9fc30c4a2b217101db90b42a318d3b57a42af8a6d8`。
+它早于新检测入口和GPU首脚本修复，不再作为当前下载或验收证据。
+
+
 
 `b2a9627` / [Actions39591446063](https://github.com/lilyco-42/lyco-browser/actions/runs/39591446063)
 整轮成功。完整工件官方/本地 SHA-256 均为
@@ -313,3 +344,5 @@ DOMRect三项和AudioBuffer一项。社区页实际完成六项检测，23分、
 新增5000组负坐标、亚像素和缩放回归，并检查输入不被修改和环境扰动仍在。
 该补丁尚待Actions；固定旋转形状这一CreepJS提示仍未证明解决，不做检测
 页面、CSS类名、角度或URL的特殊处理。
+
+</details>

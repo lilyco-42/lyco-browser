@@ -1,0 +1,12 @@
+{
+  "source": "GitHub Actions actual packaged Windows application",
+  "product_commit": "65b51acdbf5bb7e8c2273ea219c82b3cb0547463",
+  "tested_merge_commit": "46d7fde745a1fe6fcaa5054fbd526f5c0952eb45",
+  "run_url": "https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404",
+  "phase": "lyco-native-evidence",
+  "original_path": "windows-uda-desktop.png",
+  "image_sha256": "bd94db39bdc5c0fc000df0706920054c920397acda166bb035ff4950b6ac1113",
+  "evidence_zip_sha256": "62b9ec9bde59273aad7fa2328f74f63b6702ffbbe121032aec829c11f445d3b5",
+  "image_edited": false,
+  "billing": "CI fixtures; realPayments=0"
+}

@@ -1,56 +1,53 @@
-# LYCO Browser · 指纹/多环境浏览器与官方代理支付
+# LYCO Browser · 多环境桌面浏览器
 
-**桌面预览版：Windows x64、macOS Apple Silicon、Linux x64。** 维护过程中的编译、打包和自动验收只在 GitHub Actions 执行；下载后可在自己的设备上使用。
+**Windows x64 预览版已发布。** 独立环境、分组与批量操作、代理与会员、深浅主题，以及在所选环境内打开的检测入口。构建、打包和产品验收全部在 GitHub Actions 执行。
 
 ## 下载与开始使用
 
-[下载已验收的桌面预览版](https://github.com/lilyco-42/lyco-browser/releases/tag/ci-12ae5a9377ba)
+[Windows 预览版发行页](https://github.com/lilyco-42/lyco-browser/releases/tag/review-46d7fde745a1-39814682404-1)
 
-> **旧下载包的已知限制：** 上方旧预览包的新标签首段脚本可能读到默认语言、CPU、内存、时区及不同的原生 Canvas。Cookie 和代理正确不代表页面身份正确，不能用于依赖完整身份隔离的场景。修复、并发隔离和 UDA 外观已在 [PR #24](https://github.com/lilyco-42/lyco-browser/pull/24) 的 `3ff68c3` 通过完整 Windows 验收；新增检测入口仍待当前提交验收，公开下载尚未切换。[原始复现记录](https://github.com/lilyco-42/lyco-browser/actions/runs/39200266836)。
+| 文件 | 用途 |
+| --- | --- |
+| [Windows x64 安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/review-46d7fde745a1-39814682404-1/LYCO-Browser-Windows-x64-MVP.exe) | 首次使用，安装到自己的电脑 |
+| [Windows x64 便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/review-46d7fde745a1-39814682404-1/LYCO-Browser-Windows-x64-MVP.zip) | 解压后使用 |
+| [SHA256SUMS.txt](https://github.com/lilyco-42/lyco-browser/releases/download/review-46d7fde745a1-39814682404-1/SHA256SUMS.txt) | 与下载文件核对 SHA-256 |
 
-> **候选验收范围（2026-10-22）：** `3ff68c3` 的[完整 Windows 验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39768843099)通过预检46项、便携包46项、实际安装后45项及安装/图标/卸载6项；包括会话恢复、账户引导、并发 Worker、固定独立检测与 UDA 界面。新增环境检测入口和公网观察不能沿用旧提交的通过结果。Wayfern149 的 HTML Canvas 与 OffscreenCanvas 像素并不保证一致，不能据此宣传完整指纹一致或不可检测，见[兼容性与验收范围](docs/FINGERPRINT-COMPATIBILITY.md)。
+EXE SHA-256：`4563dde26cede3f4a3a636d0e12b2bff9304d20c9eeefa8a9de8046fd1fbd74c`
 
-| 系统 | 下载 | 说明 |
-| --- | --- | --- |
-| Windows x64 | [安装 EXE](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.exe) · [便携 ZIP](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Windows-x64-MVP.zip) | 初次使用选安装版 |
-| macOS Apple Silicon | [DMG](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-macOS-arm64-MVP.dmg) | ARM64，不适用于 Intel Mac |
-| Linux x64 | [tar.gz](https://github.com/lilyco-42/lyco-browser/releases/download/ci-12ae5a9377ba/LYCO-Browser-Linux-x64-MVP.tar.gz) | 桌面预览包 |
+ZIP SHA-256：`b3530f515ae539f0f0c500d5d473782525f286fd5c189a49feafcbe063cc4b53`
 
-此处固定到已验收的产品提交 `12ae5a9377ba7f22155ae2e7ef3b43ff77eab234`，不随其他平台或文档预发布版漂移。Windows 安装包 SHA-256：`c842b091536f84dc986b25131fddbdd4b19821b4e70f58186f5894c8ef6222bb`。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 与发行页核对。
-
-本分支新增：所有者本人、同仓库 PR 的完整门禁通过后，Actions 会把对应测试提交的
-EXE、ZIP 和 `SHA256SUMS.txt` 保留在未公开的 GitHub 草稿版本。它不会修改公开下载，
-也不会覆盖已发布的文件；草稿包用于所有者安装核对，仍须审阅实际公网结果。
+此入口固定到已验收的产品源提交 `65b51acdbf5bb7e8c2273ea219c82b3cb0547463`，实际测试合并提交 `46d7fde745a1fe6fcaa5054fbd526f5c0952eb45`；[PR #24](https://github.com/lilyco-42/lyco-browser/pull/24) 已合并，main 合并提交 `3c03a10` 与测试提交内容树一致。下载不会随其他平台或文档版本漂移。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 核对。
 
 1. 下载并安装或解压，打开 **LYCO Browser**。
 2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
 3. 本站月卡用户点击 **一键创建专属代理环境**；购买或续费由你主动打开[官网商城](https://lain42.top/shop/#proxy_1m)完成。
-4. 在环境列表双击启动。分组、批量创建及右键编辑都连接实际后端；退出账号会关闭受管窗口，权益到期会断开本站代理。
+4. 在环境列表双击启动。点击 **环境检测** 可选择运行中的环境并打开对应检测页。
 
-![GitHub Actions 实际安装后的环境工作台](docs/images/installed-workbench.png)
+![当前预览版在 GitHub Actions 实际安装后的环境工作台](docs/images/installed-workbench-65b51ac.png)
 
-Windows 的[正式提交验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698242)已通过：预检、便携包和实际安装后各 27 项原生检查，另有 6 项安装检查。包括分组与批量操作、双启动页在身份准备后打开且保留标签、真实代理流量、两环境 Cookie/localStorage 隔离、重启后 Canvas 一致、身份文件损坏时拒绝访问目标网页、恢复备份后重新启动，以及卸载保留用户数据。截图来自该正式包的实际安装窗口。
+[完整 Windows 验收](https://github.com/lilyco-42/lyco-browser/actions/runs/39814682404)通过原生预检47项、便携包47项、实际安装后46项及6项安装/图标/快捷方式/卸载检查。包括并行环境、普通新标签与内嵌页面首段脚本、恢复会话、代理流量、Cookie/localStorage 隔离、身份缓存保护、UDA 外观和独立检测。截图为此包实际安装窗口，原始来源见[截图记录](docs/images/installed-workbench-65b51ac.source.json)。
 
-macOS/Linux 已通过[同一产品提交的构建和打包检查](https://github.com/lilyco-42/lyco-browser/actions/runs/39146698195)，未据此宣称完成原生 UI 验收。预览包尚未配置商业代码签名。本轮已验证双启动页；新标签首次脚本问题已复现且正在修正，原生会话恢复及其他未覆盖路径仍需独立验收，完整范围见[受管代理安全边界](docs/SECURITY.md)。
+本版修复了普通新标签及内嵌页面首次读取显卡信息与环境配置不一致的问题，保留已保存的身份缓存和噪声种子。旧 `ci-12ae5a9377ba` 包存在新标签首脚本身份问题，不再作为默认下载。
 
+**验收边界：** 这是尚无商业代码签名的 Windows 预览版。HTML Canvas 与 OffscreenCanvas 跨 API 像素不保证相同；第三方检测不保证匿名、防封或官方账号准入；CI 支付为受控夹具，没有真实扣款。详见[兼容性](docs/FINGERPRINT-COMPATIBILITY.md)、[独立检测矩阵](docs/FINGERPRINT-TEST-MATRIX.md)和[网络验收](docs/NETWORK-ACCEPTANCE.md)。
+
+macOS Apple Silicon、Linux x64 的 main `3c03a10` [构建与打包检查已通过](https://github.com/lilyco-42/lyco-browser/actions/runs/39822114627)，尚未完成对应原生 UI 验收，不将 Windows 结果套用于其他平台。Windows main 的独立重建记录见[Actions39822114943](https://github.com/lilyco-42/lyco-browser/actions/runs/39822114943)，其状态以该运行实际结果为准。
 
 > **运行及随包资源分发授权已确认（2026-10-17）：** 产品所有者明确确认既有 Wayfern 书面授权涵盖 LYCO 运行、分发及随包 Windows/macOS 字体资源再分发，桌面工作流解除草稿分发限制。此记录依据所有者确认，不公开授权文件或商业条款，也不向其他项目授予相同权利。当前提交必须通过对应 Actions 门禁后才发布 CI 预览包；第三方版权、许可与源码来源继续保留，旧草稿不会自动发布。
 
 候选内核仅通过独立的 `audit-kernel-archive.yml` 执行静态审查：锁定来源、版本及 SHA-256，记录字体、版权文件和公开补丁，不启动浏览器，不上传候选二进制。审查成功不等于获得分发许可，也不等于功能等价。
 
-## 环境工作台（开发中）
+## 环境工作台
 
-参考[蓝鸟官方环境配置教程](https://www.blueniao.com/browser/?id=12)的分组、批量添加、双击启动和右键编辑流程，使用现有环境、代理和账户后端。分组在左侧，新建和批量添加默认使用当前分组；列表默认显示环境、网络、状态与操作，更多操作中可以展开全部详细列。右键菜单支持键盘导航和 Escape 关闭。品牌和图标继续使用 LYCO 原创资产，不复制蓝鸟图片或标志。
+参考[紫鸟官方工作台说明](https://www.ziniao.com/help/docs/Overview/hot/new-workbench-tutorial)的简洁/完整信息展示，以及[站斧（战斧）官方帮助](https://www.zhanfubrowser.com/help)的新建、绑定网络、启动流程，使用 LYCO 现有环境、代理和账户后端独立实现。分组在左侧，新建和批量添加默认使用当前分组；列表默认显示环境、网络、状态与操作，可展开详细列。右键菜单支持键盘导航和 Escape 关闭。当前界面使用语义 HTML/CSS/JS，并非 React/shadcn 组件；不复制其他产品的代码、图片或标志。
 
-本分支只有在当前 Actions 的实际窗口操作、代理流量和编辑回归通过后，才能称为已验收；公开分发按上方所有者授权范围及当前提交门禁执行。
+批量选择栏首层保留启动、停止、复制与更多四项入口；偏好、网络、移动分组和删除放在更多面板，继续调用原有操作。账户引导、紧凑/详细列表、检测弹窗及深浅主题已包含在上述 Windows 验收中，不代表具备参考产品的全部团队功能。
 
-批量选择栏首层保留启动、停止、复制与更多四项入口；偏好、网络、移动分组和删除放在更多面板，继续调用原有操作。选中数量使用现有语言目录及真实选择状态，避免自动翻译缓存覆盖动态数字。
-
-Windows 安装器使用 LYCO Browser 名称、独立安装目录、开始菜单/桌面快捷方式及卸载登记，原程序二进制名称和第三方声明保留。原创图标同时嵌入安装器、应用和卸载程序。Actions 必须实际安装到含空格的目录、运行安装后的原生工作流，并验证卸载清理程序且保留用户数据；通过对应提交的门禁前仍属未验收改动。
+Windows 安装器使用 LYCO Browser 名称、独立安装目录、开始菜单/桌面快捷方式及卸载登记，保留原程序二进制名称和第三方声明。原创 LYCO 图标随应用、安装器和卸载程序打包；实际安装到含空格目录、安装后运行、卸载保留用户数据及不修改上游登记均已在本版通过。
 
 ## 核心能力
 
-### 环境检测（本分支新增，待当前 CI 验收）
+### 环境检测
 
 启动一个环境后，在环境列表点击 **环境检测**，选择正在运行的环境，再选择
 Claude、GPT / Codex、DNS 或 WebRTC。网页会在所选环境的新标签中打开，沿用
@@ -62,10 +59,10 @@ Claude、GPT / Codex、DNS 或 WebRTC。网页会在所选环境的新标签中�
 
 UniDesktop/SDK 提供系统主题与强调色。在外观菜单选择“跟随系统”后使用系统主题，
 显式选择深色或浅色优先。账户页的“本机桌面外观”可查看状态和刷新；暂不可读时
-保留现有外观回退。以下是 `3ff68c3` 在 GitHub Actions 实际安装后的窗口，
-不是新增检测入口的验收截图：
+保留现有外观回退。SDK 仅提供桌面外观，不更改浏览器语言、时区或网络出口；
+本版三个 Windows 阶段的实际主题、手动覆盖及许可打包均已验收，见[集成记录](docs/DESKTOP-UDA.md)。
 
-![UDA 实际安装窗口](docs/images/uda-installed-3ff68c3.png)
+![本版 UDA 桌面外观面板](docs/images/uda-desktop-65b51ac.png)
 
 ### 浏览器与账户
 
@@ -141,7 +138,7 @@ Android 交付未签名 debug APK；iOS 交付**模拟器未签名 App**（无�
 
 首版：Windows x64、独立环境、已有账户授权、官网支付跳转、本地代理绑定和 Actions 交付。
 
-下一版：恢复登录（DPAPI 加密）、在线续费/订单状态回调、完整 UI branding、私有团队环境同步与权限模型。
+后续候选：恢复登录（DPAPI 加密）、在线续费/订单状态回调、私有团队环境同步与权限模型。它们不在本次 Windows 预览验收范围。
 
 ## 浏览器扩展（开发版，以对应提交的 Actions 验收为准）
 
