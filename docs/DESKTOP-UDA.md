@@ -35,15 +35,15 @@ tokens. Non-Windows packages explicitly report unsupported for this bridge.
   portable and installed runs. Real UI follow-system behavior, manual override,
   desktop panel screenshot and unchanged fingerprint/profile regression suites.
 
-Candidate `3ff68c3` passed the 46-check native preflight in Actions39768843099.
-The actual UDA helper hash, packaged notices, follow-system UI and manual
-override checks passed alongside the independent fingerprint/profile matrix.
-Preflight artifact SHA256 was verified as
-`7baf3efc83ce652ee5bbcb43cd285606d456ed443ea684be80c1214a05a07b26`;
+Candidate `3ff68c3` fully passed Actions39768843099: preflight46, portable46,
+installed45 checks plus six install/icon/shortcut/uninstall checks. All three
+stages verified the same helper hash, packaged notices, actual follow-system UI
+and manual override behavior. The installed desktop screenshot and raw results
+were inspected. Full artifact SHA256 was verified as
+`2e079e27ae1a6a493809dc9fc30c4a2b217101db90b42a318d3b57a42af8a6d8`;
 PR merge132345a25ad0a8a43136ab8505454877b1d40df6 has3ff68c3 as a verified
-parent. Actual desktop screenshot and raw results were inspected. At this
-documentation update the same run was still verifying the portable/installed
-packages. Do not apply this result to an unverified later candidate.
+parent. The later environment-check UI and public-network observation need
+their own current-commit acceptance; this older result does not certify them.
 
 The first native control uncovered an asynchronous Windows theme/accent race.
 Actions39765928187 recorded the desired `0x7F332211` registry value and exact UDA

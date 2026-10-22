@@ -33,9 +33,9 @@ try {
   assert.ok(existing.every(row => !row.running && row.id !== id), 'Previous CI environments must be stopped and the public profile must be new');
   let profile = await shell.evaluate(id => window.adoptLycoProfile({id, number: 90001, name: 'CI public network',
     browser: 'Google Chrome', os: 'Windows', networkMode: 'direct', proxy: 'direct',
-    language: 'en-US', startUrl: 'https://ip.net.coffee/claude/',
-    platform: {type: 'other', startUrl: 'https://ip.net.coffee/claude/'},
-    advanced: {startUrls: 'https://ip.net.coffee/claude/', tabMode: 'custom', restoreSession: false},
+    language: 'en-US', startUrl: 'about:blank',
+    platform: {type: 'other', startUrl: 'about:blank'},
+    advanced: {startUrls: 'about:blank', tabMode: 'custom', restoreSession: false},
     // Use the ordinary IP-mode resolver. Do not force an artificial language or
     // timezone just to make this external observation easier to pass.
     privacy: {deviceProfile: 'persona', clientRects: 'native', languageMode: 'ip',
@@ -67,31 +67,46 @@ try {
   // Attach to the already-running product, never launch stock Chromium/Edge.
   browser = await chromium.connectOverCDP(`http://127.0.0.1:${state.port}`, {timeout: 20000});
   const context = browser.contexts()[0];
-  const target = context.pages().find(page => page.url().startsWith('https://ip.net.coffee/')) || context.pages()[0];
-  assert.ok(target, 'Product page unavailable');
-  const responseRows = [];
-  target.on('response', response => {
-    const url = new URL(response.url());
-    if (url.hostname === 'ip.net.coffee' && responseRows.length < 120) responseRows.push({
-      // API paths can contain the public CI IP, so keep only the route family.
-      route: url.pathname.startsWith('/api/') ? url.pathname.split('/').slice(0, 3).join('/') : url.pathname,
-      status: response.status(),
-    });
+  const responseRows = [], documents = new WeakMap();
+  context.on('response', response => {
+    try {
+      const url = new URL(response.url());
+      if(response.request().isNavigationRequest() && !response.frame().parentFrame())
+        documents.set(response.frame().page(), {status: response.status()});
+      if(url.hostname === 'ip.net.coffee' && responseRows.length < 120) responseRows.push({
+        // API paths can contain the public CI IP; keep only the route family.
+        route: url.pathname.startsWith('/api/') ? url.pathname.split('/').slice(0, 3).join('/') : url.pathname,
+        status: response.status(),
+      });
+    } catch {} // Responses without a frame (e.g. a service worker) are not documents.
   });
+  await shell.locator('[data-view="profiles"]').click();
+  await shell.locator('#lyco-check-environment').click();
+  await shell.locator('#lyco-diagnostics-profile-button').click();
+  await shell.locator('#lyco-diagnostics-profile-menu [data-option-index="1"]').click();
+  assert.equal(await shell.locator('#lyco-diagnostics-profile').inputValue(), id);
+  await shell.screenshot({path: path.join(evidence, 'environment-checks-ready.png')});
   for (const route of ['claude', 'gpt', 'dns', 'webrtc']) {
     const row = {route, state: 'unavailable', cells: {}, observations: []};
     report.pages.push(row); await save();
+    // The normal UI must open a real new tab in the selected product profile.
+    // Never replace this with shell.openExternal or harness page.goto.
+    const [target] = await Promise.all([context.waitForEvent('page', {timeout: 20000}),
+      shell.locator('#lyco-diagnostics-' + route).click()]);
+    await shell.waitForFunction(route => document.getElementById('lyco-diagnostics-feedback').dataset.opened === route, route);
     try {
-      const response = await target.goto(`https://ip.net.coffee/${route}/`, {waitUntil: 'domcontentloaded', timeout: 35000});
-      row.status = response?.status() ?? null;
+      try {await target.waitForLoadState('domcontentloaded', {timeout: 35000});}
+      catch(error) {row.navigationError = String(error.message).slice(0, 1000);}
       // Let the unchanged site's bounded parallel DNS/STUN/network checks run.
       // One observation interval; no reload/retry or forced success text.
       await target.waitForTimeout(18000);
+      row.status = documents.get(target)?.status ?? null;
       row.title = await target.title();
       const finalLocation = new URL(target.url());
       row.finalLocation = {origin: finalLocation.origin, pathname: finalLocation.pathname};
       row.text = (await target.locator('body').innerText({timeout: 5000})).slice(0, 24000);
       row.state = classifyPublicPage({status: row.status, origin: finalLocation.origin, title: row.title, text: row.text});
+      if(row.state === 'observed') assert.ok(finalLocation.pathname.startsWith('/' + route + '/'), 'Diagnostic button opened the wrong page');
       const settings = await target.evaluate(() => ({language: navigator.language,
         languages: Array.from(navigator.languages), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         offset: new Date().getTimezoneOffset(), userAgent: navigator.userAgent,
@@ -121,13 +136,17 @@ try {
     } catch(error) {
       // Assertion failures are product regressions, not third-party outages.
       if(error.code === 'ERR_ASSERTION') throw error;
+      assert.equal(target.isClosed(), false, 'Product diagnostic tab closed unexpectedly');
+      assert.equal(browser.isConnected(), true, 'Product browser disconnected during diagnostics');
       row.error = String(error.message).slice(0, 1500);
       row.state = 'unavailable';
       await target.screenshot({path: path.join(evidence, `netcoffee-${route}-unavailable.png`)}).catch(() => {});
-    }
+    } finally {await target.close().catch(() => {});}
     await save();
   }
   report.responses = responseRows;
+  await shell.locator('#lyco-diagnostics-close').click();
+  report.normalUiRoutesVerified = 4;
   assert.deepEqual(await fs.readFile(cache), cachedDevice, 'Public diagnostics must not replace the native identity');
   report.cacheUnchanged = true;
   report.observedPages = report.pages.filter(row => row.state === 'observed').length;

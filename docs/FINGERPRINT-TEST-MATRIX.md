@@ -5,6 +5,21 @@ GitHub Actions 执行，不使用普通 Chrome 的结果冒充产品结果，不
 
 ## 当前证据
 
+`3ff68c3` / [Actions39768843099](https://github.com/lilyco-42/lyco-browser/actions/runs/39768843099)
+整轮成功；完整工件官方/local SHA-256 均为
+`2e079e27ae1a6a493809dc9fc30c4a2b217101db90b42a318d3b57a42af8a6d8`。
+PR merge `132345a25ad0a8a43136ab8505454877b1d40df6` 的 parents 已核对包含
+main `eb0344` 和 head `3ff68c3`。预检46、portable46、installed45项，以及实际
+安装/原创图标/快捷方式/卸载6项全部通过。三个阶段UDA helper hash/许可证、
+真实跟随系统主题和手动覆盖均通过，安装后的真实截图已检查。
+portable三组九个独立场景均passed，Creep lies0/errors0、locale23/low；DPR1/1.5/1，
+SDK四项联合断言与A/B cache不变全部true。未保证HTML/Offscreen跨API像素一致。
+
+本次新增“环境检测”入口及真实产品Net.Coffee公开页观察仍须当前提交实际验收，
+不能使用上述旧头通过来宣称新入口或公网检测已经通过。
+
+## 历史排查记录
+
 `b2a9627` / [Actions39591446063](https://github.com/lilyco-42/lyco-browser/actions/runs/39591446063)
 整轮成功。完整工件官方/本地 SHA-256 均为
 `37c61ca9ce187491f92914376ffe2746191da01deb79a7ff1381f9d107388be8`。

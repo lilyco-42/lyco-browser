@@ -31,6 +31,13 @@ manipulation is needed for these diagnostics.
 
 ## Public CI observation (new, pending execution)
 
+The workspace's **Environment checks** button lists only currently running,
+ready environments. Its four fixed actions open the corresponding page inside
+the selected environment through the existing trusted tab API. It never opens
+the OS default browser or falls back to another environment; stopped/changed
+targets and duplicate in-flight clicks are rejected. This lets an owner inspect
+their actual configured route without giving CI their proxy credentials.
+
 `tests/native-public-network.mjs` uses the actual packaged LYCO application and
 its licensed kernel, with a new unowned profile in the disposable runner's
 app data on an explicitly **direct GitHub-hosted route**. It requires previous
@@ -38,7 +45,10 @@ environments stopped and no subscription account login; it does not reuse a
 managed profile, its network permissions or account data. No stock
 browser is substituted. This is not the customer's subscription proxy route.
 
-The unchanged Claude/GPT/DNS/WebRTC pages run once, with screenshots, page text,
+The test clicks this actual UI entry, selects the new running environment via
+the real themed dropdown, and clicks each of its four actions. It observes real
+new kernel tabs; it does not substitute harness `page.goto` navigation. The
+unchanged Claude/GPT/DNS/WebRTC pages run once, with screenshots, page text,
 selected public diagnostic cells, response statuses and actual Navigator/Intl
 observations retained. The profile uses the ordinary IP-mode lookup/launch
 path; lookup unavailability remains recorded. Browser values must agree with

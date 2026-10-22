@@ -71,7 +71,7 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -90,7 +90,7 @@ one('index.html','<button class="nav" data-view="proxies">',join(
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/account.css">\n</head>');
-one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n<script src="lyco/desktop-ui.js"></script>\n</body>');
+one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n<script src="lyco/desktop-ui.js"></script>\n<script src="lyco/diagnostics-controller.js"></script>\n<script src="lyco/diagnostics-ui.js"></script>\n</body>');
 // UDA reads the host desktop only. Profile-specific locale/fingerprint APIs are
 // untouched, and an explicit light/dark preference still wins over the OS.
 one('renderer.js', 'function systemPrefersDark() {', join(
