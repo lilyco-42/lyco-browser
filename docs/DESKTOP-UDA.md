@@ -38,3 +38,10 @@ tokens. Non-Windows packages explicitly report unsupported for this bridge.
 These checks are **pending for this new integration**, even though the preceding
 browser candidate b2a9627 passed Actions39591446063. Do not apply its old green
 status to a new UDA candidate.
+
+The first native control uncovered an asynchronous Windows theme/accent race.
+Actions39765928187 recorded the desired `0x7F332211` registry value and exact UDA
+RGBA `[17,34,51,127]`, followed by Windows resetting the registry to its original
+accent. The phases now separate theme changes from the accent control with one
+bounded settling wait. Accent assertions still require identical before/after
+values and the exact asymmetric RGBA; there is no retry or guessed success.

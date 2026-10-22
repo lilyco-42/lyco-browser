@@ -20,22 +20,33 @@ try {
  foreach($item in $ownedValues){if(-not(Test-Path -LiteralPath $item.path)){New-Item -Path $item.path | Out-Null}}
  foreach($mode in @(0,1)){
   New-ItemProperty -LiteralPath $themePath -Name AppsUseLightTheme -Value $mode -PropertyType DWord -Force | Out-Null
-  New-ItemProperty -LiteralPath $accentPath -Name AccentColor -Value 0x7F332211 -PropertyType DWord -Force | Out-Null
-  $registryBefore=Get-ItemPropertyValue -LiteralPath $accentPath -Name AccentColor
   $result=& $binary
   if($LASTEXITCODE -ne 0){throw 'UDA appearance probe failed'}
   $value=$result | ConvertFrom-Json
   $expected=if($mode -eq 0){'dark'}else{'light'}
-  $registryAfter=Get-ItemPropertyValue -LiteralPath $accentPath -Name AccentColor
-  $observation=@{expected=$expected;actual=$value;accentRegistryBefore=$registryBefore;accentRegistryAfter=$registryAfter}
+  $observation=@{phase='theme';expected=$expected;actual=$value}
   $observations+=$observation
   # Retain actual observations before any assertion, including a failed probe.
   $observation | ConvertTo-Json -Depth 6 | Write-Host
-  if($registryBefore -ne 0x7F332211 -or $registryAfter -ne $registryBefore){throw 'Windows changed the accent control during observation'}
   if($value.theme -ne $expected -or $value.revision -ne 'a74bd2cf372efad2407d6be4b57739e682cf1d9a'){throw 'Actual UDA theme differs from OS preference'}
-  if(($value.accent -join ',') -ne '17,34,51,127'){throw 'Actual UDA accent channels differ from OS preference'}
   if(-not($value.capabilities.detectTheme -and $value.capabilities.readAccent)){throw 'Required desktop capabilities absent'}
  }
+ # Changing AppsUseLightTheme asynchronously makes Windows recompute AccentColor.
+ # CI39765928187 observed the desired DWORD before/inside the UDA read and the
+ # old OS accent afterwards. Finish the theme phase before installing a distinct
+ # accent control. This is one bounded lifecycle wait, not a retry-until-pass.
+ Start-Sleep -Milliseconds 2000
+ New-ItemProperty -LiteralPath $accentPath -Name AccentColor -Value 0x7F332211 -PropertyType DWord -Force | Out-Null
+ $registryBefore=Get-ItemPropertyValue -LiteralPath $accentPath -Name AccentColor
+ $result=& $binary
+ if($LASTEXITCODE -ne 0){throw 'UDA accent probe failed'}
+ $value=$result | ConvertFrom-Json
+ $registryAfter=Get-ItemPropertyValue -LiteralPath $accentPath -Name AccentColor
+ $observation=@{phase='accent';expected=@(17,34,51,127);actual=$value;accentRegistryBefore=$registryBefore;accentRegistryAfter=$registryAfter}
+ $observations+=$observation
+ $observation | ConvertTo-Json -Depth 6 | Write-Host
+ if($registryBefore -ne 0x7F332211 -or $registryAfter -ne $registryBefore){throw 'Windows changed the accent control during observation'}
+ if(($value.accent -join ',') -ne '17,34,51,127'){throw 'Actual UDA accent channels differ from OS preference'}
  & $binary forbidden-command | Out-Null
  if($LASTEXITCODE -ne 2){throw 'Desktop helper must reject all command arguments'}
  $rejectsArguments=$true
