@@ -29,6 +29,31 @@ actual product. Network failures or site blocking must remain inconclusive,
 with the original result preserved. No service login, paid model call or score
 manipulation is needed for these diagnostics.
 
+## Public CI observation (new, pending execution)
+
+`tests/native-public-network.mjs` uses the actual packaged LYCO application and
+its licensed kernel, with a new unowned profile in the disposable runner's
+app data on an explicitly **direct GitHub-hosted route**. It requires previous
+environments stopped and no subscription account login; it does not reuse a
+managed profile, its network permissions or account data. No stock
+browser is substituted. This is not the customer's subscription proxy route.
+
+The unchanged Claude/GPT/DNS/WebRTC pages run once, with screenshots, page text,
+selected public diagnostic cells, response statuses and actual Navigator/Intl
+observations retained. The profile uses the ordinary IP-mode lookup/launch
+path; lookup unavailability remains recorded. Browser values must agree with
+the engine's selected configuration, while the actual site's observations and
+geographic warnings are retained unchanged. Configuration agreement alone is
+not an independent geographic oracle and does not certify IP-mode alignment on
+a real customer proxy (the separate KR fixture covers its specific regression).
+
+Challenges, HTTP errors, missing results, unexposed DNS, blocked WebRTC and
+reported warnings remain separate. A reached page is not a network pass.
+`allNetworkChecksPassed` stays unknown pending review of the original results.
+Actual selected-language/timezone regressions fail the job; external outages
+remain recorded as unavailable. No model login, paid call, score modification,
+detector interception or reused user credentials is involved.
+
 ## UDA scope
 
 The matching public Rust SDK is

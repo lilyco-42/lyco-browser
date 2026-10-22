@@ -35,9 +35,15 @@ tokens. Non-Windows packages explicitly report unsupported for this bridge.
   portable and installed runs. Real UI follow-system behavior, manual override,
   desktop panel screenshot and unchanged fingerprint/profile regression suites.
 
-These checks are **pending for this new integration**, even though the preceding
-browser candidate b2a9627 passed Actions39591446063. Do not apply its old green
-status to a new UDA candidate.
+Candidate `3ff68c3` passed the 46-check native preflight in Actions39768843099.
+The actual UDA helper hash, packaged notices, follow-system UI and manual
+override checks passed alongside the independent fingerprint/profile matrix.
+Preflight artifact SHA256 was verified as
+`7baf3efc83ce652ee5bbcb43cd285606d456ed443ea684be80c1214a05a07b26`;
+PR merge132345a25ad0a8a43136ab8505454877b1d40df6 has3ff68c3 as a verified
+parent. Actual desktop screenshot and raw results were inspected. At this
+documentation update the same run was still verifying the portable/installed
+packages. Do not apply this result to an unverified later candidate.
 
 The first native control uncovered an asynchronous Windows theme/accent race.
 Actions39765928187 recorded the desired `0x7F332211` registry value and exact UDA
