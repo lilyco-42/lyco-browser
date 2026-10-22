@@ -71,7 +71,7 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -90,7 +90,16 @@ one('index.html','<button class="nav" data-view="proxies">',join(
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/account.css">\n</head>');
-one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n</body>');
+one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n<script src="lyco/desktop-ui.js"></script>\n</body>');
+// UDA reads the host desktop only. Profile-specific locale/fingerprint APIs are
+// untouched, and an explicit light/dark preference still wins over the OS.
+one('renderer.js', 'function systemPrefersDark() {', join(
+ 'function systemPrefersDark() {',
+ "  const theme = window.lycoDesktopAppearance?.theme;",
+ "  if (theme === 'light' || theme === 'dark') return theme === 'dark';"));
+one('renderer.js', 'let uiColorMode = resolveColorMode(uiColorPreference);', join(
+ 'let uiColorMode = resolveColorMode(uiColorPreference);',
+ "window.lycoApplySystemAppearance = () => { if (uiColorPreference === 'auto') applyColorMode('auto', false); };"));
 // The count already uses the parameterized catalogue. Auto-translation must
 // not restore its cached initial Chinese zero over a later English count.
 one('index.html','id="profile-selection-count"','id="profile-selection-count" translate="no"');
@@ -107,6 +116,7 @@ one('renderer.js','function viewMetaFor(view) {',join(
  'function viewMetaFor(view) {',
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
+ "  lycoDesktopAppearance: () => ipcRenderer.invoke('lyco:desktop-appearance'),",
  "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
  "  lycoCopyExtension: () => ipcRenderer.invoke('lyco:copy-extension'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
@@ -123,6 +133,7 @@ one('main.js',"const { randomUUID } = require('crypto');",join(
  "const { randomUUID } = require('crypto');",
  "const { LycoNetwork, SHOP: LYCO_SHOP, ACCOUNT: LYCO_ACCOUNT } = require('./lyco/network');",
  "const { LycoProfiles } = require('./lyco/profiles');",
+ "const lycoDesktopAppearance = require('./lyco/desktop-appearance').createDesktopAppearance({directory: path.join(__dirname, 'lyco')});",
  "let lycoProfiles = null;",
  "let lycoNetwork = null;"));
 one('main.js','app.whenReady().then(async () => {',join(
@@ -132,6 +143,7 @@ one('main.js','app.whenReady().then(async () => {',join(
  "    bundledCore: path.join(__dirname, 'lyco', 'core', process.platform === 'win32' ? 'mihomo.exe' : 'mihomo'),",
  '  });'));
 one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
+ "  registerTrustedIpc('lyco:desktop-appearance', () => lycoDesktopAppearance());",
  "  registerTrustedIpc('lyco:status', () => lycoNetwork.status());",
  "  registerTrustedIpc('lyco:login', (_event, credentials) => lycoProfiles.login(credentials || {}));",
  "  registerTrustedIpc('lyco:refresh', () => lycoNetwork.refresh());",

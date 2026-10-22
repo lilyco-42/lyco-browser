@@ -41,6 +41,9 @@ html[data-color-mode="dark"] #view-lyco{--lyco-panel-accent:#c02832;--lyco-panel
 #view-lyco .lyco-panel-feedback{min-height:22px;margin:16px 0 8px;font-size:12px;line-height:1.8;overflow-wrap:anywhere}
 #view-lyco .lyco-panel-feedback[data-tone="error"]{color:var(--lyco-panel-danger)}
 #view-lyco .lyco-panel-footnote{margin:0;color:var(--lyco-panel-muted);font-size:11px;line-height:1.8}
+#view-lyco #lyco-desktop-details{margin:16px 0}
+#view-lyco #lyco-desktop-accent{display:inline-block;width:12px;height:12px;border:1px solid var(--ui-border,#dfe3e8);border-radius:50%;margin-right:8px;vertical-align:middle}
+#view-lyco #lyco-desktop-accent[hidden]{display:none}
 @media(max-width:1080px){#view-lyco .lyco-panel-purchase{align-items:flex-start;flex-direction:column}#view-lyco .lyco-panel-purchase .lyco-panel-actions{max-width:100%}}
 @media(max-width:900px){#view-lyco .lyco-panel-grid{grid-template-columns:minmax(0,1fr)}#view-lyco .lyco-panel-shell{padding:22px 18px}#view-lyco .lyco-panel-steps{grid-template-columns:repeat(2,minmax(0,1fr))}#view-lyco .lyco-panel-steps li:nth-child(3){border-left:0}#view-lyco .lyco-panel-steps li:nth-child(n+3){border-top:1px solid var(--ui-border,#dfe3e8)}}
 @media(max-width:600px){#view-lyco .lyco-panel-header{display:block}#view-lyco .lyco-panel-local{display:inline-block;margin-top:14px}#view-lyco h1{font-size:22px}#view-lyco .lyco-panel-card{padding:18px}}

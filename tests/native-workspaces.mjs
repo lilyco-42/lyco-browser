@@ -9,6 +9,7 @@ import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
+import {verifyNativeDesktopAppearance} from './native-desktop-appearance.mjs';
 import {createIndependentAuditFixture} from './independent-fingerprint-audits.mjs';
 import {protectConnectHandler} from './connect-handler.mjs';
 import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
@@ -152,6 +153,7 @@ try {
  }
  report.checks.push('localized-panel-survives-upstream-language-switch');
  await verifyNativeAccountPanel({page,report,evidence});
+ await verifyNativeDesktopAppearance({page,report,evidence,appRoot});
  assert.equal(await page.locator('#lyco-create-profile').isDisabled(),true);
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();

@@ -3,10 +3,10 @@ name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
   pull_request:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - name: Reject session and ownership regressions before downloading the browser kernel
-        run: node --test tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/native-navigator.test.js tests/rect-geometry.test.js tests/startup-pages.test.js tests/session-restore.test.js tests/new-tab-gate.test.js tests/canvas-ownership-contract.test.mjs tests/independent-fingerprint-audits.test.mjs tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js tests/connect-handler.test.mjs tests/audit-cpu-diagnostic.test.mjs tests/audit-page-lifecycle.test.mjs tests/native-font-observation.test.mjs tests/browser-font-control.test.mjs
+        run: node --test tests/desktop-appearance.test.js tests/network.test.js tests/profiles.test.js tests/native-identity.test.js tests/native-navigator.test.js tests/rect-geometry.test.js tests/startup-pages.test.js tests/session-restore.test.js tests/new-tab-gate.test.js tests/canvas-ownership-contract.test.mjs tests/independent-fingerprint-audits.test.mjs tests/release-publishing.test.js tests/core-startup-observer.test.js tests/source-patch.test.js tests/browser-target-observer.test.js tests/connect-handler.test.mjs tests/audit-cpu-diagnostic.test.mjs tests/audit-page-lifecycle.test.mjs tests/native-font-observation.test.mjs tests/browser-font-control.test.mjs
 
   windows-x64:
     needs: integration-guards
@@ -134,6 +134,44 @@ jobs:
             node --check $path
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
+
+      - name: Checkout pinned UniDesktop SDK (read-only appearance backend)
+        uses: actions/checkout@v4
+        with:
+          repository: UniDesktop/SDK
+          ref: a74bd2cf372efad2407d6be4b57739e682cf1d9a
+          path: unidesktop
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@1.90.0
+
+      - name: Build and verify the bounded UDA desktop helper
+        timeout-minutes: 10
+        shell: pwsh
+        env:
+          GH_TOKEN: ''
+        run: |
+          $ErrorActionPreference='Stop'
+          $lockHash=(Get-FileHash unidesktop/Cargo.lock -Algorithm SHA256).Hash
+          Copy-Item lyco/native/desktop-probe.rs unidesktop/crates/uda-platform-windows/src/lyco-desktop-probe.rs
+          Add-Content -LiteralPath unidesktop/crates/uda-platform-windows/Cargo.toml -Value "`n[[bin]]`nname = 'lyco-desktop-probe'`npath = 'src/lyco-desktop-probe.rs'"
+          cargo build --locked --release --manifest-path unidesktop/Cargo.toml -p uda-platform-windows --bin lyco-desktop-probe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cargo test --locked --manifest-path unidesktop/Cargo.toml -p uda-platform-windows --lib appearance::tests
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if ((Get-FileHash unidesktop/Cargo.lock -Algorithm SHA256).Hash -ne $lockHash) { throw 'SDK dependency lock changed' }
+          $dest='upstream/Browserapp/lyco/desktop'
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item unidesktop/target/release/lyco-desktop-probe.exe "$dest/lyco-desktop-probe.exe"
+          Copy-Item unidesktop/LICENSE-MIT "$dest/LICENSE-MIT-UDA.txt"
+          Copy-Item unidesktop/LICENSE-APACHE "$dest/LICENSE-APACHE-UDA.txt"
+          Copy-Item lyco/native/NOTICE.txt "$dest/NOTICE.txt"
+          $binaryHash=(Get-FileHash "$dest/lyco-desktop-probe.exe" -Algorithm SHA256).Hash
+          "LYCO_UDA_BINARY_SHA256=$binaryHash" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify actual UDA reads against disposable Windows settings
+        shell: pwsh
+        run: ./lyco/tests/desktop-probe.ps1
 
       - name: Isolated LYCO proxy and Billing integration tests
         shell: pwsh
