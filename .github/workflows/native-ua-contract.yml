@@ -2,7 +2,7 @@ name: Native UA contract observations (not product acceptance)
 
 on:
   push:
-    branches: [main, test/browser-privacy-surface-coverage-20261023]
+    branches: [main, test/browser-privacy-surface-coverage-20261023, test/native-contract-controls-20261023]
     paths: ['probes/native-ua-contract.mjs', '.github/workflows/native-ua-contract.yml']
   workflow_dispatch:
 

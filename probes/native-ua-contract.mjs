@@ -22,11 +22,12 @@ const hashFile = async file => {
   for await (const chunk of createReadStream(file)) hash.update(chunk);
   return hash.digest('hex');
 };
-const fields = device => Object.fromEntries(['brand', 'brandVersion', 'platformVersion', 'userAgent', 'platform'].map(key => {
+const fields = device => Object.fromEntries(['brand', 'brandVersion', 'platformVersion', 'userAgent', 'platform', 'hardwareConcurrency'].map(key => {
   const value = device?.[key], present = Object.hasOwn(device || {}, key);
   const safe = typeof value === 'string' && (['brandVersion', 'platformVersion'].includes(key)
     ? /^\d+(?:\.\d+){0,3}$/.test(value) : key === 'brand' && ['Chromium', 'Google Chrome', 'Chrome', 'Microsoft Edge'].includes(value));
-  return [key, {present, type: typeof value, ...(present ? {digest: digest(value), ...(safe ? {value} : {})} : {})}];
+  const safeCores = key === 'hardwareConcurrency' && Number.isInteger(value) && value > 0 && value <= 256;
+  return [key, {present, type: typeof value, ...(present ? {digest: digest(value), ...(safe || safeCores ? {value} : {})} : {})}];
 }));
 const unpack = result => {
   const raw = result?.fingerprint ?? result, value = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -37,7 +38,7 @@ const observations = new Map();
 const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
   productAcceptance: false, externalAccounts: false, cases: []};
-const phases = new Set(['baseline', 'platform-only', 'selected-brand']);
+const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand', 'cdp-cpu-control']);
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://fixture.invalid'), phase = url.searchParams.get('phase');
   if (!phases.has(phase)) {res.writeHead(404); res.end(); return;}
@@ -45,7 +46,7 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/probe') {
     row.requests = (row.requests || 0) + 1;
     if (row.requests === 1) {row.requestAt = Date.now(); row.requestHints = captureClientHintHeaders(req.headers);}
-    const script = `const ua=navigator.userAgent;(${readBrowserPrivacySurfaces.toString()})().then(surfaces=>fetch(${JSON.stringify('/report?phase=' + phase)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ua,surfaces})}));`;
+    const script = `const ua=navigator.userAgent,hardwareConcurrency=navigator.hardwareConcurrency;(${readBrowserPrivacySurfaces.toString()})().then(surfaces=>fetch(${JSON.stringify('/report?phase=' + phase)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ua,hardwareConcurrency,surfaces})}));`;
     res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
     res.end('<!doctype html><meta charset="utf-8"><title>Native contract probe</title><script>' + script + '</script>');
     return;
@@ -114,10 +115,12 @@ try {
   await page.command('Page.navigate', {url: origin + '/probe?phase=baseline'}, {timeout: 5000});
   report.baseline = await waitObservation('baseline');
   for (const [phase, wanted] of [
+    ['native-cpu-control', {hardwareConcurrency: device.hardwareConcurrency === 2 ? 4 : 2}],
     ['platform-only', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}],
     ['selected-brand', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}],
   ]) {
-    const eligible = Object.fromEntries(Object.entries(wanted).filter(([key]) => Object.hasOwn(device, key) && typeof device[key] === 'string'));
+    const eligible = Object.fromEntries(Object.entries(wanted).filter(([key]) => Object.hasOwn(device, key)
+      && (key === 'hardwareConcurrency' ? Number.isInteger(device[key]) && device[key] > 0 && device[key] <= 256 : typeof device[key] === 'string')));
     const record = {phase, changedKeys: Object.keys(eligible), omittedKeys: Object.keys(wanted).filter(key => !Object.hasOwn(eligible, key))};
     report.cases.push(record);
     if (!record.changedKeys.length) {record.status = 'no-supported-field-observed'; continue;}
@@ -130,6 +133,10 @@ try {
       // A rejected capability is retained, never treated as protection.
       record.status = 'native-command-rejected'; continue;
     }
+    // A same-session read separates ignored edits from new-target propagation.
+    const samePage = unpack(await page.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
+    record.samePageFields = fields(samePage);
+    record.samePageMatchesSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, samePage[key] === value]));
     report.stage = phase + ':observe-ordinary-new-target';
     const created = await browser.command('Target.createTarget', {url: origin + '/probe?phase=' + phase}, {timeout: 5000});
     assert.ok(created.targetId);
@@ -142,9 +149,26 @@ try {
     const current = unpack(await cdp.call(target.webSocketDebuggerUrl, 'Wayfern.getFingerprint', {}, 5000));
     record.observedFields = fields(current);
     record.nativeFieldsMatchSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, current[key] === value]));
+    if (Object.hasOwn(eligible, 'hardwareConcurrency')) record.firstScriptMatchesCpu = record.first.value.hardwareConcurrency === eligible.hardwareConcurrency;
     record.seedUnchanged = digest(current.canvasNoiseSeed ?? null) === seedDigest;
     record.status = 'observed-not-product-acceptance';
     await browser.command('Target.closeTarget', {targetId: created.targetId}, {timeout: 5000});
+  }
+  // Independent transport/fixture control. This deliberately uses standard CDP
+  // only for CPU on the owned original target, never for UA or product settings.
+  // Success does not prove Wayfern.setFingerprint supports any edited field.
+  report.stage = 'cdp-cpu-control';
+  const wantedCores = report.baseline.value.hardwareConcurrency === 2 ? 4 : 2;
+  report.transportControl = {method: 'Emulation.setHardwareConcurrencyOverride', wantedCores};
+  try {
+    await page.command('Emulation.setHardwareConcurrencyOverride', {hardwareConcurrency: wantedCores}, {timeout: 5000});
+    report.transportControl.acknowledged = true;
+    await page.command('Page.navigate', {url: origin + '/probe?phase=cdp-cpu-control'}, {timeout: 5000});
+    report.transportControl.first = await waitObservation('cdp-cpu-control');
+    report.transportControl.firstScriptMatchesCpu = report.transportControl.first.value.hardwareConcurrency === wantedCores;
+    report.transportControl.status = 'observed-not-native-setter-or-product-acceptance';
+  } catch {
+    report.transportControl.status = 'control-unavailable';
   }
   report.status = 'observations-complete-not-a-privacy-pass';
   report.stage = 'observations-complete';
