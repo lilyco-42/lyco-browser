@@ -54,15 +54,19 @@ const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
   productAcceptance: false, externalAccounts: false, cases: []};
 const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand',
-  'platform-delta', 'brand-delta', 'cdp-cpu-control']);
+  'platform-delta', 'brand-delta', 'ua-marker-delta', 'platform-marker-delta', 'cdp-cpu-control']);
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://fixture.invalid'), phase = url.searchParams.get('phase');
   if (!phases.has(phase)) {res.writeHead(404); res.end(); return;}
   const row = observations.get(phase) || {}; observations.set(phase, row);
   if (url.pathname === '/probe') {
     row.requests = (row.requests || 0) + 1;
-    if (row.requests === 1) {row.requestAt = Date.now(); row.requestHints = captureClientHintHeaders(req.headers);}
-    const script = `const ua=navigator.userAgent,hardwareConcurrency=navigator.hardwareConcurrency;(${readBrowserPrivacySurfaces.toString()})().then(surfaces=>fetch(${JSON.stringify('/report?phase=' + phase)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ua,hardwareConcurrency,surfaces})}));`;
+    if (row.requests === 1) {
+      row.requestAt = Date.now(); row.requestHints = captureClientHintHeaders(req.headers);
+      // Only the ephemeral CI browser's UA; never collect cookies or credentials.
+      row.requestUserAgent = typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'].slice(0, 512) : null;
+    }
+    const script = `const ua=navigator.userAgent,platform=navigator.platform,hardwareConcurrency=navigator.hardwareConcurrency;(${readBrowserPrivacySurfaces.toString()})().then(surfaces=>fetch(${JSON.stringify('/report?phase=' + phase)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ua,platform,hardwareConcurrency,surfaces})}));`;
     res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
     res.end('<!doctype html><meta charset="utf-8"><title>Native contract probe</title><script>' + script + '</script>');
     return;
@@ -124,6 +128,10 @@ try {
       methods: (domain?.commands || []).filter(value => ['getFingerprint', 'setFingerprint'].includes(value.name)).map(value => schemaShape(value)),
       // A missing published schema does not imply the executable lacks a command.
       types: (domain?.types || []).filter(value => /fingerprint|device/i.test(value.id || '')).slice(0, 16).map(value => schemaShape(value))};
+    // Documentation from the executable's public protocol, not runtime state.
+    report.protocolParameterNotes = (domain?.commands?.find(value => value.name === 'setFingerprint')?.parameters || [])
+      .filter(value => ['userAgent', 'platform', 'platformVersion', 'brand', 'brandVersion', 'hardwareConcurrency'].includes(value.name))
+      .map(value => ({name: value.name, description: typeof value.description === 'string' ? value.description.slice(0, 2048) : null}));
   } catch {
     report.protocolSchema = {status: 'unavailable-not-a-capability-verdict'};
   }
@@ -153,6 +161,10 @@ try {
     ['selected-brand', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}],
     ['platform-delta', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}, 'declared-optional-fields'],
     ['brand-delta', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}, 'declared-optional-fields'],
+    // Obvious synthetic markers distinguish a working configurable UA/platform
+    // from the UA-metadata fields; they are not intended to resemble a real user.
+    ['ua-marker-delta', {userAgent: String(device.userAgent).slice(0, 320) + ' LYCO-Contract-Control/1.0'}, 'declared-optional-fields'],
+    ['platform-marker-delta', {platform: 'LYCO-Contract-Control'}, 'declared-optional-fields'],
   ]) {
     const eligible = Object.fromEntries(Object.entries(wanted).filter(([key]) => Object.hasOwn(device, key)
       && (key === 'hardwareConcurrency' ? Number.isInteger(device[key]) && device[key] > 0 && device[key] <= 256 : typeof device[key] === 'string')));
@@ -187,6 +199,11 @@ try {
     record.observedFields = fields(current);
     record.nativeFieldsMatchSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, current[key] === value]));
     if (Object.hasOwn(eligible, 'hardwareConcurrency')) record.firstScriptMatchesCpu = record.first.value.hardwareConcurrency === eligible.hardwareConcurrency;
+    if (Object.hasOwn(eligible, 'userAgent')) {
+      record.firstScriptMatchesUa = record.first.value.ua === eligible.userAgent;
+      record.firstRequestMatchesUa = record.first.requestUserAgent === eligible.userAgent;
+    }
+    if (Object.hasOwn(eligible, 'platform')) record.firstScriptMatchesPlatform = record.first.value.platform === eligible.platform;
     record.seedUnchanged = digest(current.canvasNoiseSeed ?? null) === seedDigest;
     record.status = 'observed-not-product-acceptance';
     await browser.command('Target.closeTarget', {targetId: created.targetId}, {timeout: 5000});
