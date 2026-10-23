@@ -179,7 +179,6 @@ one('engine.js',
  "const { BrowserKernelManager, ensureKernelReadyForLaunch } = require('./automation/browser-kernel');",
  join("const { BrowserKernelManager, ensureKernelReadyForLaunch, isWayfernKernel } = require('./automation/browser-kernel');",
  "const { prepareNativeIdentity, nativeRuntimeFingerprint } = require('./lyco/native-identity');",
- "const { cdpUserAgentOverride: lycoCdpUserAgentOverride, buildUaProfile: lycoBuildUaProfile, buildAcceptLanguageHeader: lycoBuildAcceptLanguageHeader } = require('./automation/user-agent');",
  "const { openPreparedStartupPages } = require('./lyco/startup-pages');",
  "const { openSavedSession, prepareSessionBridge } = require('./lyco/session-restore');",
  "const { createPausedTabGate, createDocumentStartGuard, observeExecutionContexts, hasDefaultExecutionContext } = require('./lyco/new-tab-gate');"));
@@ -188,13 +187,13 @@ one('engine.js',
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
  "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
 one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
-// Gate the native tab before its page starts navigation, then wait for the
-// nested page's full preparation and acknowledged parent resume. A page-only
-// pause exposes default first-request Client Hints; a tab pause alone is not
-// enough either. Keep the existing nested readiness/document-start guards.
+// Use tab-level attachment only for native session restoration: those pages
+// cannot answer early direct-page commands. Ordinary launches retain the
+// original direct Page pause. A Tab pause alone did not reliably stop a new
+// renderer's first script in packaged Actions39410773730.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity && item.lycoDeferredRestore ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
@@ -342,17 +341,10 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '      item.startUrl = startUrl;',
  '      item.lycoDeferredRestore = lycoDeferredRestore;',
  '      try {',
- '        let lycoUserAgentOverride = isWayfernKernel(browser) && (fingerprint.userAgent || fingerprint.uaProfile)',
- '          ? lycoCdpUserAgentOverride(fingerprint.uaProfile || lycoBuildUaProfile({userAgent: fingerprint.userAgent, platform: fingerprint.platform}),',
- '              fingerprint.acceptLanguage || lycoBuildAcceptLanguageHeader(fingerprint.languages || ["en-US", "en"])) : undefined;',
- '        if (lycoUserAgentOverride && (fingerprint.mobileDevice?.os === "ios" || fingerprint.uaProfile?.os === "ios" || /iphone|ipad|ipod/i.test(fingerprint.platform || ""))) {',
- '          lycoUserAgentOverride = {...lycoUserAgentOverride, userAgentMetadata: undefined};',
- '        }',
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
  '          deferredRestore: lycoDeferredRestore,',
- '          userAgentOverride: lycoUserAgentOverride,',
  '          requireNativeFontLayout: profile.privacy.clientRects === "native",',
  '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
  '            ...(fingerprint.webgl?.mode !== "blocked" && ["noise", "custom"].includes(fingerprint.webgl?.metaMode)',
@@ -394,10 +386,6 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
 one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',
  '    item.workerFingerprintConnection = connection;\n    item.workerFingerprintConnectionReady = connection;\n    return connection;');
-one('engine.js', '      item.workerFingerprintConnection?.close();',
- '      item.lycoNativeIdentity?.close();\n      item.workerFingerprintConnection?.close();');
-one('engine.js', '    item.workerFingerprintConnection?.close();\n    item.workerFingerprintConnection = null;',
- '    item.lycoNativeIdentity?.close();\n    item.workerFingerprintConnection?.close();\n    item.workerFingerprintConnection = null;');
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(

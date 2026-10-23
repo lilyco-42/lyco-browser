@@ -64,49 +64,6 @@ function pageTargets(tabs, port) {
   });
 }
 
-function validatedUserAgentOverride(value) {
-  if (value === undefined) return null;
-  const fail = () => {throw Error('浏览器身份设置无效，环境未启动');};
-  const text = (input, limit, empty = false) => {
-    if (typeof input !== 'string' || input.length > limit || /[\x00-\x1f\x7f]/.test(input)
-        || (!empty && !input.trim())) fail();
-    return input;
-  };
-  if (!value || typeof value !== 'object' || Array.isArray(value)) fail();
-  const result = {userAgent: text(value.userAgent, 1024)};
-  for (const key of ['acceptLanguage', 'platform']) {
-    if (value[key] !== undefined) result[key] = text(value[key], 512, true);
-  }
-  // iOS personas intentionally omit Chromium Client Hints in the existing
-  // upstream path. Preserve that policy instead of inventing metadata.
-  if (value.userAgentMetadata === undefined) return result;
-  const source = value.userAgentMetadata;
-  if (!source || typeof source !== 'object' || Array.isArray(source)) fail();
-  const brands = rows => {
-    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 16) fail();
-    return rows.map(row => {
-      if (!row || typeof row !== 'object' || Array.isArray(row)) fail();
-      const version = text(row.version, 32);
-      if (!/^\d+(?:\.\d+){0,3}$/.test(version)) fail();
-      return {brand: text(row.brand, 160), version};
-    });
-  };
-  const metadata = {brands: brands(source.brands), fullVersionList: brands(source.fullVersionList)};
-  for (const key of ['fullVersion', 'platform', 'platformVersion', 'architecture', 'model', 'bitness']) {
-    metadata[key] = text(source[key], 160, ['architecture', 'model', 'bitness'].includes(key));
-  }
-  for (const key of ['fullVersion', 'platformVersion']) {
-    if (!/^\d+(?:\.\d+){0,3}$/.test(metadata[key])) fail();
-  }
-  if (!['', '32', '64'].includes(metadata.bitness)) fail();
-  for (const key of ['mobile', 'wow64']) {
-    if (typeof source[key] !== 'boolean') fail();
-    metadata[key] = source[key];
-  }
-  result.userAgentMetadata = metadata;
-  return result;
-}
-
 function declaredSettings(settings = {}) {
   const result = {};
   if (settings.languages !== undefined) {
@@ -154,14 +111,12 @@ function hasNativeFontInventory(fonts) {
       && family.length <= 256 && !/[\x00-\x1f\x7f]/.test(family));
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings,
-  userAgentOverride, deferredRestore = false, requireNativeFontLayout = false}) {
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false, requireNativeFontLayout = false}) {
   if (!enabled) {
     if (requireNativeFontLayout) throw Error('一致布局保护需要支持原生字体隔离的内核，环境未启动');
     return null; // Stock Chromium and legacy kernels retain their own path.
   }
   const declared = declaredSettings(settings);
-  const selectedUserAgent = validatedUserAgentOverride(userAgentOverride);
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535) throw Error('原生身份环境参数无效');
   const root = await fs.realpath(profileRoot);
@@ -192,69 +147,30 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // Actions exposed memory 8 instead of configured 4 when those records were
   // coalesced. Both paths retain the same device; neither mints a new seed.
   const applied = new Set();
-  const pageConnections = new Map(), disconnected = new Set();
-  let closed = false;
-  const close = () => {
-    closed = true;
-    for (const connection of pageConnections.values()) connection.close();
-    pageConnections.clear(); applied.clear(); disconnected.clear();
-  };
   const apply = async tabs => {
-    if (closed) throw Error('原生身份连接已关闭，环境未就绪');
     const current = pageTargets(tabs, port);
     const live = new Set(current.map(tab => tab.webSocketDebuggerUrl));
-    for (const target of applied) if (!live.has(target)) {
-      applied.delete(target);
-      const connection = pageConnections.get(target);
-      pageConnections.delete(target); connection?.close(); disconnected.delete(target);
-    }
+    for (const target of applied) if (!live.has(target)) applied.delete(target);
     for (const tab of current) {
-      if (disconnected.has(tab.webSocketDebuggerUrl)) throw Error('原生身份连接已断开，环境未就绪');
       if (applied.has(tab.webSocketDebuggerUrl)) continue;
-      let connection;
       try {
-        // UA overrides belong to the CDP agent. cdp.call closes its socket
-        // after every command, which clears these overrides. Own one live
-        // page connection until the target or environment is closed.
-        if (selectedUserAgent) {
-          connection = await cdp.connect(tab.webSocketDebuggerUrl, {timeout: 5000,
-            onDisconnect: () => {
-              if (closed || pageConnections.get(tab.webSocketDebuggerUrl) !== connection) return;
-              disconnected.add(tab.webSocketDebuggerUrl);
-              void cdp.call(tab.webSocketDebuggerUrl, 'Page.close', {}, 5000).catch(() => {});
-            }});
-          pageConnections.set(tab.webSocketDebuggerUrl, connection);
-        }
-        const invoke = (method, params) => connection
-          ? connection.command(method, params, {timeout: 5000})
-          : cdp.call(tab.webSocketDebuggerUrl, method, params, 5000);
-        await invoke('Wayfern.setFingerprint', device);
-        // Restoring the saved native device can restore its default Client
-        // Hints as well. Reapply the already-selected upstream UA contract on
-        // BOTH native readiness paths, before either path can ready the page.
-        if (selectedUserAgent) {
-          await invoke('Emulation.setUserAgentOverride', selectedUserAgent);
-          await invoke('Network.setUserAgentOverride', selectedUserAgent);
-        }
+        await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
         // Wayfern's saved payload alone can leave an isolated world's CPU at
         // the host value. Apply the explicit setting through Chromium as well,
         // before this page is ready; do not depend on a main-world JS getter.
         if (declared.hardwareConcurrency !== undefined) {
-          await invoke('Emulation.setHardwareConcurrencyOverride',
-            {hardwareConcurrency: declared.hardwareConcurrency});
+          await cdp.call(tab.webSocketDebuggerUrl, 'Emulation.setHardwareConcurrencyOverride',
+            {hardwareConcurrency: declared.hardwareConcurrency}, 5000);
         }
-        if (connection?.closed || disconnected.has(tab.webSocketDebuggerUrl)) throw Error('Page identity transport closed');
       } catch {
-        pageConnections.delete(tab.webSocketDebuggerUrl); connection?.close();
         throw Error('原生身份恢复失败，环境未启动；已保存身份不会被重置');
       }
       applied.add(tab.webSocketDebuggerUrl);
     }
   };
-  try { await apply(targets); } catch (error) { close(); throw error; }
+  await apply(targets);
   const applySession = async (connection, sessionId, targetInfo = {}) => {
     if (targetInfo.type !== 'page') return;
-    if (closed) throw Error('原生身份连接已关闭，环境未就绪');
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId || '') || !/^[A-Za-z0-9_-]{1,128}$/.test(targetInfo.targetId || '')) {
       throw Error('新页面的原生身份目标无效');
     }
@@ -262,10 +178,6 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       // The engine's existing flattened auto-attach connection owns this
       // paused target. Restore the complete saved device before resuming it.
       await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
-      if (selectedUserAgent) {
-        await connection.command('Emulation.setUserAgentOverride', selectedUserAgent, {sessionId, timeout: 5000});
-        await connection.command('Network.setUserAgentOverride', selectedUserAgent, {sessionId, timeout: 5000});
-      }
       if (declared.hardwareConcurrency !== undefined) {
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
@@ -284,7 +196,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   const ownsHtmlCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
     && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
   return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'),
-    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession, close};
+    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession};
 }
 
 function nativeCanvasFingerprint(value, identity) {
