@@ -9,6 +9,7 @@ import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs'
 import {verifyIndependentAudits} from './independent-fingerprint-audits.mjs';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
 import {assertWebglIdentity, readWebglIdentity} from './browser-webgl-identity.mjs';
+import {assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -68,6 +69,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
       assert.equal(observed.pageProxied, true, `${phase}: page bypassed the managed proxy`);
       assert.equal(observed.reportProxied, true, `${phase}: report bypassed the managed proxy`);
       const value = observed.value;
+      report.clientHints ||= {};
+      report.clientHints[phase] = assertClientHintConsistency(value.browserSurfaces,
+        observed.requestClientHints, ua, phase, report.clientHints[owner.toLowerCase() + '-first']);
       const state = await page.evaluate(async id => (await window.ops.profileStatus()).find(item => item.id === id), profiles[owner].id);
       assert.ok(state?.profileDirectory, `${phase}: missing actual engine profile directory`);
       profileRoots[owner] = state.profileDirectory;
@@ -139,6 +143,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           cdpError: startup?.cdpError, blocked: startup?.verificationBlocked};
         assert.ok(extra?.value && extra.pageProxied && extra.reportProxied, `${phase}: extra startup page did not reach the proxy fixture`);
         assert.equal(extra.value.error, undefined, `${phase}: ${extra.value.error}`);
+        assertClientHintConsistency(extra.value.browserSurfaces, extra.requestClientHints,
+          ua, extraPhase, report.clientHints[phase]);
         assertFontControlIsolation(extra.value.fontControl, report.hostFontControl, extraPhase);
         for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
           assert.deepEqual(extra.value[field], value[field], `${phase}: extra page first script saw a different ${field}`);
@@ -182,6 +188,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             report.newTabNative[phase].laterCanvas = later?.canvas;
             report.newTabNative[phase].laterShape = later?.canvasControl;
             report.newTabNative[phase].laterWebgl = later?.webgl;
+            report.newTabNative[phase].laterBrowserSurfaces = later?.browserSurfaces;
             // Read native GPU metadata in a separate unpatched world only
             // after the original document has reported its first-script data.
             // Record names/types/hashes, never the complete saved device.
@@ -200,6 +207,10 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
           await checkpoint(newPhase + ':observed');
           assert.ok(newTab?.value && newTab.pageProxied && newTab.reportProxied, `${newPhase}: new tab did not report through Mihomo`);
           assert.equal(newTab.value.error, undefined, `${newPhase}: ${newTab.value.error}`);
+          assertClientHintConsistency(newTab.value.browserSurfaces, newTab.requestClientHints,
+            ua, newPhase, report.clientHints[phase]);
+          assertClientHintConsistency(report.newTabNative[phase]?.laterBrowserSurfaces,
+            newTab.requestClientHints, ua, newPhase + ':later', report.clientHints[phase]);
           assertFontControlIsolation(newTab.value.fontControl, report.hostFontControl, newPhase);
           for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'memory', 'timezone']) {
             assert.deepEqual(newTab.value[field], value[field], `${newPhase}: first script saw a different ${field}`);
@@ -219,6 +230,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             const frame = report.parserFrames[newPhase][realm];
             assert.ok(frame?.value && frame.pageProxied && frame.reportProxied, `${newPhase}: ${realm} parser frame bypassed proxy or failed to report`);
             assert.equal(frame.value.isTop, false, `${newPhase}: ${realm} observation must come from an actual frame`);
+            if (realm === 'same') assertClientHintConsistency(frame.value.browserSurfaces,
+              frame.requestClientHints, ua, newPhase + ':same-frame', report.clientHints[phase]);
             assertFontControlIsolation(frame.value.fontControl, report.hostFontControl, newPhase + ':' + realm);
             assertWebglIdentity(frame.value.webgl, value.webgl, newPhase + ':' + realm);
             assert.equal(frame.value.host, realm === 'same' ? '127.0.0.1' : 'lyco-fixture.invalid');
@@ -288,7 +301,8 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   assert.notEqual(results['a-first'].canvas[0], results['b-first'].canvas[0], 'Different environment seeds produced the same canvas');
   assert.notEqual(results['a-first'].canvasControl[0], results['b-first'].canvasControl[0],
     'Identical shape-only drawings must retain distinct pixel noise across environments, independently of fonts');
-  report.checks.push('native-configured-user-agent-language-timezone-cpu-memory',
+  report.checks.push('native-client-hints-request-first-script-and-reopen-consistency',
+    'native-configured-user-agent-language-timezone-cpu-memory',
     'native-cookie-localstorage-isolated-and-persistent', 'native-canvas-stable-per-profile-and-distinct-across-profiles',
     'native-multiple-startup-pages-retained-with-first-script-profile',
     'native-new-target-first-script-identity-and-proxy-after-start-and-reopen');

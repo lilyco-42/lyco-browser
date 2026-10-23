@@ -8,6 +8,10 @@ The current Windows preview has actual product observations on a direct
 GitHub-hosted Azure route, described below. That is not the customer's
 subscription proxy route. No target-service login or paid model call is used.
 
+Additional Client Hints/WebGPU coverage and unverified local-machine boundaries
+are described in [privacy test scope](PRIVACY-TEST-SCOPE.md). A successful test
+does not promise complete avoidance of a platform's security checks.
+
 ## Current verified observation
 
 Product source `65b51acdbf5bb7e8c2273ea219c82b3cb0547463` passed
