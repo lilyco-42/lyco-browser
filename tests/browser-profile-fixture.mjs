@@ -98,8 +98,12 @@ export function createBrowserProfileFixture() {
     const entry = entries.get(key) || {};
     entries.set(key, entry);
     if (url.pathname === '/profile-frame') {
-      entry.pageProxied = Boolean(proxied);
-      entry.requestClientHints = captureClientHintHeaders(req.headers);
+      entry.requestCount = (entry.requestCount || 0) + 1;
+      if (entry.requestCount === 1) {
+        entry.requestObservedAt = Date.now();
+        entry.pageProxied = Boolean(proxied);
+        entry.requestClientHints = captureClientHintHeaders(req.headers);
+      }
       const endpoint = '/profile-frame-report?phase=' + encodeURIComponent(phase) + '&realm=' + realm;
       // Synchronous first-script reads in actual parser-created documents.
       // No storage writes, parent messages, injection or harness navigation.
@@ -120,9 +124,13 @@ export function createBrowserProfileFixture() {
       return true;
     }
     if (url.pathname === '/profile-probe') {
-      entry.pageProxied = Boolean(proxied);
-      entry.requestLanguage = req.headers['accept-language'] || '';
-      entry.requestClientHints = captureClientHintHeaders(req.headers);
+      entry.requestCount = (entry.requestCount || 0) + 1;
+      if (entry.requestCount === 1) {
+        entry.requestObservedAt = Date.now();
+        entry.pageProxied = Boolean(proxied);
+        entry.requestLanguage = req.headers['accept-language'] || '';
+        entry.requestClientHints = captureClientHintHeaders(req.headers);
+      }
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
       const readOnly = phase.endsWith('-extra') || newTab;
@@ -145,9 +153,14 @@ export function createBrowserProfileFixture() {
     req.on('data', chunk => { body += chunk; if (body.length > 8192) req.destroy(); });
     req.on('end', () => {
       try {
-        entry.value = JSON.parse(body);
-        entry.reportProxied = Boolean(proxied);
-        entry.reportClientHints = captureClientHintHeaders(req.headers);
+        const value = JSON.parse(body);
+        entry.reportCount = (entry.reportCount || 0) + 1;
+        if (entry.reportCount === 1) {
+          entry.value = value;
+          entry.reportObservedAt = Date.now();
+          entry.reportProxied = Boolean(proxied);
+          entry.reportClientHints = captureClientHintHeaders(req.headers);
+        }
         res.writeHead(200, {'Content-Type': 'text/plain', 'Cache-Control': 'no-store'}); res.end('ok');
       } catch { res.writeHead(400); res.end('Invalid CI report'); }
     });

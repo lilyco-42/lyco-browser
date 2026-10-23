@@ -9,7 +9,7 @@ import {verifyNativeSessionRestore} from './native-session-restore-contract.mjs'
 import {verifyIndependentAudits} from './independent-fingerprint-audits.mjs';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
 import {assertWebglIdentity, readWebglIdentity} from './browser-webgl-identity.mjs';
-import {assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
+import {assertClientHintConsistency, describeNativeUserAgentFields} from './browser-privacy-surfaces.mjs';
 
 // Drive existing workbench actions and the unchanged engine. These expectations
 // come from explicit saved settings, not from production buildFingerprint().
@@ -104,6 +104,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
         const hasSavedSeed = Object.hasOwn(cached || {}, 'canvasNoiseSeed');
         report.profileRuntime[phase].nativeFingerprint = {available: true,
           digest: digest(native), canvasDigest: digest(native?.canvas ?? native?.noise?.canvas),
+          uaFields: describeNativeUserAgentFields(native, state.fingerprint),
           canvasSeed: {nativePresent: hasNativeSeed, savedPresent: hasSavedSeed,
             nativeType: typeof native?.canvasNoiseSeed, savedType: typeof cached?.canvasNoiseSeed,
             matchesSaved: hasNativeSeed && hasSavedSeed && native.canvasNoiseSeed === cached.canvasNoiseSeed,
@@ -180,6 +181,7 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
             report.newTabNative ||= {};
             report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+            report.newTabNative[phase].uaFields = describeNativeUserAgentFields(native, state.fingerprint);
             report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
             const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
               expression: readOnlyProfileProbeSource()}, 3000);

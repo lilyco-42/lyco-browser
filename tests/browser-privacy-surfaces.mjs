@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {isDeepStrictEqual} from 'node:util';
 
 // Serialize this read-only collector into CI-owned browser documents. No
 // prototype writes, permission prompts, device creation or external requests.
@@ -18,8 +20,21 @@ export async function readBrowserPrivacySurfaces() {
     ? value.slice(0, 8).map(row => ({brand: text(row.brand), version: text(row.version)})) : null;
   const nav = globalThis.navigator;
   const data = nav.userAgentData;
+  const shape = (() => {
+    try {
+      const navDescriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(nav), 'userAgentData');
+      const uaPrototype = typeof globalThis.NavigatorUAData === 'function' ? globalThis.NavigatorUAData.prototype : null;
+      const brandsDescriptor = uaPrototype && Object.getOwnPropertyDescriptor(uaPrototype, 'brands');
+      return {status: 'observed', interfaceAvailable: Boolean(uaPrototype), navigatorOwn: Object.hasOwn(nav, 'userAgentData'),
+        navigatorPrototypeGetter: typeof navDescriptor?.get === 'function',
+        objectPrototypeMatches: data && uaPrototype ? Object.getPrototypeOf(data) === uaPrototype : null,
+        brandsOwn: data ? Object.hasOwn(data, 'brands') : null,
+        brandsPrototypeGetter: typeof brandsDescriptor?.get === 'function',
+        brandsPrototypeConfigurable: brandsDescriptor ? brandsDescriptor.configurable : null};
+    } catch (error) {return {status: 'error', error: String(error?.name || 'Error').slice(0, 80)};}
+  })();
   // Capture low-entropy properties in the first synchronous script turn.
-  const first = {secureContext: globalThis.isSecureContext === true,
+  const first = {observedAt: Date.now(), secureContext: globalThis.isSecureContext === true, clientHintShape: shape,
     webdriver: typeof nav.webdriver === 'boolean' ? nav.webdriver : null,
     clientHints: data ? {status: 'observed', brands: brands(data.brands),
       mobile: data.mobile, platform: text(data.platform)} : {status: 'unsupported'}};
@@ -51,6 +66,24 @@ export async function readBrowserPrivacySurfaces() {
 export function captureClientHintHeaders(headers) {
   return Object.fromEntries(['sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform']
     .map(name => [name, typeof headers[name] === 'string' ? headers[name].slice(0, 1024) : null]));
+}
+
+// CI-side inventory only: never export native payloads or unknown fields.
+// Presence is not proof that a kernel accepts a particular launch contract.
+export function describeNativeUserAgentFields(device, declared = {}) {
+  const expected = declared && typeof declared === 'object' ? declared : {};
+  const known = ['userAgent', 'userAgentMetadata', 'userAgentData', 'uaData', 'brands', 'fullVersionList',
+    'platform', 'platformVersion', 'architecture', 'bitness', 'wow64', 'uaFullVersion', 'uaMetadata',
+    'clientHints', 'browserVersion', 'browserBrand', 'userAgentPlatform', 'userAgentFullVersion',
+    'userAgentPlatformVersion', 'navigatorPlatform'];
+  return known.map(key => {
+    if (!device || !Object.hasOwn(device, key)) return {key, present: false};
+    const value = device[key], encoded = JSON.stringify(value);
+    return {key, present: true, type: value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value,
+      digest: encoded === undefined ? null : createHash('sha256').update(encoded).digest('hex'),
+      declaredPresent: Object.hasOwn(expected, key),
+      matchesDeclared: Object.hasOwn(expected, key) ? isDeepStrictEqual(expected[key], value) : null};
+  });
 }
 
 function normalizedBrands(rows) {
