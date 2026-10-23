@@ -34,6 +34,21 @@ const unpack = result => {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value));
   return value;
 };
+// Public local protocol structure only: no descriptions, command responses,
+// credentials or browser-profile data are copied into this schema inventory.
+const schemaShape = (entry, depth = 0) => {
+  if (!entry || typeof entry !== 'object' || depth > 4) return null;
+  const shape = {};
+  for (const key of ['name', 'id', 'type', '$ref']) {
+    if (typeof entry[key] === 'string' && /^[A-Za-z0-9_.-]{1,100}$/.test(entry[key])) shape[key] = entry[key];
+  }
+  if (typeof entry.optional === 'boolean') shape.optional = entry.optional;
+  for (const key of ['parameters', 'returns', 'properties']) {
+    if (Array.isArray(entry[key])) shape[key] = entry[key].slice(0, 64).map(value => schemaShape(value, depth + 1));
+  }
+  if (entry.items) shape.items = schemaShape(entry.items, depth + 1);
+  return shape;
+};
 const observations = new Map();
 const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
@@ -94,6 +109,23 @@ try {
   }
   assert.ok(Number.isInteger(port) && port > 1023 && port < 65536
     && /^\/devtools\/browser\/[A-Za-z0-9-]+$/.test(browserPath || ''), 'No bounded CDP readiness');
+  report.stage = 'read-public-local-protocol';
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/json/protocol`, {signal: AbortSignal.timeout(5000), redirect: 'error'});
+    assert.equal(response.status, 200);
+    const chunks = []; let bytes = 0;
+    for await (const chunk of response.body) {
+      bytes += chunk.length; assert.ok(bytes <= 4 * 1024 * 1024, 'Protocol inventory exceeded bound'); chunks.push(chunk);
+    }
+    const protocol = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    const domain = protocol.domains?.find(value => value.domain === 'Wayfern');
+    report.protocolSchema = {status: 'observed', nativeDomainPresent: Boolean(domain),
+      methods: (domain?.commands || []).filter(value => ['getFingerprint', 'setFingerprint'].includes(value.name)).map(value => schemaShape(value)),
+      // A missing published schema does not imply the executable lacks a command.
+      types: (domain?.types || []).filter(value => /fingerprint|device/i.test(value.id || '')).slice(0, 16).map(value => schemaShape(value))};
+  } catch {
+    report.protocolSchema = {status: 'unavailable-not-a-capability-verdict'};
+  }
   browser = await new cdp.PersistentConnection(`ws://127.0.0.1:${port}${browserPath}`).open(5000);
   const initial = (await cdp.tabs(port)).find(tab => tab.type === 'page' && tab.url === 'about:blank');
   assert.ok(initial?.webSocketDebuggerUrl);
