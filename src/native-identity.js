@@ -64,6 +64,49 @@ function pageTargets(tabs, port) {
   });
 }
 
+function validatedUserAgentOverride(value) {
+  if (value === undefined) return null;
+  const fail = () => {throw Error('浏览器身份设置无效，环境未启动');};
+  const text = (input, limit, empty = false) => {
+    if (typeof input !== 'string' || input.length > limit || /[\x00-\x1f\x7f]/.test(input)
+        || (!empty && !input.trim())) fail();
+    return input;
+  };
+  if (!value || typeof value !== 'object' || Array.isArray(value)) fail();
+  const result = {userAgent: text(value.userAgent, 1024)};
+  for (const key of ['acceptLanguage', 'platform']) {
+    if (value[key] !== undefined) result[key] = text(value[key], 512, true);
+  }
+  // iOS personas intentionally omit Chromium Client Hints in the existing
+  // upstream path. Preserve that policy instead of inventing metadata.
+  if (value.userAgentMetadata === undefined) return result;
+  const source = value.userAgentMetadata;
+  if (!source || typeof source !== 'object' || Array.isArray(source)) fail();
+  const brands = rows => {
+    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 16) fail();
+    return rows.map(row => {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) fail();
+      const version = text(row.version, 32);
+      if (!/^\d+(?:\.\d+){0,3}$/.test(version)) fail();
+      return {brand: text(row.brand, 160), version};
+    });
+  };
+  const metadata = {brands: brands(source.brands), fullVersionList: brands(source.fullVersionList)};
+  for (const key of ['fullVersion', 'platform', 'platformVersion', 'architecture', 'model', 'bitness']) {
+    metadata[key] = text(source[key], 160, ['architecture', 'model', 'bitness'].includes(key));
+  }
+  for (const key of ['fullVersion', 'platformVersion']) {
+    if (!/^\d+(?:\.\d+){0,3}$/.test(metadata[key])) fail();
+  }
+  if (!['', '32', '64'].includes(metadata.bitness)) fail();
+  for (const key of ['mobile', 'wow64']) {
+    if (typeof source[key] !== 'boolean') fail();
+    metadata[key] = source[key];
+  }
+  result.userAgentMetadata = metadata;
+  return result;
+}
+
 function declaredSettings(settings = {}) {
   const result = {};
   if (settings.languages !== undefined) {
@@ -111,12 +154,14 @@ function hasNativeFontInventory(fonts) {
       && family.length <= 256 && !/[\x00-\x1f\x7f]/.test(family));
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false, requireNativeFontLayout = false}) {
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings,
+  userAgentOverride, deferredRestore = false, requireNativeFontLayout = false}) {
   if (!enabled) {
     if (requireNativeFontLayout) throw Error('一致布局保护需要支持原生字体隔离的内核，环境未启动');
     return null; // Stock Chromium and legacy kernels retain their own path.
   }
   const declared = declaredSettings(settings);
+  const selectedUserAgent = validatedUserAgentOverride(userAgentOverride);
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535) throw Error('原生身份环境参数无效');
   const root = await fs.realpath(profileRoot);
@@ -155,6 +200,13 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       if (applied.has(tab.webSocketDebuggerUrl)) continue;
       try {
         await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
+        // Restoring the saved native device can restore its default Client
+        // Hints as well. Reapply the already-selected upstream UA contract on
+        // BOTH native readiness paths, before either path can ready the page.
+        if (selectedUserAgent) {
+          await cdp.call(tab.webSocketDebuggerUrl, 'Emulation.setUserAgentOverride', selectedUserAgent, 5000);
+          await cdp.call(tab.webSocketDebuggerUrl, 'Network.setUserAgentOverride', selectedUserAgent, 5000);
+        }
         // Wayfern's saved payload alone can leave an isolated world's CPU at
         // the host value. Apply the explicit setting through Chromium as well,
         // before this page is ready; do not depend on a main-world JS getter.
@@ -178,6 +230,10 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       // The engine's existing flattened auto-attach connection owns this
       // paused target. Restore the complete saved device before resuming it.
       await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+      if (selectedUserAgent) {
+        await connection.command('Emulation.setUserAgentOverride', selectedUserAgent, {sessionId, timeout: 5000});
+        await connection.command('Network.setUserAgentOverride', selectedUserAgent, {sessionId, timeout: 5000});
+      }
       if (declared.hardwareConcurrency !== undefined) {
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
