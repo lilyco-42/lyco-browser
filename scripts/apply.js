@@ -394,6 +394,10 @@ one('engine.js', '      const injectionFailed = !injectSucceeded || !workerSucce
  '      const injectionFailed = !injectSucceeded || !workerSucceeded;'));
 one('engine.js', '    item.workerFingerprintConnection = connection;\n    return connection;',
  '    item.workerFingerprintConnection = connection;\n    item.workerFingerprintConnectionReady = connection;\n    return connection;');
+one('engine.js', '      item.workerFingerprintConnection?.close();',
+ '      item.lycoNativeIdentity?.close();\n      item.workerFingerprintConnection?.close();');
+one('engine.js', '    item.workerFingerprintConnection?.close();\n    item.workerFingerprintConnection = null;',
+ '    item.lycoNativeIdentity?.close();\n    item.workerFingerprintConnection?.close();\n    item.workerFingerprintConnection = null;');
 // The upstream inner catch normally attempts a last-chance navigation. A
 // rejected identity must reach the existing outer cleanup, never that fallback.
 one('engine.js', '      item.cdpError = error.message;', join(

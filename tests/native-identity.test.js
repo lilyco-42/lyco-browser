@@ -11,12 +11,23 @@ async function fixture(t) {
   t.after(() => fs.rm(root, {recursive: true, force: true}));
   const tabs = [{type: 'page', webSocketDebuggerUrl: 'ws://127.0.0.1:19341/devtools/page/first'}];
   const calls = [];
+  const connections = [];
   let counter = 0;
   const cdp = {tabs: async () => tabs, call: async (target, method, params) => {
     calls.push({target, method, params});
     return method === 'Wayfern.getFingerprint' ? {fingerprint: {canvasSeed: ++counter, fonts: '["Arial"]'}} : {};
   }};
-  return {root, tabs, calls, cdp, args: {enabled: true, profileRoot: root, profileId: 'owner-profile', port: 19341, cdp}};
+  cdp.connect = async (target, options) => {
+    const connection = {target, options, closed: false,
+      close() {this.closed = true;},
+      command(method, params, commandOptions) {
+        assert.equal(this.closed, false, 'Cannot use a closed page transport');
+        assert.deepEqual(commandOptions, {timeout: 5000});
+        return cdp.call(target, method, params);
+      }};
+    connections.push(connection); return connection;
+  };
+  return {root, tabs, calls, connections, cdp, args: {enabled: true, profileRoot: root, profileId: 'owner-profile', port: 19341, cdp}};
 }
 
 test('native layout requires a supported kernel and a valid complete font inventory', async t => {
@@ -293,6 +304,9 @@ test('selected UA metadata is reapplied after native restore on direct and pause
   input.ignored = 'never-forward'; input.userAgentMetadata.ignored = 'never-forward';
   f.calls.length = 0;
   const identity = await prepareNativeIdentity({...f.args, userAgentOverride: input});
+  t.after(() => identity.close());
+  assert.equal(f.connections.length, 1);
+  assert.equal(f.connections[0].closed, false, 'Selected UA must outlive an individual CDP command');
   assert.deepEqual(f.calls.map(row => row.method),
     ['Wayfern.setFingerprint', 'Emulation.setUserAgentOverride', 'Network.setUserAgentOverride']);
   assert.deepEqual(f.calls[0].params, saved);
@@ -314,6 +328,8 @@ test('selected UA metadata is reapplied after native restore on direct and pause
     ['Wayfern.setFingerprint', 'Emulation.setUserAgentOverride', 'Network.setUserAgentOverride']);
   assert.deepEqual(f.calls[1].params, expected);
   assert.deepEqual(f.calls[2].params, expected);
+  assert.equal(f.connections.length, 2);
+  assert.ok(f.connections.every(connection => !connection.closed));
   assert.deepEqual(await fs.readFile(file), bytes);
   assert.equal(f.calls.some(row => row.method === 'Wayfern.getFingerprint'), false);
 });
@@ -328,8 +344,10 @@ test('refused UA metadata blocks page readiness and keeps the saved device', asy
     return originalCall(...args);
   };
   await assert.rejects(prepareNativeIdentity({...f.args, userAgentOverride: selectedUserAgent()}), /恢复失败/);
+  assert.equal(f.connections[0].closed, true, 'Failed startup must release its page transport');
   f.cdp.call = originalCall;
   const identity = await prepareNativeIdentity({...f.args, userAgentOverride: selectedUserAgent()});
+  t.after(() => identity.close());
   const sent = [], connection = {command: async (...args) => {
     sent.push(args);
     if (args[0] === 'Emulation.setUserAgentOverride') throw Error('CI refusal');
@@ -341,6 +359,25 @@ test('refused UA metadata blocks page readiness and keeps the saved device', asy
     ['Wayfern.setFingerprint', 'Emulation.setUserAgentOverride', 'Target.closeTarget']);
   assert.equal(connection.lycoIdentityRefusedSessions.has('ua-refused'), true);
   assert.deepEqual(await fs.readFile(file), bytes);
+});
+
+test('UA page transports close with their target or environment and an unexpected disconnect refuses readiness', async t => {
+  const f = await fixture(t);
+  const identity = await prepareNativeIdentity({...f.args, userAgentOverride: selectedUserAgent()});
+  t.after(() => identity.close());
+  const first = f.connections[0];
+  const original = [...f.tabs];
+  f.tabs.length = 0; await identity.apply(f.tabs);
+  assert.equal(first.closed, true, 'A closed target cannot retain an identity transport');
+  f.tabs.push(...original); await identity.apply(f.tabs);
+  const second = f.connections[1];
+  assert.equal(second.closed, false);
+  second.options.onDisconnect();
+  await assert.rejects(identity.apply(f.tabs), /连接已断开/);
+  assert.ok(f.calls.some(row => row.method === 'Page.close'), 'A live page cannot continue after losing its UA agent');
+  identity.close(); identity.close();
+  assert.ok(f.connections.every(connection => connection.closed));
+  await assert.rejects(identity.apply(f.tabs), /连接已关闭/);
 });
 
 test('malformed UA metadata is rejected before the native cache is read or applied', async t => {
@@ -363,7 +400,8 @@ test('malformed UA metadata is rejected before the native cache is read or appli
   assert.equal(await fs.readFile(file, 'utf8'), '{damaged-cache');
   await fs.unlink(file);
   const noHints = {userAgent: 'CI selected UA without Client Hints', platform: 'iPhone'};
-  await prepareNativeIdentity({...f.args, userAgentOverride: noHints});
+  const identity = await prepareNativeIdentity({...f.args, userAgentOverride: noHints});
+  t.after(() => identity.close());
   assert.deepEqual(f.calls.find(row => row.method === 'Emulation.setUserAgentOverride').params, noHints);
 });
 
