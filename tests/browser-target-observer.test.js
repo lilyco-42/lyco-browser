@@ -108,3 +108,18 @@ test('one-shot native calls retain only fixed failure metadata and forward the o
   assert.equal(trace.nativeCalls[1].done, true);
   assert.doesNotMatch(JSON.stringify(trace.nativeCalls), /CI_PRIVATE_NATIVE_RESPONSE|licence|params|stack/);
 });
+
+test('UA command observations retain ordering on direct and persistent transports without metadata payloads', async () => {
+  class BrowserEngine {startWorkerFingerprintInjection() {}}
+  const secret = 'CI_PRIVATE_UA_METADATA', params = {userAgent: secret, userAgentMetadata: {brands: secret}};
+  const result = {}, calls = [];
+  const cdp = {async call(...args) {calls.push(args); return result;},
+    async connect() {return {async command(...args) {calls.push(args); return result;}};}};
+  const trace = installBrowserTargetObserver({BrowserEngine, cdp});
+  assert.equal(await cdp.call(secret, 'Emulation.setUserAgentOverride', params, 5000), result);
+  const connection = await cdp.connect(secret);
+  assert.equal(await connection.command('Network.setUserAgentOverride', params, {timeout: 5000}), result);
+  assert.deepEqual(trace.nativeCalls.map(row => row.method), ['Emulation.setUserAgentOverride', 'Network.setUserAgentOverride']);
+  assert.equal(calls[0][2], params); assert.equal(calls[1][1], params);
+  assert.doesNotMatch(JSON.stringify([trace, trace.nativeCalls]), /CI_PRIVATE_UA_METADATA|userAgent|brands|params/);
+});

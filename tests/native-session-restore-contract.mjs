@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
 import {assertWebglIdentity} from './browser-webgl-identity.mjs';
+import {assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
 // Exercise the engine's ordinary Stop/Start and Chromium's own saved session.
 // The harness never reloads, creates, navigates or injects a restored target.
@@ -32,6 +33,9 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
     assert.equal(value.error, undefined, label + ': ' + value.error);
     assertFontControlIsolation(value.fontControl, report.hostFontControl, label);
     assertWebglIdentity(value.webgl, baseline?.value.webgl, label);
+    const baselineHints = baseline ? assertClientHintConsistency(baseline.value.browserSurfaces,
+      baseline.requestClientHints, ua, label + ':baseline') : report.clientHints?.['a-first'];
+    assertClientHintConsistency(value.browserSurfaces, entry.requestClientHints, ua, label, baselineHints);
     const fields = {userAgent: ua, platform: 'Win32', language: expected.language,
       languages: [expected.language, expected.language.split('-')[0]],
       timezone: expected.timezone, cores: expected.cores, memory: expected.memory};
@@ -133,6 +137,8 @@ export async function verifyNativeSessionRestore({page, profile, expected, ua, o
         assert.equal(frame.pageProxied, true, phase + ': ' + realm + ' frame navigation bypassed proxy');
         assert.equal(frame.reportProxied, true, phase + ': ' + realm + ' frame report bypassed proxy');
         assert.equal(frame.value.isTop, false);
+        if (secure) assertClientHintConsistency(frame.value.browserSurfaces, frame.requestClientHints,
+          ua, phase + ':restored-frame', report.clientHints?.['a-first']);
         assert.equal(frame.value.host, secure ? '127.0.0.1' : 'lyco-fixture.invalid');
         for (const field of ['userAgent', 'platform', 'language', 'languages', 'cores', 'timezone']) {
           assert.deepEqual(frame.value[field], entry.value[field], phase + ': ' + realm + ' first-script ' + field);
