@@ -1,0 +1,34 @@
+name: Verified public ARM64 runner dependency
+
+on:
+  push:
+    branches: [test/native-contract-controls-20261023]
+    paths: [.github/workflows/runner-dependency.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  relay-public-dependency:
+    if: github.repository == 'lilyco-42/lyco-browser'
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      # No checkout, private source, credentials or product execution.
+      - name: Download and verify the official public runner archive
+        shell: pwsh
+        run: |
+          $archive = 'actions-runner-linux-arm64-2.338.1.tar.gz'
+          Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/v2.338.1/$archive" -OutFile $archive
+          $expected = '475e0c149fd3b611610127b9664ba5bacf5c6928795cc448ab520bb5f324bede'
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'Official public runner archive digest mismatch'
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-public-arm64-runner
+          path: actions-runner-linux-arm64-2.338.1.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
