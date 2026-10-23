@@ -188,13 +188,13 @@ one('engine.js',
 one('engine.js', "        if (sessionId && targetInfo.type === 'service_worker') {",
  "        if (sessionId && targetInfo.type === 'service_worker' && !options.lycoOwnWorkerEvents) {");
 one('engine.js', '      onEvent: onAttached,', '      onEvent: onAttached,\n      lycoOwnWorkerEvents: true,');
-// Use tab-level attachment only for native session restoration: those pages
-// cannot answer early direct-page commands. Ordinary launches retain the
-// original direct Page pause. A Tab pause alone did not reliably stop a new
-// renderer's first script in packaged Actions39410773730.
+// Gate the native tab before its page starts navigation, then wait for the
+// nested page's full preparation and acknowledged parent resume. A page-only
+// pause exposes default first-request Client Hints; a tab pause alone is not
+// enough either. Keep the existing nested readiness/document-start guards.
 one('engine.js',
  '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n      });',
- '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity && item.lycoDeferredRestore ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
+ '      await connection.command(\'Target.setAutoAttach\', {\n        autoAttach: true,\n        waitForDebuggerOnStart: true,\n        flatten: true,\n        ...(item.lycoNativeIdentity ? {filter: [{type: "browser", exclude: true}, {type: "page", exclude: true}, {type: "iframe", exclude: true}, {}]} : {}),\n      });');
 one('engine.js',
  "          if (targetInfo.type === 'page' || targetInfo.type === 'iframe' || pageLikeTypes.has(targetInfo.type)) {",
  join("          if (targetInfo.type === 'tab') {",
