@@ -53,7 +53,8 @@ const observations = new Map();
 const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
   productAcceptance: false, externalAccounts: false, cases: []};
-const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand', 'cdp-cpu-control']);
+const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand',
+  'platform-delta', 'brand-delta', 'cdp-cpu-control']);
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://fixture.invalid'), phase = url.searchParams.get('phase');
   if (!phases.has(phase)) {res.writeHead(404); res.end(); return;}
@@ -146,17 +147,21 @@ try {
   await page.command('Page.enable', {}, {timeout: 5000});
   await page.command('Page.navigate', {url: origin + '/probe?phase=baseline'}, {timeout: 5000});
   report.baseline = await waitObservation('baseline');
-  for (const [phase, wanted] of [
+  for (const [phase, wanted, payloadMode = 'whole-device'] of [
     ['native-cpu-control', {hardwareConcurrency: device.hardwareConcurrency === 2 ? 4 : 2}],
     ['platform-only', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}],
     ['selected-brand', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}],
+    ['platform-delta', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}, 'declared-optional-fields'],
+    ['brand-delta', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}, 'declared-optional-fields'],
   ]) {
     const eligible = Object.fromEntries(Object.entries(wanted).filter(([key]) => Object.hasOwn(device, key)
       && (key === 'hardwareConcurrency' ? Number.isInteger(device[key]) && device[key] > 0 && device[key] <= 256 : typeof device[key] === 'string')));
-    const record = {phase, changedKeys: Object.keys(eligible), omittedKeys: Object.keys(wanted).filter(key => !Object.hasOwn(eligible, key))};
+    const record = {phase, payloadMode, changedKeys: Object.keys(eligible), omittedKeys: Object.keys(wanted).filter(key => !Object.hasOwn(eligible, key))};
     report.cases.push(record);
     if (!record.changedKeys.length) {record.status = 'no-supported-field-observed'; continue;}
-    const candidate = {...device, ...eligible};
+    // Compare full-device restoration with the same API's optional scalar
+    // parameters. Only disposable CI state is touched; seed changes are reported.
+    const candidate = payloadMode === 'declared-optional-fields' ? eligible : {...device, ...eligible};
     report.stage = phase + ':apply-owned-temporary-device';
     try {
       const response = unpack(await page.command('Wayfern.setFingerprint', candidate, {timeout: 5000}));
