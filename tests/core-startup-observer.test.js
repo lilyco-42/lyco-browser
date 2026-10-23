@@ -37,3 +37,19 @@ test('observer preserves the actual spawn contract and restores it on failure', 
   assert.equal(options.stdio, 'ignore'); assert.equal(records[0].pid, 123);
   assert.doesNotMatch(JSON.stringify(records), /private config|owned directory/);
 });
+
+test('listener evidence distinguishes occupied, forbidden and unavailable addresses without retaining endpoints', () => {
+  for (const [message, expected] of [
+    ['bind: address already in use', 'listener-address-in-use'],
+    ['Only one usage of each socket address (protocol/network address/port) is normally permitted.', 'listener-address-in-use'],
+    ['bind: An attempt was made to access a socket in a way forbidden by its access permissions.', 'listener-permission-denied'],
+    ['bind: WSAEACCES 10013', 'listener-permission-denied'],
+    ['bind: cannot assign requested address', 'listener-address-unavailable'],
+  ]) {
+    const child = new EventEmitter(); child.stdout = new EventEmitter(); child.stderr = new EventEmitter();
+    const record = {outputBytes: 0, signals: []}; observeCore(child, record);
+    child.stderr.emit('data', Buffer.from('127.0.0.1:49123 token=CI_LISTENER_SECRET ' + message));
+    assert.ok(record.signals.includes(expected));
+    assert.doesNotMatch(JSON.stringify(record), /CI_LISTENER_SECRET|127\.0\.0\.1|49123|token=/);
+  }
+});
