@@ -38,6 +38,8 @@ jobs:
         run: |
           node --check lyco/probes/native-ua-contract.mjs
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          node --test lyco/tests/browser-privacy-surfaces.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           node lyco/probes/native-ua-contract.mjs upstream/Browserapp native-ua-evidence
           if ($LASTEXITCODE -ne 0) { exit 1 }
       - uses: actions/upload-artifact@v4

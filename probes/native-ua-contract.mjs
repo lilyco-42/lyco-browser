@@ -8,7 +8,9 @@ import {createRequire} from 'node:module';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import {readBrowserPrivacySurfaces, captureClientHintHeaders} from '../tests/browser-privacy-surfaces.mjs';
+import {isDeepStrictEqual} from 'node:util';
+import {readBrowserPrivacySurfaces, captureClientHintHeaders, parseBrandHeader,
+  assertClientHintConsistency} from '../tests/browser-privacy-surfaces.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true' || process.platform !== 'win32') throw Error('Disposable Windows Actions probe only');
 const appRoot = path.resolve(process.argv[2]), output = path.resolve(process.argv[3]);
@@ -54,7 +56,8 @@ const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
   productAcceptance: false, externalAccounts: false, cases: []};
 const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand',
-  'platform-delta', 'brand-delta', 'ua-marker-delta', 'platform-marker-delta', 'cdp-cpu-control']);
+  'platform-delta', 'brand-delta', 'ua-marker-delta', 'platform-marker-delta', 'cdp-cpu-control',
+  'cdp-ua-emulation-control', 'cdp-ua-network-control', 'cdp-ua-both-control']);
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://fixture.invalid'), phase = url.searchParams.get('phase');
   if (!phases.has(phase)) {res.writeHead(404); res.end(); return;}
@@ -208,9 +211,96 @@ try {
     record.status = 'observed-not-product-acceptance';
     await browser.command('Target.closeTarget', {targetId: created.targetId}, {timeout: 5000});
   }
-  // Independent transport/fixture control. This deliberately uses standard CDP
-  // only for CPU on the owned original target, never for UA or product settings.
-  // Success does not prove Wayfern.setFingerprint supports any edited field.
+  // Independent UA-metadata controls on new about:blank targets. Apply each
+  // documented standard method before that target's first fixture navigation.
+  // This is not the production auto-attach path or a Wayfern setter verdict.
+  // Synthetic markers are CI-only; no document/prototype/score is modified.
+  report.stage = 'restore-original-before-independent-cdp-controls';
+  await page.command('Wayfern.setFingerprint', device, {timeout: 5000});
+  report.cdpUaControls = [];
+  assert.equal(typeof device.userAgent, 'string', 'Original UA control input missing');
+  assert.equal(typeof device.platform, 'string', 'Original platform control input missing');
+  const wantedUa = String(device.userAgent).slice(0, 320) + ' LYCO-CDP-Contract-Control/1.0';
+  const wantedMetadata = {
+    brands: [{brand: 'Chromium', version: '149'}, {brand: 'LYCO Contract Control', version: '149'}],
+    fullVersionList: [{brand: 'Chromium', version: '149.0.7827.114'},
+      {brand: 'LYCO Contract Control', version: '149.0.0.0'}],
+    platform: 'Windows', platformVersion: '15.0.0', architecture: 'x86',
+    model: '', mobile: false, bitness: '64', wow64: false,
+  };
+  const sortedBrands = rows => Array.isArray(rows)
+    ? rows.map(row => ({brand: row.brand, version: row.version})).sort((a, b) => a.brand.localeCompare(b.brand)) : null;
+  for (const [phase, methods] of [
+    ['cdp-ua-emulation-control', ['Emulation.setUserAgentOverride']],
+    ['cdp-ua-network-control', ['Network.setUserAgentOverride']],
+    ['cdp-ua-both-control', ['Emulation.setUserAgentOverride', 'Network.setUserAgentOverride']],
+  ]) {
+    const record = {phase, methods, appliedBeforeNavigation: false,
+      syntheticMetadata: structuredClone(wantedMetadata), acknowledgedMethods: []};
+    report.cdpUaControls.push(record);
+    let targetId, control;
+    report.stage = phase + ':prepare-new-blank-target';
+    try {
+      const created = await browser.command('Target.createTarget', {url: 'about:blank'}, {timeout: 5000});
+      assert.ok(created.targetId); targetId = created.targetId;
+      const target = (await cdp.tabs(port)).find(tab => tab.id === targetId && tab.url === 'about:blank');
+      assert.ok(target?.webSocketDebuggerUrl);
+      const endpoint = new URL(target.webSocketDebuggerUrl);
+      assert.equal(endpoint.protocol, 'ws:'); assert.equal(endpoint.hostname, '127.0.0.1');
+      assert.equal(Number(endpoint.port), port); assert.equal(endpoint.username, ''); assert.equal(endpoint.password, '');
+      control = await new cdp.PersistentConnection(target.webSocketDebuggerUrl).open(5000);
+      await control.command('Page.enable', {}, {timeout: 5000});
+      await control.command('Network.enable', {}, {timeout: 5000});
+      for (const method of methods) {
+        await control.command(method, {userAgent: wantedUa, platform: String(device.platform),
+          userAgentMetadata: structuredClone(wantedMetadata)}, {timeout: 5000});
+        record.acknowledgedMethods.push(method);
+      }
+      record.appliedBeforeNavigation = true;
+      report.stage = phase + ':observe-first-navigation';
+      await control.command('Page.navigate', {url: origin + '/probe?phase=' + phase}, {timeout: 5000});
+      record.first = await waitObservation(phase);
+      assert.equal(record.first.requests, 1, 'Expected one first navigation request');
+      assert.equal(record.first.reports, 1, 'Expected one first-script report');
+      record.firstRequestMatchesUa = record.first.requestUserAgent === wantedUa;
+      record.firstScriptMatchesUa = record.first.value.ua === wantedUa;
+      const surface = record.first.value.surfaces;
+      const low = surface?.first?.clientHints, high = surface?.highEntropy;
+      record.firstScriptMatchesMetadata = {
+        brands: low?.status === 'observed' && isDeepStrictEqual(sortedBrands(low.brands), sortedBrands(wantedMetadata.brands)),
+        mobile: low?.status === 'observed' && low.mobile === wantedMetadata.mobile,
+        platform: low?.status === 'observed' && low.platform === wantedMetadata.platform,
+        platformVersion: high?.status === 'observed' && high.value?.platformVersion === wantedMetadata.platformVersion,
+        fullVersionList: high?.status === 'observed'
+          && isDeepStrictEqual(sortedBrands(high.value?.fullVersionList), sortedBrands(wantedMetadata.fullVersionList)),
+      };
+      try {
+        record.firstRequestMatchesMetadata = isDeepStrictEqual(
+          parseBrandHeader(record.first.requestHints?.['sec-ch-ua']), sortedBrands(wantedMetadata.brands))
+          && record.first.requestHints['sec-ch-ua-mobile'] === '?0'
+          && JSON.parse(record.first.requestHints['sec-ch-ua-platform'] || 'null') === wantedMetadata.platform;
+      } catch { record.firstRequestMatchesMetadata = false; }
+      try {
+        assertClientHintConsistency(surface, record.first.requestHints, wantedUa, phase);
+        record.requestAndFirstScriptConsistent = true;
+      } catch { record.requestAndFirstScriptConsistent = false; }
+      const current = unpack(await control.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
+      record.nativeFields = fields(current);
+      record.seedObserved = Object.hasOwn(device, 'canvasNoiseSeed') && Object.hasOwn(current, 'canvasNoiseSeed');
+      record.seedUnchanged = record.seedObserved ? digest(current.canvasNoiseSeed) === seedDigest : null;
+      record.status = 'observed-not-native-setter-or-product-acceptance';
+    } catch (error) {
+      record.status = 'control-unavailable';
+      record.errorReason = /timed?\s*out|timeout/i.test(String(error?.message || '')) ? 'timeout'
+        : /not found|wasn't found|not supported/i.test(String(error?.message || '')) ? 'method-unavailable'
+        : 'required-control-observation-unavailable';
+    } finally {
+      control?.close();
+      if (targetId) await browser.command('Target.closeTarget', {targetId}, {timeout: 5000}).catch(() => {});
+    }
+  }
+  // Independent CPU transport/fixture control on the owned original target.
+  // Neither this nor the UA controls certify the native setter or product.
   report.stage = 'cdp-cpu-control';
   const wantedCores = report.baseline.value.hardwareConcurrency === 2 ? 4 : 2;
   report.transportControl = {method: 'Emulation.setHardwareConcurrencyOverride', wantedCores};
