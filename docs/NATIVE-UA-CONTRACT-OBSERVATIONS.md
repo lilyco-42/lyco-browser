@@ -58,3 +58,30 @@ CPU 对照证实同一原生设置接口至少有一项能够生效。三个 UA 
 | 12512360329 | `438e3c59c78f408a96b4743d547f1f7122849da47b49dd06da71f3e1d7d59988` |
 
 本机找到的另一个 `lyco-fingerprint-browser` 包与这里运行的 `lyco-browser` 原生集成不能混用验收证据。以上也不能证明用户本机路线，或保证第三方服务不会检测、限制或关联账号。
+
+## 首次导航前的标准 CDP 对照
+
+[40092291440](https://github.com/lilyco-42/lyco-browser/actions/runs/40092291440)，源提交 `2f4891782438e98a11bb506b3de5bb3a458eafa8`，对同一固定 149 内核独立比较 Emulation、Network 及两者共同设置。每组新建空白目标、持有本目标连接，先完成设置并收到确认，再导航自有 loopback 页面；首次请求和首次脚本各采集一次。此前原生实验的结论不由这些标准 CDP 对照替代。
+
+| 观察 | Emulation | Network | 两者共同 |
+| --- | --- | --- | --- |
+| 设置先于首次导航 | 是 | 是 | 是 |
+| 请求 UA 匹配合成标记 | 是 | 是 | 是 |
+| 首段脚本 UA 匹配合成标记 | 否 | 否 | 否 |
+| 请求品牌匹配设置 | 否 | 否 | 否 |
+| 脚本品牌、完整版本、平台版本匹配设置 | 均否 | 均否 | 均否 |
+| 观察到的种子摘要改变 | 否 | 否 | 否 |
+
+实际品牌仍为 Chromium 149 与 Not)A;Brand 24，平台版本仍为 12.0.0。请求与脚本的 UA 字符串不同。原始 JSON 中 `requestAndFirstScriptConsistent:true` 只对应现有 Client Hints 验证器的检查范围，**不表示 UA 字符串一致，也不表示符合期望设置**；不能据此报告整体一致。原始证据保留原样。
+
+工件 `12559102964` 的 ZIP SHA-256 为 `06ef3cd08d8595d66d957016eeca0fd205fafa9edf7d4096d5fb63e641698a90`，与 Actions 元数据摘要核对一致。该任务成功仅表示观察完成；报告仍明确 `productAcceptance:false`。结果不支持把应用晚注入作为唯一原因，没有证明具体内核故障或授权条件。
+
+## 当前官方契约与 149 的版本边界
+
+2026-10-24 读取[官方分发元数据](https://donutbrowser.com/wayfern.json)，当前为 155.0.8059.79。该信息是分发状态，不是本产品已升级或通过验收的证据。
+
+官方应用源码固定到 [`16ba69ff5d18920af2662ffd0cd0f7a0cc7d6a51`](https://github.com/donutbrowser/donutbrowser/tree/16ba69ff5d18920af2662ffd0cd0f7a0cc7d6a51)，其 [wayfern_manager.rs](https://github.com/donutbrowser/donutbrowser/blob/16ba69ff5d18920af2662ffd0cd0f7a0cc7d6a51/src-tauri/src/wayfern_manager.rs#L372) 明确区分：151 新增 identity API，152 新增启动身份文件等契约，155 新增启动结果配置。源码仍保留旧完整设备的 setFingerprint 路径。因此不能把新版启动文件参数移植到 149，当作现有内核已支持的修复。
+
+[当前官方应用文档](https://donutbrowser.com/docs/profiles/)也提醒自定义值与其余设备信息不符可能导致问题；[官方远程浏览器说明](https://donutbrowser.com/docs/remote-browsers/)说明升级至 155 后存在旧版本无法重开配置的边界。这里没有升级用户配置、登录其账户、使用云端会话或获取新的授权凭据。网站的托管服务权限说明亦不等同于用户已确认的独立产品书面分发授权。
+
+下一步所需的具体契约证据：149 版本是否允许修改 brand、brandVersion、platformVersion，生效范围及正常授权条件；以及该版本是否承诺标准 CDP UA 字符串与 JS/Client Hints 同步。在此之前，不继续猜测参数或重复已否定的晚注入修复，不删掉失败断言，也不把默认值改成期望值来获得通过。如评估新内核，应使用独立的临时配置与单独门禁，不能覆盖现有用户配置。
