@@ -39,7 +39,7 @@ const fields = device => Object.fromEntries(['brand', 'brandVersion', 'platformV
   return [key, {present, type: typeof value, ...(present ? {digest: digest(value), ...(safe || safeCores ? {value} : {})} : {})}];
 }));
 const unpack = result => {
-  const raw = result?.fingerprint ?? result, value = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  const raw = result?.identity ?? result?.fingerprint ?? result, value = typeof raw === 'string' ? JSON.parse(raw) : raw;
   assert.ok(value && typeof value === 'object' && !Array.isArray(value));
   return value;
 };
@@ -96,7 +96,7 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const origin = 'http://127.0.0.1:' + server.address().port;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const exec = promisify(execFile);
-let child, browser, page;
+let child, browser, page, modernIdentityId;
 try {
   report.stage = 'hash-pinned-kernel';
   report.binarySha256 = await hashFile(binary);
@@ -163,11 +163,22 @@ try {
     const created = await page.command('Wayfern.createIdentity', {
       operatingSystem: 'windows', timezone: 'UTC', language: 'en-US',
     }, {timeout: 10000});
+    assert.match(created.identityId || '', /^[a-f0-9-]{36}$/i, 'Missing bounded temporary identity ID');
+    modernIdentityId = created.identityId;
     report.initialIdentity = {acknowledged: true,
       identityIdObserved: typeof created.identityId === 'string' && created.identityId.length > 0};
+    report.stage = 'activate-owned-temporary-identity';
+    await page.command('Wayfern.setIdentity', {identityId: modernIdentityId,
+      operatingSystem: 'windows', timezone: 'UTC', language: 'en-US'}, {timeout: 10000});
+    report.initialIdentity.activated = true;
   }
+  const readMethod = modernIdentityId ? 'Wayfern.getIdentity' : 'Wayfern.getFingerprint';
+  const writeMethod = modernIdentityId ? 'Wayfern.setIdentity' : 'Wayfern.setFingerprint';
+  const writeParams = overrides => modernIdentityId ? {identityId: modernIdentityId,
+    operatingSystem: 'windows', timezone: 'UTC', language: 'en-US', overrides} : overrides;
+  report.nativeMethods = {read: readMethod, write: writeMethod};
   report.stage = 'read-original-native-device';
-  const device = unpack(await page.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
+  const device = unpack(await page.command(readMethod, {}, {timeout: 5000}));
   report.originalFields = fields(device);
   const seedDigest = digest(device.canvasNoiseSeed ?? null);
   const actualVersion = /\/(\d+\.\d+\.\d+\.\d+)$/.exec(report.browserProduct)?.[1];
@@ -201,22 +212,23 @@ try {
   ]) {
     const eligible = Object.fromEntries(Object.entries(wanted).filter(([key]) => Object.hasOwn(device, key)
       && (key === 'hardwareConcurrency' ? Number.isInteger(device[key]) && device[key] > 0 && device[key] <= 256 : typeof device[key] === 'string')));
-    const record = {phase, payloadMode, changedKeys: Object.keys(eligible), omittedKeys: Object.keys(wanted).filter(key => !Object.hasOwn(eligible, key))};
+    const record = {phase, payloadMode: modernIdentityId ? 'documented-identity-overrides' : payloadMode,
+      changedKeys: Object.keys(eligible), omittedKeys: Object.keys(wanted).filter(key => !Object.hasOwn(eligible, key))};
     report.cases.push(record);
     if (!record.changedKeys.length) {record.status = 'no-supported-field-observed'; continue;}
     // Compare full-device restoration with the same API's optional scalar
     // parameters. Only disposable CI state is touched; seed changes are reported.
-    const candidate = payloadMode === 'declared-optional-fields' ? eligible : {...device, ...eligible};
+    const candidate = modernIdentityId || payloadMode === 'declared-optional-fields' ? eligible : {...device, ...eligible};
     report.stage = phase + ':apply-owned-temporary-device';
     try {
-      const response = unpack(await page.command('Wayfern.setFingerprint', candidate, {timeout: 5000}));
+      const response = unpack(await page.command(writeMethod, writeParams(candidate), {timeout: 5000}));
       record.acknowledged = true; record.responseFields = fields(response);
     } catch {
       // A rejected capability is retained, never treated as protection.
       record.status = 'native-command-rejected'; continue;
     }
     // A same-session read separates ignored edits from new-target propagation.
-    const samePage = unpack(await page.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
+    const samePage = unpack(await page.command(readMethod, {}, {timeout: 5000}));
     record.samePageFields = fields(samePage);
     record.samePageMatchesSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, samePage[key] === value]));
     report.stage = phase + ':observe-ordinary-new-target';
@@ -228,7 +240,7 @@ try {
     const targetEndpoint = new URL(target.webSocketDebuggerUrl);
     assert.equal(targetEndpoint.protocol, 'ws:'); assert.equal(targetEndpoint.hostname, '127.0.0.1');
     assert.equal(Number(targetEndpoint.port), port); assert.equal(targetEndpoint.username, ''); assert.equal(targetEndpoint.password, '');
-    const current = unpack(await cdp.call(target.webSocketDebuggerUrl, 'Wayfern.getFingerprint', {}, 5000));
+    const current = unpack(await cdp.call(target.webSocketDebuggerUrl, readMethod, {}, 5000));
     record.observedFields = fields(current);
     record.nativeFieldsMatchSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, current[key] === value]));
     if (Object.hasOwn(eligible, 'hardwareConcurrency')) record.firstScriptMatchesCpu = record.first.value.hardwareConcurrency === eligible.hardwareConcurrency;
@@ -247,7 +259,7 @@ try {
   // This is not the production auto-attach path or a Wayfern setter verdict.
   // Synthetic markers are CI-only; no document/prototype/score is modified.
   report.stage = 'restore-original-before-independent-cdp-controls';
-  await page.command('Wayfern.setFingerprint', device, {timeout: 5000});
+  await page.command(writeMethod, writeParams(modernIdentityId ? {} : device), {timeout: 5000});
   report.cdpUaControls = [];
   assert.equal(typeof device.userAgent, 'string', 'Original UA control input missing');
   assert.equal(typeof device.platform, 'string', 'Original platform control input missing');
@@ -318,7 +330,7 @@ try {
       record.requestAndFirstScriptUaConsistent = record.first.requestUserAgent === record.first.value.ua;
       record.requestAndFirstScriptConsistent = record.requestAndFirstScriptHintsConsistent
         && record.requestAndFirstScriptUaConsistent;
-      const current = unpack(await control.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
+      const current = unpack(await control.command(readMethod, {}, {timeout: 5000}));
       record.nativeFields = fields(current);
       record.seedObserved = Object.hasOwn(device, 'canvasNoiseSeed') && Object.hasOwn(current, 'canvasNoiseSeed');
       record.seedUnchanged = record.seedObserved ? digest(current.canvasNoiseSeed) === seedDigest : null;
