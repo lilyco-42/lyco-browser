@@ -1,6 +1,7 @@
 // Ordinary CI pages/workers read their own first-script values. No navigator,
 // native identity, canvas implementation, or application setting is patched.
 import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} from './browser-font-control.mjs';
+import {readBrowserPrivacySurfaces, captureClientHintHeaders} from './browser-privacy-surfaces.mjs';
 
 function readRealm(readFonts, family) {
   const draw = (offscreen, opaquePattern) => {
@@ -37,7 +38,8 @@ export function readOnlyConcurrentRealmSource() {
   return '(' + readRealm.toString() + ')(' + readFontControlMetrics.toString() + ',' + JSON.stringify(hostFontControlFamily) + ')';
 }
 
-function pageProbe(read, readLocal, family, phase) {
+function pageProbe(read, readLocal, family, phase, readSurfaces) {
+  const initialSurfaces = readSurfaces();
   const initial = read();
   const localFont = readLocal(family);
   const key = 'lyco_native_profile_storage';
@@ -45,14 +47,19 @@ function pageProbe(read, readLocal, family, phase) {
     .find(part => part.startsWith(key + '='))?.slice(key.length + 1) ?? null};
   const send = (kind, value) => fetch('/concurrent-report?phase=' + phase + '&kind=' + kind,
     {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(value)});
-  void localFont.then(face => {initial.fontControl.face = face; return send('page', {initial, before});});
+  void Promise.all([localFont, initialSurfaces]).then(([face, browserSurfaces]) => {
+    initial.fontControl.face = face; initial.browserSurfaces = browserSurfaces;
+    return send('page', {initial, before});
+  });
   document.getElementById('read-workers').onclick = async function () {
     this.disabled = true;
     const releaseButton = document.getElementById('release-workers');
     let dedicated, registration;
     try {
+      const currentSurfaces = readSurfaces();
       const current = read();
       current.fontControl.face = await readLocal(family);
+      current.browserSurfaces = await currentSurfaces;
       const firstDedicated = await new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(Error('Dedicated worker did not report')), 15000);
         dedicated = new Worker('/concurrent-worker.js?phase=' + phase + '&kind=dedicated');
@@ -108,21 +115,28 @@ export function createConcurrentBrowserFixture() {
     if (!['a-concurrent', 'b-concurrent'].includes(phase)) {res.writeHead(400); res.end(); return true;}
     const entry = observations.get(phase) || {requests: []}; observations.set(phase, entry);
     if (url.pathname === '/concurrent-probe') {
-      entry.pageProxied = Boolean(proxied);
+      entry.pageRequestCount = (entry.pageRequestCount || 0) + 1;
+      if (entry.pageRequestCount === 1) {
+        entry.pageProxied = Boolean(proxied);
+        entry.pageRequestClientHints = captureClientHintHeaders(req.headers);
+      }
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
       res.end('<!doctype html><meta charset="utf-8"><button id="read-workers">Read workers</button><button id="release-workers" disabled>Release workers</button><script>('
         + pageProbe.toString() + ')(()=>(' + readOnlyConcurrentRealmSource() + '),'
-        + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily) + ',' + JSON.stringify(phase) + ')</script>');
+        + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily) + ',' + JSON.stringify(phase)
+        + ',' + readBrowserPrivacySurfaces.toString() + ')</script>');
       return true;
     }
     const kind = url.searchParams.get('kind');
     if (url.pathname === '/concurrent-worker.js') {
       if (!['dedicated', 'service'].includes(kind)) {res.writeHead(400); res.end(); return true;}
-      entry.requests.push({kind, proxied: Boolean(proxied), language: req.headers['accept-language'] || ''});
+      entry.requests.push({kind, proxied: Boolean(proxied), language: req.headers['accept-language'] || '',
+        clientHints: captureClientHintHeaders(req.headers)});
       res.writeHead(200, {'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store'});
-      const first = 'const first=' + readOnlyConcurrentRealmSource() + ';const ready=('
+      const first = 'const surfaces=(' + readBrowserPrivacySurfaces.toString() + ')();const first='
+        + readOnlyConcurrentRealmSource() + ';const ready=Promise.all([('
         + readLocalFontControl.toString() + ')(' + JSON.stringify(hostFontControlFamily)
-        + ').then(face=>{first.fontControl.face=face;return first;});';
+        + '),surfaces]).then(([face,browserSurfaces])=>{first.fontControl.face=face;first.browserSurfaces=browserSurfaces;return first;});';
       res.end(first + (kind === 'service'
         ? 'self.addEventListener("install",event=>event.waitUntil(self.skipWaiting()));self.addEventListener("message",event=>event.waitUntil(ready.then(value=>event.ports[0]?.postMessage(value))));'
         : 'ready.then(value=>self.postMessage(value));'));
@@ -130,7 +144,7 @@ export function createConcurrentBrowserFixture() {
     }
     if (req.method !== 'POST' || !['page', 'workers', 'released'].includes(kind)) {res.writeHead(405); res.end(); return true;}
     let body = '';
-    req.on('data', chunk => {body += chunk; if (body.length > 8192) req.destroy();});
+    req.on('data', chunk => {body += chunk; if (body.length > 16384) req.destroy();});
     req.on('end', () => {
       try {
         entry[kind] = JSON.parse(body); entry[kind + 'ReportProxied'] = Boolean(proxied);

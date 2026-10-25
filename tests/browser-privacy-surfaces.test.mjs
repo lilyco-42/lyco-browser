@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {EventEmitter} from 'node:events';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
+import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
 import {readBrowserPrivacySurfaces, captureClientHintHeaders, parseBrandHeader, describeNativeUserAgentFields,
   assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
@@ -157,4 +158,70 @@ test('unavailable and timed-out adapters remain distinct and never become safe-n
   const stalled = await collect({gpu: {requestAdapter() {return new Promise(() => {});}}});
   assert.equal(stalled.webgpu.status, 'timeout');
   assert.equal(stalled.webgpu.value, undefined);
+});
+
+test('concurrent page and worker requests preserve original identity headers without copying credentials', () => {
+  const fixture = createConcurrentBrowserFixture();
+  const request = (url, values, proxied) => {
+    const req = {url, method: 'GET', headers: {host: '127.0.0.1:19876', ...values}};
+    assert.equal(fixture.route(req, {writeHead() {}, end() {}}, proxied), true);
+  };
+  request('/concurrent-probe?phase=a-concurrent', {...headers, cookie: 'private-cookie', authorization: 'private-token'}, false);
+  request('/concurrent-probe?phase=a-concurrent', {'user-agent': 'later'}, true);
+  for (const kind of ['dedicated', 'service']) {
+    request('/concurrent-worker.js?phase=a-concurrent&kind=' + kind,
+      {...headers, cookie: 'private-cookie', authorization: 'private-token'}, false);
+    request('/concurrent-worker.js?phase=a-concurrent&kind=' + kind, {'user-agent': 'later'}, true);
+  }
+  const entry = fixture.result('a-concurrent');
+  assert.equal(entry.pageRequestCount, 2);
+  assert.equal(entry.pageProxied, false);
+  assert.deepEqual(entry.pageRequestClientHints, headers);
+  for (const kind of ['dedicated', 'service']) {
+    const original = entry.requests.find(row => row.kind === kind);
+    assert.equal(original.proxied, false);
+    assert.deepEqual(original.clientHints, headers);
+    assert.equal(entry.requests.filter(row => row.kind === kind)[1].clientHints['user-agent'], 'later');
+  }
+  assert.doesNotMatch(JSON.stringify(entry), /private-cookie|private-token|authorization/);
+  fixture.clearWorkers('a-concurrent');
+  assert.deepEqual(entry.requests, []);
+  assert.deepEqual(entry.pageRequestClientHints, headers, 'Worker rounds must retain the original page request');
+});
+
+test('dedicated and service worker reports retain first-script UA while asynchronous reads finish', {timeout: 5000}, async () => {
+  for (const kind of ['dedicated', 'service']) {
+    const fixture = createConcurrentBrowserFixture();
+    let source;
+    fixture.route({url: '/concurrent-worker.js?phase=a-concurrent&kind=' + kind, method: 'GET',
+      headers: {host: '127.0.0.1:19876', ...headers}},
+    {writeHead() {}, end(value) {source = value;}}, true);
+    let currentUa = ua;
+    const navigator = {get userAgent() {return currentUa;}, language: 'en-GB', languages: ['en-GB', 'en'],
+      hardwareConcurrency: 6, deviceMemory: 4, webdriver: false,
+      userAgentData: {brands: low, mobile: false, platform: 'Windows', async getHighEntropyValues() {return high;}}};
+    const before = Object.getOwnPropertyDescriptors(navigator);
+    let resolveReport;
+    const report = new Promise(resolve => {resolveReport = resolve;});
+    const handlers = new Map();
+    const scope = {navigator, isSecureContext: true, setTimeout, clearTimeout,
+      OffscreenCanvas: class {
+        getContext() {return {fillRect() {}, beginPath() {}, arc() {}, fill() {},
+          getImageData() {return {data: [1, 2, 3, 255]};}, measureText(text) {return {width: text.length * 8};}};}
+      },
+      self: {postMessage: resolveReport, addEventListener(name, handler) {handlers.set(name, handler);}, skipWaiting() {}},
+    };
+    vm.runInNewContext(source, scope);
+    currentUa = 'late browser value';
+    if (kind === 'service') {
+      let delivery;
+      handlers.get('message')({ports: [{postMessage: resolveReport}], waitUntil(value) {delivery = value;}});
+      await delivery;
+    }
+    const value = JSON.parse(JSON.stringify(await report));
+    assert.equal(value.browserSurfaces.first.userAgent, ua, kind + ': delayed observation replaced the first-script value');
+    assert.deepEqual(value.browserSurfaces.highEntropy.value, high);
+    assertClientHintConsistency(value.browserSurfaces, headers, ua, kind);
+    assert.deepEqual(Object.getOwnPropertyDescriptors(navigator), before);
+  }
 });
