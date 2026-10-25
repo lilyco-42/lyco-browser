@@ -10,9 +10,9 @@ const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/149.0.0.0 Safari/53
 const low = [{brand: 'Chromium', version: '149'}, {brand: 'Not/A)Brand', version: '8'}];
 const high = {architecture: 'x86', bitness: '64', model: '', platformVersion: '19.0.0', wow64: false,
   fullVersionList: [{brand: 'Chromium', version: '149.0.7827.0'}, {brand: 'Not/A)Brand', version: '8.0.0.0'}]};
-const headers = {'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="149"',
+const headers = {'user-agent': ua, 'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="149"',
   'sec-ch-ua-platform': '"Windows"', 'sec-ch-ua-mobile': '?0'};
-const sample = () => ({schema: 1, first: {secureContext: true, webdriver: false,
+const sample = () => ({schema: 1, first: {secureContext: true, webdriver: false, userAgent: ua,
   clientHints: {status: 'observed', brands: structuredClone(low), mobile: false, platform: 'Windows'}},
   highEntropy: {status: 'observed', value: structuredClone(high)}, webgpu: {status: 'unsupported'}});
 
@@ -22,6 +22,18 @@ test('real Client Hint headers agree semantically with the first script and surv
   assert.deepEqual(assertClientHintConsistency(sample(), headers, ua, 'restart', snapshot), snapshot);
   assert.deepEqual(before, sample(), 'Validator must not rewrite observations');
   assert.deepEqual(captureClientHintHeaders({...headers, authorization: 'do-not-copy', cookie: 'private'}), headers);
+});
+
+test('matching Client Hints cannot hide a missing or contradictory first HTTP User-Agent', () => {
+  const wrong = {...headers, 'user-agent': ua.replace('149.0.0.0', '148.0.0.0')};
+  assert.throws(() => assertClientHintConsistency(sample(), wrong, ua, 'wrong-ua'), /first HTTP User-Agent/);
+  const missing = {...headers};delete missing['user-agent'];
+  assert.throws(() => assertClientHintConsistency(sample(), missing, ua, 'missing-ua'), /first HTTP User-Agent/);
+  const wrongScript = sample();wrongScript.first.userAgent = wrong['user-agent'];
+  assert.throws(() => assertClientHintConsistency(wrongScript, headers, ua, 'wrong-script'), /first script User-Agent/);
+  const missingScript = sample();delete missingScript.first.userAgent;
+  assert.throws(() => assertClientHintConsistency(missingScript, headers, ua, 'missing-script'), /first script User-Agent/);
+  assert.equal(wrong['user-agent'].includes('148.0.0.0'), true, 'A mismatch must remain unmodified');
 });
 
 test('missing, contradictory and incomplete surfaces cannot masquerade as passed observations', () => {
@@ -45,7 +57,7 @@ test('missing, contradictory and incomplete surfaces cannot masquerade as passed
 
 test('collector is standalone, bounded and read-only and records real adapter metadata', async () => {
   let calls = 0;
-  const navigator = {webdriver: false, userAgentData: {brands: low, mobile: false, platform: 'Windows',
+  const navigator = {webdriver: false, userAgent: ua, userAgentData: {brands: low, mobile: false, platform: 'Windows',
     async getHighEntropyValues() {return high;}}, gpu: {async requestAdapter() {
     calls++; return {info: {vendor: 'intel', architecture: 'xe', device: 'unit-device', description: 'CI adapter'}};
   }}};

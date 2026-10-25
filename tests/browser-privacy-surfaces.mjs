@@ -35,6 +35,7 @@ export async function readBrowserPrivacySurfaces() {
   })();
   // Capture low-entropy properties in the first synchronous script turn.
   const first = {observedAt: Date.now(), secureContext: globalThis.isSecureContext === true, clientHintShape: shape,
+    userAgent: typeof nav.userAgent === 'string' ? nav.userAgent.slice(0, 512) : null,
     webdriver: typeof nav.webdriver === 'boolean' ? nav.webdriver : null,
     clientHints: data ? {status: 'observed', brands: brands(data.brands),
       mobile: data.mobile, platform: text(data.platform)} : {status: 'unsupported'}};
@@ -64,7 +65,7 @@ export async function readBrowserPrivacySurfaces() {
 }
 
 export function captureClientHintHeaders(headers) {
-  return Object.fromEntries(['sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform']
+  return Object.fromEntries(['user-agent', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform']
     .map(name => [name, typeof headers[name] === 'string' ? headers[name].slice(0, 1024) : null]));
 }
 
@@ -114,6 +115,8 @@ export function parseBrandHeader(header) {
 // Unsupported/timeouts remain explicit and cannot satisfy this secure Chromium
 // Client Hints contract. WebGPU observations are retained, not called a pass.
 export function assertClientHintConsistency(surface, headers, userAgent, phase, prior) {
+  assert.equal(headers?.['user-agent'], userAgent, phase + ': first HTTP User-Agent differs from the expected first-script UA');
+  assert.equal(surface?.first?.userAgent, userAgent, phase + ': first script User-Agent differs from the configured UA');
   assert.equal(surface?.schema, 1, phase + ': missing surface report');
   assert.equal(surface.first?.secureContext, true, phase + ': secure-origin control missing');
   const low = surface.first.clientHints;
