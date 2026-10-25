@@ -1,0 +1,72 @@
+name: Official kernel archive inventory (no product execution)
+
+on:
+  push:
+    branches: [test/vendor-155-contract-20261025]
+    paths: ['.github/workflows/vendor-kernel-inventory.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendor-155-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  official-archive:
+    if: github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - name: Inventory the versioned official archive without running its contents
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $url='https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip'
+          $expectedEtag='"850106ce412545cde93a55c4902e28fb-191"'
+          $archive=Join-Path $env:RUNNER_TEMP 'wayfern-155.0.8059.79_windows_x64.zip'
+          $headers=Join-Path $env:RUNNER_TEMP 'wayfern-archive-headers.txt'
+          curl.exe --fail --location --proto '=https' --tlsv1.2 --max-time 600 --silent --show-error --dump-header $headers --output $archive $url
+          if($LASTEXITCODE -ne 0){throw 'Official archive download failed'}
+          $etags=[regex]::Matches((Get-Content -LiteralPath $headers -Raw),'(?im)^etag:\s*("[^"\r\n]{1,128}")\s*$')
+          if($etags.Count -eq 0 -or $etags[$etags.Count-1].Groups[1].Value -ne $expectedEtag){throw 'Official versioned object changed; review before execution'}
+          $file=Get-Item -LiteralPath $archive
+          if($file.Length -ne 1599626910){throw 'Official archive length changed'}
+          $report=@{
+            source=$env:GITHUB_SHA;run=$env:GITHUB_RUN_ID;diagnosticOnly=$true;productAcceptance=$false
+            executed=$false;version='155.0.8059.79';url=$url;etag=$expectedEtag;archiveBytes=$file.Length
+            archiveSha256=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+            binaries=@();entryCount=0;fontCount=0
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip=[IO.Compression.ZipFile]::OpenRead($archive)
+          try {
+            $report.entryCount=$zip.Entries.Count
+            foreach($entry in $zip.Entries){
+              $name=$entry.FullName.Replace('\','/')
+              if($name.StartsWith('/') -or $name.Contains(':') -or $name.Contains([char]0) -or ($name.Split('/') -contains '..')){throw 'Unsafe archive member path'}
+              if($name -match '\.(ttf|otf|woff2?)$'){$report.fontCount++}
+              if($name -match '(^|/)(chrome|wayfern)\.(exe|dll)$'){
+                $stream=$entry.Open()
+                $hasher=[Security.Cryptography.SHA256]::Create()
+                try {$hash=[Convert]::ToHexString($hasher.ComputeHash($stream)).ToLowerInvariant()}
+                finally {$hasher.Dispose();$stream.Dispose()}
+                $report.binaries+=@{path=$name;bytes=$entry.Length;sha256=$hash}
+              }
+            }
+          } finally {$zip.Dispose()}
+          if($report.binaries.Count -eq 0){throw 'No expected browser executable in official archive'}
+          $report | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath official-155-inventory.json -Encoding utf8
+          Write-Output 'LYCO_OFFICIAL_ARCHIVE_INVENTORY_BEGIN'
+          Get-Content -LiteralPath official-155-inventory.json -Raw | Write-Output
+          Write-Output 'LYCO_OFFICIAL_ARCHIVE_INVENTORY_END'
+      - name: Retain only public dependency metadata
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-155-inventory-${{ github.run_id }}
+          path: official-155-inventory.json
+          if-no-files-found: warn
+          retention-days: 7
