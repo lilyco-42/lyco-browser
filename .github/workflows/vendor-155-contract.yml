@@ -53,12 +53,36 @@ jobs:
           $expected='43925a0841c254f66289565cd1d65f7d783c1f1e40b2a77fd402253c59b3e8b1'
           if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected){throw 'Official archive SHA-256 mismatch'}
           $destination=Join-Path $env:RUNNER_TEMP 'lyco-vendor-155'
-          # Inventory compression without running archive contents. Use the .NET
-          # API directly so PowerShell cleanup cannot mask the original error.
+          # The official ZIP contains Windows-equivalent duplicate member names.
+          # Extract each path once, only after proving duplicates are identical.
           & 7z.exe l -slt $archive | Select-String '^Method = ' | Group-Object Line | Select-Object Count,Name | Format-Table -AutoSize
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           try {
-            [IO.Compression.ZipFile]::ExtractToDirectory($archive,$destination)
+            if(Test-Path -LiteralPath $destination){throw 'Diagnostic destination must be fresh'}
+            $seen=[Collections.Generic.Dictionary[string,string]]::new([StringComparer]::OrdinalIgnoreCase)
+            $duplicates=@()
+            $zip=[IO.Compression.ZipFile]::OpenRead($archive)
+            try {
+              foreach($entry in $zip.Entries){
+                $name=$entry.FullName.Replace('\','/')
+                if($name.StartsWith('/') -or $name.Contains(':') -or $name.Contains([char]0) -or ($name.Split('/') -contains '..') -or ($name.Split('/') -contains '.')){throw 'Unsafe archive member'}
+                $target=[IO.Path]::GetFullPath((Join-Path $destination $name))
+                if(-not $target.StartsWith($destination+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Archive member escaped temporary destination'}
+                if($name.EndsWith('/')){New-Item -ItemType Directory -Path $target -Force | Out-Null;continue}
+                $stream=$entry.Open();$hasher=[Security.Cryptography.SHA256]::Create()
+                try {$hash=[Convert]::ToHexString($hasher.ComputeHash($stream)).ToLowerInvariant()}
+                finally {$hasher.Dispose();$stream.Dispose()}
+                if($seen.ContainsKey($target)){
+                  if($seen[$target] -ne $hash){throw "Conflicting duplicate archive member: $name"}
+                  $duplicates+=@{path=$name;sha256=$hash};continue
+                }
+                $seen[$target]=$hash
+                New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force | Out-Null
+                [IO.Compression.ZipFileExtensions]::ExtractToFile($entry,$target,$false)
+              }
+            } finally {$zip.Dispose()}
+            Write-Output ('Identical duplicate members: '+$duplicates.Count)
+            $duplicates | ConvertTo-Json -Compress | Write-Output
           } catch {
             Write-Output ('Archive extraction exception: '+$_.Exception.ToString())
             try {
