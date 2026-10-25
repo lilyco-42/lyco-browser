@@ -43,6 +43,16 @@ const unpack = result => {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value));
   return value;
 };
+// Field names and types only. A protocol response can contain private identity
+// data; never retain arbitrary values merely to discover its response format.
+const answerShape = (value, depth = 0) => {
+  if (value === null) return {type: 'null'};
+  if (Array.isArray(value)) return {type: 'array', length: value.length};
+  if (typeof value !== 'object') return {type: typeof value};
+  return {type: 'object', fields: depth >= 2 ? undefined : Object.fromEntries(
+    Object.entries(value).filter(([key]) => /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(key))
+      .slice(0, 96).map(([key, entry]) => [key, answerShape(entry, depth + 1)]))};
+};
 // Public local protocol structure only: no descriptions, command responses,
 // credentials or browser-profile data are copied into this schema inventory.
 const schemaShape = (entry, depth = 0) => {
@@ -142,6 +152,9 @@ try {
     report.protocolParameterNotes = (domain?.commands?.find(value => value.name === 'setFingerprint')?.parameters || [])
       .filter(value => ['userAgent', 'platform', 'platformVersion', 'brand', 'brandVersion', 'hardwareConcurrency'].includes(value.name))
       .map(value => ({name: value.name, description: typeof value.description === 'string' ? value.description.slice(0, 2048) : null}));
+    const view = domain?.commands?.find(value => value.name === 'getIdentity')?.parameters?.find(value => value.name === 'view');
+    report.identityViewParameter = view ? {description: typeof view.description === 'string' ? view.description.slice(0, 2048) : null,
+      values: Array.isArray(view.enum) ? view.enum.filter(value => typeof value === 'string' && /^[A-Za-z_-]{1,48}$/.test(value)).slice(0, 16) : null} : null;
   } catch {
     report.protocolSchema = {status: 'unavailable-not-a-capability-verdict'};
   }
@@ -178,7 +191,10 @@ try {
     operatingSystem: 'windows', timezone: 'UTC', language: 'en-US', overrides} : overrides;
   report.nativeMethods = {read: readMethod, write: writeMethod};
   report.stage = 'read-original-native-device';
-  const device = unpack(await page.command(readMethod, {}, {timeout: 5000}));
+  const answer = await page.command(readMethod, {}, {timeout: 5000});
+  report.nativeAnswerShape = answerShape(answer);
+  report.identityReadMatchesCreated = modernIdentityId ? answer.identityId === modernIdentityId : null;
+  const device = unpack(answer);
   report.originalFields = fields(device);
   const seedDigest = digest(device.canvasNoiseSeed ?? null);
   const actualVersion = /\/(\d+\.\d+\.\d+\.\d+)$/.exec(report.browserProduct)?.[1];
@@ -199,6 +215,8 @@ try {
     assertClientHintConsistency(report.baseline.value.surfaces, report.baseline.requestHints, report.baseline.value.ua, 'baseline');
     report.baseline.requestAndFirstScriptHintsConsistent = true;
   } catch { report.baseline.requestAndFirstScriptHintsConsistent = false; }
+  report.requiredDeviceFieldsMissing = ['userAgent', 'platform'].filter(key => typeof device[key] !== 'string');
+  assert.equal(report.requiredDeviceFieldsMissing.length, 0, 'Required native device fields missing');
   for (const [phase, wanted, payloadMode = 'whole-device'] of [
     ['native-cpu-control', {hardwareConcurrency: device.hardwareConcurrency === 2 ? 4 : 2}],
     ['platform-only', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}],
