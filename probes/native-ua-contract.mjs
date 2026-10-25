@@ -155,10 +155,24 @@ try {
   const endpoint = new URL(initial.webSocketDebuggerUrl);
   assert.equal(endpoint.hostname, '127.0.0.1'); assert.equal(Number(endpoint.port), port);
   page = await new cdp.PersistentConnection(initial.webSocketDebuggerUrl).open(5000);
+  if (kernelMode === 'official-155') {
+    // The vendor's 151+ flow creates an identity before reading its device.
+    // Use the documented anonymous path, without a token or entitlement claim.
+    // Any refusal remains a failure; never manufacture a stored identity.
+    report.stage = 'create-owned-temporary-identity';
+    const created = await page.command('Wayfern.createIdentity', {
+      operatingSystem: 'windows', timezone: 'UTC', language: 'en-US',
+    }, {timeout: 10000});
+    report.initialIdentity = {acknowledged: true,
+      identityIdObserved: typeof created.identityId === 'string' && created.identityId.length > 0};
+  }
   report.stage = 'read-original-native-device';
   const device = unpack(await page.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
   report.originalFields = fields(device);
   const seedDigest = digest(device.canvasNoiseSeed ?? null);
+  const actualVersion = /\/(\d+\.\d+\.\d+\.\d+)$/.exec(report.browserProduct)?.[1];
+  assert.ok(actualVersion, 'Expected a bounded browser version for the synthetic controls');
+  const major = actualVersion.split('.')[0], markerVersion = major + '.0.0.0';
   const waitObservation = async phase => {
     const limit = Date.now() + 15000;
     while (Date.now() < limit && !observations.get(phase)?.value) await sleep(50);
@@ -177,9 +191,9 @@ try {
   for (const [phase, wanted, payloadMode = 'whole-device'] of [
     ['native-cpu-control', {hardwareConcurrency: device.hardwareConcurrency === 2 ? 4 : 2}],
     ['platform-only', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}],
-    ['selected-brand', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}],
+    ['selected-brand', {brand: 'Google Chrome', brandVersion: markerVersion, platformVersion: '15.0.0'}],
     ['platform-delta', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}, 'declared-optional-fields'],
-    ['brand-delta', {brand: 'Google Chrome', brandVersion: '149.0.0.0', platformVersion: '15.0.0'}, 'declared-optional-fields'],
+    ['brand-delta', {brand: 'Google Chrome', brandVersion: markerVersion, platformVersion: '15.0.0'}, 'declared-optional-fields'],
     // Obvious synthetic markers distinguish a working configurable UA/platform
     // from the UA-metadata fields; they are not intended to resemble a real user.
     ['ua-marker-delta', {userAgent: String(device.userAgent).slice(0, 320) + ' LYCO-Contract-Control/1.0'}, 'declared-optional-fields'],
@@ -223,7 +237,8 @@ try {
       record.firstRequestMatchesUa = record.first.requestUserAgent === eligible.userAgent;
     }
     if (Object.hasOwn(eligible, 'platform')) record.firstScriptMatchesPlatform = record.first.value.platform === eligible.platform;
-    record.seedUnchanged = digest(current.canvasNoiseSeed ?? null) === seedDigest;
+    record.seedObserved = Object.hasOwn(device, 'canvasNoiseSeed') && Object.hasOwn(current, 'canvasNoiseSeed');
+    record.seedUnchanged = record.seedObserved ? digest(current.canvasNoiseSeed) === seedDigest : null;
     record.status = 'observed-not-product-acceptance';
     await browser.command('Target.closeTarget', {targetId: created.targetId}, {timeout: 5000});
   }
@@ -238,9 +253,9 @@ try {
   assert.equal(typeof device.platform, 'string', 'Original platform control input missing');
   const wantedUa = String(device.userAgent).slice(0, 320) + ' LYCO-CDP-Contract-Control/1.0';
   const wantedMetadata = {
-    brands: [{brand: 'Chromium', version: '149'}, {brand: 'LYCO Contract Control', version: '149'}],
-    fullVersionList: [{brand: 'Chromium', version: '149.0.7827.114'},
-      {brand: 'LYCO Contract Control', version: '149.0.0.0'}],
+    brands: [{brand: 'Chromium', version: major}, {brand: 'LYCO Contract Control', version: major}],
+    fullVersionList: [{brand: 'Chromium', version: actualVersion},
+      {brand: 'LYCO Contract Control', version: markerVersion}],
     platform: 'Windows', platformVersion: '15.0.0', architecture: 'x86',
     model: '', mobile: false, bitness: '64', wow64: false,
   };
@@ -337,9 +352,19 @@ try {
   report.stage = 'observations-complete';
 } catch (error) {
   report.status = 'probe-failed'; report.errorType = ['AssertionError', 'Error', 'TypeError'].includes(error?.name) ? error.name : 'other';
+  const message = String(error?.message || '');
+  // Only fixed public error-code tokens/categories, never arbitrary CDP text.
+  report.errorCodes = [...new Set(message.match(/\bWAYFERN_[A-Z0-9_]{2,64}\b/g) || [])].slice(0, 8);
+  report.errorCategorySignals = {
+    authorization: /license|licence|authoriz|permission|entitlement|token|login|sign.in/i.test(message),
+    noActiveIdentity: /no.*fingerprint|fingerprint.*not|no.*identity|identity.*not|not.*initializ/i.test(message),
+    connectionClosed: /closed|disconnect/i.test(message),
+    invalidParameters: /invalid.*param|invalid.*argument/i.test(message),
+  };
   report.errorReason = /timed?\s*out|timeout/i.test(String(error?.message || '')) ? 'timeout'
     : /not found|wasn't found|unknown method|not supported/i.test(String(error?.message || '')) ? 'method-unavailable'
-    : /license|licence|authoriz|permission/i.test(String(error?.message || '')) ? 'authorization'
+    : report.errorCategorySignals.authorization ? 'authorization'
+    : report.errorCategorySignals.noActiveIdentity ? 'no-active-identity'
     : /assert|missing|No bounded/i.test(String(error?.message || '')) ? 'required-observation-missing' : 'other';
   process.exitCode = 1;
 } finally {
