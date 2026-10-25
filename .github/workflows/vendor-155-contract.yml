@@ -1,0 +1,86 @@
+name: Official 155 isolated native contract (not product acceptance)
+
+on:
+  push:
+    branches: [test/vendor-155-contract-20261025]
+    paths: ['probes/native-ua-contract.mjs', '.github/workflows/vendor-155-contract.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendor-155-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-155-contract:
+    if: github.repository == 'lilyco-42/lyco-browser' && github.actor == github.repository_owner
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lyco
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: sheying2013/OpenBrowser
+          ref: 5fa3b9d0bd218a948da15820b35fe598c362eba0
+          path: upstream
+          persist-credentials: false
+          sparse-checkout: |
+            /Browserapp/cdp.js
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate probe syntax and read-only collection contracts
+        shell: pwsh
+        run: |
+          node --check lyco/probes/native-ua-contract.mjs
+          if($LASTEXITCODE -ne 0){exit 1}
+          node --test lyco/tests/browser-privacy-surfaces.test.mjs
+          if($LASTEXITCODE -ne 0){exit 1}
+      - name: Verify and extract the inventoried official dependency only in runner temp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $archive=Join-Path $env:RUNNER_TEMP 'wayfern-155.0.8059.79_windows_x64.zip'
+          curl.exe --fail --location --proto '=https' --tlsv1.2 --max-time 600 --silent --show-error --output $archive https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip
+          if($LASTEXITCODE -ne 0){throw 'Official archive download failed'}
+          # Measured in independent public inventory run 40176505301 before execution.
+          $expected='43925a0841c254f66289565cd1d65f7d783c1f1e40b2a77fd402253c59b3e8b1'
+          if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected){throw 'Official archive SHA-256 mismatch'}
+          $destination=Join-Path $env:RUNNER_TEMP 'lyco-vendor-155'
+          Expand-Archive -LiteralPath $archive -DestinationPath $destination
+          $binary=Join-Path $destination 'wayfern-155.0.8059.79_windows_x64/chrome.exe'
+          $library=Join-Path (Split-Path $binary) 'chrome.dll'
+          if((Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant() -ne '1b49fdb3b79de9427b247e0c6bb41a8668e5f7b75ba0da39e6d5518cb2cb25e3'){throw 'Official executable SHA-256 mismatch'}
+          if((Get-FileHash -LiteralPath $library -Algorithm SHA256).Hash.ToLowerInvariant() -ne '7309262853663eb58a9d8b018ad8844808b101eca92f6c4fe7c7dd847c6d0c17'){throw 'Official library SHA-256 mismatch'}
+          "LYCO_VENDOR_155_BINARY=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Observe the new kernel in a fresh CI-only profile
+        shell: pwsh
+        env:
+          LYCO_UA_PROBE_KERNEL: official-155
+        run: |
+          node lyco/probes/native-ua-contract.mjs upstream/Browserapp native-ua-evidence $env:LYCO_VENDOR_155_BINARY
+          if($LASTEXITCODE -ne 0){exit 1}
+      - name: Retain bounded raw observations in logs
+        if: always()
+        shell: pwsh
+        run: |
+          $file='native-ua-evidence/native-ua-contract.json'
+          if(Test-Path -LiteralPath $file){
+            Write-Output 'LYCO_NATIVE_155_OBSERVATIONS_BEGIN'
+            Get-Content -LiteralPath $file -Raw | Write-Output
+            Write-Output 'LYCO_NATIVE_155_OBSERVATIONS_END'
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: official-155-contract-${{ github.run_id }}
+          path: native-ua-evidence/native-ua-contract.json
+          if-no-files-found: warn
+          retention-days: 7

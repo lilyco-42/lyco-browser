@@ -15,7 +15,14 @@ import {readBrowserPrivacySurfaces, captureClientHintHeaders, parseBrandHeader,
 if (process.env.GITHUB_ACTIONS !== 'true' || process.platform !== 'win32') throw Error('Disposable Windows Actions probe only');
 const appRoot = path.resolve(process.argv[2]), output = path.resolve(process.argv[3]);
 await fs.mkdir(output, {recursive: true});
-const binary = path.join(appRoot, 'kernels/windows-x64/chrome.exe');
+const kernelMode = process.env.LYCO_UA_PROBE_KERNEL || 'pinned-upstream-149';
+assert.ok(['pinned-upstream-149', 'official-155'].includes(kernelMode), 'Unknown diagnostic kernel');
+const binary = process.argv[4] ? path.resolve(process.argv[4]) : path.join(appRoot, 'kernels/windows-x64/chrome.exe');
+if (kernelMode === 'official-155') {
+  assert.ok(process.argv[4] && process.env.RUNNER_TEMP, 'Official diagnostic needs a disposable runner path');
+  const relative = path.relative(path.resolve(process.env.RUNNER_TEMP), binary);
+  assert.ok(relative && !relative.startsWith('..') && !path.isAbsolute(relative), 'Kernel must remain in runner temp');
+}
 const cdp = createRequire(path.join(appRoot, 'package.json'))('./cdp.js');
 const root = await fs.mkdtemp(path.join(os.tmpdir(), 'lyco-ua-contract-'));
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -54,7 +61,7 @@ const schemaShape = (entry, depth = 0) => {
 const observations = new Map();
 const report = {commit: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID,
   upstream: '5fa3b9d0bd218a948da15820b35fe598c362eba0', diagnosticOnly: true,
-  productAcceptance: false, externalAccounts: false, cases: []};
+  kernelMode, productAcceptance: false, externalAccounts: false, cases: []};
 const phases = new Set(['baseline', 'native-cpu-control', 'platform-only', 'selected-brand',
   'platform-delta', 'brand-delta', 'ua-marker-delta', 'platform-marker-delta', 'cdp-cpu-control',
   'cdp-ua-emulation-control', 'cdp-ua-network-control', 'cdp-ua-both-control']);
@@ -128,7 +135,7 @@ try {
     const protocol = JSON.parse(Buffer.concat(chunks).toString('utf8'));
     const domain = protocol.domains?.find(value => value.domain === 'Wayfern');
     report.protocolSchema = {status: 'observed', nativeDomainPresent: Boolean(domain),
-      methods: (domain?.commands || []).filter(value => ['getFingerprint', 'setFingerprint'].includes(value.name)).map(value => schemaShape(value)),
+      methods: (domain?.commands || []).filter(value => ['getFingerprint', 'setFingerprint', 'createIdentity', 'getIdentity', 'setIdentity'].includes(value.name)).map(value => schemaShape(value)),
       // A missing published schema does not imply the executable lacks a command.
       types: (domain?.types || []).filter(value => /fingerprint|device/i.test(value.id || '')).slice(0, 16).map(value => schemaShape(value))};
     // Documentation from the executable's public protocol, not runtime state.
@@ -139,6 +146,10 @@ try {
     report.protocolSchema = {status: 'unavailable-not-a-capability-verdict'};
   }
   browser = await new cdp.PersistentConnection(`ws://127.0.0.1:${port}${browserPath}`).open(5000);
+  const version = await browser.command('Browser.getVersion', {}, {timeout: 5000});
+  report.browserProduct = typeof version.product === 'string' && /^[A-Za-z0-9. /_-]{1,100}$/.test(version.product)
+    ? version.product : 'unavailable';
+  if (kernelMode === 'official-155') assert.match(report.browserProduct, /155\.0\.8059\.79$/, 'Unexpected diagnostic browser version');
   const initial = (await cdp.tabs(port)).find(tab => tab.type === 'page' && tab.url === 'about:blank');
   assert.ok(initial?.webSocketDebuggerUrl);
   const endpoint = new URL(initial.webSocketDebuggerUrl);
@@ -158,6 +169,11 @@ try {
   await page.command('Page.enable', {}, {timeout: 5000});
   await page.command('Page.navigate', {url: origin + '/probe?phase=baseline'}, {timeout: 5000});
   report.baseline = await waitObservation('baseline');
+  report.baseline.requestAndFirstScriptUaConsistent = report.baseline.requestUserAgent === report.baseline.value.ua;
+  try {
+    assertClientHintConsistency(report.baseline.value.surfaces, report.baseline.requestHints, report.baseline.value.ua, 'baseline');
+    report.baseline.requestAndFirstScriptHintsConsistent = true;
+  } catch { report.baseline.requestAndFirstScriptHintsConsistent = false; }
   for (const [phase, wanted, payloadMode = 'whole-device'] of [
     ['native-cpu-control', {hardwareConcurrency: device.hardwareConcurrency === 2 ? 4 : 2}],
     ['platform-only', {platformVersion: device.platformVersion === '15.0.0' ? '14.0.0' : '15.0.0'}],
@@ -282,8 +298,11 @@ try {
       } catch { record.firstRequestMatchesMetadata = false; }
       try {
         assertClientHintConsistency(surface, record.first.requestHints, wantedUa, phase);
-        record.requestAndFirstScriptConsistent = true;
-      } catch { record.requestAndFirstScriptConsistent = false; }
+        record.requestAndFirstScriptHintsConsistent = true;
+      } catch { record.requestAndFirstScriptHintsConsistent = false; }
+      record.requestAndFirstScriptUaConsistent = record.first.requestUserAgent === record.first.value.ua;
+      record.requestAndFirstScriptConsistent = record.requestAndFirstScriptHintsConsistent
+        && record.requestAndFirstScriptUaConsistent;
       const current = unpack(await control.command('Wayfern.getFingerprint', {}, {timeout: 5000}));
       record.nativeFields = fields(current);
       record.seedObserved = Object.hasOwn(device, 'canvasNoiseSeed') && Object.hasOwn(current, 'canvasNoiseSeed');
