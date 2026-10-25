@@ -1,0 +1,49 @@
+name: Native UA contract observations (not product acceptance)
+
+on:
+  push:
+    branches: [main, test/browser-privacy-surface-coverage-20261023]
+    paths: ['probes/native-ua-contract.mjs', '.github/workflows/native-ua-contract.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-native-contract:
+    if: github.repository == 'lilyco-42/lyco-browser'
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lyco
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: sheying2013/OpenBrowser
+          ref: 5fa3b9d0bd218a948da15820b35fe598c362eba0
+          path: upstream
+          lfs: true
+          persist-credentials: false
+          sparse-checkout: |
+            /Browserapp/kernels/windows-x64/
+            /Browserapp/cdp.js
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Observe fixed kernel in a disposable profile
+        shell: pwsh
+        run: |
+          node --check lyco/probes/native-ua-contract.mjs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          node lyco/probes/native-ua-contract.mjs upstream/Browserapp native-ua-evidence
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-ua-contract-${{ github.run_id }}-${{ github.run_attempt }}
+          path: native-ua-evidence/native-ua-contract.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -7,7 +7,8 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
   Object.defineProperty(records, 'nativeCalls', {value: nativeCalls});
   const startupReadiness = [];
   Object.defineProperty(records, 'startupReadiness', {value: startupReadiness});
-  const nativeMethods = new Set(['Wayfern.getFingerprint', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
+  const nativeMethods = new Set(['Wayfern.getFingerprint', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride',
+    'Emulation.setUserAgentOverride', 'Network.setUserAgentOverride']);
   const reasonFor = error => {
     const message = String(error?.message || '');
     return /timed?\s*out|timeout/i.test(message) ? 'timeout'
@@ -93,7 +94,7 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
     }});
     const command = connection.command;
     connection.command = async function (method, params, options) {
-      if (!['Target.setAutoAttach', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
+      if (!nativeMethods.has(method) && !['Target.setAutoAttach', 'Page.enable', 'Runtime.enable', 'Page.addScriptToEvaluateOnNewDocument', 'Runtime.runIfWaitingForDebugger', 'Target.closeTarget'].includes(method)) {
         return command.call(this, method, params, options);
       }
       const event = {kind: 'command', method, session: id(options?.sessionId), startedAt: Date.now(), done: false, failed: false};

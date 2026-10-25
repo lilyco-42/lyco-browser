@@ -30,6 +30,7 @@ jobs:
           node --test tests/diagnostics-controller.test.js
           node --test tests/release-preview.test.js
           node --test tests/browser-webgl-identity.test.mjs
+          node --test tests/browser-privacy-surfaces.test.mjs
 
   windows-x64:
     needs: integration-guards

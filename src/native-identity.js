@@ -66,6 +66,14 @@ function pageTargets(tabs, port) {
 
 function declaredSettings(settings = {}) {
   const result = {};
+  for (const key of ['userAgent', 'platform']) {
+    if (settings[key] === undefined) continue;
+    const value = settings[key];
+    if (typeof value !== 'string' || !value.trim() || value.length > 512 || /[\x00-\x1f\x7f]/.test(value)) {
+      throw Error('环境浏览器标识配置无效，原生身份未应用');
+    }
+    result[key] = value;
+  }
   if (settings.languages !== undefined) {
     if (!Array.isArray(settings.languages) || !settings.languages.length || settings.languages.length > 16
         || settings.languages.some(value => typeof value !== 'string' || !value.length || value.length > 64 || /[^A-Za-z0-9-]/.test(value))) {
@@ -111,12 +119,15 @@ function hasNativeFontInventory(fonts) {
       && family.length <= 256 && !/[\x00-\x1f\x7f]/.test(family));
 }
 
-async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false, requireNativeFontLayout = false}) {
+async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp, refresh = false, settings, deferredRestore = false, requireNativeFontLayout = false, preserveNativeClientHints = false, clientHintOverrides = {}}) {
   if (!enabled) {
     if (requireNativeFontLayout) throw Error('一致布局保护需要支持原生字体隔离的内核，环境未启动');
     return null; // Stock Chromium and legacy kernels retain their own path.
   }
   const declared = declaredSettings(settings);
+  if (preserveNativeClientHints && Object.keys(clientHintOverrides).some(key => key !== 'os')) {
+    throw Error('当前内核无法确认自定义浏览器版本信息，环境未启动；请移除 Client Hints 自定义项');
+  }
   if (!/^[A-Za-z0-9_-]{1,120}$/.test(profileId || '') || !path.isAbsolute(profileRoot || '')
       || !Number.isInteger(port) || port < 1024 || port > 65535) throw Error('原生身份环境参数无效');
   const root = await fs.realpath(profileRoot);
@@ -138,6 +149,21 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // Retain the complete saved device/noise and its original cache bytes. These
   // explicit UI settings must agree in the native engine and document script;
   // otherwise a new document initially exposes the saved device's defaults.
+  if (preserveNativeClientHints) {
+    const major = String(device.brandVersion || '').match(/^(\d+)(?:\.\d+){0,3}$/)?.[1];
+    const ua = declared.userAgent || device.userAgent;
+    const uaMajor = typeof ua === 'string' ? ua.match(/Chrome\/(\d+)\./)?.[1] : null;
+    const family = value => /windows nt|win32|win64/i.test(value || '') ? 'windows'
+      : /macintosh|macintel/i.test(value || '') ? 'macos'
+        : /android/i.test(value || '') ? 'android' : /linux/i.test(value || '') ? 'linux' : null;
+    const nativeFamily = family(device.platform);
+    if (!major || uaMajor !== major || !nativeFamily || family(ua) !== nativeFamily
+        || family(declared.platform || device.platform) !== nativeFamily
+        || !/^(Chromium|Google Chrome|Chrome|Microsoft Edge)$/.test(device.brand || '')
+        || !/^\d+(?:\.\d+){0,3}$/.test(device.platformVersion || '')) {
+      throw Error('环境 UA 与内核原生版本或系统不一致，环境未启动；请使用当前内核对应的浏览器配置');
+    }
+  }
   device = {...device, ...declared};
   const fontInventoryAvailable = hasNativeFontInventory(device.fonts);
   if (requireNativeFontLayout && !fontInventoryAvailable) {
@@ -196,7 +222,8 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   const ownsHtmlCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
     && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
   return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'),
-    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession};
+    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable,
+    preserveNativeClientHints, userAgent: device.userAgent, apply, applySession};
 }
 
 function nativeCanvasFingerprint(value, identity) {
@@ -208,7 +235,13 @@ function nativeCanvasFingerprint(value, identity) {
 }
 
 function nativeRuntimeFingerprint(value, identity) {
-  const result = nativeCanvasFingerprint(value, identity);
+  let result = nativeCanvasFingerprint(value, identity);
+  if (identity?.preserveNativeClientHints === true) {
+    if (!result?.uaProfile || result.uaProfile.userAgent !== identity.userAgent) {
+      throw Error('页面浏览器标识与原生身份不一致，页面未放行');
+    }
+    result = {...result, uaProfile: {...result.uaProfile, preserveNativeClientHints: true}};
+  }
   if (result?.clientRects?.mode !== 'native') return result;
   if (identity?.hasNativeFontInventory !== true) {
     throw Error('一致布局保护缺少原生字体配置，页面未放行');

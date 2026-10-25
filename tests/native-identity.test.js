@@ -19,6 +19,52 @@ async function fixture(t) {
   return {root, tabs, calls, cdp, args: {enabled: true, profileRoot: root, profileId: 'owner-profile', port: 19341, cdp}};
 }
 
+test('native Client Hints retain their actual full version while an explicit reduced UA is applied', async t => {
+  const f = await fixture(t);
+  const saved = {userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/149.0.7827.114',
+    platform: 'Win32', brand: 'Chromium', brandVersion: '149', platformVersion: '12.0.0',
+    canvasNoiseSeed: 42, unknownNoise: {keep: true}};
+  f.cdp.call = async (target, method, params) => {f.calls.push({target, method, params});
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: saved} : {};};
+  const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/149.0.0.0';
+  const identity = await prepareNativeIdentity({...f.args, preserveNativeClientHints: true, settings: {userAgent: ua, platform: 'Win32'}});
+  const sent = f.calls.find(row => row.method === 'Wayfern.setFingerprint').params;
+  assert.equal(sent.userAgent, ua);
+  assert.equal(sent.brandVersion, saved.brandVersion);
+  assert.equal(sent.canvasNoiseSeed, 42);
+  assert.deepEqual(sent.unknownNoise, saved.unknownNoise);
+  const fp = {userAgent: ua, uaProfile: {userAgent: ua, metadata: {generated: true}}, canvas: {mode: 'noise'}};
+  const runtime = nativeRuntimeFingerprint(fp, identity);
+  assert.equal(runtime.uaProfile.preserveNativeClientHints, true);
+  assert.equal(fp.uaProfile.preserveNativeClientHints, undefined);
+  assert.equal(runtime.uaProfile.metadata, fp.uaProfile.metadata, 'Do not invent replacement native metadata');
+  assert.throws(() => nativeRuntimeFingerprint({...fp, uaProfile: {userAgent: 'different'}}, identity), /不一致/);
+  const stored = JSON.parse(await fs.readFile(path.join(f.root, 'lyco-native-identity-owner-profile.json')));
+  assert.deepEqual(stored.fingerprint, saved, 'Runtime UA selection must not rewrite saved identity or noise');
+});
+
+test('native Client Hints refuse explicit unsupported metadata before accessing an identity', async t => {
+  const f = await fixture(t);
+  await assert.rejects(prepareNativeIdentity({...f.args, preserveNativeClientHints: true,
+    clientHintOverrides: {platform_version: '15.0.0'}}), /自定义浏览器版本/);
+  assert.equal(f.calls.length, 0);
+  for (const settings of [{userAgent: 'bad\nua'}, {platform: ''}, {userAgent: 'x'.repeat(513)}]) {
+    await assert.rejects(prepareNativeIdentity({...f.args, settings}), /配置无效/);
+  }
+  assert.equal(f.calls.length, 0);
+});
+
+test('native Client Hints reject incompatible major versions and operating systems', async t => {
+  const f = await fixture(t);
+  const device = {userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/149.0.7827.114',
+    platform: 'Win32', brand: 'Chromium', brandVersion: '149.0.7827.114', platformVersion: '12.0.0'};
+  f.cdp.call = async (_target, method) => method === 'Wayfern.getFingerprint' ? {fingerprint: device} : {};
+  for (const userAgent of ['Mozilla/5.0 (Windows NT 10.0) Chrome/148.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/149.0.0.0']) {
+    await assert.rejects(prepareNativeIdentity({...f.args, preserveNativeClientHints: true, settings: {userAgent}}), /UA 与内核/);
+  }
+});
+
 test('native layout requires a supported kernel and a valid complete font inventory', async t => {
   const f = await fixture(t);
   await assert.rejects(prepareNativeIdentity({...f.args, enabled: false, requireNativeFontLayout: true}), /需要支持原生字体隔离/);

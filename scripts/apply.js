@@ -71,6 +71,42 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
+// A reduced UA string is compatible with the kernel's unreduced Client Hints.
+// Keep that native interface and its request headers together, rather than
+// deriving competing full versions/brands in a document-start script.
+one('automation/user-agent.js', '    userAgent: uaProfile.userAgent,\n    appVersion: uaProfile.appVersion,',
+ '    preserveNativeClientHints: uaProfile.preserveNativeClientHints === true,\n    userAgent: uaProfile.userAgent,\n    appVersion: uaProfile.appVersion,');
+one('automation/user-agent.js', '  // userAgentData (Client Hints JS API)\n  try {',
+ '  // userAgentData (Client Hints JS API)\n  if (!U.preserveNativeClientHints) try {');
+one('automation/user-agent.js', '  const cleanLang = formatAcceptLanguage(acceptLanguage);\n  return {', join(
+ '  const cleanLang = formatAcceptLanguage(acceptLanguage);',
+ '  if (uaProfile.preserveNativeClientHints) return {userAgent: uaProfile.userAgent, acceptLanguage: cleanLang || undefined, platform: uaProfile.platform};',
+ '  return {'));
+one('engine.js', '    this.persona = {\n      userAgent: override.userAgent || uaProfile.userAgent || ua,',
+ '    this.persona = {\n      preserveNativeClientHints: uaProfile.preserveNativeClientHints === true,\n      userAgent: override.userAgent || uaProfile.userAgent || ua,');
+one('engine.js', '            lk.startsWith("sec-ch-ua")',
+ '            (!this.persona.preserveNativeClientHints && lk.startsWith("sec-ch-ua"))');
+one('engine.js', '        if (!isIos) {\n          if (this.secChUa) {',
+ '        if (!isIos && !this.persona.preserveNativeClientHints) {\n          if (this.secChUa) {');
+for (const method of ['Network', 'Emulation']) {
+ one('engine.js', join('                await connection.command(\''+method+'.setUserAgentOverride\', {',
+  '                  userAgent: workerUa.userAgent,', '                  acceptLanguage: workerUa.acceptLanguage,',
+  '                  platform: workerUa.platformNav || workerUa.platform,', '                  userAgentMetadata: workerUa.metadata,'),
+  join('                await connection.command(\''+method+'.setUserAgentOverride\', {',
+  '                  userAgent: workerUa.userAgent,', '                  acceptLanguage: workerUa.acceptLanguage,',
+  '                  platform: workerUa.platformNav || workerUa.platform,',
+  '                  userAgentMetadata: workerUa.preserveNativeClientHints ? undefined : workerUa.metadata,'));
+}
+// Workers have a separate UAData generator. Preserve the native interface in
+// this path too; guarding only the document script leaves conflicting brands
+// and full platform/browser versions in Dedicated/Service Worker globals.
+one('automation/fingerprint.js', '    userAgentMetadata: fp.userAgentMetadata,\n    languages: fp.languages,',
+ '    preserveNativeClientHints: fp.uaProfile?.preserveNativeClientHints === true,\n    userAgentMetadata: fp.userAgentMetadata,\n    languages: fp.languages,');
+one('automation/fingerprint.js', '      const metadata = CFG.userAgentMetadata || {};',
+ '      if (!CFG.preserveNativeClientHints) {\n      const metadata = CFG.userAgentMetadata || {};');
+one('automation/fingerprint.js',
+ '      } catch (_) {}\n    }\n  } catch (_) {}\n\n  // Same guard as the page copy:',
+ '      } catch (_) {}\n      }\n    }\n  } catch (_) {}\n\n  // Same guard as the page copy:');
 for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
@@ -344,9 +380,15 @@ one('engine.js', '      item.startUrl = startUrl;', join(
  '        item.lycoNativeIdentity = await prepareNativeIdentity({',
  '          enabled: isWayfernKernel(browser), profileRoot: root, profileId: profile.id,',
  '          port: item.port, cdp, refresh: allowSeedRefresh,',
+ '          preserveNativeClientHints: true,',
+ '          clientHintOverrides: (() => {',
+ '            const input = profile.privacy.fingerprint || profile.fingerprint || {};',
+ '            const hints = input.clientHints || profile.privacy.clientHints || profile.clientHints || {};',
+ '            return {...hints, ...Object.fromEntries(["chromeMajor", "ua_full_version", "fullVersion", "platformVersion", "architecture", "bitness", "wow64", "model", "mobile"].filter(key => Object.hasOwn(input, key) && input[key] !== undefined && input[key] !== "").map(key => [key, input[key]]))};',
+ '          })(),',
  '          deferredRestore: lycoDeferredRestore,',
  '          requireNativeFontLayout: profile.privacy.clientRects === "native",',
- '          settings: {hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
+ '          settings: {userAgent: fingerprint.userAgent, platform: fingerprint.platform, hardwareConcurrency: fingerprint.hardwareConcurrency, deviceMemory: fingerprint.deviceMemory,',
  '            ...(fingerprint.webgl?.mode !== "blocked" && ["noise", "custom"].includes(fingerprint.webgl?.metaMode)',
  '              ? {webglVendor: fingerprint.webgl.vendor, webglRenderer: fingerprint.webgl.renderer} : {}),',
  '            languages: profile.privacy.languageMode === "real" ? undefined : fingerprint.languages,',

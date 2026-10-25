@@ -4,6 +4,7 @@ import {readOnlyConcurrentRealmSource} from './browser-concurrent-fixture.mjs';
 import {assertCanvasOwnership} from './canvas-ownership-contract.mjs';
 import {observeNativeFonts} from './native-font-observation.mjs';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
+import {assertClientHintConsistency, assertWorkerClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -41,6 +42,8 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       await page.evaluate(source => window.ops.startProfile(source), configured);
       const observed = await wait(() => fixture.result(phase)?.page);
       checkRealm(observed.initial, expected, owner + ' window');
+      assertClientHintConsistency(observed.initial.browserSurfaces, fixture.result(phase).pageRequestClientHints,
+        ua, owner + ':concurrent-first-page', report.clientHints?.[owner.toLowerCase() + '-first']);
       assert.deepEqual(observed.before, {cookie: owner, local: owner});
       assert.equal(fixture.result(phase).pageProxied, true);
       assert.equal(fixture.result(phase).pageReportProxied, true);
@@ -89,6 +92,11 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
       assert.equal(workers.error, undefined, owner + ': ' + workers.error);
       for (const realm of ['windowStart', 'windowNow', 'dedicated', 'service']) {
         checkRealm(workers[realm], expected, owner + ' ' + realm, {requireDom: realm.startsWith('window')});
+        const firstHeaders = realm.startsWith('window') ? entry.pageRequestClientHints
+          : entry.requests.find(row => row.kind === realm)?.clientHints;
+        const validate = realm.startsWith('window') ? assertClientHintConsistency : assertWorkerClientHintConsistency;
+        validate(workers[realm].browserSurfaces, firstHeaders, ua,
+          owner + ':concurrent-' + realm, report.clientHints?.[owner.toLowerCase() + '-first']);
       }
       checkRealm(evidence.nativeCanvasControls[owner], expected, owner + ' native control', {requireFace: false});
       const extra = evidence.nativeFontObservations[owner]?.hostExtra;
@@ -196,6 +204,7 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
     for (const realm of ['windowStart', 'dedicated', 'service']) assert.ok(distinct(realm), realm + ': parallel OffscreenCanvas lost per-profile noise');
     checkWorkers('A', evidence.afterStoppingB);
     report.checks.push('native-concurrent-profiles-first-script-worker-storage-and-proxy-isolation');
+    report.checks.push('native-concurrent-window-dedicated-service-first-ua-and-client-hints');
     report.checks.push('host-extra-font-isolated-in-native-default-frame-and-worker-realms');
     await checkpoint('concurrent:passed');
   } finally {

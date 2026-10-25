@@ -3,6 +3,7 @@
 import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
 import {readFontControlMetrics, readLocalFontControl, hostFontControlFamily} from './browser-font-control.mjs';
 import {readWebglIdentity} from './browser-webgl-identity.mjs';
+import {readBrowserPrivacySurfaces, captureClientHintHeaders} from './browser-privacy-surfaces.mjs';
 const phases = new Map([
   ['a-first', 'A'], ['b-first', 'B'], ['a-reopen', 'A'], ['b-reopen', 'B'],
   ['a-corrupt', 'A'], ['a-recover', 'A'],
@@ -15,9 +16,10 @@ const phases = new Map([
   ['a-restored-new-tab', 'A'], ['a-restored-new-tab-2', 'A'], ['a-restored-new-tab-3', 'A'],
 ]);
 
-async function observeProfile(marker, readOnly, readFonts, readLocal, family, readGpu) {
+async function observeProfile(marker, readOnly, readFonts, readLocal, family, readGpu, readSurfaces) {
   // Read these synchronously in the page's first script, before font readiness
   // or network awaits can hide a late runtime injection.
+  const surfaceObservation = readSurfaces();
   const initial = {
     userAgent: navigator.userAgent, platform: navigator.platform,
     language: navigator.language, languages: Array.from(navigator.languages),
@@ -59,7 +61,7 @@ async function observeProfile(marker, readOnly, readFonts, readLocal, family, re
   await document.fonts.ready;
   fontControl.face = await localFont;
   return {
-    ...initial,
+    ...initial, browserSurfaces: await surfaceObservation,
     fontControl,
     before, after: {cookie: cookie(), local: localStorage.getItem(key)},
     canvas: [draw(), draw()], canvasControl: initialShape, textWidth,
@@ -74,7 +76,7 @@ export function readOnlyProfileProbeSource() {
 
 function fontArguments() {
   return readFontControlMetrics.toString() + ',' + readLocalFontControl.toString() + ',' + JSON.stringify(hostFontControlFamily)
-    + ',' + readWebglIdentity.toString();
+    + ',' + readWebglIdentity.toString() + ',' + readBrowserPrivacySurfaces.toString();
 }
 
 export function createBrowserProfileFixture() {
@@ -96,18 +98,25 @@ export function createBrowserProfileFixture() {
     const entry = entries.get(key) || {};
     entries.set(key, entry);
     if (url.pathname === '/profile-frame') {
-      entry.pageProxied = Boolean(proxied);
+      entry.requestCount = (entry.requestCount || 0) + 1;
+      if (entry.requestCount === 1) {
+        entry.requestObservedAt = Date.now();
+        entry.pageProxied = Boolean(proxied);
+        entry.requestClientHints = captureClientHintHeaders(req.headers);
+      }
       const endpoint = '/profile-frame-report?phase=' + encodeURIComponent(phase) + '&realm=' + realm;
       // Synchronous first-script reads in actual parser-created documents.
       // No storage writes, parent messages, injection or harness navigation.
-      const script = `const initial={userAgent:navigator.userAgent,platform:navigator.platform,
+      const script = `const surfaces=(${readBrowserPrivacySurfaces.toString()})();
+        const initial={userAgent:navigator.userAgent,platform:navigator.platform,
         language:navigator.language,languages:Array.from(navigator.languages),cores:navigator.hardwareConcurrency,
         memory:navigator.deviceMemory,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
         host:location.hostname,isTop:window===window.top,secureContext:isSecureContext,
         memoryAvailable:'deviceMemory' in navigator,webgl:(${readWebglIdentity.toString()})()};
         initial.fontControl=(${readFontControlMetrics.toString()})(${JSON.stringify(hostFontControlFamily)});
-        (${readLocalFontControl.toString()})(${JSON.stringify(hostFontControlFamily)}).then(face=>{
+        Promise.all([(${readLocalFontControl.toString()})(${JSON.stringify(hostFontControlFamily)}),surfaces]).then(([face,browserSurfaces])=>{
           initial.fontControl.face=face;
+          initial.browserSurfaces=browserSurfaces;
           return fetch(${JSON.stringify(endpoint)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(initial)});
         });`;
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
@@ -115,8 +124,13 @@ export function createBrowserProfileFixture() {
       return true;
     }
     if (url.pathname === '/profile-probe') {
-      entry.pageProxied = Boolean(proxied);
-      entry.requestLanguage = req.headers['accept-language'] || '';
+      entry.requestCount = (entry.requestCount || 0) + 1;
+      if (entry.requestCount === 1) {
+        entry.requestObservedAt = Date.now();
+        entry.pageProxied = Boolean(proxied);
+        entry.requestLanguage = req.headers['accept-language'] || '';
+        entry.requestClientHints = captureClientHintHeaders(req.headers);
+      }
       const reportPath = '/profile-report?phase=' + encodeURIComponent(phase);
       const post = 'value=>fetch(' + JSON.stringify(reportPath) + ',{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)})';
       const readOnly = phase.endsWith('-extra') || newTab;
@@ -139,8 +153,14 @@ export function createBrowserProfileFixture() {
     req.on('data', chunk => { body += chunk; if (body.length > 8192) req.destroy(); });
     req.on('end', () => {
       try {
-        entry.value = JSON.parse(body);
-        entry.reportProxied = Boolean(proxied);
+        const value = JSON.parse(body);
+        entry.reportCount = (entry.reportCount || 0) + 1;
+        if (entry.reportCount === 1) {
+          entry.value = value;
+          entry.reportObservedAt = Date.now();
+          entry.reportProxied = Boolean(proxied);
+          entry.reportClientHints = captureClientHintHeaders(req.headers);
+        }
         res.writeHead(200, {'Content-Type': 'text/plain', 'Cache-Control': 'no-store'}); res.end('ok');
       } catch { res.writeHead(400); res.end('Invalid CI report'); }
     });
