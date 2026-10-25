@@ -53,7 +53,22 @@ jobs:
           $expected='43925a0841c254f66289565cd1d65f7d783c1f1e40b2a77fd402253c59b3e8b1'
           if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected){throw 'Official archive SHA-256 mismatch'}
           $destination=Join-Path $env:RUNNER_TEMP 'lyco-vendor-155'
-          Expand-Archive -LiteralPath $archive -DestinationPath $destination
+          # Inventory compression without running archive contents. Use the .NET
+          # API directly so PowerShell cleanup cannot mask the original error.
+          & 7z.exe l -slt $archive | Select-String '^Method = ' | Group-Object Line | Select-Object Count,Name | Format-Table -AutoSize
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          try {
+            [IO.Compression.ZipFile]::ExtractToDirectory($archive,$destination)
+          } catch {
+            Write-Output ('Archive extraction exception: '+$_.Exception.ToString())
+            try {
+              $detections=@(Get-MpThreatDetection -ErrorAction Stop | Where-Object {
+                @($_.Resources | Where-Object {$_ -like "*$destination*"}).Count -gt 0
+              })
+              $detections | Select-Object ThreatID,ActionSuccess,InitialDetectionTime | ConvertTo-Json -Compress | Write-Output
+            } catch { Write-Output 'Owned-path Defender detection inventory unavailable' }
+            throw
+          }
           $binary=Join-Path $destination 'wayfern-155.0.8059.79_windows_x64/chrome.exe'
           $library=Join-Path (Split-Path $binary) 'chrome.dll'
           if((Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant() -ne '1b49fdb3b79de9427b247e0c6bb41a8668e5f7b75ba0da39e6d5518cb2cb25e3'){throw 'Official executable SHA-256 mismatch'}
