@@ -97,6 +97,16 @@ for (const method of ['Network', 'Emulation']) {
   '                  platform: workerUa.platformNav || workerUa.platform,',
   '                  userAgentMetadata: workerUa.preserveNativeClientHints ? undefined : workerUa.metadata,'));
 }
+// Workers have a separate UAData generator. Preserve the native interface in
+// this path too; guarding only the document script leaves conflicting brands
+// and full platform/browser versions in Dedicated/Service Worker globals.
+one('automation/fingerprint.js', '    userAgentMetadata: fp.userAgentMetadata,\n    languages: fp.languages,',
+ '    preserveNativeClientHints: fp.uaProfile?.preserveNativeClientHints === true,\n    userAgentMetadata: fp.userAgentMetadata,\n    languages: fp.languages,');
+one('automation/fingerprint.js', '      const metadata = CFG.userAgentMetadata || {};',
+ '      if (!CFG.preserveNativeClientHints) {\n      const metadata = CFG.userAgentMetadata || {};');
+one('automation/fingerprint.js',
+ '      } catch (_) {}\n    }\n  } catch (_) {}\n\n  // Same guard as the page copy:',
+ '      } catch (_) {}\n      }\n    }\n  } catch (_) {}\n\n  // Same guard as the page copy:');
 for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);

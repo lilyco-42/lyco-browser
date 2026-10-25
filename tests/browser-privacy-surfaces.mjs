@@ -116,6 +116,35 @@ export function parseBrandHeader(header) {
 // Client Hints contract. WebGPU observations are retained, not called a pass.
 export function assertClientHintConsistency(surface, headers, userAgent, phase, prior) {
   assert.equal(headers?.['user-agent'], userAgent, phase + ': first HTTP User-Agent differs from the expected first-script UA');
+  const snapshot = clientHintSnapshot(surface, userAgent, phase, prior);
+  assert.deepEqual(parseBrandHeader(headers?.['sec-ch-ua']), snapshot.low.brands,
+    phase + ': request and first-script brand values disagree');
+  assert.equal(headers['sec-ch-ua-mobile'], snapshot.low.mobile ? '?1' : '?0', phase + ': mobile header mismatch');
+  assert.equal(JSON.parse(headers['sec-ch-ua-platform'] || 'null'), snapshot.low.platform, phase + ': platform header mismatch');
+  return snapshot;
+}
+
+// Initial worker script fetches are not document navigations. The Client Hints
+// Infrastructure draft, request-processing step1, excludes worker/sharedworker
+// non-subresource requests; step6 also permits user agents to omit hints.
+// https://wicg.github.io/client-hints-infrastructure/#request-processing
+// Keep absent headers as absent. The JS interface must still be complete and
+// equal the owning window; every header actually sent must agree with it.
+export function assertWorkerClientHintConsistency(surface, headers, userAgent, phase, prior) {
+  assert.equal(headers?.['user-agent'], userAgent, phase + ': first worker HTTP User-Agent mismatch');
+  assert.ok(prior, phase + ': owning window Client Hints baseline missing');
+  const snapshot = clientHintSnapshot(surface, userAgent, phase, prior);
+  const sent = name => typeof headers?.[name] === 'string';
+  if (sent('sec-ch-ua')) assert.deepEqual(parseBrandHeader(headers['sec-ch-ua']), snapshot.low.brands,
+    phase + ': worker request brand values disagree');
+  if (sent('sec-ch-ua-mobile')) assert.equal(headers['sec-ch-ua-mobile'], snapshot.low.mobile ? '?1' : '?0',
+    phase + ': worker request mobile mismatch');
+  if (sent('sec-ch-ua-platform')) assert.equal(JSON.parse(headers['sec-ch-ua-platform']), snapshot.low.platform,
+    phase + ': worker request platform mismatch');
+  return {snapshot, observedRequestHints: ['sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform'].filter(sent)};
+}
+
+function clientHintSnapshot(surface, userAgent, phase, prior) {
   assert.equal(surface?.first?.userAgent, userAgent, phase + ': first script User-Agent differs from the configured UA');
   assert.equal(surface?.schema, 1, phase + ': missing surface report');
   assert.equal(surface.first?.secureContext, true, phase + ': secure-origin control missing');
@@ -123,10 +152,6 @@ export function assertClientHintConsistency(surface, headers, userAgent, phase, 
   assert.equal(low?.status, 'observed', phase + ': Client Hints unavailable');
   assert.equal(typeof low.mobile, 'boolean');
   const lowBrands = normalizedBrands(low.brands);
-  assert.deepEqual(parseBrandHeader(headers?.['sec-ch-ua']), lowBrands,
-    phase + ': request and first-script brand values disagree');
-  assert.equal(headers['sec-ch-ua-mobile'], low.mobile ? '?1' : '?0', phase + ': mobile header mismatch');
-  assert.equal(JSON.parse(headers['sec-ch-ua-platform'] || 'null'), low.platform, phase + ': platform header mismatch');
   if (userAgent.includes('Windows NT')) assert.equal(low.platform, 'Windows', phase + ': Windows UA platform mismatch');
   const major = userAgent.match(/Chrome\/(\d+)\./)?.[1];
   assert.ok(major, phase + ': expected Chromium UA missing');

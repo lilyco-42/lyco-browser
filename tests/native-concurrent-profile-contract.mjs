@@ -4,7 +4,7 @@ import {readOnlyConcurrentRealmSource} from './browser-concurrent-fixture.mjs';
 import {assertCanvasOwnership} from './canvas-ownership-contract.mjs';
 import {observeNativeFonts} from './native-font-observation.mjs';
 import {assertFontControlIsolation} from './browser-font-control.mjs';
-import {assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
+import {assertClientHintConsistency, assertWorkerClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
 export async function verifyConcurrentWorkerProfiles({page, profiles, settings, ua, originPort, fixture, report, checkpoint, cdp}) {
   if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Real concurrent browser acceptance only runs in Actions');
@@ -94,7 +94,8 @@ export async function verifyConcurrentWorkerProfiles({page, profiles, settings, 
         checkRealm(workers[realm], expected, owner + ' ' + realm, {requireDom: realm.startsWith('window')});
         const firstHeaders = realm.startsWith('window') ? entry.pageRequestClientHints
           : entry.requests.find(row => row.kind === realm)?.clientHints;
-        assertClientHintConsistency(workers[realm].browserSurfaces, firstHeaders, ua,
+        const validate = realm.startsWith('window') ? assertClientHintConsistency : assertWorkerClientHintConsistency;
+        validate(workers[realm].browserSurfaces, firstHeaders, ua,
           owner + ':concurrent-' + realm, report.clientHints?.[owner.toLowerCase() + '-first']);
       }
       checkRealm(evidence.nativeCanvasControls[owner], expected, owner + ' native control', {requireFace: false});

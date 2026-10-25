@@ -5,7 +5,7 @@ import {EventEmitter} from 'node:events';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {createConcurrentBrowserFixture} from './browser-concurrent-fixture.mjs';
 import {readBrowserPrivacySurfaces, captureClientHintHeaders, parseBrandHeader, describeNativeUserAgentFields,
-  assertClientHintConsistency} from './browser-privacy-surfaces.mjs';
+  assertClientHintConsistency, assertWorkerClientHintConsistency} from './browser-privacy-surfaces.mjs';
 
 const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/149.0.0.0 Safari/537.36';
 const low = [{brand: 'Chromium', version: '149'}, {brand: 'Not/A)Brand', version: '8'}];
@@ -35,6 +35,30 @@ test('matching Client Hints cannot hide a missing or contradictory first HTTP Us
   const missingScript = sample();delete missingScript.first.userAgent;
   assert.throws(() => assertClientHintConsistency(missingScript, headers, ua, 'missing-script'), /first script User-Agent/);
   assert.equal(wrong['user-agent'].includes('148.0.0.0'), true, 'A mismatch must remain unmodified');
+});
+
+test('worker script header omission cannot hide different JS brands or full versions', () => {
+  const baseline = assertClientHintConsistency(sample(), headers, ua, 'owner');
+  const omitted = {'user-agent': ua, 'sec-ch-ua': null, 'sec-ch-ua-mobile': null, 'sec-ch-ua-platform': null};
+  const original = structuredClone(omitted);
+  assert.deepEqual(assertWorkerClientHintConsistency(sample(), omitted, ua, 'worker', baseline),
+    {snapshot: baseline, observedRequestHints: []});
+  assert.deepEqual(omitted, original, 'Absent headers must not be filled from the page');
+  assert.throws(() => assertClientHintConsistency(sample(), omitted, ua, 'document'), /request header missing/,
+    'Document first-request requirements remain strict');
+  const generated = sample();
+  generated.highEntropy.value.platformVersion = '15.0.0';
+  generated.highEntropy.value.fullVersionList[0].version = '149.0.0.0';
+  generated.first.clientHints.brands.push({brand: 'Google Chrome', version: '149'});
+  assert.throws(() => assertWorkerClientHintConsistency(generated, omitted, ua, 'worker', baseline), /changed/,
+    'The observed build149 Worker/page discrepancy must still fail');
+  assert.throws(() => assertWorkerClientHintConsistency(sample(), {...omitted, 'sec-ch-ua': '"Other";v="149"'},
+    ua, 'worker', baseline), /brand values disagree/);
+  assert.throws(() => assertWorkerClientHintConsistency(sample(), {...omitted, 'sec-ch-ua-platform': '"Linux"'},
+    ua, 'worker', baseline), /platform mismatch/);
+  assert.throws(() => assertWorkerClientHintConsistency(sample(), {...omitted, 'user-agent': 'different'},
+    ua, 'worker', baseline), /HTTP User-Agent/);
+  assert.throws(() => assertWorkerClientHintConsistency(sample(), omitted, ua, 'worker'), /baseline missing/);
 });
 
 test('missing, contradictory and incomplete surfaces cannot masquerade as passed observations', () => {
