@@ -186,12 +186,15 @@ try {
     report.initialIdentity.activated = true;
   }
   const readMethod = modernIdentityId ? 'Wayfern.getIdentity' : 'Wayfern.getFingerprint';
+  // The public 155 protocol declares editable (default) and all views. The
+  // editable view can be empty; acceptance needs the complete actual device.
+  const readParams = modernIdentityId ? {view: 'all'} : {};
   const writeMethod = modernIdentityId ? 'Wayfern.setIdentity' : 'Wayfern.setFingerprint';
   const writeParams = overrides => modernIdentityId ? {identityId: modernIdentityId,
     operatingSystem: 'windows', timezone: 'UTC', language: 'en-US', overrides} : overrides;
-  report.nativeMethods = {read: readMethod, write: writeMethod};
+  report.nativeMethods = {read: readMethod, readView: modernIdentityId ? 'all' : null, write: writeMethod};
   report.stage = 'read-original-native-device';
-  const answer = await page.command(readMethod, {}, {timeout: 5000});
+  const answer = await page.command(readMethod, readParams, {timeout: 5000});
   report.nativeAnswerShape = answerShape(answer);
   report.identityReadMatchesCreated = modernIdentityId ? answer.identityId === modernIdentityId : null;
   const device = unpack(answer);
@@ -246,7 +249,7 @@ try {
       record.status = 'native-command-rejected'; continue;
     }
     // A same-session read separates ignored edits from new-target propagation.
-    const samePage = unpack(await page.command(readMethod, {}, {timeout: 5000}));
+    const samePage = unpack(await page.command(readMethod, readParams, {timeout: 5000}));
     record.samePageFields = fields(samePage);
     record.samePageMatchesSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, samePage[key] === value]));
     report.stage = phase + ':observe-ordinary-new-target';
@@ -258,7 +261,7 @@ try {
     const targetEndpoint = new URL(target.webSocketDebuggerUrl);
     assert.equal(targetEndpoint.protocol, 'ws:'); assert.equal(targetEndpoint.hostname, '127.0.0.1');
     assert.equal(Number(targetEndpoint.port), port); assert.equal(targetEndpoint.username, ''); assert.equal(targetEndpoint.password, '');
-    const current = unpack(await cdp.call(target.webSocketDebuggerUrl, readMethod, {}, 5000));
+    const current = unpack(await cdp.call(target.webSocketDebuggerUrl, readMethod, readParams, 5000));
     record.observedFields = fields(current);
     record.nativeFieldsMatchSettings = Object.fromEntries(Object.entries(eligible).map(([key, value]) => [key, current[key] === value]));
     if (Object.hasOwn(eligible, 'hardwareConcurrency')) record.firstScriptMatchesCpu = record.first.value.hardwareConcurrency === eligible.hardwareConcurrency;
@@ -348,7 +351,7 @@ try {
       record.requestAndFirstScriptUaConsistent = record.first.requestUserAgent === record.first.value.ua;
       record.requestAndFirstScriptConsistent = record.requestAndFirstScriptHintsConsistent
         && record.requestAndFirstScriptUaConsistent;
-      const current = unpack(await control.command(readMethod, {}, {timeout: 5000}));
+      const current = unpack(await control.command(readMethod, readParams, {timeout: 5000}));
       record.nativeFields = fields(current);
       record.seedObserved = Object.hasOwn(device, 'canvasNoiseSeed') && Object.hasOwn(current, 'canvasNoiseSeed');
       record.seedUnchanged = record.seedObserved ? digest(current.canvasNoiseSeed) === seedDigest : null;
