@@ -31,7 +31,7 @@ private struct BrowserError: Error, LocalizedError {
 }
 
 @available(iOS 17.0, *)
-private final class ProfileBrowserController: UIViewController, WKNavigationDelegate, WKUIDelegate {
+private final class ProfileBrowserController: UIViewController, WKNavigationDelegate, WKUIDelegate, UITextFieldDelegate {
   private var tunnel: LycotunnelSession?
   private var paidGuard: PaidSessionGuard?
   private var stopped = false
@@ -40,6 +40,10 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
   private let configuration: WKWebViewConfiguration
   private let environmentName: String
   private let status = UILabel()
+  private let address = UITextField()
+  private let back = UIButton(type: .system)
+  private let forward = UIButton(type: .system)
+  private let reload = UIButton(type: .system)
 
   init(options: [String: String]) throws {
     guard let id = UUID(uuidString: options["id"] ?? ""),
@@ -116,11 +120,33 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     let bar = UIStackView(arrangedSubviews: [close, status])
     bar.axis = .horizontal
     bar.spacing = 12
+    address.accessibilityLabel = "浏览网址"
+    address.placeholder = "输入网址"
+    address.borderStyle = .roundedRect
+    address.keyboardType = .URL
+    address.autocapitalizationType = .none
+    address.autocorrectionType = .no
+    address.returnKeyType = .go
+    address.delegate = self
+    let go = UIButton(type: .system)
+    go.setTitle("前往", for: .normal)
+    go.addTarget(self, action: #selector(navigateAddress), for: .touchUpInside)
+    let addressBar = UIStackView(arrangedSubviews: [address, go])
+    addressBar.spacing = 8
+    go.setContentHuggingPriority(.required, for: .horizontal)
+    back.setTitle("后退", for: .normal)
+    forward.setTitle("前进", for: .normal)
+    reload.setTitle("刷新", for: .normal)
+    back.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+    forward.addTarget(self, action: #selector(goForward), for: .touchUpInside)
+    reload.addTarget(self, action: #selector(reloadPage), for: .touchUpInside)
+    let navigationBar = UIStackView(arrangedSubviews: [back, forward, reload])
+    navigationBar.distribution = .fillEqually
     let web = WKWebView(frame: .zero, configuration: configuration)
     web.navigationDelegate = self
     web.uiDelegate = self
     browser = web
-    let stack = UIStackView(arrangedSubviews: [bar, web])
+    let stack = UIStackView(arrangedSubviews: [bar, addressBar, navigationBar, web])
     stack.axis = .vertical
     stack.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(stack)
@@ -129,17 +155,41 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
       stack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
       stack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      bar.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
+      bar.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
+      addressBar.heightAnchor.constraint(equalToConstant: 44),
+      navigationBar.heightAnchor.constraint(equalToConstant: 44)
     ])
+    address.text = startURL.absoluteString
+    updateNavigation()
     paidGuard?.start()
     if !stopped { web.load(URLRequest(url: startURL)) }
   }
   @objc private func checkPaidLease() { paidGuard?.checkForeground() }
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool { navigateAddress(); return true }
+  @objc private func navigateAddress() {
+    guard !stopped, let browser else { return }
+    let raw = (address.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+    let hasScheme = raw.range(of: "^[A-Za-z][A-Za-z0-9+.-]*:", options: .regularExpression) != nil
+    address.resignFirstResponder()
+    guard let url = URL(string: hasScheme ? raw : "https://" + raw), Self.allowed(url) else {
+      status.text = "请输入无账号密码的 HTTP(S) 网址"; return
+    }
+    browser.load(URLRequest(url: url))
+  }
+  @objc private func goBack() { if !stopped, browser?.canGoBack == true { browser?.goBack() } }
+  @objc private func goForward() { if !stopped, browser?.canGoForward == true { browser?.goForward() } }
+  @objc private func reloadPage() { if !stopped { browser?.reload() } }
+  private func updateNavigation() {
+    back.isEnabled = !stopped && browser?.canGoBack == true
+    forward.isEnabled = !stopped && browser?.canGoForward == true
+    reload.isEnabled = !stopped && browser != nil
+  }
   private func stopForAuthorization() {
     stopped = true
     paidGuard?.close(); paidGuard = nil
     try? tunnel?.close(); tunnel = nil
     browser?.stopLoading(); browser?.removeFromSuperview(); browser = nil
+    updateNavigation()
     status.text = "官网权益已失效或长时间无法核实，环境已停止"
   }
   deinit { paidGuard?.close(); try? tunnel?.close(); NotificationCenter.default.removeObserver(self) }
@@ -152,6 +202,7 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     browser?.navigationDelegate = nil
     browser?.removeFromSuperview()
     browser = nil
+    updateNavigation()
     // Keep proxy settings on the data store: existing service workers must
     // never become direct when the visible view closes.
     dismiss(animated: true)
@@ -165,9 +216,17 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
   }
   func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
     status.text = "连接失败，请检查代理；未切换直连"
+    updateNavigation()
+  }
+  func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+    status.text = "正在通过所选代理加载…"
+    if !address.isFirstResponder { address.text = webView.url?.absoluteString }
+    updateNavigation()
   }
   func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     status.text = environmentName + " · 已配置代理 · " + (webView.url?.host ?? "")
+    if !address.isFirstResponder { address.text = webView.url?.absoluteString }
+    updateNavigation()
   }
   func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { status.text = "环境进程已停止，请关闭后重新打开" }
 }

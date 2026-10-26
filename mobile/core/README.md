@@ -12,4 +12,6 @@ Dependency: SagerNet/sing-box v1.14.4, source commit
 c005f35300ce76427dc285481ec5695f5b179cd2. All builds and tests run in Actions.
 The dependency is GPL-3.0-or-later; mobile distributions must retain its notices,
 license and corresponding complete source/build instructions. This integration
-is not yet wired into the native application until the routing/binding gates pass.
+is integrated into both native applications for paid and manual browser routes.
+Native runtime gates remain mandatory; passing a Go or binding build alone does
+not establish WebView/WKWebView routing or all-platform release readiness.

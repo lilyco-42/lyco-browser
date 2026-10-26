@@ -1,0 +1,31 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "浏览网址"
+- eraseText
+- inputText: http://lyco-fixture.invalid:18080/navigation?step=one
+- tapOn: "前往"
+- extendedWaitUntil:
+    visible: "LYCO navigation one"
+    timeout: 30000
+- tapOn: "浏览网址"
+- eraseText
+- inputText: "javascript:document.body.textContent='FORBIDDEN'"
+- tapOn: "前往"
+- assertVisible: "请输入无账号密码的 HTTP\\(S\\) 网址"
+- assertVisible: "LYCO navigation one"
+- tapOn: "Next page"
+- extendedWaitUntil:
+    visible: "LYCO navigation two"
+    timeout: 30000
+- tapOn: "后退"
+- extendedWaitUntil:
+    visible: "LYCO navigation one"
+    timeout: 30000
+- tapOn: "前进"
+- extendedWaitUntil:
+    visible: "LYCO navigation two"
+    timeout: 30000
+- tapOn: "刷新"
+- extendedWaitUntil:
+    visible: "LYCO navigation two"
+    timeout: 30000

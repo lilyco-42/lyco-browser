@@ -23,7 +23,7 @@ class LycoMobileBrowserModule : Module() {
       context.startActivity(intent)
     }.runOnQueue(Queues.MAIN)
     AsyncFunction("closeAll") {
-      val context = appContext.reactContext ?: return@AsyncFunction
+      val context = appContext.reactContext ?: error("应用尚未就绪")
       val preferences = context.getSharedPreferences(ProfileControl.PREFERENCES, Context.MODE_PRIVATE)
       synchronized(ProfileControl) {
         check(preferences.edit().putLong(ProfileControl.EPOCH, preferences.getLong(ProfileControl.EPOCH, 0) + 1).commit()) { "无法停止待启动环境" }

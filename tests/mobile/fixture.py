@@ -6,14 +6,30 @@ parser=argparse.ArgumentParser()
 parser.add_argument('--evidence',required=True)
 args=parser.parse_args()
 evidence=Path(args.evidence);evidence.mkdir(parents=True,exist_ok=True)
-state={'reports':[],'requests':[],'proxyRequests':[],'responseBodies':[],'tunnels':[]}
+state={'reports':[],'requests':[],'proxyRequests':[],'responseBodies':[],'tunnels':[],'navigations':[]}
 lock=threading.Lock()
 def save():
     with lock: (evidence/'network.json').write_text(json.dumps(state,indent=2))
 class Origin(http.server.BaseHTTPRequestHandler):
     def log_message(self,*_): pass
+    def page(self, page):
+        payload=page.encode()
+        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(payload)));self.send_header('Connection','close');self.end_headers();state['responseBodies'].append({'path':self.path,'bytes':len(payload)});save();self.wfile.write(payload)
     def do_GET(self):
         state['requests'].append(self.path);save()
+        if urlsplit(self.path).path=='/navigation':
+            stage=parse_qs(urlsplit(self.path).query).get('step',[''])[0]
+            if stage not in ('one','two'): self.send_error(404);return
+            self.page('''<!doctype html><meta name="viewport" content="width=device-width">
+            <h1 id="status" role="status" aria-live="polite" aria-atomic="true">Loading</h1>
+            <a href="/navigation?step=two">Next page</a><script>
+            window.addEventListener('pageshow',async()=>{
+              const cookie=document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
+              const row={stage:STAGE,cookie,local:localStorage.getItem('owner')};
+              const response=await fetch('/navigation-report',{method:'POST',body:JSON.stringify(row)});
+              if(response.ok)document.getElementById('status').textContent='LYCO navigation '+row.stage;
+            });</script>'''.replace('STAGE',json.dumps(stage)))
+            return
         owner=parse_qs(urlsplit(self.path).query).get('owner',[''])[0]
         if owner not in ('mobile-A','mobile-B','mobile-C'):
             self.send_error(404);return
@@ -26,9 +42,11 @@ class Origin(http.server.BaseHTTPRequestHandler):
         const result=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
         if(!result.ok)throw Error('report failed');document.getElementById('status').textContent='LYCO verified '+owner;
         })().catch(()=>document.getElementById('status').textContent='LYCO fixture failed');</script>'''.replace('OWNER',json.dumps(owner))
-        payload=page.encode()
-        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(payload)));self.send_header('Connection','close');self.end_headers();state['responseBodies'].append({'path':self.path,'bytes':len(payload)});save();self.wfile.write(payload)
+        self.page(page)
     def do_POST(self):
+        if self.path=='/navigation-report':
+            state['navigations'].append(json.loads(self.rfile.read(int(self.headers.get('Content-Length',0)))));save()
+            self.send_response(200);self.send_header('Content-Length','2');self.end_headers();self.wfile.write(b'OK');return
         if self.path!='/report': self.send_error(404);return
         report=json.loads(self.rfile.read(int(self.headers.get('Content-Length',0))))
         state['reports'].append(report);save()

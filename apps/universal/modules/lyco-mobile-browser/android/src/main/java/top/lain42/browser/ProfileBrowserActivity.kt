@@ -13,6 +13,10 @@ import android.os.Looper
 import android.os.Process
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.text.InputType
+import android.graphics.Bitmap
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -21,6 +25,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.webkit.ProxyConfig
@@ -39,6 +44,10 @@ class ProfileBrowserActivity : Activity() {
   private val handler = Handler(Looper.getMainLooper())
   private val timeout = Runnable { fail("代理设置超时，未打开网页") }
   private lateinit var status: TextView
+  private lateinit var address: EditText
+  private lateinit var back: Button
+  private lateinit var forward: Button
+  private lateinit var reload: Button
   private var closing = false
   private var controlRegistered = false
   private val controlReceiver = object : BroadcastReceiver() {
@@ -62,6 +71,25 @@ class ProfileBrowserActivity : Activity() {
     status = TextView(this).apply { text = "正在配置独立环境与代理…"; setPadding(16, 12, 16, 12) }
     layout.addView(close)
     layout.addView(status)
+    address = EditText(this).apply {
+      contentDescription = "浏览网址"; hint = "输入网址"
+      setSingleLine(true)
+      inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+      imeOptions = EditorInfo.IME_ACTION_GO
+      setOnEditorActionListener { _, action, _ ->
+        if (action == EditorInfo.IME_ACTION_GO) { navigateAddress(); true } else false
+      }
+    }
+    val addressBar = LinearLayout(this)
+    addressBar.addView(address, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+    addressBar.addView(Button(this).apply { text = "前往"; setOnClickListener { navigateAddress() } })
+    layout.addView(addressBar)
+    val navigation = LinearLayout(this)
+    back = Button(this).apply { text = "后退"; isEnabled = false; setOnClickListener { browser?.takeIf { it.canGoBack() && !closing }?.goBack() } }
+    forward = Button(this).apply { text = "前进"; isEnabled = false; setOnClickListener { browser?.takeIf { it.canGoForward() && !closing }?.goForward() } }
+    reload = Button(this).apply { text = "刷新"; isEnabled = false; setOnClickListener { if (!closing) browser?.reload() } }
+    for (button in listOf(back, forward, reload)) navigation.addView(button, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+    layout.addView(navigation)
     setContentView(layout)
     try {
       val filter = IntentFilter(ProfileControl.ACTION_CLOSE)
@@ -121,11 +149,20 @@ class ProfileBrowserActivity : Activity() {
           view.settings.setSupportMultipleWindows(false)
           view.settings.javaScriptCanOpenWindowsAutomatically = false
           view.settings.mediaPlaybackRequiresUserGesture = true
+          view.settings.builtInZoomControls = true
+          view.settings.displayZoomControls = false
           CookieManager.getInstance().setAcceptThirdPartyCookies(view, false)
           view.webChromeClient = WebChromeClient() // Permission requests are denied by default.
           view.webViewClient = object : WebViewClient() {
             private var mainError: String? = null
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = !allowedUrl(request.url.toString())
+            override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+              if (closing) return
+              mainError = null
+              if (!address.hasFocus()) address.setText(url)
+              status.text = "正在通过所选代理加载…"
+              updateNavigation()
+            }
             override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
               if (request.isForMainFrame && !closing) { mainError = "页面网络请求失败（${error.errorCode}）"; status.text = mainError }
             }
@@ -136,6 +173,8 @@ class ProfileBrowserActivity : Activity() {
               if (closing) return
               CookieManager.getInstance().flush()
               status.text = mainError ?: "${intent.getStringExtra("name") ?: "独立环境"} · 已配置代理 · ${Uri.parse(url).host ?: ""}"
+              if (!address.hasFocus()) address.setText(url)
+              updateNavigation()
             }
           }
           layout.addView(view, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
@@ -157,6 +196,20 @@ class ProfileBrowserActivity : Activity() {
     val uri = Uri.parse(value)
     return uri.scheme in listOf("http", "https") && !uri.host.isNullOrBlank() && uri.userInfo == null
   }
+  private fun navigateAddress() {
+    if (closing || browser == null) return
+    val raw = address.text.toString().trim()
+    val url = if (Regex("^[A-Za-z][A-Za-z0-9+.-]*:").containsMatchIn(raw)) raw else "https://$raw"
+    address.clearFocus()
+    (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(address.windowToken, 0)
+    if (!allowedUrl(url)) { status.text = "请输入无账号密码的 HTTP(S) 网址"; return }
+    browser?.loadUrl(url)
+  }
+  private fun updateNavigation() {
+    back.isEnabled = !closing && browser?.canGoBack() == true
+    forward.isEnabled = !closing && browser?.canGoForward() == true
+    reload.isEnabled = !closing && browser != null
+  }
   private fun fail(message: String) {
     handler.removeCallbacks(timeout)
     closing = true
@@ -165,6 +218,7 @@ class ProfileBrowserActivity : Activity() {
     browser?.stopLoading()
     browser?.destroy()
     browser = null
+    updateNavigation()
     status.text = message
   }
   @Deprecated("Deprecated in Java")

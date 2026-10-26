@@ -74,9 +74,9 @@ export default function App(){
   finally{setBusy(false)}
  }
  async function closeBrowser(){
+  setOpenProfile(null);
   try{await closeMobileProfiles()}
   catch{setNote('环境尚未停止，请关闭原生浏览窗口后重试')}
-  finally{setOpenProfile(null)}
  }
  async function addProfile(){
   try{
@@ -126,9 +126,9 @@ export default function App(){
        <Action title="退出" secondary disabled={busy} onPress={logout}/></View>
      </>}
     </View>
-    <View style={styles.card}><Text style={styles.cardTitle}>LYCO VPN / 代理服务</Text>
-     <Text style={styles.hint}>桌面版使用 Mihomo 连接官网订阅。移动端新增独立网站数据与 HTTP(S) 代理入口，目前需要自备兼容代理，尚未连接官网订阅或全设备 VPN。</Text>
-     <View style={styles.pill}><Text style={styles.pillText}>{Platform.OS==='android'?'Android':Platform.OS==='ios'?'iOS':'Web'} · {entitlement?'权益已验证':'尚无有效月卡'} · VPN 未连接</Text></View>
+    <View style={styles.card}><Text style={styles.cardTitle}>浏览环境代理</Text>
+     <Text style={styles.hint}>登录并核实官网月卡后，可在环境内加载和选择官网线路。移动端也可使用自备 HTTP(S) 代理；每个环境保留自己的网页登录数据。</Text>
+     <View style={styles.pill}><Text style={styles.pillText}>{Platform.OS==='android'?'Android':Platform.OS==='ios'?'iOS':'Web'} · {entitlement?'权益已验证':'尚无有效月卡'} · 在环境内启动代理</Text></View>
      <Action title="进入官网代理教程" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>支付 / 续费</Text>
@@ -139,7 +139,7 @@ export default function App(){
    </>}
    {screen==='profiles'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>新建环境条目</Text>
-     <Text style={styles.hint}>环境名称与网址保存在本设备。移动端通过原生网站数据存储区分环境，启动时配置专用 HTTP(S) 代理。指纹、系统参数和全设备流量不在这项隔离范围内。</Text>
+     <Text style={styles.hint}>环境名称与网址保存在本设备。移动端为每个环境分配独立网站数据，启动时选择官网线路或自备代理。连接仅覆盖当前浏览环境。</Text>
      <Field label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A"/>
      <Field label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com"/>
      <Action title="保存环境" onPress={addProfile}/>

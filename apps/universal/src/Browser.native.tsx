@@ -1,6 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {Keyboard,ScrollView,Text,Pressable,TextInput,StyleSheet} from 'react-native';
-import {openMobileProfile,openPaidMobileProfile} from './mobile-browser';
+import {openMobileProfile,openPaidMobileProfile,closeMobileProfiles} from './mobile-browser';
 import {mobileSubscription,type MobileSubscription} from './billing';
 import type {BrowserProps} from './profiles';
 export default function Browser({profile,onClose,session}:BrowserProps){
@@ -9,7 +9,7 @@ export default function Browser({profile,onClose,session}:BrowserProps){
  const [subscription,setSubscription]=useState<MobileSubscription|null>(null);
  const [selected,setSelected]=useState(''),[manual,setManual]=useState(!session);
  const opening=useRef(false),mounted=useRef(true);
- useEffect(()=>{mounted.current=true;return()=>{mounted.current=false}},[]);
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;void closeMobileProfiles().catch(()=>{})}},[]);
  async function run(action:()=>Promise<void>){
   if(opening.current)return;
   opening.current=true;setBusy(true);setMessage('正在处理…');
@@ -31,10 +31,10 @@ export default function Browser({profile,onClose,session}:BrowserProps){
   const node=fresh.nodes.find(x=>x.name===selected);
   if(!node)throw Error('所选线路已变化，请重新加载线路');
   await openPaidMobileProfile(profile,fresh,node,session);
-  setMessage('已提交官网线路启动，实际网络状态见浏览窗口');
+  if(mounted.current)setMessage('已提交官网线路启动，实际网络状态见浏览窗口');
  })}
  function launchManual(){return run(async()=>{
-  await openMobileProfile(profile,proxy);setMessage('已提交环境启动，实际网络状态见浏览窗口');
+  await openMobileProfile(profile,proxy);if(mounted.current)setMessage('已提交环境启动，实际网络状态见浏览窗口');
  })}
  return <ScrollView contentContainerStyle={s.shell} keyboardShouldPersistTaps="handled">
   <Text style={s.title}>{profile.name}</Text>
