@@ -203,3 +203,43 @@ test('unexpected Mihomo exit triggers managed-window shutdown hook',async t=>{
  assert.equal(app.status().connected,false);
  assert.equal(app.port,null);
 });
+
+test('a revoked paid entitlement stops both the tracked core and owned-window hook',async t=>{
+ const {app,children}=await lifecycleFixture(t);await app.connect();
+ let stopped=0;app.onAuthorizationLost=()=>{stopped++};
+ app.fetchFn=async()=>new Response(JSON.stringify({username:'sample',entitlements:[]}));
+ const state=await app.validateConnection();
+ assert.equal(state.entitled,false);assert.equal(state.connected,false);
+ assert.equal(children[0].killed,true);assert.equal(stopped,1);
+ assert.equal(app.validationTimer,null);
+});
+
+test('a transient Billing outage retains a verified route only within the five-minute lease',async t=>{
+ const {app,children}=await lifecycleFixture(t);await app.connect();
+ app.fetchFn=async()=>{throw Error('CI-controlled network outage')};
+ await assert.rejects(()=>app.validateConnection(),/outage/);
+ assert.equal(app.status().connected,true);
+ app.lastVerifiedAt=Date.now()-300001;
+ await assert.rejects(()=>app.validateConnection(),/outage/);
+ assert.equal(app.status().connected,false);assert.equal(children[0].killed,true);
+});
+
+test('an authorization rejection closes an active route immediately without an outage grace period',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ let stopped=false;app.onAuthorizationLost=()=>{stopped=true};
+ app.fetchFn=async()=>new Response('{}',{status:403});
+ await assert.rejects(()=>app.validateConnection(),/403/);
+ assert.equal(stopped,true);assert.equal(app.status().logged_in,false);assert.equal(app.status().connected,false);
+});
+
+test('a late outage result cannot invalidate a replacement core',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ const original=app.fetchFn;let release,started;
+ const requested=new Promise(resolve=>{started=resolve});
+ app.fetchFn=()=>{started();return new Promise((_resolve,reject)=>{release=()=>reject(Error('late old outage'))})};
+ const pending=app.validateConnection();const rejection=assert.rejects(pending,/late old outage/);
+ await requested;await app.disconnect();app.fetchFn=original;await app.connect();
+ app.lastVerifiedAt=Date.now()-300001;
+ release();await rejection;
+ assert.equal(app.status().connected,true);assert.equal(app.status().entitled,true);
+});

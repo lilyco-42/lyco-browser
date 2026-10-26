@@ -108,3 +108,10 @@ test('unexpected proxy loss shuts down only bound managed environments',async t=
  assert.deepEqual(calls.stops,[profile.id]);
  assert.equal(calls.stops.includes('independent'),false);
 });
+
+test('a Billing authorization-loss event closes only persisted managed environments',async t=>{
+ const {service,engine,args,calls}=setup(t);
+ const {profile}=await service.create();engine.profiles.set('manual',{id:'manual'});
+ await args.network.onAuthorizationLost();
+ assert.deepEqual(calls.stops,[profile.id]);
+});

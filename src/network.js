@@ -122,6 +122,9 @@ class LycoNetwork {
     this.connectionEpoch = 0;
     this.authGeneration = 0;
     this.onCoreExit = null;
+    this.onAuthorizationLost = null;
+    this.validationTimer = null;
+    this.lastVerifiedAt = 0;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -132,9 +135,9 @@ class LycoNetwork {
       signal: AbortSignal.timeout(15000), redirect: 'error',
     });
     if (!response.ok) {
-      if (response.status === 401 && jwt === this.token) {
+      if ((response.status === 401 || response.status === 403) && jwt && jwt === this.token) {
         this.token = null; this.entitlement = null; this.username = null;
-        await this.disconnect();
+        await this.endAuthorization();
       }
       throw Error(response.status === 401 ? '登录失败或会话已过期' :
         '官网 API 请求失败（HTTP ' + response.status + '）');
@@ -169,8 +172,9 @@ class LycoNetwork {
     const me = await this.request('/me');
     if(this.token!==sessionToken || this.connectionEpoch!==epoch)throw Error('登录会话已变化，请重新操作');
     this.username = typeof me.username === 'string' ? me.username : '';
+    this.lastVerifiedAt = Date.now();
     this.entitlement = extractEntitlement(me);
-    if (!this.entitlement && this.child) await this.disconnect();
+    if (!this.entitlement && this.child) await this.endAuthorization();
     if(this.child) this.armExpiry();
     return this.status();
   }
@@ -179,10 +183,40 @@ class LycoNetwork {
     if(!this.entitlement?.expires_at) return;
     const remaining=Date.parse(this.entitlement.expires_at)-Date.now();
     if(!Number.isFinite(remaining) || remaining<=0) {
-      this.entitlement=null;void this.disconnect();return;
+      void this.endAuthorization();return;
     }
     this.expiryTimer=setTimeout(()=>this.armExpiry(),Math.min(remaining,2147483647));
     this.expiryTimer.unref?.();
+  }
+  async endAuthorization() {
+    this.entitlement = null;
+    const disconnected = this.disconnect();
+    // The core stops immediately; owned windows also stop when Billing revokes
+    // access. Explicit core disconnect does not emit the unexpected-exit hook.
+    await Promise.allSettled([disconnected, Promise.resolve().then(()=>this.onAuthorizationLost?.())]);
+    return this.status();
+  }
+  async validateConnection() {
+    const child=this.child,epoch=this.connectionEpoch;
+    if(!child) return this.status();
+    try { return await this.refresh(); }
+    catch(error) {
+      // A short API outage may recover. An unverified paid connection cannot
+      // continue forever, and a late old response cannot stop a new connection.
+      if(this.child===child && this.connectionEpoch===epoch && Date.now()-this.lastVerifiedAt>=300000)
+        await this.endAuthorization();
+      throw error;
+    }
+  }
+  armValidation() {
+    clearTimeout(this.validationTimer);
+    const child=this.child;
+    if(!child) return;
+    this.validationTimer=setTimeout(async()=>{
+      try { await this.validateConnection(); } catch (_) { /* bounded lease above */ }
+      if(this.child===child) this.armValidation();
+    },60000);
+    this.validationTimer.unref?.();
   }
   status() {
     const connected = Boolean(this.child && this.child.exitCode === null && !this.child.killed && this.port);
@@ -249,7 +283,7 @@ class LycoNetwork {
     this.child = child; this.port = port;
     const onGone=()=>{
       if(this.child!==child)return;
-      this.child=null;this.port=null;clearTimeout(this.expiryTimer);
+      this.child=null;this.port=null;clearTimeout(this.expiryTimer);clearTimeout(this.validationTimer);
       // Unexpected core loss closes managed windows. Explicit disconnect
       // clears this.child first, so the callback is never invoked for it.
       try { Promise.resolve(this.onCoreExit?.()).catch(()=>{}); } catch (_) {}
@@ -260,6 +294,7 @@ class LycoNetwork {
       await waitForPort(port, child);
       stillCurrent();
       this.armExpiry();
+      this.armValidation();
       return this.status();
     } catch (e) {
       await this.disconnect();
@@ -274,6 +309,7 @@ class LycoNetwork {
   async disconnect() {
     this.connectionEpoch++;
     clearTimeout(this.expiryTimer);this.expiryTimer=null;
+    clearTimeout(this.validationTimer);this.validationTimer=null;
     if (this.child) {
       const child = this.child;
       this.child = null; this.port = null;

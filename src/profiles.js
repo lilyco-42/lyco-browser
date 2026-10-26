@@ -17,6 +17,7 @@ class LycoProfiles {
       this.bindings=Object.assign(Object.create(null),saved.bindings);
     }
     network.onCoreExit=()=>this.stopManaged();
+    network.onAuthorizationLost=()=>this.stopManaged();
     // The upstream sanitizer rebuilds proxyMeta and drops custom flags.
     // Resolve policy from trusted, persisted bindings at the final launch
     // boundary instead of trusting renderer metadata to survive that path.
