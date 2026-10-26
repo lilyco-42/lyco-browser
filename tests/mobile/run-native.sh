@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export MAESTRO_CLI_NO_ANALYTICS=1
+export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
 [[ ${GITHUB_ACTIONS:-} == true ]] || { echo 'Actions only' >&2; exit 2; }
 platform=${1:?android or ios}
 root=$(cd "$(dirname "$0")" && pwd)

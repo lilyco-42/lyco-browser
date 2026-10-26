@@ -39,6 +39,16 @@ func TestRealHTTPProxyAndClosedPortGuard(t *testing.T) {
  response,err:=client.Get(origin.URL);if err!=nil{t.Fatal(err)}
  body,_:=io.ReadAll(response.Body);response.Body.Close()
  if string(body)!="LYCO route verified"||hits.Load()==0{t.Fatal("traffic did not traverse the real HTTP outbound")}
+ // HTTP/1.0 EOF-delimited pages remain valid through both proxy hops.
+ legacy:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  connection,buffer,err:=w.(http.Hijacker).Hijack();if err!=nil{return}
+  defer connection.Close()
+  buffer.WriteString("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<h1>Legacy HTML body</h1>")
+  buffer.Flush()
+ }));defer legacy.Close()
+ response,err=client.Get(legacy.URL);if err!=nil{t.Fatal(err)}
+ body,_=io.ReadAll(response.Body);response.Body.Close()
+ if string(body)!="<h1>Legacy HTML body</h1>"{t.Fatalf("EOF-delimited body was truncated: %d bytes",len(body))}
  // Anonymous web content cannot access an authenticated iOS session's core.
  anonymous:=*proxy;anonymous.User=nil
  noAuth:=&http.Client{Transport:&http.Transport{Proxy:http.ProxyURL(&anonymous)},Timeout:2*time.Second}

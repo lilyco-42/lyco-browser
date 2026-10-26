@@ -6,7 +6,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('--evidence',required=True)
 args=parser.parse_args()
 evidence=Path(args.evidence);evidence.mkdir(parents=True,exist_ok=True)
-state={'reports':[],'requests':[],'proxyRequests':[]}
+state={'reports':[],'requests':[],'proxyRequests':[],'responseBodies':[],'tunnels':[]}
 lock=threading.Lock()
 def save():
     with lock: (evidence/'network.json').write_text(json.dumps(state,indent=2))
@@ -26,7 +26,7 @@ class Origin(http.server.BaseHTTPRequestHandler):
         const result=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
         if(!result.ok)throw Error('report failed');document.getElementById('status').textContent='LYCO verified '+owner;
         })().catch(()=>document.getElementById('status').textContent='LYCO fixture failed');</script>'''.replace('OWNER',json.dumps(owner))
-        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(page.encode())
+        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.end_headers();payload=page.encode();state['responseBodies'].append({'path':self.path,'bytes':len(payload)});save();self.wfile.write(payload)
     def do_POST(self):
         if self.path!='/report': self.send_error(404);return
         report=json.loads(self.rfile.read(int(self.headers.get('Content-Length',0))))
@@ -45,14 +45,24 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             state['proxyRequests'].append({'method':'CONNECT','host':host});save()
             self.send_response(200);self.end_headers()
             self.connection.settimeout(20);upstream.settimeout(20)
+            traffic={'sent':0,'received':0};state['tunnels'].append(traffic)
             with upstream:
-                while True:
-                    ready,_,_=select.select([self.connection,upstream],[],[],20)
+                # TCP half-close ends one direction, not the still-pending HTTP
+                # response in the other direction. Keep draining before closing.
+                readers=[self.connection,upstream]
+                while readers:
+                    ready,_,_=select.select(readers,[],[],20)
                     if not ready: break
                     for source in ready:
                         data=source.recv(65536)
-                        if not data: return
-                        (upstream if source is self.connection else self.connection).sendall(data)
+                        destination=upstream if source is self.connection else self.connection
+                        if not data:
+                            readers.remove(source)
+                            try: destination.shutdown(socket.SHUT_WR)
+                            except OSError: pass
+                            continue
+                        traffic['sent' if source is self.connection else 'received']+=len(data);save()
+                        destination.sendall(data)
         except (OSError,ValueError): self.close_connection=True
     def relay(self):
         url=urlsplit(self.path)

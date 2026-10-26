@@ -6,6 +6,7 @@ import path from 'node:path';
 import http from 'node:http';
 import net from 'node:net';
 import {protectConnectHandler} from './connect-handler.mjs';
+import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {_electron as electron} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
@@ -13,10 +14,12 @@ const evidence=path.resolve(process.env.LYCO_UNIX_EVIDENCE||'lyco-unix-evidence'
 await fs.mkdir(evidence,{recursive:true});
 const report={platform:process.platform,source:process.env.GITHUB_SHA,checks:[],observations:[],proxyRequests:[]};
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
+const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
 const tunnelPorts=new Set();
 const navigations=[];
 const origin=http.createServer(async(req,res)=>{
  const proxied=req.headers['x-lyco-ci-route']==='proxy'||tunnelPorts.has(req.socket.remotePort);
+ if(privacyProbe.route(req,res,proxied))return;
  const url=new URL(req.url,'http://fixture');
  if(url.pathname==='/network-control'){res.setHeader('x-lyco-fixture-proxy',proxied?'yes':'no');res.end('LYCO core control');return;}
  if(url.pathname==='/report'){
@@ -56,7 +59,8 @@ const proxy=http.createServer((req,res)=>{
  upstream.on('error',()=>res.destroy());req.pipe(upstream);
 });
 const geo=http.createServer((_req,res)=>{
- res.setHeader('Content-Type','application/json');
+ report.geoRequests=(report.geoRequests||0)+1;
+ res.writeHead(200,{'Content-Type':'application/json','Connection':'close'});
  res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));
 });
 const geoPort=await listen(geo);
@@ -135,6 +139,21 @@ try{
   await page.evaluate(id=>window.ops.stopProfile(id),profiles[index].id);
   report.checks.push(phase+'-proxied-storage');
  }
+ const rtcTarget=`http://127.0.0.1:${originPort}/webrtc-probe`;
+ const rtcProfile=await page.evaluate(({profile,target})=>window.adoptLycoProfile({...profile,
+  startUrl:target,platform:{type:'other',startUrl:target},advanced:{...profile.advanced,startUrls:target},
+  privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false,webrtc:'proxy'}}),{profile:profiles[0],target:rtcTarget});
+ await page.evaluate(source=>window.ops.startProfile(source),rtcProfile);
+ const rtcDeadline=Date.now()+22000;
+ while(Date.now()<rtcDeadline&&!privacyProbe.snapshot().rtc)await new Promise(resolve=>setTimeout(resolve,150));
+ const rtc=privacyProbe.snapshot();report.webrtcAudit=rtc;
+ assert.ok(rtc.rtc?.completed,'Packaged kernel did not complete WebRTC observation');
+ assert.equal(rtc.rtc.blocked,false,'WebRTC must exercise an actual peer connection');
+ assert.equal(rtc.pageProxied,true);assert.equal(rtc.reportProxied,true);
+ assert.equal(rtc.rtc.ipCandidate,false,'WebRTC exposed a literal IP candidate');
+ assert.equal(rtc.udpPackets,0,'WebRTC sent direct UDP to the proven reachable STUN fixture');
+ await page.evaluate(id=>window.ops.stopProfile(id),profiles[0].id);
+ report.checks.push('native-webrtc-peer-connection-no-literal-ip-or-direct-stun-packets');
  await page.evaluate(()=>window.ops.lycoLogout());
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).logged_in,false);
  report.checks.push('native-logout');
@@ -143,6 +162,7 @@ try{
 finally{
  if(app)try{report.coreStartup=await app.evaluate(()=>globalThis.__lycoUnixCoreEvidence||[])}catch{}
  await app?.close().catch(()=>{});
+ await privacyProbe.close();
  for(const socket of sockets)socket.destroy();origin.close();proxy.close();geo.close();
  await fs.writeFile(path.join(evidence,'report.json'),JSON.stringify(report,null,2));
  // The runner's app userData remains outside this report directory.

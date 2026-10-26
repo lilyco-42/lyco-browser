@@ -13,6 +13,8 @@ import android.view.WindowInsets
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceError
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
@@ -109,10 +111,18 @@ class ProfileBrowserActivity : Activity() {
           CookieManager.getInstance().setAcceptThirdPartyCookies(view, false)
           view.webChromeClient = WebChromeClient() // Permission requests are denied by default.
           view.webViewClient = object : WebViewClient() {
+            private var mainError: String? = null
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = !allowedUrl(request.url.toString())
+            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+              if (request.isForMainFrame && !closing) { mainError = "页面网络请求失败（${error.errorCode}）"; status.text = mainError }
+            }
+            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
+              if (request.isForMainFrame && !closing) { mainError = "页面返回 HTTP ${response.statusCode}"; status.text = mainError }
+            }
             override fun onPageFinished(view: WebView, url: String) {
+              if (closing) return
               CookieManager.getInstance().flush()
-              status.text = "${intent.getStringExtra("name") ?: "独立环境"} · 已配置代理 · ${Uri.parse(url).host ?: ""}"
+              status.text = mainError ?: "${intent.getStringExtra("name") ?: "独立环境"} · 已配置代理 · ${Uri.parse(url).host ?: ""}"
             }
           }
           layout.addView(view, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
