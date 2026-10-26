@@ -7,7 +7,7 @@ import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
 function Action({title,onPress,secondary=false,disabled=false}:{title:string;onPress:()=>void;secondary?:boolean;disabled?:boolean}){
- return <Pressable disabled={disabled} onPress={onPress}
+ return <Pressable accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} onPress={onPress}
   style={[styles.action,secondary&&styles.secondary,disabled&&styles.disabled]}>
   <Text style={[styles.actionText,secondary&&{color:COLOR.text}]}>{title}</Text>
  </Pressable>;
@@ -52,6 +52,7 @@ export default function App(){
  }
  async function addProfile(){
   try{
+   if(profiles.length>=100)throw Error('每台设备最多保存100个环境');
    const next=[...profiles,createProfile(name,url)];
    await saveProfiles(next);setProfiles(next);setName('');setNote('已建立本地环境条目');
   }catch(e){setNote((e as Error).message)}
@@ -59,7 +60,7 @@ export default function App(){
  async function removeProfile(id:string){
   try{
    const next=profiles.filter(x=>x.id!==id);
-   await saveProfiles(next);setProfiles(next);setNote('本地环境条目已删除；历史浏览数据不保证清除');
+   await saveProfiles(next);setProfiles(next);setNote('环境列表条目已删除；原生网站数据仍保留在本机');
   }catch(e){setNote((e as Error).message)}
  }
  async function openSite(address:string){
@@ -72,7 +73,7 @@ export default function App(){
   <View style={styles.header}>
    <Text style={styles.kicker}>LYCO / UNIFIED CLIENT</Text>
    <Text style={styles.title}>LYCO Browser</Text>
-   <Text style={styles.subtitle}>React Native · 代理会员与多环境管理</Text>
+   <Text style={styles.subtitle}>代理会员与独立环境管理</Text>
   </View>
   <View style={styles.tabs}>
    {([['home','会员与代理'],['profiles','环境管理'],['about','平台能力']] as [Screen,string][]).map(([tab,label])=>
@@ -98,7 +99,7 @@ export default function App(){
      </>}
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>LYCO VPN / 代理服务</Text>
-     <Text style={styles.hint}>已接入现有 Billing 权益验证；桌面版使用 Mihomo 启动本地代理。移动端 VPN 原生隧道尚未接入，不能把付费权益当成已经连接 VPN。</Text>
+     <Text style={styles.hint}>桌面版使用 Mihomo 连接官网订阅。移动端新增独立网站数据与 HTTP(S) 代理入口，目前需要自备兼容代理，尚未连接官网订阅或全设备 VPN。</Text>
      <View style={styles.pill}><Text style={styles.pillText}>{Platform.OS==='android'?'Android':Platform.OS==='ios'?'iOS':'Web'} · {entitlement?'权益已验证':'尚无有效月卡'} · VPN 未连接</Text></View>
      <Action title="进入官网代理教程" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
     </View>
@@ -110,7 +111,7 @@ export default function App(){
    </>}
    {screen==='profiles'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>新建环境条目</Text>
-     <Text style={styles.hint}>环境名称与网址保存在本设备。移动端目前使用临时 WebView，**不具备桌面版 Chromium 的独立用户目录与完整指纹隔离**。</Text>
+     <Text style={styles.hint}>环境名称与网址保存在本设备。移动端通过原生网站数据存储区分环境，启动时配置专用 HTTP(S) 代理。指纹、系统参数和全设备流量不在这项隔离范围内。</Text>
      <Field label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A"/>
      <Field label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com"/>
      <Action title="保存环境" onPress={addProfile}/>
@@ -122,8 +123,8 @@ export default function App(){
        <Action title="删除条目" secondary onPress={()=>removeProfile(row.id)}/></View></View>)}
    </>}
    {screen==='about'&&<View style={styles.card}><Text style={styles.cardTitle}>支持范围与限制</Text>
-    <Text style={styles.hint}>Android：React Native + Android WebView，单个临时网页视图；需要独立原生模块处理 VPNService、进程级 Cookie/缓存隔离。</Text>
-    <Text style={styles.hint}>iOS：React Native + WKWebView。使用其他浏览器内核涉及 Apple 专门授权条件；VPN 必须使用 Network Extension 等原生能力及授权。</Text>
+    <Text style={styles.hint}>Android 9 及以上：原生 WebView 使用环境专用数据目录和独立进程。每次只打开一个环境，关闭后终止浏览进程。需要系统 WebView 支持代理覆盖。</Text>
+    <Text style={styles.hint}>iOS 17 及以上：每个环境使用独立持久 WKWebsiteDataStore，并在加载前配置 HTTP(S) 代理。功能仍需模拟器和真机验证；不提供全设备 VPN。</Text>
     <Text style={styles.hint}>Windows / macOS / Linux：使用 OpenBrowser 桌面内核。React Native Web 可作为跨平台会员控制界面，但 Electron 容器和原生进程不同于移动端 WebView。</Text>
     <Text style={styles.hint}>反检测并非隐身承诺。独立账号、合法授权、合规使用，且不同平台的指纹能力不能保证完全相同。</Text>
     <Action title="官网帮助" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>

@@ -21,6 +21,19 @@
       "bundler": "metro",
       "name": "LYCO Browser",
       "shortName": "LYCO"
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 28
+          },
+          "ios": {
+            "deploymentTarget": "17.0"
+          }
+        }
+      ]
+    ]
   }
 }
