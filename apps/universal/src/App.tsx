@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {ActivityIndicator,Linking,Platform,Pressable,SafeAreaView,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
+import {ActivityIndicator,BackHandler,Keyboard,Linking,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
 import Browser from './Browser';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 
@@ -17,7 +18,7 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{lab
   <Text style={styles.label}>{label}</Text>
   <TextInput testID={label} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
-   returnKeyType="done" submitBehavior="blurAndSubmit" secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
+   returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
 }
 export default function App(){
@@ -34,6 +35,14 @@ export default function App(){
   readProfiles().then(rows=>{if(live)setProfiles(rows)}).catch(()=>{if(live)setNote('无法读取本地环境列表')});
   return()=>{live=false};
  },[]);
+ useEffect(()=>{
+  const subscription=BackHandler.addEventListener('hardwareBackPress',()=>{
+   if(openProfile){setOpenProfile(null);return true}
+   if(screen!=='home'){setScreen('home');return true}
+   return false;
+  });
+  return()=>subscription.remove();
+ },[openProfile,screen]);
  async function doLogin(){
   const generation=++authGeneration.current;
   setBusy(true);setNote('登录中…');
@@ -72,7 +81,7 @@ export default function App(){
  }
  const entitlement=me?proxyEntitlement(me):null;
  if(openProfile)return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
-  <Browser profile={openProfile} onClose={()=>setOpenProfile(null)}/></SafeAreaView>;
+  <Browser profile={openProfile} onClose={()=>setOpenProfile(null)} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
  return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
   <View style={styles.header}>
    <Text style={styles.kicker}>LYCO / UNIFIED CLIENT</Text>

@@ -10,15 +10,15 @@ if [[ "$platform" == android ]]; then
   test -n "$ANDROID_NDK_HOME"
   gomobile bind -v -target=android/arm64,android/amd64 -androidapi=28 -javapkg=top.lain42 -tags=with_quic,with_utls -trimpath -o "$RUNNER_TEMP/lyco-tunnel.aar" .
   python3 - <<'PY'
-  import os,zipfile
-  from pathlib import Path
-  archive=Path(os.environ['RUNNER_TEMP'])/'lyco-tunnel.aar'
-  with zipfile.ZipFile(archive) as z:
-      names=z.namelist()
-      assert 'classes.jar' in names
-      assert any(x.startswith('jni/arm64-v8a/') and x.endswith('.so') for x in names)
-      assert any(x.startswith('jni/x86_64/') and x.endswith('.so') for x in names)
-      z.extract('classes.jar',Path(os.environ['RUNNER_TEMP'])/'lyco-tunnel-binding')
+import os,zipfile
+from pathlib import Path
+archive=Path(os.environ['RUNNER_TEMP'])/'lyco-tunnel.aar'
+with zipfile.ZipFile(archive) as z:
+    names=z.namelist()
+    assert 'classes.jar' in names
+    assert any(x.startswith('jni/arm64-v8a/') and x.endswith('.so') for x in names)
+    assert any(x.startswith('jni/x86_64/') and x.endswith('.so') for x in names)
+    z.extract('classes.jar',Path(os.environ['RUNNER_TEMP'])/'lyco-tunnel-binding')
 PY
   javap -classpath "$RUNNER_TEMP/lyco-tunnel-binding/classes.jar" top.lain42.lycotunnel.Lycotunnel top.lain42.lycotunnel.Session > "$RUNNER_TEMP/lyco-tunnel-bindings.txt"
 else

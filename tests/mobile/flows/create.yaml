@@ -8,7 +8,7 @@ appId: top.lain42.lycobrowser
 - tapOn:
     id: "环境名称"
 - inputText: ${NAME}
-- hideKeyboard
+- pressKey: Enter
 - scrollUntilVisible:
     element:
       id: "首页 URL"
@@ -17,5 +17,5 @@ appId: top.lain42.lycobrowser
     id: "首页 URL"
 - eraseText
 - inputText: ${URL}
-- hideKeyboard
+- pressKey: Enter
 - tapOn: "保存环境"

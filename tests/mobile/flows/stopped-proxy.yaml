@@ -1,5 +1,7 @@
 appId: top.lain42.lycobrowser
 ---
+- launchApp:
+    clearState: false
 - runFlow:
     file: create.yaml
     env:

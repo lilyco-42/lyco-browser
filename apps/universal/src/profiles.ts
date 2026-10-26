@@ -1,6 +1,8 @@
 import {randomUUID} from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const KEY='lyco:browser-profile-metadata:v1';
+export type BrowserSession={token:string;username:string};
+export type BrowserProps={profile:Profile;onClose:()=>void;session?:BrowserSession};
 export type Profile = {id:string;name:string;url:string;createdAt:number};
 export function safeUrl(url:string):string {
  let value=url.trim();

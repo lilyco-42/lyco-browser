@@ -3,11 +3,13 @@ package top.lain42.browser
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -20,10 +22,14 @@ import androidx.webkit.ProxyConfig
 import androidx.webkit.ProxyController
 import androidx.webkit.WebViewFeature
 import java.util.UUID
+import top.lain42.lycotunnel.Lycotunnel
+import top.lain42.lycotunnel.Session
 
 /** One profile and one route per process lifetime. No React bridge in web content. */
 class ProfileBrowserActivity : Activity() {
   private var browser: WebView? = null
+  private var tunnel: Session? = null
+  private var paidGuard: PaidSessionGuard? = null
   private val handler = Handler(Looper.getMainLooper())
   private val timeout = Runnable { fail("代理设置超时，未打开网页") }
   private lateinit var status: TextView
@@ -32,6 +38,16 @@ class ProfileBrowserActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    layout.setOnApplyWindowInsetsListener { view, insets ->
+      if (Build.VERSION.SDK_INT >= 30) {
+        val bars = insets.getInsets(WindowInsets.Type.systemBars())
+        view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+      } else {
+        @Suppress("DEPRECATION")
+        view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop, insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+      }
+      insets
+    }
     val close = Button(this).apply { text = "关闭环境"; setOnClickListener { finish() } }
     status = TextView(this).apply { text = "正在配置独立环境与代理…"; setPadding(16, 12, 16, 12) }
     layout.addView(close)
@@ -41,12 +57,30 @@ class ProfileBrowserActivity : Activity() {
       val id = UUID.fromString(intent.getStringExtra("id")).toString()
       val url = intent.getStringExtra("url") ?: error("缺少网址")
       check(allowedUrl(url)) { "仅支持 HTTP(S) 网页" }
-      val host = intent.getStringExtra("host") ?: error("缺少代理地址")
-      check(host.matches(Regex("[A-Za-z0-9.-]{1,253}"))) { "代理主机无效" }
-      val port = intent.getStringExtra("port")?.toIntOrNull() ?: error("代理端口无效")
+      val host: String
+      val port: Int
+      val scheme: String
+      val outbound = intent.getStringExtra("outbound")
+      if (outbound != null) {
+        val token = intent.getStringExtra("accountToken") ?: error("缺少登录会话")
+        val owner = intent.getStringExtra("accountOwner") ?: error("缺少所属账号")
+        val deadline = intent.getStringExtra("verificationDeadline")?.toLongOrNull() ?: error("权益核实无效")
+        check(token.isNotBlank() && token.length <= 4096 && !token.contains('\r') && !token.contains('\n') && owner.isNotBlank() && owner.length <= 120 && deadline > System.currentTimeMillis()) { "请重新核实官网权益" }
+        tunnel = Lycotunnel.start(outbound, false)
+        host = "127.0.0.1"; port = tunnel!!.port().toInt(); scheme = "http"
+        paidGuard = PaidSessionGuard(token, owner, deadline) { fail("官网权益已失效或长时间无法核实，环境已停止") }
+        // System task restoration must not retain account or node secrets.
+        intent.removeExtra("accountToken"); intent.removeExtra("outbound")
+      } else {
+        host = intent.getStringExtra("host") ?: error("缺少代理地址")
+        check(host.matches(Regex("[A-Za-z0-9.-]{1,253}"))) { "代理主机无效" }
+        port = intent.getStringExtra("port")?.toIntOrNull() ?: error("代理端口无效")
+        scheme = intent.getStringExtra("scheme") ?: "http"
+        check(scheme == "http" || scheme == "https") { "移动端当前支持 HTTP(S) 代理" }
+      }
       check(port in 1..65535) { "代理端口无效" }
-      val scheme = intent.getStringExtra("scheme") ?: "http"
-      check(scheme == "http" || scheme == "https") { "移动端当前支持 HTTP(S) 代理" }
+      paidGuard?.start()
+      if (closing) return
       // Must precede ANY android.webkit/WebViewFeature call in this process.
       WebView.setDataDirectorySuffix("lyco_$id")
       check(WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) { "请更新 Android System WebView 以支持代理" }
@@ -98,6 +132,8 @@ class ProfileBrowserActivity : Activity() {
   private fun fail(message: String) {
     handler.removeCallbacks(timeout)
     closing = true
+    paidGuard?.close(); paidGuard = null
+    runCatching { tunnel?.close() }; tunnel = null
     browser?.stopLoading()
     browser?.destroy()
     browser = null
@@ -108,8 +144,11 @@ class ProfileBrowserActivity : Activity() {
     val view = browser
     if (view != null && view.canGoBack()) view.goBack() else finish()
   }
+  override fun onResume() { super.onResume(); paidGuard?.checkForeground() }
   override fun onDestroy() {
     closing = true
+    paidGuard?.close(); paidGuard = null
+    runCatching { tunnel?.close() }; tunnel = null
     handler.removeCallbacksAndMessages(null)
     browser?.let { CookieManager.getInstance().flush(); it.stopLoading(); it.destroy() }
     browser = null

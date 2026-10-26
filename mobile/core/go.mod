@@ -3,6 +3,7 @@ module github.com/lilyco-42/lyco-browser/mobile/core
 go 1.25.5
 
 require (
+	github.com/sagernet/gomobile v0.1.12
 	github.com/sagernet/sing v0.9.7-0.20261023115459-5dc452e537bf
 	github.com/sagernet/sing-box v1.14.4
 )

@@ -72,6 +72,16 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
+      - name: Build and integrate the Android subscription core from source
+        working-directory: mobile/core
+        run: |
+          bash build-native.sh android
+          go test -tags with_quic,with_utls -count=1 ./...
+          python3 install-android.py
       - run: npx expo prebuild --clean --platform android --non-interactive
       - name: Prepare private signing key for an explicitly dispatched candidate
         if: github.event_name == 'workflow_dispatch' && inputs.signed_android
@@ -93,7 +103,7 @@ jobs:
           set -euo pipefail
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --no-daemon --stacktrace
       - name: Compile an explicitly dispatched signed Android candidate
         if: github.event_name == 'workflow_dispatch' && inputs.signed_android
         env:
@@ -105,7 +115,7 @@ jobs:
           set -euo pipefail
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --init-script ../scripts/android-signing.gradle --no-daemon --stacktrace
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --init-script ../scripts/android-signing.gradle --no-daemon --stacktrace
       - name: Verify Android signature and retain standalone preview
         run: |
           set -euo pipefail
@@ -174,6 +184,18 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
+      - name: Build and integrate the Apple subscription core from source
+        working-directory: mobile/core
+        run: |
+          set -euo pipefail
+          bash build-native.sh apple
+          go test -tags with_quic,with_utls -count=1 ./...
+          mkdir -p ../../apps/universal/modules/lyco-mobile-browser/ios/Frameworks
+          tar xzf "$RUNNER_TEMP/lyco-tunnel-apple.tar.gz" -C ../../apps/universal/modules/lyco-mobile-browser/ios/Frameworks
       - run: npx expo prebuild --clean --platform ios --non-interactive
       - name: Install CocoaPods dependencies
         run: |

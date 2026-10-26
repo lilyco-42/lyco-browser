@@ -2,6 +2,7 @@ import ExpoModulesCore
 import WebKit
 import Network
 import UIKit
+import Lycotunnel
 
 public class LycoMobileBrowserModule: Module {
   private weak var active: ProfileBrowserController?
@@ -30,6 +31,9 @@ private struct BrowserError: Error, LocalizedError {
 
 @available(iOS 17.0, *)
 private final class ProfileBrowserController: UIViewController, WKNavigationDelegate, WKUIDelegate {
+  private var tunnel: LycotunnelSession?
+  private var paidGuard: PaidSessionGuard?
+  private var stopped = false
   private var browser: WKWebView?
   private let startURL: URL
   private let configuration: WKWebViewConfiguration
@@ -38,26 +42,53 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
 
   init(options: [String: String]) throws {
     guard let id = UUID(uuidString: options["id"] ?? ""),
-      let url = URL(string: options["url"] ?? ""), Self.allowed(url),
-      let host = options["host"], host.range(of: "^[A-Za-z0-9.-]{1,253}$", options: .regularExpression) != nil,
-      let portValue = UInt16(options["port"] ?? ""), portValue > 0,
-      let port = NWEndpoint.Port(rawValue: portValue),
-      let scheme = options["scheme"], ["http", "https"].contains(scheme) else {
-      throw BrowserError("环境或 HTTP(S) 代理设置无效")
+      let url = URL(string: options["url"] ?? ""), Self.allowed(url) else {
+      throw BrowserError("环境或网址设置无效")
     }
+    let host: String
+    let portValue: UInt16
+    let scheme: String
+    var core: LycotunnelSession?
+    var paidToken: String?
+    var paidOwner: String?
+    var verificationDeadline: Date?
+    if let outbound = options["outbound"] {
+      guard let token = options["accountToken"], !token.isEmpty, token.count <= 4096,
+        !token.contains("\r"), !token.contains("\n"),
+        let owner = options["accountOwner"], !owner.isEmpty, owner.count <= 120,
+        let value = Double(options["verificationDeadline"] ?? ""), value.isFinite,
+        Date(timeIntervalSince1970: value / 1000) > Date() else { throw BrowserError("请重新核实官网权益") }
+      var failure: NSError?
+      guard let session = LycotunnelStart(outbound, true, &failure) else { throw BrowserError("无法准备官网线路，请刷新订阅或更新客户端") }
+      core = session
+      host = "127.0.0.1"; portValue = UInt16(session.port()); scheme = "http"
+      paidToken = token; paidOwner = owner; verificationDeadline = Date(timeIntervalSince1970: value / 1000)
+    } else {
+      guard let address = options["host"], address.range(of: "^[A-Za-z0-9.-]{1,253}$", options: .regularExpression) != nil,
+        let value = UInt16(options["port"] ?? ""), value > 0,
+        let protocolName = options["scheme"], ["http", "https"].contains(protocolName) else { throw BrowserError("HTTP(S) 代理设置无效") }
+      host = address; portValue = value; scheme = protocolName
+    }
+    guard let port = NWEndpoint.Port(rawValue: portValue) else { try? core?.close(); throw BrowserError("代理端口无效") }
     startURL = url
     environmentName = String((options["name"] ?? "独立环境").prefix(90))
     let store = WKWebsiteDataStore(forIdentifier: id)
     var proxy = ProxyConfiguration(httpCONNECTProxy: .hostPort(host: .init(host), port: port),
       tlsOptions: scheme == "https" ? NWProtocolTLS.Options() : nil)
     proxy.allowFailover = false
+    if let core { proxy.applyCredential(username: core.username(), password: core.password()) }
     store.proxyConfigurations = [proxy]
     let config = WKWebViewConfiguration()
     config.websiteDataStore = store
     config.preferences.javaScriptCanOpenWindowsAutomatically = false
     config.mediaTypesRequiringUserActionForPlayback = .all
     configuration = config
+    tunnel = core
     super.init(nibName: nil, bundle: nil)
+    if let token = paidToken, let owner = paidOwner, let deadline = verificationDeadline {
+      paidGuard = PaidSessionGuard(token: token, owner: owner, deadline: deadline) { [weak self] in self?.stopForAuthorization() }
+    }
+    NotificationCenter.default.addObserver(self, selector: #selector(checkPaidLease), name: UIApplication.didBecomeActiveNotification, object: nil)
   }
   required init?(coder: NSCoder) { fatalError("init(coder:) unavailable") }
 
@@ -88,9 +119,22 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       stack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
       bar.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
     ])
-    web.load(URLRequest(url: startURL))
+    paidGuard?.start()
+    if !stopped { web.load(URLRequest(url: startURL)) }
   }
+  @objc private func checkPaidLease() { paidGuard?.checkForeground() }
+  private func stopForAuthorization() {
+    stopped = true
+    paidGuard?.close(); paidGuard = nil
+    try? tunnel?.close(); tunnel = nil
+    browser?.stopLoading(); browser?.removeFromSuperview(); browser = nil
+    status.text = "官网权益已失效或长时间无法核实，环境已停止"
+  }
+  deinit { paidGuard?.close(); try? tunnel?.close(); NotificationCenter.default.removeObserver(self) }
   @objc private func closeEnvironment() {
+    stopped = true
+    paidGuard?.close(); paidGuard = nil
+    try? tunnel?.close(); tunnel = nil
     browser?.stopLoading()
     browser?.navigationDelegate = nil
     browser?.removeFromSuperview()
