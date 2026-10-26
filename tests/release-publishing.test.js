@@ -70,8 +70,9 @@ test('universal release steps expose a scoped GitHub token only at publication',
   'Upload Android APK to GitHub prerelease',
   'Upload iOS simulator build to GitHub prerelease',
  ]) {
-  const block='      - name: '+name+'\n        env:\n          GH_TOKEN: '+'$'+'{{ github.token }}'+'\n        run:';
-  assert.ok(yaml.includes(block),'GH_TOKEN missing from '+name);
+  const block=yaml.split('      - name: '+name+'\n')[1]?.split(/\n      - (?:name:|uses:|run:)/)[0];
+  assert.ok(block?.includes('GH_TOKEN: '+'$'+'{{ github.token }}'),'GH_TOKEN missing from '+name);
+  assert.ok(block.includes("if: github.event_name != 'pull_request'"),'PR must not publish '+name);
  }
  assert.ok(!yaml.includes('\n  env:\n    GH_TOKEN:'),'Do not expose release token at workflow scope');
 });

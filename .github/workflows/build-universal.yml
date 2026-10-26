@@ -11,6 +11,11 @@ on:
     branches: [main]
     paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'scripts/ci-publish-release.sh', '.github/workflows/build-universal.yml']
   workflow_dispatch:
+    inputs:
+      signed_android:
+        description: 'Build a signed Android candidate in an owner-only draft (not a commercial release)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -42,7 +47,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
 
   android:
-    name: Android arm64/x64 debug APK
+    name: Android standalone preview / signed candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 70
     steps:
@@ -56,18 +61,66 @@ jobs:
       - run: npx tsc --noEmit
       - run: node --test ../../tests/mobile-proxy-endpoint.test.mjs
       - run: npx expo prebuild --clean --platform android --non-interactive
-      - name: Compile Android test APK on Actions
+      - name: Prepare private signing key for an explicitly dispatched candidate
+        if: github.event_name == 'workflow_dispatch' && inputs.signed_android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
+          python3 - <<'PYKEY'
+          import os, base64
+          from pathlib import Path
+          target=Path(os.environ['RUNNER_TEMP'])/'lyco-release.p12'
+          key=os.environ.get('ANDROID_KEYSTORE_BASE64','')
+          if not key: raise SystemExit('Android signing key is not configured')
+          target.write_bytes(base64.b64decode(key,validate=True))
+          target.chmod(0o600)
+          PYKEY
+      - name: Compile a standalone Android preview without production secrets
+        if: github.event_name != 'workflow_dispatch' || !inputs.signed_android
+        run: |
+          set -euo pipefail
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace
+      - name: Compile an explicitly dispatched signed Android candidate
+        if: github.event_name == 'workflow_dispatch' && inputs.signed_android
+        env:
+          LYCO_ANDROID_KEYSTORE: ${{ runner.temp }}/lyco-release.p12
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --init-script ../scripts/android-signing.gradle --no-daemon --stacktrace
+      - name: Verify Android signature and retain standalone preview
+        run: |
+          set -euo pipefail
+          cp android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          test -n "$signer"
+          "$signer" verify --verbose --print-certs "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
+          sha256sum "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk" > "$RUNNER_TEMP/ANDROID-SHA256SUMS.txt"
+      - name: Remove private signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/lyco-release.p12"
+      - name: Retain Android candidate for owner review
+        if: github.event_name == 'pull_request' || inputs.signed_android
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-android-candidate-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/LYCO-Browser-Android-preview.apk
+            ${{ runner.temp }}/ANDROID-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: Upload Android APK to GitHub prerelease
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && !inputs.signed_android
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/LYCO-Browser-Android-debug.apk"
-          bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-debug.apk"
+          bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
 
   ios-simulator:
     name: iOS 26 simulator unsigned app · no signing
@@ -87,7 +140,7 @@ jobs:
         run: |
           cd ios
           pod install
-      - name: Compile unsigned simulator app on Actions (not an IPA)
+      - name: Compile standalone unsigned simulator app on Actions (not an IPA)
         run: |
           set -euo pipefail
           cd ios
@@ -95,8 +148,8 @@ jobs:
           test -n "$WORKSPACE"
           SCHEME="$(basename "$WORKSPACE" .xcworkspace)"
           echo "Building application scheme: $SCHEME (not the first Pods workspace scheme)"
-          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/LYCO_iOS" CODE_SIGNING_ALLOWED=NO build
-          APP="$(find "$RUNNER_TEMP/LYCO_iOS/Build/Products/Debug-iphonesimulator" -maxdepth 1 -name '*.app' | head -1)"
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/LYCO_iOS" CODE_SIGNING_ALLOWED=NO build
+          APP="$(find "$RUNNER_TEMP/LYCO_iOS/Build/Products/Release-iphonesimulator" -maxdepth 1 -name '*.app' | head -1)"
           test -d "$APP"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$RUNNER_TEMP/LYCO-Browser-iOS-simulator.zip"
       - name: Upload iOS simulator build to GitHub prerelease

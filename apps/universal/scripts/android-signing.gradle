@@ -1,0 +1,16 @@
+// Used only by the manually dispatched signed-candidate job. No key or password
+// belongs in source, Gradle arguments, build logs, or the APK assets.
+allprojects { candidate ->
+  candidate.plugins.withId('com.android.application') {
+    candidate.afterEvaluate {
+      def android = candidate.extensions.getByName('android')
+      def signing = android.signingConfigs.maybeCreate('lycoRelease')
+      signing.storeFile = new File(System.getenv('LYCO_ANDROID_KEYSTORE'))
+      signing.storeType = 'PKCS12'
+      signing.storePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+      signing.keyAlias = System.getenv('ANDROID_KEY_ALIAS')
+      signing.keyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+      android.buildTypes.getByName('release').signingConfig = signing
+    }
+  }
+}
