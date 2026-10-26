@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import {ActivityIndicator,Linking,Platform,Pressable,SafeAreaView,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
 import Browser from './Browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
@@ -22,6 +22,7 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{lab
 }
 export default function App(){
  const [screen,setScreen]=useState<Screen>('home');
+ const authGeneration=useRef(0);
  const [user,setUser]=useState(''),[password,setPassword]=useState('');
  const [token,setToken]=useState(''),[me,setMe]=useState<Account|null>(null);
  const [busy,setBusy]=useState(false),[note,setNote]=useState('');
@@ -34,21 +35,24 @@ export default function App(){
   return()=>{live=false};
  },[]);
  async function doLogin(){
+  const generation=++authGeneration.current;
   setBusy(true);setNote('登录中…');
   try{
    const credentials=await login(user,password);
    const result=await account(credentials.token);
+   if(generation!==authGeneration.current)return;
    setToken(credentials.token);setMe(result);setPassword('');
    setNote('官网登录成功，已同步代理权益');
-  }catch(e){setPassword('');setToken('');setMe(null);setNote((e as Error).message)}
-  finally{setBusy(false)}
+  }catch(e){if(generation===authGeneration.current){setPassword('');setToken('');setMe(null);setNote((e as Error).message)}}
+  finally{if(generation===authGeneration.current)setBusy(false)}
  }
  async function refresh(){
   if(!token)return;
+  const generation=authGeneration.current;
   setBusy(true);
-  try{setMe(await account(token));setNote('权益已刷新')}
-  catch(e){setMe(null);setToken('');setNote('请重新登录：'+(e as Error).message)}
-  finally{setBusy(false)}
+  try{const next=await account(token);if(generation===authGeneration.current){setMe(next);setNote('权益已刷新')}}
+  catch(e){if(generation===authGeneration.current){setMe(null);setToken('');setNote('请重新登录：'+(e as Error).message)}}
+  finally{if(generation===authGeneration.current)setBusy(false)}
  }
  async function addProfile(){
   try{
@@ -95,7 +99,7 @@ export default function App(){
        {entitlement?'代理月卡有效':'暂无有效代理月卡'}</Text>
       {entitlement?.expires_at&&<Text style={styles.hint}>到期：{new Date(entitlement.expires_at).toLocaleString()}</Text>}
       <View style={styles.actions}><Action title="刷新权益" disabled={busy} onPress={refresh}/>
-       <Action title="退出" secondary onPress={()=>{setToken('');setMe(null);setNote('会话已退出')}}/></View>
+       <Action title="退出" secondary onPress={()=>{authGeneration.current++;setBusy(false);setPassword('');setToken('');setMe(null);setNote('会话已退出')}}/></View>
      </>}
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>LYCO VPN / 代理服务</Text>

@@ -47,7 +47,7 @@ jobs:
           path: apps/universal/package-lock.json
           retention-days: 7
       - run: node --test ../../tests/release-publishing.test.js
-      - run: node --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - run: npx tsc --noEmit
       - run: npx expo export --platform web --output-dir dist-web
       - name: Upload React Native Web to GitHub prerelease
@@ -71,7 +71,7 @@ jobs:
       # Ubuntu GitHub-hosted runner already provides the Android SDK; avoid legacy 'tools' package.
       - run: npm ci --no-audit --no-fund
       - run: npx tsc --noEmit
-      - run: node --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - run: npx expo prebuild --clean --platform android --non-interactive
       - name: Prepare private signing key for an explicitly dispatched candidate
         if: github.event_name == 'workflow_dispatch' && inputs.signed_android
@@ -173,7 +173,7 @@ jobs:
         run: xcodebuild -version
       - run: npm ci --no-audit --no-fund
       - run: npx tsc --noEmit
-      - run: node --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - run: npx expo prebuild --clean --platform ios --non-interactive
       - name: Install CocoaPods dependencies
         run: |

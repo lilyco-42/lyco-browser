@@ -7,7 +7,7 @@ test('mobile outbound adapters preserve node credentials and explicit safe TLS/t
  assert.deepEqual(mobileOutbound({...base,type:'ss',cipher:'aes-128-gcm',password:'CI-only'}),{type:'shadowsocks',server:'127.0.0.1',server_port:18081,method:'aes-128-gcm',password:'CI-only'});
  const vless=mobileOutbound({...base,type:'vless',uuid,tls:true,servername:'edge.example',network:'ws','ws-opts':{path:'/stream',headers:{Host:'edge.example'}}});
  assert.equal(vless.tls.server_name,'edge.example');assert.equal(vless.transport.path,'/stream');assert.equal(vless.uuid,uuid);
- for(const type of ['vmess','trojan','hysteria2','tuic','http','socks5'])assert.ok(mobileOutbound({...base,type,uuid,cipher:'auto',password:'CI-only'}));
+ for(const type of ['vmess','trojan','hysteria2','tuic','http','socks5'])assert.ok(mobileOutbound({...base,type,uuid,cipher:'auto',username:'CI-user',password:'CI-only'}));
 });
 test('mobile adapters reject unsafe certificate policy, hidden dialers and unsupported node settings',()=>{
  for(const extra of [{'skip-cert-verify':true},{'dialer-proxy':'DIRECT'},{plugin:'unknown'},{ports:'1000-2000'},{network:'unknown'},{uuid:'not-a-uuid'}])assert.throws(()=>mobileOutbound({...base,type:'vless',uuid,...extra}));
