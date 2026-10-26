@@ -6,8 +6,8 @@ import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
-function Action({title,onPress,secondary=false,disabled=false}:{title:string;onPress:()=>void;secondary?:boolean;disabled?:boolean}){
- return <Pressable accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} onPress={onPress}
+function Action({title,label,onPress,secondary=false,disabled=false}:{title:string;label?:string;onPress:()=>void;secondary?:boolean;disabled?:boolean}){
+ return <Pressable accessibilityRole="button" accessibilityLabel={label||title} accessibilityState={{disabled}} disabled={disabled} onPress={onPress}
   style={[styles.action,secondary&&styles.secondary,disabled&&styles.disabled]}>
   <Text style={[styles.actionText,secondary&&{color:COLOR.text}]}>{title}</Text>
  </Pressable>;
@@ -15,7 +15,7 @@ function Action({title,onPress,secondary=false,disabled=false}:{title:string;onP
 function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{label:string;value:string;onChangeText:(value:string)=>void;placeholder?:string;secureTextEntry?:boolean}){
  return <View style={{gap:6,marginBottom:13}}>
   <Text style={styles.label}>{label}</Text>
-  <TextInput style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
+  <TextInput testID={label} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
    secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
@@ -119,7 +119,7 @@ export default function App(){
     {profiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无环境，先添加一个。</Text></View>:
      profiles.map(row=><View style={styles.card} key={row.id}>
       <Text style={styles.cardTitle}>{row.name}</Text><Text style={styles.hint}>{row.url}</Text>
-      <View style={styles.actions}><Action title="打开网页" onPress={()=>setOpenProfile(row)}/>
+      <View style={styles.actions}><Action title="打开网页" label={"打开环境 "+row.name} onPress={()=>setOpenProfile(row)}/>
        <Action title="删除条目" secondary onPress={()=>removeProfile(row.id)}/></View></View>)}
    </>}
    {screen==='about'&&<View style={styles.card}><Text style={styles.cardTitle}>支持范围与限制</Text>

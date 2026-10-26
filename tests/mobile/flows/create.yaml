@@ -1,0 +1,16 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element:
+      id: "环境名称"
+    direction: UP
+- tapOn:
+    id: "环境名称"
+- inputText: ${NAME}
+- tapOn:
+    id: "首页 URL"
+- eraseText
+- inputText: ${URL}
+- hideKeyboard
+- tapOn: "保存环境"

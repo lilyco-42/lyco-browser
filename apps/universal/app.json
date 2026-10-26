@@ -15,7 +15,12 @@
     },
     "ios": {
       "bundleIdentifier": "top.lain42.lycobrowser",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoadsInWebContent": true
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -27,7 +32,8 @@
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 28
+            "minSdkVersion": 28,
+            "usesCleartextTraffic": true
           },
           "ios": {
             "deploymentTarget": "17.0"
