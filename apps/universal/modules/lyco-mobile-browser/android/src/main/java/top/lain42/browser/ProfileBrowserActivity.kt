@@ -56,7 +56,7 @@ class ProfileBrowserActivity : Activity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; isFocusableInTouchMode = true }
     layout.setOnApplyWindowInsetsListener { view, insets ->
       if (Build.VERSION.SDK_INT >= 30) {
         val bars = insets.getInsets(WindowInsets.Type.systemBars())
@@ -91,6 +91,7 @@ class ProfileBrowserActivity : Activity() {
     for (button in listOf(back, forward, reload)) navigation.addView(button, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
     layout.addView(navigation)
     setContentView(layout)
+    layout.requestFocus()
     try {
       val filter = IntentFilter(ProfileControl.ACTION_CLOSE)
       if (Build.VERSION.SDK_INT >= 33) registerReceiver(controlReceiver, filter, ProfileControl.PERMISSION, null, Context.RECEIVER_NOT_EXPORTED)
@@ -101,6 +102,7 @@ class ProfileBrowserActivity : Activity() {
       val id = UUID.fromString(intent.getStringExtra("id")).toString()
       val url = intent.getStringExtra("url") ?: error("缺少网址")
       check(allowedUrl(url)) { "仅支持 HTTP(S) 网页" }
+      address.setText(url)
       val host: String
       val port: Int
       val scheme: String
