@@ -1,5 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {Keyboard,ScrollView,Text,Pressable,TextInput,StyleSheet} from 'react-native';
+import {Keyboard,KeyboardAvoidingView,Platform,ScrollView,Text,Pressable,TextInput,StyleSheet} from 'react-native';
 import {openMobileProfile,openPaidMobileProfile,closeMobileProfiles} from './mobile-browser';
 import {mobileSubscription,type MobileSubscription} from './billing';
 import type {BrowserProps} from './profiles';
@@ -12,6 +12,7 @@ export default function Browser({profile,onClose,session}:BrowserProps){
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;void closeMobileProfiles().catch(()=>{})}},[]);
  async function run(action:()=>Promise<void>){
   if(opening.current)return;
+  Keyboard.dismiss();
   opening.current=true;setBusy(true);setMessage('正在处理…');
   try{await action()}
   catch(error){if(mounted.current)setMessage(error instanceof Error?error.message:'无法打开环境')}
@@ -36,7 +37,8 @@ export default function Browser({profile,onClose,session}:BrowserProps){
  function launchManual(){return run(async()=>{
   await openMobileProfile(profile,proxy);if(mounted.current)setMessage('已提交环境启动，实际网络状态见浏览窗口');
  })}
- return <ScrollView contentContainerStyle={s.shell} keyboardShouldPersistTaps="handled">
+ return <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
+ <ScrollView contentContainerStyle={s.shell} keyboardShouldPersistTaps="handled">
   <Text style={s.title}>{profile.name}</Text>
   <Text style={s.copy}>该环境有自己的持久网站数据。关闭当前环境后可打开另一个。</Text>
   {session&&<>
@@ -51,7 +53,7 @@ export default function Browser({profile,onClose,session}:BrowserProps){
   </>}
   {manual&&<>
    <Text style={s.copy}>输入可从此设备访问的无账号密码 HTTP(S) 代理。地址只用于本次启动，订阅链接请通过官网账号加载。</Text>
-   <TextInput testID="mobile-proxy" accessibilityLabel="HTTP(S) 代理地址" style={s.input} defaultValue={proxy} onChangeText={setProxy}
+   <TextInput testID="mobile-proxy" accessibilityLabel="HTTP(S) 代理地址" style={s.input} defaultValue="" onChangeText={setProxy} editable={!busy}
     autoCapitalize="none" autoCorrect={false} returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} placeholder="https://proxy.example.com:8443" placeholderTextColor="#8995aa"/>
    <Pressable accessibilityRole="button" accessibilityState={{disabled:busy}} disabled={busy} onPress={launchManual} style={[s.button,busy&&s.disabled]}>
     <Text>{busy?'正在打开…':'通过代理打开独立环境'}</Text></Pressable>
@@ -59,6 +61,6 @@ export default function Browser({profile,onClose,session}:BrowserProps){
   <Pressable accessibilityRole="button" disabled={busy} onPress={onClose} style={s.button}><Text>返回环境列表</Text></Pressable>
   {!!message&&<Text accessibilityRole="alert" style={s.copy}>{message}</Text>}
   <Text style={s.copy}>代理设置失败时不会改用系统浏览器。该功能保护环境网站数据与浏览代理，不代表全设备 VPN 或指纹伪装。</Text>
- </ScrollView>;
+ </ScrollView></KeyboardAvoidingView>;
 }
 const s=StyleSheet.create({shell:{flexGrow:1,padding:24,gap:18,backgroundColor:'#111622'},title:{color:'#fff',fontSize:22,fontWeight:'700'},copy:{fontSize:14,lineHeight:22,color:'#b8c7dc'},input:{borderWidth:1,borderColor:'#68758b',borderRadius:8,color:'#fff',padding:14},button:{backgroundColor:'#c6d8f5',padding:16,borderRadius:8,alignItems:'center'},route:{padding:12,borderWidth:1,borderColor:'#68758b',borderRadius:8},selected:{borderColor:'#c6d8f5',backgroundColor:'#293547'},disabled:{opacity:.4}});

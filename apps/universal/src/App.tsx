@@ -16,9 +16,10 @@ function Action({title,label,onPress,secondary=false,disabled=false}:{title:stri
  </Pressable>;
 }
 function Field({label,value,onChangeText,placeholder,secureTextEntry=false,disabled=false}:{label:string;value:string;onChangeText:(value:string)=>void;placeholder?:string;secureTextEntry?:boolean;disabled?:boolean}){
+ const initialValue=useRef(value).current;
  return <View style={{gap:6,marginBottom:13}}>
   <Text style={styles.label}>{label}</Text>
-  <TextInput testID={label} style={styles.input} defaultValue={value} onChangeText={onChangeText} placeholder={placeholder} editable={!disabled}
+  <TextInput testID={label} style={styles.input} defaultValue={initialValue} onChangeText={onChangeText} placeholder={placeholder} editable={!disabled}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
    returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;

@@ -14,5 +14,8 @@ appId: top.lain42.lycobrowser
 # process. Returning through the real UI must close that background process.
 - launchApp:
     stopApp: false
+- scrollUntilVisible:
+    element: "返回环境列表"
+    direction: DOWN
 - tapOn: "返回环境列表"
 - assertVisible: "环境管理"
