@@ -20,6 +20,7 @@ public class LycoMobileBrowserModule: Module {
       self.active = controller
       presenter.present(controller, animated: true)
     }.runOnQueue(.main)
+    AsyncFunction("closeAll") { self.active?.shutdown() }.runOnQueue(.main)
   }
 }
 
@@ -83,7 +84,12 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       tlsOptions: scheme == "https" ? NWProtocolTLS.Options() : nil)
     proxy.allowFailover = false
     if let core { proxy.applyCredential(username: core.username(), password: core.password()) }
-    store.proxyConfigurations = [proxy]
+    // Network.framework may exempt loopback from its default catch-all. Give
+    // those hosts an explicit rule as well, retaining the global rule for
+    // ordinary websites. Both rules use the same fail-closed authenticated core.
+    var loopbackProxy = proxy
+    loopbackProxy.matchDomains = ["localhost", "127.0.0.1", "::1"]
+    store.proxyConfigurations = [loopbackProxy, proxy]
     let config = WKWebViewConfiguration()
     config.websiteDataStore = store
     config.preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -137,6 +143,7 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     status.text = "官网权益已失效或长时间无法核实，环境已停止"
   }
   deinit { paidGuard?.close(); try? tunnel?.close(); NotificationCenter.default.removeObserver(self) }
+  fileprivate func shutdown() { closeEnvironment() }
   @objc private func closeEnvironment() {
     stopped = true
     paidGuard?.close(); paidGuard = nil

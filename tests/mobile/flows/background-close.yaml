@@ -1,0 +1,18 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    stopApp: false
+- tapOn: "环境管理"
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-A
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-A"
+    timeout: 30000
+# Bring the control app forward without stopping its separate native browser
+# process. Returning through the real UI must close that background process.
+- launchApp:
+    stopApp: false
+- tapOn: "返回环境列表"
+- assertVisible: "环境管理"

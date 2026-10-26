@@ -4,8 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {randomUUID} = require('node:crypto');
 class LycoProfiles {
-  constructor({network, engine, proxyStore, dataDir}) {
+  constructor({network, engine, proxyStore, dataDir, layoutPolicy=()=> 'native'}) {
     this.network=network; this.engine=engine; this.proxyStore=proxyStore;
+    this.layoutPolicy=layoutPolicy;
     this.file=path.join(dataDir,'lyco-workspaces.json'); this.busy=false;
     this.bindings=Object.create(null);
     if(fs.existsSync(this.file)) {
@@ -66,6 +67,8 @@ class LycoProfiles {
     this.busy=true;
     try {
       const state=await this.authorized();
+      const layout=this.layoutPolicy();
+      if(!['native','noise'].includes(layout))throw Error('无法确认浏览器内核的布局保护能力');
       const number=Math.max(0,...[...this.engine.profiles.values()].map(p=>Number(p.number)||0))+1;
       const record=await this.proxy(state);
       this.assertCurrent(state);
@@ -74,7 +77,7 @@ class LycoProfiles {
         os:process.platform==='win32'?'Windows':process.platform==='darwin'?'macOS':'Linux',
         networkMode:'proxy',proxy:record.raw,proxyId:record.id,proxyMeta:{proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''},
         language:'en-US',startUrl:'https://www.youtube.com/',platform:{type:'other',startUrl:'https://www.youtube.com/'},
-        privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona',clientRects:'native'}};
+        privacy:{languageMode:'ip',langFromIp:true,uiLanguage:'profile',deviceProfile:'persona',clientRects:layout}};
       this.bindings[id]={owner:state.username,proxyId:record.id};
       this.save();
       try { await this.engine.syncProfiles([...this.engine.profiles.values(),profile]); }

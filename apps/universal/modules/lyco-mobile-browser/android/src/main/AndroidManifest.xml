@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.INTERNET" />
+  <permission android:name="top.lain42.lycobrowser.CONTROL_ENVIRONMENT" android:protectionLevel="signature" />
+  <uses-permission android:name="top.lain42.lycobrowser.CONTROL_ENVIRONMENT" />
   <application>
     <activity android:name="top.lain42.browser.ProfileBrowserActivity"
       android:exported="false" android:process=":lyco_browser"

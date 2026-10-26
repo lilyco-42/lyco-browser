@@ -2,6 +2,9 @@ package top.lain42.browser
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Context
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +40,10 @@ class ProfileBrowserActivity : Activity() {
   private val timeout = Runnable { fail("代理设置超时，未打开网页") }
   private lateinit var status: TextView
   private var closing = false
+  private var controlRegistered = false
+  private val controlReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) { if (intent.action == ProfileControl.ACTION_CLOSE) finish() }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -57,6 +64,12 @@ class ProfileBrowserActivity : Activity() {
     layout.addView(status)
     setContentView(layout)
     try {
+      val filter = IntentFilter(ProfileControl.ACTION_CLOSE)
+      if (Build.VERSION.SDK_INT >= 33) registerReceiver(controlReceiver, filter, ProfileControl.PERMISSION, null, Context.RECEIVER_NOT_EXPORTED)
+      else registerReceiver(controlReceiver, filter, ProfileControl.PERMISSION, null)
+      controlRegistered = true
+      val epoch = getSharedPreferences(ProfileControl.PREFERENCES, Context.MODE_PRIVATE).getLong(ProfileControl.EPOCH, 0)
+      if (intent.getLongExtra(ProfileControl.EPOCH, -1) != epoch) { finish(); return }
       val id = UUID.fromString(intent.getStringExtra("id")).toString()
       val url = intent.getStringExtra("url") ?: error("缺少网址")
       check(allowedUrl(url)) { "仅支持 HTTP(S) 网页" }
@@ -162,6 +175,7 @@ class ProfileBrowserActivity : Activity() {
   override fun onResume() { super.onResume(); paidGuard?.checkForeground() }
   override fun onDestroy() {
     closing = true
+    if (controlRegistered) { unregisterReceiver(controlReceiver); controlRegistered = false }
     paidGuard?.close(); paidGuard = null
     runCatching { tunnel?.close() }; tunnel = null
     handler.removeCallbacksAndMessages(null)

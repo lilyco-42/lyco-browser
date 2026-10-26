@@ -115,3 +115,15 @@ test('a Billing authorization-loss event closes only persisted managed environme
  await args.network.onAuthorizationLost();
  assert.deepEqual(calls.stops,[profile.id]);
 });
+
+test('new managed profiles use the selected kernel capability without rewriting existing explicit modes',async t=>{
+ const {args,engine,service}=setup(t);
+ const {profile:existing}=await service.create();
+ assert.equal(existing.privacy.clientRects,'native');
+ const restarted={...engine,start:async p=>p};
+ const compatible=new LycoProfiles({...args,engine:restarted,layoutPolicy:()=> 'noise'});
+ const {profile}=await compatible.create();
+ assert.equal(profile.privacy.clientRects,'noise');
+ assert.equal(restarted.profiles.get(existing.id).privacy.clientRects,'native');
+ assert.equal(profile.networkMode,'proxy');
+});

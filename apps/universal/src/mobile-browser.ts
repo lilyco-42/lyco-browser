@@ -4,7 +4,7 @@ import type {Profile,BrowserSession} from './profiles';
 import type {MobileSubscription} from './billing';
 import type {MobileNode} from './subscription.mjs';
 
-type NativeBrowser = {open(options:Record<string,string>):Promise<void>};
+type NativeBrowser = {open(options:Record<string,string>):Promise<void>;closeAll():Promise<void>};
 export async function openMobileProfile(profile:Profile, proxyURL:string):Promise<void> {
  const route=parseProxyEndpoint(proxyURL);
  const native=requireOptionalNativeModule<NativeBrowser>('LycoMobileBrowser');
@@ -22,4 +22,9 @@ export async function openPaidMobileProfile(profile:Profile,subscription:MobileS
  await native.open({id:profile.id,name:profile.name,url:profile.url,outbound:JSON.stringify(node.outbound),
   accountToken:session.token,accountOwner:session.username,
   verificationDeadline:String(Math.min(subscription.verifiedAt+300000,subscription.expiresAt??Infinity))});
+}
+
+export async function closeMobileProfiles():Promise<void>{
+ const native=requireOptionalNativeModule<NativeBrowser>('LycoMobileBrowser');
+ if(native)await native.closeAll();
 }

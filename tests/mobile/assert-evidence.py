@@ -2,8 +2,10 @@ import json, sys
 from pathlib import Path
 root=Path(sys.argv[1]);data=json.loads((root/'network.json').read_text())
 reports=data['reports']
-assert len(reports)==3, f'Expected exactly A, B, A reports; observed {len(reports)}'
-assert [r['owner'] for r in reports]==['mobile-A','mobile-B','mobile-A']
+expected=int(sys.argv[2]) if len(sys.argv)>2 else 3
+assert expected in (3,4)
+assert len(reports)==expected, f'Expected {expected} native reports; observed {len(reports)}'
+assert [r['owner'] for r in reports]==['mobile-A','mobile-B','mobile-A']+(['mobile-A'] if expected==4 else [])
 for index,row in enumerate(reports):
     expected=None if index<2 else 'mobile-A'
     assert row['before']=={'cookie':expected,'local':expected}, 'Cookie/localStorage isolation or reopen persistence failed'

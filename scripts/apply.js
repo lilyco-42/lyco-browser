@@ -84,6 +84,11 @@ one('index.html','src="assets/logo-pixel.png?v=20261002-flat" alt="OpenBrowser"'
 one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">','<strong>LYCO Browser</strong><small data-i18n="app.brand.sub">');
 one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
 one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
+// The updater must request the assets this product actually publishes.
+one('main.js', "  'darwin:x64': 'OpenBrowser-macOS-x86_64.dmg',\n", '');
+one('main.js', "'darwin:arm64': 'OpenBrowser-macOS-arm64-with-kernel.dmg'", "'darwin:arm64': 'LYCO-Browser-macOS-arm64-MVP.dmg'");
+one('main.js', "'win32:x64': 'OpenBrowser-Windows-x86_64-with-kernel.exe'", "'win32:x64': 'LYCO-Browser-Windows-x64-MVP.exe'");
+one('main.js', "'linux:x64': 'OpenBrowser-Linux-x86_64-with-kernel.tar.gz'", "'linux:x64': 'LYCO-Browser-Linux-x64-MVP.tar.gz'");
 one('index.html','<button class="nav" data-view="proxies">',join(
  '<button class="nav" data-view="lyco" lang="zh-CN" translate="no" aria-label="LYCO 账户与代理" title="LYCO 账户与代理"><i data-lucide="shield-check"></i><span class="lyco-nav-label">账户与代理</span></button>',
  '<button class="nav" data-view="proxies">'));
@@ -408,7 +413,7 @@ one('engine.js',"      const kernelVer = browser?.version || (isOpenBrowser148(b
 
 one('main.js',"  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",join(
  "  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",
- "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData')});"));
+ "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData'),layoutPolicy:()=>require('./automation/browser-kernel').isWayfernKernel(engine.browserSelection()?.browser||{})?'native':'noise'});"));
 one('renderer.js','function renderProfiles() {',join(
  'function lycoPreferredGroup() {',
  "  return activeGroupFilter === 'ungrouped' ? UNGROUPED_ID : (findGroup(activeGroupFilter)?.id || listGroups()[0]?.id || UNGROUPED_ID);",

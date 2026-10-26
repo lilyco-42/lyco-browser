@@ -17,21 +17,22 @@ class Origin(http.server.BaseHTTPRequestHandler):
         owner=parse_qs(urlsplit(self.path).query).get('owner',[''])[0]
         if owner not in ('mobile-A','mobile-B','mobile-C'):
             self.send_error(404);return
-        page='''<!doctype html><meta name="viewport" content="width=device-width"><h1 id="status">Loading</h1><script>
+        page='''<!doctype html><meta name="viewport" content="width=device-width"><h1 id="status" role="status" aria-live="polite" aria-atomic="true">Loading</h1><script>
         (async()=>{const owner=OWNER;
         const readCookie=()=>document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
         const before={cookie:readCookie(),local:localStorage.getItem('owner')};
-        document.cookie='owner='+owner+'; Path=/; SameSite=Lax';localStorage.setItem('owner',owner);
+        document.cookie='owner='+owner+'; Path=/; Max-Age=600; SameSite=Lax';localStorage.setItem('owner',owner);
         const report={owner,before,after:{cookie:readCookie(),local:localStorage.getItem('owner')}};
         const result=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
         if(!result.ok)throw Error('report failed');document.getElementById('status').textContent='LYCO verified '+owner;
         })().catch(()=>document.getElementById('status').textContent='LYCO fixture failed');</script>'''.replace('OWNER',json.dumps(owner))
-        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.end_headers();payload=page.encode();state['responseBodies'].append({'path':self.path,'bytes':len(payload)});save();self.wfile.write(payload)
+        payload=page.encode()
+        self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(payload)));self.send_header('Connection','close');self.end_headers();state['responseBodies'].append({'path':self.path,'bytes':len(payload)});save();self.wfile.write(payload)
     def do_POST(self):
         if self.path!='/report': self.send_error(404);return
         report=json.loads(self.rfile.read(int(self.headers.get('Content-Length',0))))
         state['reports'].append(report);save()
-        self.send_response(200);self.end_headers();self.wfile.write(b'OK')
+        self.send_response(200);self.send_header('Content-Length','2');self.send_header('Connection','close');self.end_headers();self.wfile.write(b'OK')
 class Proxy(http.server.BaseHTTPRequestHandler):
     def log_message(self,*_): pass
     def target(self,host,port):

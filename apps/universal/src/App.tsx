@@ -2,6 +2,7 @@ import React,{useEffect,useRef,useState} from 'react';
 import {ActivityIndicator,BackHandler,Keyboard,Linking,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
 import Browser from './Browser';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {closeMobileProfiles} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 
@@ -32,12 +33,13 @@ export default function App(){
  const [openProfile,setOpenProfile]=useState<Profile|null>(null);
  useEffect(()=>{
   let live=true;
+  closeMobileProfiles().catch(()=>{if(live)setNote('无法核实旧浏览环境是否已停止，请重新打开应用')});
   readProfiles().then(rows=>{if(live)setProfiles(rows)}).catch(()=>{if(live)setNote('无法读取本地环境列表')});
   return()=>{live=false};
  },[]);
  useEffect(()=>{
   const subscription=BackHandler.addEventListener('hardwareBackPress',()=>{
-   if(openProfile){setOpenProfile(null);return true}
+   if(openProfile){void closeBrowser();return true}
    if(screen!=='home'){setScreen('home');return true}
    return false;
   });
@@ -47,6 +49,8 @@ export default function App(){
   const generation=++authGeneration.current;
   setBusy(true);setNote('登录中…');
   try{
+   await closeMobileProfiles();
+   if(generation!==authGeneration.current)return;
    const credentials=await login(user,password);
    const result=await account(credentials.token);
    if(generation!==authGeneration.current)return;
@@ -60,8 +64,19 @@ export default function App(){
   const generation=authGeneration.current;
   setBusy(true);
   try{const next=await account(token);if(generation===authGeneration.current){setMe(next);setNote('权益已刷新')}}
-  catch(e){if(generation===authGeneration.current){setMe(null);setToken('');setNote('请重新登录：'+(e as Error).message)}}
+  catch(e){if(generation===authGeneration.current){setMe(null);setToken('');try{await closeMobileProfiles()}catch{}setNote('请重新登录：'+(e as Error).message)}}
   finally{if(generation===authGeneration.current)setBusy(false)}
+ }
+ async function logout(){
+  authGeneration.current++;setBusy(true);setPassword('');setToken('');setMe(null);
+  try{await closeMobileProfiles();setNote('已退出并停止本机浏览环境')}
+  catch{setNote('账号会话已清除，请关闭仍在运行的浏览环境')}
+  finally{setBusy(false)}
+ }
+ async function closeBrowser(){
+  try{await closeMobileProfiles()}
+  catch{setNote('环境尚未停止，请关闭原生浏览窗口后重试')}
+  finally{setOpenProfile(null)}
  }
  async function addProfile(){
   try{
@@ -81,7 +96,7 @@ export default function App(){
  }
  const entitlement=me?proxyEntitlement(me):null;
  if(openProfile)return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
-  <Browser profile={openProfile} onClose={()=>setOpenProfile(null)} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
+  <Browser profile={openProfile} onClose={closeBrowser} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
  return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
   <View style={styles.header}>
    <Text style={styles.kicker}>LYCO / UNIFIED CLIENT</Text>
@@ -108,7 +123,7 @@ export default function App(){
        {entitlement?'代理月卡有效':'暂无有效代理月卡'}</Text>
       {entitlement?.expires_at&&<Text style={styles.hint}>到期：{new Date(entitlement.expires_at).toLocaleString()}</Text>}
       <View style={styles.actions}><Action title="刷新权益" disabled={busy} onPress={refresh}/>
-       <Action title="退出" secondary onPress={()=>{authGeneration.current++;setBusy(false);setPassword('');setToken('');setMe(null);setNote('会话已退出')}}/></View>
+       <Action title="退出" secondary disabled={busy} onPress={logout}/></View>
      </>}
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>LYCO VPN / 代理服务</Text>

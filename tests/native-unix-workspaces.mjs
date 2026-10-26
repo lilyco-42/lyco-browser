@@ -34,7 +34,7 @@ const origin=http.createServer(async(req,res)=>{
  res.end(`<!doctype html><script>(async()=>{const phase=${JSON.stringify(phase)},owner=${JSON.stringify(owner)};
  const readCookie=()=>document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
  const before={cookie:readCookie(),local:localStorage.getItem('owner')};
- document.cookie='owner='+owner+'; Path=/';localStorage.setItem('owner',owner);
+ document.cookie='owner='+owner+'; Path=/; Max-Age=600; SameSite=Lax';localStorage.setItem('owner',owner);
  await fetch('/report',{method:'POST',body:JSON.stringify({phase,before,after:{cookie:readCookie(),local:localStorage.getItem('owner')}})});
  })();</script>`);
 });
