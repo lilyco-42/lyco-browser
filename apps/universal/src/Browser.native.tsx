@@ -18,7 +18,7 @@ export default function Browser({profile,onClose}:{profile:Profile;onClose:()=>v
   <Text style={s.copy}>该环境有自己的持久网站数据。输入可从此设备访问的 HTTP(S) 代理；地址仅用于本次启动。</Text>
   <Text style={s.copy}>当前仅支持无账号密码的 HTTP(S) 代理，官网订阅的其他协议尚未接入移动端。</Text>
   <TextInput testID="mobile-proxy" accessibilityLabel="HTTP(S) 代理地址" style={s.input} value={proxy} onChangeText={setProxy}
-   autoCapitalize="none" autoCorrect={false} placeholder="https://proxy.example.com:8443" placeholderTextColor="#8995aa"/>
+   autoCapitalize="none" autoCorrect={false} returnKeyType="done" submitBehavior="blurAndSubmit" placeholder="https://proxy.example.com:8443" placeholderTextColor="#8995aa"/>
   <Pressable accessibilityRole="button" accessibilityState={{disabled:busy}} disabled={busy} onPress={launch} style={s.button}>
    <Text>{busy?'正在打开…':'通过代理打开独立环境'}</Text></Pressable>
   <Pressable accessibilityRole="button" onPress={onClose} style={s.button}><Text>返回环境列表</Text></Pressable>

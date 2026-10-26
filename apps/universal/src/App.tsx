@@ -17,7 +17,7 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{lab
   <Text style={styles.label}>{label}</Text>
   <TextInput testID={label} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
-   secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
+   selectTextOnFocus returnKeyType="done" submitBehavior="blurAndSubmit" secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
 }
 export default function App(){

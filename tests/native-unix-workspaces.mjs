@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
+import net from 'node:net';
+import {protectConnectHandler} from './connect-handler.mjs';
 import {_electron as electron} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
@@ -11,15 +13,19 @@ const evidence=path.resolve(process.env.LYCO_UNIX_EVIDENCE||'lyco-unix-evidence'
 await fs.mkdir(evidence,{recursive:true});
 const report={platform:process.platform,source:process.env.GITHUB_SHA,checks:[],observations:[],proxyRequests:[]};
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
+const tunnelPorts=new Set();
+const navigations=[];
 const origin=http.createServer(async(req,res)=>{
+ const proxied=req.headers['x-lyco-ci-route']==='proxy'||tunnelPorts.has(req.socket.remotePort);
  const url=new URL(req.url,'http://fixture');
  if(url.pathname==='/report'){
   let body='';for await(const chunk of req)body+=chunk;
-  report.observations.push({...JSON.parse(body),proxied:req.headers['x-lyco-ci-route']==='proxy'});
+  report.observations.push({...JSON.parse(body),proxied});
   res.end('ok');return;
  }
  if(url.pathname!=='/probe'){res.writeHead(404).end();return;}
  const phase=url.searchParams.get('phase'),owner=phase.startsWith('a')?'A':'B';
+ navigations.push({phase,proxied});
  res.setHeader('Content-Type','text/html');res.setHeader('Cache-Control','no-store');
  res.end(`<!doctype html><script>(async()=>{const phase=${JSON.stringify(phase)},owner=${JSON.stringify(owner)};
  const readCookie=()=>document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
@@ -48,6 +54,26 @@ const proxy=http.createServer((req,res)=>{
   headers:{...req.headers,'x-lyco-ci-route':'proxy'}},r=>{res.writeHead(r.statusCode,r.headers);r.pipe(res)});
  upstream.on('error',()=>res.destroy());req.pipe(upstream);
 });
+const geo=http.createServer((_req,res)=>{
+ res.setHeader('Content-Type','application/json');
+ res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}));
+});
+const geoPort=await listen(geo);
+// The real Mihomo HTTP adapter uses CONNECT for plain HTTP as well. Restrict
+// tunnels to the CI origin and the controlled proxy exit-check response.
+proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+ const port=req.url==='ip-api.com:80'?geoPort:req.url===`127.0.0.1:${originPort}`?originPort:null;
+ if(!port){socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;}
+ const upstream=net.connect({host:'127.0.0.1',port});sockets.add(upstream);
+ upstream.once('connect',()=>{
+  const localPort=upstream.localPort;tunnelPorts.add(localPort);
+  upstream.once('close',()=>tunnelPorts.delete(localPort));
+  socket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+  if(head.length)upstream.write(head);socket.pipe(upstream);upstream.pipe(socket);
+ });
+ socket.on('error',()=>upstream.destroy());upstream.on('error',()=>socket.destroy());
+ socket.once('close',()=>upstream.destroy());upstream.once('close',()=>{sockets.delete(upstream);socket.destroy()});
+},error=>{(report.tunnelErrors||=[]).push(error)}));
 for(const server of [origin,proxy])server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s))});
 const proxyPort=await listen(proxy);
 let app;
@@ -90,7 +116,7 @@ try{
   assert.ok(row,phase+': no real profile report');assert.equal(row.proxied,true,phase+': report bypassed Mihomo');
   assert.deepEqual(row.before,{cookie:previous,local:previous},phase+': storage isolation/persistence');
   const owner=index===0?'A':'B';assert.deepEqual(row.after,{cookie:owner,local:owner});
-  assert.ok(report.proxyRequests.some(r=>r.path==='/probe'&&r.phase===phase),phase+': navigation bypassed proxy');
+  assert.ok(navigations.some(r=>r.proxied&&r.phase===phase),phase+': navigation bypassed proxy');
   await page.evaluate(id=>window.ops.stopProfile(id),profiles[index].id);
   report.checks.push(phase+'-proxied-storage');
  }
@@ -101,7 +127,7 @@ try{
 }catch(error){report.failure=String(error?.stack||error);throw error}
 finally{
  await app?.close().catch(()=>{});
- for(const socket of sockets)socket.destroy();origin.close();proxy.close();
+ for(const socket of sockets)socket.destroy();origin.close();proxy.close();geo.close();
  await fs.writeFile(path.join(evidence,'report.json'),JSON.stringify(report,null,2));
  // The runner's app userData remains outside this report directory.
  // Only report.json and workbench.png are uploaded, never identity caches.
