@@ -64,6 +64,9 @@ jobs:
         with: {distribution: 'temurin', java-version: '17'}
       - name: Build native bindings from the pinned Go source
         run: bash build-native.sh ${{ matrix.platform }}
+      - name: Retain tested application and verified Go module sources
+        if: matrix.platform == 'android'
+        run: python3 bundle-source.py
       - name: Retain native libraries and generated API for integration review
         uses: actions/upload-artifact@v4
         with:
@@ -72,5 +75,7 @@ jobs:
             ${{ runner.temp }}/lyco-tunnel.aar
             ${{ runner.temp }}/lyco-tunnel-apple.tar.gz
             ${{ runner.temp }}/lyco-tunnel-bindings.txt
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz.sha256
           if-no-files-found: error
           retention-days: 7
