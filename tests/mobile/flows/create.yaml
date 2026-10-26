@@ -8,6 +8,11 @@ appId: top.lain42.lycobrowser
 - tapOn:
     id: "环境名称"
 - inputText: ${NAME}
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "首页 URL"
+    direction: DOWN
 - tapOn:
     id: "首页 URL"
 - eraseText

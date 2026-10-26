@@ -7,6 +7,9 @@ on:
       - 'src/**'
       - 'scripts/**'
       - '.github/workflows/build-desktop-unix.yml'
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', 'tests/native-unix-workspaces.mjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
 
 permissions:
@@ -151,12 +154,42 @@ jobs:
           test -f upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/lyco/core/mihomo
           cp upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel.tar.gz upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
 
-      - name: Upload macOS DMG to GitHub prerelease
+      - name: Install the native packaged acceptance driver
+        shell: bash
+        run: npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+
+      - name: Real packaged macOS environment and proxy acceptance
         if: matrix.target == 'macos-arm64'
+        shell: bash
+        env:
+          LYCO_UNIX_EVIDENCE: ${{ runner.temp }}/lyco-unix-macos
+        run: |
+          node lyco/tests/native-unix-workspaces.mjs upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel/OpenBrowser.app/Contents/MacOS/OpenBrowser upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel/OpenBrowser.app/Contents/Resources/app
+
+      - name: Real packaged Linux environment and proxy acceptance
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        env:
+          LYCO_UNIX_EVIDENCE: ${{ runner.temp }}/lyco-unix-linux
+        run: |
+          xvfb-run -a node lyco/tests/native-unix-workspaces.mjs upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/OpenBrowser upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app
+
+      - name: Retain original Unix native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-unix-native-${{ matrix.target }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-unix-*/report.json
+            ${{ runner.temp }}/lyco-unix-*/workbench.png
+          retention-days: 7
+
+      - name: Upload macOS DMG to GitHub prerelease
+        if: matrix.target == 'macos-arm64' && github.event_name != 'pull_request'
         shell: bash
         run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
 
       - name: Upload Linux portable tar.gz to GitHub prerelease
-        if: matrix.target == 'linux-x64'
+        if: matrix.target == 'linux-x64' && github.event_name != 'pull_request'
         shell: bash
         run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
