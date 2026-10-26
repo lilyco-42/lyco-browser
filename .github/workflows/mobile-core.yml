@@ -4,6 +4,10 @@ on:
     branches: [main]
     paths: ['mobile/core/**', '.github/workflows/mobile-core.yml']
   workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 jobs:
@@ -20,8 +24,14 @@ jobs:
         with:
           go-version: '1.25.5'
           cache-dependency-path: mobile/core/go.sum
-      - run: go mod tidy
-      - run: go test -race -count=1 ./...
+      - name: Resolve verified Go modules (retry transient checksum service failures)
+        run: |
+          for attempt in 1 2 3; do
+            go mod tidy && break
+            test "$attempt" != 3 || exit 1
+            sleep 5
+          done
+      - run: go test -race -tags with_quic,with_utls -count=1 ./...
       - name: Retain resolved dependency checksums
         uses: actions/upload-artifact@v4
         with:

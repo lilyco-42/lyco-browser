@@ -5,6 +5,8 @@ const SIGNALS = [
   ['configuration-started', /initial configuration/i],
   ['configuration-ready', /initial configuration complete/i],
   ['mixed-listener-ready', /mixed\(http\+socks\).*listening/i],
+  ['address-in-use', /address already in use|only one usage of each socket address|EADDRINUSE/i],
+  ['address-permission', /forbidden by its access permissions|permission denied|EACCES/i],
   ['listener-error', /(?:listen|bind).*(?:error|failed|denied|in use)|(?:error|failed|denied).*listen/i],
   ['geodata-download', /(?:download|initial).*(?:geoip|geosite|mmdb)|(?:geoip|geosite|mmdb).*(?:download|initial)/i],
   ['database-lock', /database.*(?:lock|timeout)|(?:lock|timeout).*database/i],

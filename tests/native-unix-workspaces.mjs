@@ -18,6 +18,7 @@ const navigations=[];
 const origin=http.createServer(async(req,res)=>{
  const proxied=req.headers['x-lyco-ci-route']==='proxy'||tunnelPorts.has(req.socket.remotePort);
  const url=new URL(req.url,'http://fixture');
+ if(url.pathname==='/network-control'){res.setHeader('x-lyco-fixture-proxy',proxied?'yes':'no');res.end('LYCO core control');return;}
  if(url.pathname==='/report'){
   let body='';for await(const chunk of req)body+=chunk;
   report.observations.push({...JSON.parse(body),proxied});
@@ -62,6 +63,7 @@ const geoPort=await listen(geo);
 // The real Mihomo HTTP adapter uses CONNECT for plain HTTP as well. Restrict
 // tunnels to the CI origin and the controlled proxy exit-check response.
 proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+ (report.connectTargets||=[]).push(req.url);
  const port=req.url==='ip-api.com:80'?geoPort:req.url===`127.0.0.1:${originPort}`?originPort:null;
  if(!port){socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;}
  const upstream=net.connect({host:'127.0.0.1',port});sockets.add(upstream);
@@ -81,6 +83,10 @@ try{
  // Keep repository/Actions credentials out of the packaged application.
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|HOME|USER|LOGNAME|TMPDIR|TEMP|TMP|DISPLAY|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR|XDG_CONFIG_HOME|XDG_DATA_HOME|LANG|LC_ALL)$/.test(key)));
  app=await electron.launch({executablePath:binary,args:[appRoot],env:{...cleanEnv,OPENBROWSER_API_PORT:String(52000+Math.floor(Math.random()*1000))},timeout:60000});
+ await app.evaluate((_electron,{appRoot,observer})=>{
+  const require=process.mainModule.require.bind(process.mainModule);
+  globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork);
+ },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  const page=await app.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
  await app.evaluate((_electron,port)=>{
   globalThis.fetch=async(url,options={})=>{
@@ -104,6 +110,14 @@ try{
  }
  assert.notEqual(profiles[0].id,profiles[1].id);
  report.checks.push('two-real-managed-environments');
+ const state=await page.evaluate(()=>window.ops.lycoStatus());
+ assert.ok(state.connected&&Number.isInteger(state.port));
+ const control=await new Promise((resolve,reject)=>{
+  const request=http.get({host:'127.0.0.1',port:state.port,path:`http://127.0.0.1:${originPort}/network-control`},response=>{let body='';response.on('data',chunk=>body+=chunk);response.on('end',()=>resolve({body,proxied:response.headers['x-lyco-fixture-proxy']}))});
+  request.on('error',reject);request.setTimeout(5000,()=>request.destroy(Error('Real core control timed out')));
+ });
+ assert.deepEqual(control,{body:'LYCO core control',proxied:'yes'});
+ report.checks.push('real-mihomo-core-http-positive-control');
  for(const [phase,index,previous] of [['a-first',0,null],['b-first',1,null],['a-reopen',0,'A']]){
   const startUrl=`http://127.0.0.1:${originPort}/probe?phase=${phase}`;
   const configured=await page.evaluate(({profile,startUrl})=>window.adoptLycoProfile({...profile,
@@ -126,6 +140,7 @@ try{
  await page.screenshot({path:path.join(evidence,'workbench.png')});
 }catch(error){report.failure=String(error?.stack||error);throw error}
 finally{
+ if(app)try{report.coreStartup=await app.evaluate(()=>globalThis.__lycoUnixCoreEvidence||[])}catch{}
  await app?.close().catch(()=>{});
  for(const socket of sockets)socket.destroy();origin.close();proxy.close();geo.close();
  await fs.writeFile(path.join(evidence,'report.json'),JSON.stringify(report,null,2));
