@@ -4,17 +4,25 @@
     "slug": "lyco-browser",
     "scheme": "lycobrowser",
     "version": "0.1.0",
+    "icon": "../../resources/branding/icon-source.png",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
       "package": "top.lain42.lycobrowser",
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "../../resources/branding/icon-source.png",
+        "backgroundColor": "#121016"
+      },
       "permissions": [
         "INTERNET"
       ]
     },
     "ios": {
       "bundleIdentifier": "top.lain42.lycobrowser",
+      "buildNumber": "1",
       "supportsTablet": true,
       "infoPlist": {
         "NSAppTransportSecurity": {
