@@ -32,6 +32,16 @@ const originPort=await listen(origin);
 const sockets=new Set();
 const proxy=http.createServer((req,res)=>{
  const url=new URL(req.url);
+ // The packaged-startup test uses a controlled, test-owned HTTP proxy. The
+ // upstream kernel's first exit lookup is ip-api.com over plain HTTP; answer
+ // that single probe with fixture data so Actions does not depend on public
+ // geolocation providers/rate limits. This is explicitly NOT real egress proof.
+ if(url.hostname==='ip-api.com' && url.pathname==='/json/'){
+  report.proxyRequests.push({method:req.method,host:url.hostname,path:url.pathname,phase:'egress-probe-fixture'});
+  res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
+  res.end(JSON.stringify({status:'success',query:'198.51.100.42',country:'CI Fixture',countryCode:'US',regionName:'CI',city:'CI',zip:'',timezone:'Etc/UTC',lat:0,lon:0,isp:'CI Fixture',org:'CI Fixture',as:'AS0 CI Fixture',asname:'CI Fixture',mobile:false,proxy:true,hosting:false}));
+  return;
+ }
  if(url.hostname!=='127.0.0.1'||Number(url.port)!==originPort){res.writeHead(502).end();return;}
  report.proxyRequests.push({method:req.method,path:url.pathname,phase:url.searchParams.get('phase')});
  const upstream=http.request({host:'127.0.0.1',port:originPort,path:url.pathname+url.search,method:req.method,
