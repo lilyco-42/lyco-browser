@@ -51,7 +51,7 @@ export default function Browser({profile,onClose,session}:BrowserProps){
   </>}
   {manual&&<>
    <Text style={s.copy}>输入可从此设备访问的无账号密码 HTTP(S) 代理。地址只用于本次启动，订阅链接请通过官网账号加载。</Text>
-   <TextInput testID="mobile-proxy" accessibilityLabel="HTTP(S) 代理地址" style={s.input} value={proxy} onChangeText={setProxy}
+   <TextInput testID="mobile-proxy" accessibilityLabel="HTTP(S) 代理地址" style={s.input} defaultValue={proxy} onChangeText={setProxy}
     autoCapitalize="none" autoCorrect={false} returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} placeholder="https://proxy.example.com:8443" placeholderTextColor="#8995aa"/>
    <Pressable accessibilityRole="button" accessibilityState={{disabled:busy}} disabled={busy} onPress={launchManual} style={[s.button,busy&&s.disabled]}>
     <Text>{busy?'正在打开…':'通过代理打开独立环境'}</Text></Pressable>

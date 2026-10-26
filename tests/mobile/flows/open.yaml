@@ -7,5 +7,6 @@ appId: top.lain42.lycobrowser
 - tapOn:
     id: "mobile-proxy"
 - inputText: ${PROXY}
+- assertVisible: ${PROXY.split('.').join('\\.')}
 - pressKey: Enter
 - tapOn: "通过代理打开独立环境"

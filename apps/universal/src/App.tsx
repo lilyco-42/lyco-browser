@@ -17,13 +17,14 @@ function Action({title,label,onPress,secondary=false,disabled=false}:{title:stri
 function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{label:string;value:string;onChangeText:(value:string)=>void;placeholder?:string;secureTextEntry?:boolean}){
  return <View style={{gap:6,marginBottom:13}}>
   <Text style={styles.label}>{label}</Text>
-  <TextInput testID={label} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
+  <TextInput testID={label} style={styles.input} defaultValue={value} onChangeText={onChangeText} placeholder={placeholder}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
    returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
 }
 export default function App(){
  const [screen,setScreen]=useState<Screen>('home');
+ const [fieldEpoch,setFieldEpoch]=useState(0);
  const authGeneration=useRef(0);
  const [user,setUser]=useState(''),[password,setPassword]=useState('');
  const [token,setToken]=useState(''),[me,setMe]=useState<Account|null>(null);
@@ -57,7 +58,7 @@ export default function App(){
    setToken(credentials.token);setMe(result);setPassword('');
    setNote('官网登录成功，已同步代理权益');
   }catch(e){if(generation===authGeneration.current){setPassword('');setToken('');setMe(null);setNote((e as Error).message)}}
-  finally{if(generation===authGeneration.current)setBusy(false)}
+  finally{if(generation===authGeneration.current){setFieldEpoch(value=>value+1);setBusy(false)}}
  }
  async function refresh(){
   if(!token)return;
@@ -82,7 +83,7 @@ export default function App(){
   try{
    if(profiles.length>=100)throw Error('每台设备最多保存100个环境');
    const next=[...profiles,createProfile(name,url)];
-   await saveProfiles(next);setProfiles(next);setName('');setUrl('');setNote('已建立本地环境条目');
+   await saveProfiles(next);setProfiles(next);setName('');setUrl('');setFieldEpoch(value=>value+1);setNote('已建立本地环境条目');
   }catch(e){setNote((e as Error).message)}
  }
  async function removeProfile(id:string){
@@ -113,8 +114,8 @@ export default function App(){
    {screen==='home'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>网站账号 / Billing</Text>
      {!token?<><Text style={styles.hint}>与 lain42.top 共用账户，管理员令牌和支付密钥不进入客户端。</Text>
-      <Field label="网站用户名" value={user} onChangeText={setUser} placeholder="输入用户名"/>
-      <Field label="网站密码" value={password} onChangeText={setPassword} placeholder="至少8位" secureTextEntry/>
+      <Field key={'user-'+fieldEpoch} label="网站用户名" value={user} onChangeText={setUser} placeholder="输入用户名"/>
+      <Field key={'password-'+fieldEpoch} label="网站密码" value={password} onChangeText={setPassword} placeholder="至少8位" secureTextEntry/>
       <Action title={busy?'登录中…':'登录并验证权益'} disabled={busy} onPress={doLogin}/>
      </>:<>
       <Text style={styles.value}>✓ {me?.username||user}</Text>
@@ -140,8 +141,8 @@ export default function App(){
    {screen==='profiles'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>新建环境条目</Text>
      <Text style={styles.hint}>环境名称与网址保存在本设备。移动端为每个环境分配独立网站数据，启动时选择官网线路或自备代理。连接仅覆盖当前浏览环境。</Text>
-     <Field label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A"/>
-     <Field label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com"/>
+     <Field key={'name-'+fieldEpoch} label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A"/>
+     <Field key={'url-'+fieldEpoch} label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com"/>
      <Action title="保存环境" onPress={addProfile}/>
     </View>
     {profiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无环境，先添加一个。</Text></View>:
