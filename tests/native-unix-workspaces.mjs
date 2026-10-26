@@ -78,6 +78,7 @@ proxy.on('connect',protectConnectHandler((req,socket,head)=>{
 },error=>{(report.tunnelErrors||=[]).push(error)}));
 for(const server of [origin,proxy])server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s))});
 const proxyPort=await listen(proxy);
+report.fixturePorts={origin:originPort,proxy:proxyPort,geo:geoPort};
 let app;
 try{
  // Keep repository/Actions credentials out of the packaged application.
@@ -113,7 +114,7 @@ try{
  const state=await page.evaluate(()=>window.ops.lycoStatus());
  assert.ok(state.connected&&Number.isInteger(state.port));
  const control=await new Promise((resolve,reject)=>{
-  const request=http.get({host:'127.0.0.1',port:state.port,path:`http://127.0.0.1:${originPort}/network-control`},response=>{let body='';response.on('data',chunk=>body+=chunk);response.on('end',()=>resolve({body,proxied:response.headers['x-lyco-fixture-proxy']}))});
+  const request=http.get({host:'127.0.0.1',port:state.port,path:`http://127.0.0.1:${originPort}/network-control`,headers:{Host:`127.0.0.1:${originPort}`} },response=>{let body='';response.on('data',chunk=>body+=chunk);response.on('end',()=>resolve({body,proxied:response.headers['x-lyco-fixture-proxy']}))});
   request.on('error',reject);request.setTimeout(5000,()=>request.destroy(Error('Real core control timed out')));
  });
  assert.deepEqual(control,{body:'LYCO core control',proxied:'yes'});

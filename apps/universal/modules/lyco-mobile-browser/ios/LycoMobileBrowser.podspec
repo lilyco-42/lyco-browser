@@ -11,6 +11,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
   s.dependency 'ExpoModulesCore'
   s.frameworks = 'WebKit', 'Network', 'UIKit'
+  s.libraries = 'resolv'
   s.source_files = '*.swift'
   s.vendored_frameworks = 'Frameworks/Lycotunnel.xcframework'
   s.swift_version = '5.9'

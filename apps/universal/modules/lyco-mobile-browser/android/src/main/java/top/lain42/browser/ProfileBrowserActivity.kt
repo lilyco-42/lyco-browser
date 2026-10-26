@@ -22,6 +22,7 @@ import androidx.webkit.ProxyConfig
 import androidx.webkit.ProxyController
 import androidx.webkit.WebViewFeature
 import java.util.UUID
+import org.json.JSONObject
 import top.lain42.lycotunnel.Lycotunnel
 import top.lain42.lycotunnel.Session
 
@@ -72,11 +73,15 @@ class ProfileBrowserActivity : Activity() {
         // System task restoration must not retain account or node secrets.
         intent.removeExtra("accountToken"); intent.removeExtra("outbound")
       } else {
-        host = intent.getStringExtra("host") ?: error("缺少代理地址")
-        check(host.matches(Regex("[A-Za-z0-9.-]{1,253}"))) { "代理主机无效" }
-        port = intent.getStringExtra("port")?.toIntOrNull() ?: error("代理端口无效")
-        scheme = intent.getStringExtra("scheme") ?: "http"
-        check(scheme == "http" || scheme == "https") { "移动端当前支持 HTTP(S) 代理" }
+        val remoteHost = intent.getStringExtra("host") ?: error("缺少代理地址")
+        check(remoteHost.matches(Regex("[A-Za-z0-9.-]{1,253}"))) { "代理主机无效" }
+        val remotePort = intent.getStringExtra("port")?.toIntOrNull() ?: error("代理端口无效")
+        val remoteScheme = intent.getStringExtra("scheme") ?: "http"
+        check(remotePort in 1..65535 && (remoteScheme == "http" || remoteScheme == "https")) { "HTTP(S) 代理设置无效" }
+        val node = JSONObject().put("type", "http").put("server", remoteHost).put("server_port", remotePort)
+        if (remoteScheme == "https") node.put("tls", JSONObject().put("enabled", true).put("server_name", remoteHost))
+        tunnel = Lycotunnel.start(node.toString(), false)
+        host = "127.0.0.1"; port = tunnel!!.port().toInt(); scheme = "http"
       }
       check(port in 1..65535) { "代理端口无效" }
       paidGuard?.start()

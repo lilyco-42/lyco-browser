@@ -67,7 +67,13 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       guard let address = options["host"], address.range(of: "^[A-Za-z0-9.-]{1,253}$", options: .regularExpression) != nil,
         let value = UInt16(options["port"] ?? ""), value > 0,
         let protocolName = options["scheme"], ["http", "https"].contains(protocolName) else { throw BrowserError("HTTP(S) 代理设置无效") }
-      host = address; portValue = value; scheme = protocolName
+      var node: [String: Any] = ["type": "http", "server": address, "server_port": Int(value)]
+      if protocolName == "https" { node["tls"] = ["enabled": true, "server_name": address] }
+      guard let data = try? JSONSerialization.data(withJSONObject: node), let content = String(data: data, encoding: .utf8) else { throw BrowserError("代理设置无效") }
+      var failure: NSError?
+      guard let session = LycotunnelStart(content, true, &failure) else { throw BrowserError("无法准备自备代理，请检查地址或更新客户端") }
+      core = session
+      host = "127.0.0.1"; portValue = UInt16(session.port()); scheme = "http"
     }
     guard let port = NWEndpoint.Port(rawValue: portValue) else { try? core?.close(); throw BrowserError("代理端口无效") }
     startURL = url
