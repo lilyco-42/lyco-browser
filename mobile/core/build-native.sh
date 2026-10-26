@@ -2,6 +2,7 @@
 set -euo pipefail
 [[ ${GITHUB_ACTIONS:-} == true ]] || { echo 'Native core builds run in Actions only' >&2; exit 2; }
 platform=${1:?android or apple}
+go mod tidy
 go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
 go install github.com/sagernet/gomobile/cmd/gobind@v0.1.12
 if [[ "$platform" == android ]]; then
