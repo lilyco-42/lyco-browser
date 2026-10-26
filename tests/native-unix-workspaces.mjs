@@ -83,11 +83,11 @@ try{
  // Keep repository/Actions credentials out of the packaged application.
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|HOME|USER|LOGNAME|TMPDIR|TEMP|TMP|DISPLAY|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR|XDG_CONFIG_HOME|XDG_DATA_HOME|LANG|LC_ALL)$/.test(key)));
  app=await electron.launch({executablePath:binary,args:[appRoot],env:{...cleanEnv,OPENBROWSER_API_PORT:String(52000+Math.floor(Math.random()*1000))},timeout:60000});
+ const page=await app.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
  await app.evaluate((_electron,{appRoot,observer})=>{
   const require=process.mainModule.require.bind(process.mainModule);
   globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork);
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
- const page=await app.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
  await app.evaluate((_electron,port)=>{
   globalThis.fetch=async(url,options={})=>{
    const root='https://lain42.top/studio/api';

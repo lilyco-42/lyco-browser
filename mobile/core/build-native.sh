@@ -18,7 +18,7 @@ if [[ "$platform" == android ]]; then
       assert any(x.startswith('jni/arm64-v8a/') and x.endswith('.so') for x in names)
       assert any(x.startswith('jni/x86_64/') and x.endswith('.so') for x in names)
       z.extract('classes.jar',Path(os.environ['RUNNER_TEMP'])/'lyco-tunnel-binding')
-  PY
+PY
   javap -classpath "$RUNNER_TEMP/lyco-tunnel-binding/classes.jar" top.lain42.lycotunnel.Lycotunnel top.lain42.lycotunnel.Session > "$RUNNER_TEMP/lyco-tunnel-bindings.txt"
 else
   gomobile bind -v -target=ios,iossimulator -iosversion=17.0 -tags=with_quic,with_utls,with_low_memory -trimpath -o "$RUNNER_TEMP/Lycotunnel.xcframework" .
