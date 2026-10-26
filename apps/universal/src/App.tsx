@@ -17,7 +17,7 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{lab
   <Text style={styles.label}>{label}</Text>
   <TextInput testID={label} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
-   selectTextOnFocus returnKeyType="done" submitBehavior="blurAndSubmit" secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
+   returnKeyType="done" submitBehavior="blurAndSubmit" secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
 }
 export default function App(){
@@ -26,7 +26,7 @@ export default function App(){
  const [token,setToken]=useState(''),[me,setMe]=useState<Account|null>(null);
  const [busy,setBusy]=useState(false),[note,setNote]=useState('');
  const [profiles,setProfiles]=useState<Profile[]>([]);
- const [name,setName]=useState(''),[url,setUrl]=useState('https://example.com');
+ const [name,setName]=useState(''),[url,setUrl]=useState('');
  const [openProfile,setOpenProfile]=useState<Profile|null>(null);
  useEffect(()=>{
   let live=true;
@@ -54,7 +54,7 @@ export default function App(){
   try{
    if(profiles.length>=100)throw Error('每台设备最多保存100个环境');
    const next=[...profiles,createProfile(name,url)];
-   await saveProfiles(next);setProfiles(next);setName('');setNote('已建立本地环境条目');
+   await saveProfiles(next);setProfiles(next);setName('');setUrl('');setNote('已建立本地环境条目');
   }catch(e){setNote((e as Error).message)}
  }
  async function removeProfile(id:string){
