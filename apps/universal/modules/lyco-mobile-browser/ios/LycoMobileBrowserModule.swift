@@ -130,10 +130,12 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     view.backgroundColor = .systemBackground
     let close = UIButton(type: .system)
     close.setTitle("关闭环境", for: .normal)
+    close.setContentCompressionResistancePriority(.required, for: .horizontal)
     close.addTarget(self, action: #selector(closeEnvironment), for: .touchUpInside)
     status.text = environmentName + " · 已配置代理"
     status.font = .preferredFont(forTextStyle: .caption1)
     status.numberOfLines = 2
+    status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     let bar = UIStackView(arrangedSubviews: [close, status])
     bar.axis = .horizontal
     bar.spacing = 12
@@ -146,12 +148,15 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     address.autocorrectionType = .no
     address.returnKeyType = .go
     address.delegate = self
+    address.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     let go = UIButton(type: .system)
     go.setTitle("前往", for: .normal)
     go.addTarget(self, action: #selector(navigateAddress), for: .touchUpInside)
     let addressBar = UIStackView(arrangedSubviews: [address, go])
     addressBar.spacing = 8
     go.setContentHuggingPriority(.required, for: .horizontal)
+    go.setContentCompressionResistancePriority(.required, for: .horizontal)
+    go.widthAnchor.constraint(greaterThanOrEqualToConstant: 56).isActive = true
     back.setTitle("后退", for: .normal)
     forward.setTitle("前进", for: .normal)
     reload.setTitle("刷新", for: .normal)
