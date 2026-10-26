@@ -1,11 +1,13 @@
 import {_electron as electron, chromium} from 'playwright';
 import http from 'node:http';
 import net from 'node:net';
+import {randomUUID} from 'node:crypto';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseConnection} from '../extensions/lain42/connection.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
+import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
@@ -23,6 +25,7 @@ const report={commit:process.env.GITHUB_SHA,binary,fixtureBilling:true,realPayme
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
+const failureProbe=await createProxyFailureProbe();
 const profileProbe=createBrowserProfileFixture();
 const independentAudit=process.env.LYCO_INDEPENDENT_AUDITS==='true'
  ? await createIndependentAuditFixture(process.env.GITHUB_WORKSPACE) : null;
@@ -47,20 +50,24 @@ const geo=http.createServer((_req,res)=>{
  res.end(JSON.stringify(geoResponse));
 });
 const geoPort=await listen(geo);
+let proxyUnavailable=false;
 const proxy=http.createServer((req,res)=>{
+ if(proxyUnavailable){res.writeHead(503).end();return;}
  const url=new URL(req.url);
- if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {
+ if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||![originPort,...failureProbe.ports].includes(Number(url.port))) {
   if(independentAudit){res.writeHead(403);res.end('CI audit external HTTP blocked');return;}
   res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(geoResponse));return;}
  url.hostname='127.0.0.1';
  const upstream=http.request(url,{headers:{...req.headers,'x-ci-proxy':'yes'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res)});
+ upstream.on('socket',socket=>socket.once('connect',()=>failureProbe.markProxyPort(socket.localPort)));
  upstream.on('error',()=>{res.writeHead(502);res.end()});req.pipe(upstream);
 });
 // Mihomo's HTTP adapter uses CONNECT even for HTTP targets. Permit ONLY the
 // ephemeral CI origin, never a general-purpose tunnel or public listener.
 proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+ if(proxyUnavailable){socket.end('HTTP/1.1 502 CI upstream stopped\r\n\r\n');return;}
  const targetPort=req.url==='ip-api.com:80'?geoPort:
-  [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:null;
+  [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:failureProbe.ports.find(port=>req.url===`127.0.0.1:${port}`);
  if(!targetPort) {
   socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;
  }
@@ -68,6 +75,7 @@ proxy.on('connect',protectConnectHandler((req,socket,head)=>{
  tunnelSockets.add(socket);tunnelSockets.add(upstream);
  upstream.once('connect',()=>{
   const port=upstream.localPort;tunnelPorts.add(port);
+  failureProbe.markProxyPort(port);
   upstream.once('close',()=>tunnelPorts.delete(port));
   socket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
   if(head.length)upstream.write(head);
@@ -78,7 +86,7 @@ proxy.on('connect',protectConnectHandler((req,socket,head)=>{
  upstream.once('close',()=>{tunnelSockets.delete(upstream);socket.destroy()});
 },row=>{(report.tunnelErrors||=[]).length<30&&report.tunnelErrors.push(row)}));
 const proxyPort=await listen(proxy);
-let application;
+let application,kernelConnection;
 try {
  await checkpoint('launch-workbench');
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA|PROGRAMFILES(?:\(X86\))?|COMMONPROGRAMFILES|HOMEDRIVE|HOMEPATH|OS|PROCESSOR_ARCHITECTURE|NUMBER_OF_PROCESSORS)$/i.test(key)));
@@ -352,8 +360,36 @@ try {
  report.webrtcAudit={completed:true,blocked:rtcResult.rtc.blocked,
   candidateCount:rtcResult.rtc.candidateCount,directUdpPackets:rtcResult.udpPackets};
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
+ await checkpoint('failed-upstream-probe');
+ const sessions=await page.evaluate(()=>window.ops.syncSessions());
+ const session=sessions.find(row=>row.id===profile.id);
+ assert.ok(session?.port,'Managed environment has no debugging session');
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${session.port}`);
+ const kernelPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===rtcTarget);
+ assert.ok(kernelPage,'Managed RTC page is missing');
+ try{
+  report.failedProxyAudit=await failureProbe.audit(kernelPage,async()=>{
+   proxyUnavailable=true;
+   for(const socket of tunnelSockets)socket.destroy();
+  });
+ }finally{proxyUnavailable=false;}
+ report.checks.push('native-failed-upstream-no-direct-http-websocket-or-tls-connection');
  await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ await checkpoint('unmanaged-native-network-control');
+ const directTarget='http://127.0.0.1:'+originPort+'/direct-control-page';
+ const directProfile=await page.evaluate(({profile,id,target})=>window.adoptLycoProfile({...profile,id,name:'CI direct network control',networkMode:'direct',proxy:null,proxyId:null,proxyMeta:{},
+  startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},
+  privacy:{...profile.privacy,languageMode:'profile',langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,id:randomUUID(),target:directTarget});
+ await page.evaluate(profile=>window.ops.startProfile(profile),directProfile);
+ const directSession=(await page.evaluate(()=>window.ops.syncSessions())).find(row=>row.id===directProfile.id);
+ assert.ok(directSession?.port);
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${directSession.port}`);
+ const directPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===directTarget);
+ assert.ok(directPage,'Unmanaged native control page is missing');
+ report.unmanagedProxyControl=await failureProbe.auditUnmanaged(directPage);
+ await page.evaluate(id=>window.ops.stopProfile(id),directProfile.id);
+ report.checks.push('unmanaged-native-http-websocket-tls-direct-positive-controls');
  const profileIsolation=await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot,
   independentAudit,evidence});
  try {
@@ -396,14 +432,17 @@ try {
  }
  throw error;
 } finally {
+ report.failedProxyConnections=failureProbe.snapshot();
  report.profileAudit=profileProbe.snapshot();
  if(application)try{report.coreStartup=await application.evaluate(()=>globalThis.__lycoCoreStartupEvidence||[])}catch{}
  if(application)try{report.targetTrace=await application.evaluate(()=>globalThis.__lycoTargetEvidence||[])}catch{}
  if(application)try{report.nativeIdentityCalls=await application.evaluate(()=>globalThis.__lycoNativeIdentityEvidence||[])}catch{}
  if(application)try{report.startupReadiness=await application.evaluate(()=>globalThis.__lycoStartupReadinessEvidence||[])}catch{}
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
+ await kernelConnection?.close().catch(()=>{});
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();
+ await failureProbe.close();
  origin.closeAllConnections();geo.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>geo.close(r));await new Promise(r=>proxy.close(r));
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 }

@@ -6,10 +6,15 @@ on:
     paths:
       - 'src/**'
       - 'scripts/**'
+      - 'tests/native-unix-workspaces.mjs'
+      - 'tests/proxy-failure-probe.mjs'
+      - 'tests/browser-privacy-fixture.mjs'
+      - 'tests/connect-handler.mjs'
+      - 'tests/core-startup-observer.cjs'
       - '.github/workflows/build-desktop-unix.yml'
   pull_request:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'tests/native-unix-workspaces.mjs', '.github/workflows/build-desktop-unix.yml']
+    paths: ['src/**', 'scripts/**', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
 
 concurrency:

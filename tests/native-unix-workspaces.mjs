@@ -5,9 +5,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
 import net from 'node:net';
+import {randomUUID} from 'node:crypto';
 import {protectConnectHandler} from './connect-handler.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
-import {_electron as electron} from 'playwright';
+import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
+import {_electron as electron,chromium} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
 const evidence=path.resolve(process.env.LYCO_UNIX_EVIDENCE||'lyco-unix-evidence');
@@ -15,6 +17,7 @@ await fs.mkdir(evidence,{recursive:true});
 const report={platform:process.platform,source:process.env.GITHUB_SHA,checks:[],observations:[],proxyRequests:[]};
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
+const failureProbe=await createProxyFailureProbe();
 const tunnelPorts=new Set();
 const navigations=[];
 const origin=http.createServer(async(req,res)=>{
@@ -40,7 +43,10 @@ const origin=http.createServer(async(req,res)=>{
 });
 const originPort=await listen(origin);
 const sockets=new Set();
+const proxyUpstreams=new Set();
+let proxyUnavailable=false;
 const proxy=http.createServer((req,res)=>{
+ if(proxyUnavailable){res.writeHead(503).end();return;}
  const url=new URL(req.url);
  // The packaged-startup test uses a controlled, test-owned HTTP proxy. The
  // upstream kernel's first exit lookup is ip-api.com over plain HTTP; answer
@@ -52,10 +58,11 @@ const proxy=http.createServer((req,res)=>{
   res.end(JSON.stringify({status:'success',query:'198.51.100.42',country:'CI Fixture',countryCode:'US',regionName:'CI',city:'CI',zip:'',timezone:'Etc/UTC',lat:0,lon:0,isp:'CI Fixture',org:'CI Fixture',as:'AS0 CI Fixture',asname:'CI Fixture',mobile:false,proxy:true,hosting:false}));
   return;
  }
- if(url.hostname!=='127.0.0.1'||Number(url.port)!==originPort){res.writeHead(502).end();return;}
+ if(url.hostname!=='127.0.0.1'||![originPort,...failureProbe.ports].includes(Number(url.port))){res.writeHead(502).end();return;}
  report.proxyRequests.push({method:req.method,path:url.pathname,phase:url.searchParams.get('phase')});
- const upstream=http.request({host:'127.0.0.1',port:originPort,path:url.pathname+url.search,method:req.method,
+ const upstream=http.request({host:'127.0.0.1',port:Number(url.port),path:url.pathname+url.search,method:req.method,
   headers:{...req.headers,'x-lyco-ci-route':'proxy'}},r=>{res.writeHead(r.statusCode,r.headers);r.pipe(res)});
+ upstream.on('socket',socket=>socket.once('connect',()=>failureProbe.markProxyPort(socket.localPort)));
  upstream.on('error',()=>res.destroy());req.pipe(upstream);
 });
 const geo=http.createServer((_req,res)=>{
@@ -67,23 +74,25 @@ const geoPort=await listen(geo);
 // The real Mihomo HTTP adapter uses CONNECT for plain HTTP as well. Restrict
 // tunnels to the CI origin and the controlled proxy exit-check response.
 proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+ if(proxyUnavailable){socket.end('HTTP/1.1 502 CI upstream stopped\r\n\r\n');return;}
  (report.connectTargets||=[]).push(req.url);
- const port=req.url==='ip-api.com:80'?geoPort:req.url===`127.0.0.1:${originPort}`?originPort:null;
+ const port=req.url==='ip-api.com:80'?geoPort:[originPort,...failureProbe.ports].find(port=>req.url===`127.0.0.1:${port}`);
  if(!port){socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;}
- const upstream=net.connect({host:'127.0.0.1',port});sockets.add(upstream);
+ const upstream=net.connect({host:'127.0.0.1',port});sockets.add(upstream);proxyUpstreams.add(upstream);
  upstream.once('connect',()=>{
   const localPort=upstream.localPort;tunnelPorts.add(localPort);
+  failureProbe.markProxyPort(localPort);
   upstream.once('close',()=>tunnelPorts.delete(localPort));
   socket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
   if(head.length)upstream.write(head);socket.pipe(upstream);upstream.pipe(socket);
  });
  socket.on('error',()=>upstream.destroy());upstream.on('error',()=>socket.destroy());
- socket.once('close',()=>upstream.destroy());upstream.once('close',()=>{sockets.delete(upstream);socket.destroy()});
+ socket.once('close',()=>upstream.destroy());upstream.once('close',()=>{sockets.delete(upstream);proxyUpstreams.delete(upstream);socket.destroy()});
 },error=>{(report.tunnelErrors||=[]).push(error)}));
 for(const server of [origin,proxy])server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s))});
 const proxyPort=await listen(proxy);
 report.fixturePorts={origin:originPort,proxy:proxyPort,geo:geoPort};
-let app;
+let app,kernelConnection;
 try{
  // Keep repository/Actions credentials out of the packaged application.
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|HOME|USER|LOGNAME|TMPDIR|TEMP|TMP|DISPLAY|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR|XDG_CONFIG_HOME|XDG_DATA_HOME|LANG|LC_ALL)$/.test(key)));
@@ -152,17 +161,44 @@ try{
  assert.equal(rtc.pageProxied,true);assert.equal(rtc.reportProxied,true);
  assert.equal(rtc.rtc.ipCandidate,false,'WebRTC exposed a literal IP candidate');
  assert.equal(rtc.udpPackets,0,'WebRTC sent direct UDP to the proven reachable STUN fixture');
+ const sessions=await page.evaluate(()=>window.ops.syncSessions());
+ const session=sessions.find(row=>row.id===profiles[0].id);
+ assert.ok(session?.port,'Real managed environment has no debugging session');
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${session.port}`);
+ const kernelPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===rtcTarget);
+ assert.ok(kernelPage,'Real managed RTC page is missing');
+ report.failedProxyAudit=await failureProbe.audit(kernelPage,async()=>{
+  proxyUnavailable=true;
+  for(const socket of proxyUpstreams)socket.destroy();
+ });
+ report.checks.push('native-failed-upstream-no-direct-http-websocket-or-tls-connection');
  await page.evaluate(id=>window.ops.stopProfile(id),profiles[0].id);
  report.checks.push('native-webrtc-peer-connection-no-literal-ip-or-direct-stun-packets');
+ const directTarget=`http://127.0.0.1:${originPort}/network-control`;
+ const directProfile=await page.evaluate(({profile,id,target})=>window.adoptLycoProfile({...profile,id,name:'CI direct network control',networkMode:'direct',proxy:null,proxyId:null,proxyMeta:{},
+  startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},
+  privacy:{...profile.privacy,languageMode:'profile',langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile:profiles[0],id:randomUUID(),target:directTarget});
+ await page.evaluate(profile=>window.ops.startProfile(profile),directProfile);
+ const directSession=(await page.evaluate(()=>window.ops.syncSessions())).find(row=>row.id===directProfile.id);
+ assert.ok(directSession?.port);
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${directSession.port}`);
+ const directPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===directTarget);
+ assert.ok(directPage,'Unmanaged native control page is missing');
+ report.unmanagedProxyControl=await failureProbe.auditUnmanaged(directPage);
+ await page.evaluate(id=>window.ops.stopProfile(id),directProfile.id);
+ report.checks.push('unmanaged-native-http-websocket-tls-direct-positive-controls');
  await page.evaluate(()=>window.ops.lycoLogout());
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).logged_in,false);
  report.checks.push('native-logout');
  await page.screenshot({path:path.join(evidence,'workbench.png')});
 }catch(error){report.failure=String(error?.stack||error);throw error}
 finally{
+ report.failedProxyConnections=failureProbe.snapshot();
  if(app)try{report.coreStartup=await app.evaluate(()=>globalThis.__lycoUnixCoreEvidence||[])}catch{}
  await app?.close().catch(()=>{});
+ await kernelConnection?.close().catch(()=>{});
  await privacyProbe.close();
+ await failureProbe.close();
  for(const socket of sockets)socket.destroy();origin.close();proxy.close();geo.close();
  await fs.writeFile(path.join(evidence,'report.json'),JSON.stringify(report,null,2));
  // The runner's app userData remains outside this report directory.
