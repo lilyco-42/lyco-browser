@@ -5,6 +5,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
+import coreNotices from './core-notices.json';
 
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
@@ -24,6 +25,7 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false,disab
 }
 export default function App(){
  const [screen,setScreen]=useState<Screen>('home');
+ const [showCoreLicense,setShowCoreLicense]=useState(false);
  const [fieldEpoch,setFieldEpoch]=useState(0);
  const authGeneration=useRef(0);
  const [user,setUser]=useState(''),[password,setPassword]=useState('');
@@ -190,6 +192,15 @@ export default function App(){
     <Text style={styles.hint}>Windows / macOS / Linux：使用 OpenBrowser 桌面内核。React Native Web 可作为跨平台会员控制界面，但 Electron 容器和原生进程不同于移动端 WebView。</Text>
     <Text style={styles.hint}>反检测并非隐身承诺。独立账号、合法授权、合规使用，且不同平台的指纹能力不能保证完全相同。</Text>
     <Action title="官网帮助" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
+    <Action title={showCoreLicense?'收起网络组件许可':'网络组件开源许可'} secondary onPress={()=>setShowCoreLicense(value=>!value)}/>
+    {showCoreLicense&&<View style={{gap:12}}>
+     <Text style={styles.value}>{coreNotices.name} {coreNotices.version}</Text>
+     <Text selectable style={styles.hint}>移动端浏览环境网络核心。LYCO 是独立项目，不代表该组件的作者或获得其背书。</Text>
+     <Text selectable style={styles.hint}>源码版本：{coreNotices.commit}</Text>
+     <Action title="查看此版本组件源码" secondary onPress={()=>openSite(coreNotices.source)}/>
+     <Text selectable style={styles.hint}>{coreNotices.notice}</Text>
+     <Text selectable style={styles.hint}>{coreNotices.gpl}</Text>
+    </View>}
    </View>}
    {(busy||savingProfiles)&&<ActivityIndicator color={COLOR.gold}/>}
    {!!note&&<Text style={styles.note} accessibilityRole="alert">{note}</Text>}
