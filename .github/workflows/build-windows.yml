@@ -35,6 +35,7 @@ jobs:
           node --check src/diagnostics-ui.js
           node --test tests/diagnostics-controller.test.js
           node --test tests/release-preview.test.js tests/third-party-notices.test.js
+          node --test tests/update-policy.test.js
           node --test tests/browser-webgl-identity.test.mjs
 
   windows-x64:

@@ -71,7 +71,7 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
+for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','update-policy.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -84,7 +84,26 @@ one('index.html','href="assets/logo-pixel.png?v=20261002-flat"','href="assets/lo
 one('index.html','src="assets/logo-pixel.png?v=20261002-flat" alt="OpenBrowser"','src="assets/logo.png" alt="Lyco 原创角色"');
 one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">','<strong>LYCO Browser</strong><small data-i18n="app.brand.sub">');
 one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
-one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
+one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';",join(
+ "const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';",
+ "const {resolveStableReleaseMeta, updateAssetUrlIsAllowed} = require('./lyco/update-policy');"));
+// The pinned upstream's Atom-first resolver also sees CI and preview tags.
+// Keep its callers, but resolve only official stable releases for this product.
+for(const [pattern,replacement] of [
+ [/async function resolveLatestReleaseMeta\(\) \{[\s\S]*?\n\}\n(?=\nasync function resolveReleaseAsset)/g,
+  'async function resolveLatestReleaseMeta() {\n  return resolveStableReleaseMeta({fetch, userAgent: updateUserAgent(), timeout: UPDATE_TIMEOUT_MS});\n}\n'],
+ [/function updateUrlIsAllowed\(value, assetName\) \{[\s\S]*?\n\}\n(?=\nfunction updateUserAgent)/g,
+  'function updateUrlIsAllowed(value, assetName) {\n  return updateAssetUrlIsAllowed(value, assetName);\n}\n'],
+]){
+ const matches=fs.readFileSync(path.join(app,'main.js'),'utf8').match(pattern);
+ if(matches?.length!==1)throw Error('Pinned updater function boundary mismatch');
+ one('main.js',matches[0],replacement);
+}
+one('main.js','        const asset = Array.isArray(release.assets)',join(
+ '        if (release.draft !== false || release.prerelease !== false || release.tag_name !== `v${remoteVersion}`) return null;',
+ '        const asset = Array.isArray(release.assets)'));
+one('main.js',"const APP_UPDATE_CACHE_FILE = path.join(app.getPath('userData'), 'openbrowser-update-status.json');",
+ "const APP_UPDATE_CACHE_FILE = path.join(app.getPath('userData'), 'lyco-stable-update-status.json');");
 // The updater must request the assets this product actually publishes.
 one('main.js', "  'darwin:x64': 'OpenBrowser-macOS-x86_64.dmg',\n", '');
 one('main.js', "'darwin:arm64': 'OpenBrowser-macOS-arm64-with-kernel.dmg'", "'darwin:arm64': 'LYCO-Browser-macOS-arm64-MVP.dmg'");
