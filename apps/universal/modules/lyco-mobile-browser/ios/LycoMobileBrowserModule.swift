@@ -140,6 +140,7 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     address.accessibilityLabel = "浏览网址"
     address.placeholder = "输入网址"
     address.borderStyle = .roundedRect
+    address.clearButtonMode = .whileEditing
     address.keyboardType = .URL
     address.autocapitalizationType = .none
     address.autocorrectionType = .no
@@ -183,6 +184,12 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
   }
   @objc private func checkPaidLease() { paidGuard?.checkForeground() }
   func textFieldShouldReturn(_ textField: UITextField) -> Bool { navigateAddress(); return true }
+  func textFieldDidBeginEditing(_ textField: UITextField) {
+    DispatchQueue.main.async { [weak textField] in
+      guard let textField, textField.isFirstResponder else { return }
+      textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
+    }
+  }
   @objc private func navigateAddress() {
     guard !stopped, let browser else { return }
     let raw = (address.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)

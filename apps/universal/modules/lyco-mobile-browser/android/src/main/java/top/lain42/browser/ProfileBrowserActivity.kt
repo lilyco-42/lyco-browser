@@ -74,6 +74,7 @@ class ProfileBrowserActivity : Activity() {
     address = EditText(this).apply {
       contentDescription = "浏览网址"; hint = "输入网址"
       setSingleLine(true)
+      setSelectAllOnFocus(true)
       inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
       imeOptions = EditorInfo.IME_ACTION_GO
       setOnEditorActionListener { _, action, _ ->
