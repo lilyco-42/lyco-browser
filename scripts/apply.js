@@ -77,6 +77,7 @@ for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate
 }
 fs.mkdirSync(path.join(app,'lyco','core'),{recursive:true});
 fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.txt'),path.join(app,'lyco','core','LICENSE-MIHOMO.txt'));
+fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.source.json'),path.join(app,'lyco','core','LICENSE-MIHOMO.source.json'));
 const view=fs.readFileSync(path.join(base,'src','view.html'),'utf8');
 one('index.html','<title>OpenBrowser</title>','<title>LYCO Browser · 代理与会员</title>');
 one('index.html','href="assets/logo-pixel.png?v=20261002-flat"','href="assets/logo.png"');

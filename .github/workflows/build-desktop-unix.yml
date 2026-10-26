@@ -75,7 +75,7 @@ jobs:
           for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js lyco/workbench.js; do
             node --check "upstream/Browserapp/$f"
           done
-          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/third-party-notices.test.js
 
       - uses: actions/setup-python@v5
         with:

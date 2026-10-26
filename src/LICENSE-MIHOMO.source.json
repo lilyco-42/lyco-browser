@@ -1,0 +1,9 @@
+{
+  "repository": "MetaCubeX/mihomo",
+  "ref": "v1.19.32",
+  "path": "LICENSE",
+  "git_blob_sha": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+  "source_url": "https://github.com/MetaCubeX/mihomo/blob/v1.19.32/LICENSE",
+  "license": "GPL-3.0",
+  "note": "Unmodified upstream license; replaces the incorrectly attributed MIT text. This record does not grant a license to unrelated project code."
+}
