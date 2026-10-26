@@ -7,10 +7,12 @@
 | 范围 | 源码提交及 Actions | 证明的范围 |
 | --- | --- | --- |
 | Windows | `c67433a`，[40340561128](https://github.com/lilyco-42/lyco-browser/actions/runs/40340561128) | 集成门禁及完整 Windows 打包、便携和安装验收通过；不替代后续修改的验收 |
-| macOS ARM64、Linux x64 | `f2f61f4`，[40369727125](https://github.com/lilyco-42/lyco-browser/actions/runs/40369727125) | 真实打包应用、真实 Mihomo、两个受管环境、代理流量、Cookie/localStorage 隔离与 A 重开持久化、受控 RTC peer/STUN、退出通过；新增 HTTP/WebSocket/TLS ClientHello 的失效代理检查及真实直连环境对照也通过 |
-| Go 移动核心 | `f2f61f4`，[40369726733](https://github.com/lilyco-42/lyco-browser/actions/runs/40369726733) | HTTP、本机认证、停止、SOCKS5、SS、VMess、VLESS、Trojan、Hysteria2、TUIC、VMess/VLESS WebSocket、VLESS gRPC 真实服务链及 race 检查通过，Android/Apple 绑定均构建成功 |
+| macOS ARM64、Linux x64 | `cdae6b1`，[40373568947](https://github.com/lilyco-42/lyco-browser/actions/runs/40373568947) | 真实打包应用、真实 Mihomo、两个受管环境、代理流量、Cookie/localStorage 隔离与 A 重开持久化、受控 RTC peer/STUN、退出通过；新增 HTTP/WebSocket/TLS ClientHello 的失效代理检查及真实直连环境对照也通过。macOS 首次因 Electron 下载返回 504 失败，重跑后成功 |
+| Go 移动核心 | `cdae6b1`，[40373569000](https://github.com/lilyco-42/lyco-browser/actions/runs/40373569000) | HTTP、本机认证、停止、SOCKS5、SS、VMess、VLESS、Trojan、Hysteria2、TUIC、VMess/VLESS WebSocket、VLESS gRPC 真实服务链及 race 检查通过，Android/Apple 绑定均构建成功 |
 | iOS 原生运行 | `f2f61f4`，[40369727206](https://github.com/lilyco-42/lyco-browser/actions/runs/40369727206) | 原生编译、普通测试域名经 Go 核心代理与首个网页写入通过；网址清除不完整且长网址压缩隐藏“前往”按钮，导航失败。此前 `c67433a` 的停代理用例出现本机直连，见 [40340561441](https://github.com/lilyco-42/lyco-browser/actions/runs/40340561441)，该问题仍必须保留回归验收 |
-| Android 原生运行 | `f2f61f4`，[40369727206](https://github.com/lilyco-42/lyco-browser/actions/runs/40369727206) | 原生编译、新建环境、Go/JNI 代理与首个网页写入通过；地址栏替换残留旧网址尾部导致导航失败，整体失败。已加入聚焦全选修复，待新一轮运行 |
+| Android 原生运行 | `cdae6b1`，[40373568817](https://github.com/lilyco-42/lyco-browser/actions/runs/40373568817) | 原生编译、Go/JNI 代理、地址栏/历史/刷新、A/B Cookie 与 localStorage 隔离及 A 重开持久化通过；后台浏览返回控制页时键盘遮挡返回按钮，整体失败。正在验证启动前收起键盘与控制页键盘避让，清除数据和断代理仍未运行 |
+
+同轮 iOS `cdae6b1` 在最初环境名称输入中出现 `mbile-A`，整体失败且未到网页。已将输入组件的初始值固定到该次挂载，程序清空仍使用显式重建；不能把之前的首个网页成功当作当前完整验收。
 
 Windows `6cc4f25` 的 [40362816779](https://github.com/lilyco-42/lyco-browser/actions/runs/40362816779) 在新标签首脚本读到错误 CPU/内存，后续读取才恢复；已加入页面恢复前的最终原生设置，仍须真实内核验证。`f2f61f4` 的 [40369727136](https://github.com/lilyco-42/lyco-browser/actions/runs/40369727136) 通过新增断代理和直连对照后，测试误读了旧直连环境的创建结果，已修正为等待本次创建完成。不能用旧成功记录替代当前版本验收。
 
