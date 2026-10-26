@@ -9,14 +9,14 @@
 | Windows | `c67433a`，[40340561128](https://github.com/lilyco-42/lyco-browser/actions/runs/40340561128) | 集成门禁及完整 Windows 打包、便携和安装验收通过；不替代后续修改的验收 |
 | macOS ARM64、Linux x64 | `6cc4f25`，[40362816857](https://github.com/lilyco-42/lyco-browser/actions/runs/40362816857) | 真实打包应用、真实 Mihomo、两个受管环境、代理流量、Cookie/localStorage 隔离与 A 重开持久化、受控 RTC peer/STUN、退出通过；不含后续新增的失效代理用例 |
 | Go 移动核心 | `6cc4f25`，[40362816845](https://github.com/lilyco-42/lyco-browser/actions/runs/40362816845) | HTTP、本机认证、停止、SOCKS5、SS、VMess、VLESS、Trojan、Hysteria2、TUIC、VMess/VLESS WebSocket、VLESS gRPC 真实服务链及 race 检查通过，Android/Apple 绑定均构建成功 |
-| iOS 原生运行 | `c67433a`，[40340561441](https://github.com/lilyco-42/lyco-browser/actions/runs/40340561441) | 编译成功，A/B 流程运行；停代理后本机目标出现直连，整体失败，不能发行 |
+| iOS 原生运行 | `6cc4f25`，[40362816746](https://github.com/lilyco-42/lyco-browser/actions/runs/40362816746) | 原生界面与完整输入通过，普通测试域名报 DNS `-1003` 且未进入代理，整体失败。此前 `c67433a` 的 A/B 流程运行后，停代理访问本机目标出现直连，见 [40340561441](https://github.com/lilyco-42/lyco-browser/actions/runs/40340561441)，两个问题都必须保留回归验收 |
 | Android 原生运行 | `6cc4f25`，[40362816746](https://github.com/lilyco-42/lyco-browser/actions/runs/40362816746) | 原生编译成功；完整环境名称已进入原生输入框，但软键盘遮挡导致输入断言失败，整体失败。此前 `c67433a` 已观察到 Go/JNI 真实代理请求和网页写入，不能替代本轮完整验收 |
 
 PR 工作流的 `GITHUB_SHA` 是 GitHub 测试合并提交；报告记录该 SHA，不应误写为分支 head。原始截图、网络记录和报告保留在对应 Actions Artifact，测试不上传身份缓存、账号 JWT 或节点凭据。Billing 使用 CI 夹具；没有真实付款或客户线路验收。
 
 ## 正在修复及尚需完成
 
-- iOS 使用显式 loopback 匹配规则，继续保留普通网站全局规则及 `allowFailover=false`，用相同停代理用例验收，不能删除失败断言。
+- iOS 为显式 loopback 匹配和普通网站全局规则分别创建原生代理配置，均保留 `allowFailover=false`；普通域名与停代理用例都必须通过，不能删除失败断言。
 - Cookie 持久化夹具桌面使用 `Max-Age=600`、移动使用 `Max-Age=3600`，覆盖多轮原生驱动启动的测试窗口；会话 Cookie 退出浏览器后失效属于正常语义，不将其伪造为永久 Cookie。
 - 移动端退出、切换账号或返回列表时关闭原生环境；Android 额外验收后台浏览进程确实退出。
 - 移动原生地址栏、前进后退、刷新和 URL 协议限制需真实 UI 与网络记录证明。
@@ -26,5 +26,6 @@ PR 工作流的 `GITHUB_SHA` 是 GitHub 测试合并提交；报告记录该 SHA
 - Android 正式签名候选仍需实际打包、签名核验和运行验收。已配置私有签名材料不等于候选已通过。
 - iOS 真机签名与分发、macOS 签名公证、Windows 商业代码签名、商店账号和正式审核尚未完成。
 - 移动代理核心、桌面内核、字体及全部依赖的随包许可与对应源码交付须完成；保留现有授权记录与第三方文件。
+- Mihomo 的既有随包文件误写为 MIT；已按官方 v1.19.32 替换为 GPLv3 原文，Git blob SHA 为 `f288702d2fa16d3cdf0035b15a9fcbc552cd88e7`，随包携带来源记录并增加回归检查。这不等于其他依赖或整个应用已完成分发许可审查。
 
 功能和运行门禁通过前不合并发行，不把模拟器 App 称作 iPhone 安装包，不用源码检查替代五平台成品验收。所有产品测试与构建只在 GitHub Actions 执行。

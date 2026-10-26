@@ -103,7 +103,12 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     // Network.framework may exempt loopback from its default catch-all. Give
     // those hosts an explicit rule as well, retaining the global rule for
     // ordinary websites. Both rules use the same fail-closed authenticated core.
-    var loopbackProxy = proxy
+    // Keep separate native configurations so the loopback rule's domain
+    // mutations cannot constrain the ordinary-site catch-all.
+    var loopbackProxy = ProxyConfiguration(httpCONNECTProxy: .hostPort(host: .init(host), port: port),
+      tlsOptions: scheme == "https" ? NWProtocolTLS.Options() : nil)
+    loopbackProxy.allowFailover = false
+    if let core { loopbackProxy.applyCredential(username: core.username(), password: core.password()) }
     loopbackProxy.matchDomains = ["localhost", "127.0.0.1", "::1"]
     store.proxyConfigurations = [loopbackProxy, proxy]
     let config = WKWebViewConfiguration()
@@ -229,7 +234,13 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     decisionHandler(action.request.url.map(Self.allowed) == true ? .allow : .cancel)
   }
   func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-    status.text = "连接失败，请检查代理；未切换直连"
+    showNavigationFailure(error)
+  }
+  func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    showNavigationFailure(error)
+  }
+  private func showNavigationFailure(_ error: Error) {
+    status.text = "连接失败（\((error as NSError).code)），请检查所选代理"
     updateNavigation()
   }
   func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
