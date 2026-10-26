@@ -267,6 +267,12 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
+// Generic UA/metrics preparation runs after the first native restore. Reassert
+// the same saved identity on this paused owning session as the final step,
+// before its target can resume; a later watch pass cannot repair first reads.
+one('engine.js', '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();', join(
+ '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);',
+ '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();'));
 one('engine.js', '        const destroyedId = event.params?.targetId;', join(
  '        const destroyedId = event.params?.targetId;',
  '        newTabGate.targetClosed(destroyedId);',

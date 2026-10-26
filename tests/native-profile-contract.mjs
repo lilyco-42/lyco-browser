@@ -22,8 +22,11 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   };
   await checkpoint('profile:create-second');
   await page.locator('[data-view="lyco"]').click();
+  // Other native probes also adopt profiles (including the direct control).
+  // Wait for this creation to replace the current observation, not a stale one.
+  const previousCreatedId = await page.evaluate(() => window.__lycoCreated?.id);
   await page.locator('#lyco-create-profile').click();
-  await page.waitForFunction(id => window.__lycoCreated?.id && window.__lycoCreated.id !== id, profile.id);
+  await page.waitForFunction(id => window.__lycoCreated?.id && window.__lycoCreated.id !== id, previousCreatedId);
   const second = await page.evaluate(() => window.__lycoCreated);
   assert.notEqual(second.id, profile.id, 'Storage test requires two actual environments');
   assert.ok(second.proxyId, 'Second environment must retain its managed proxy binding');
