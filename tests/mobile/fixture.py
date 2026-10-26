@@ -37,7 +37,7 @@ class Origin(http.server.BaseHTTPRequestHandler):
         (async()=>{const owner=OWNER;
         const readCookie=()=>document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
         const before={cookie:readCookie(),local:localStorage.getItem('owner')};
-        document.cookie='owner='+owner+'; Path=/; Max-Age=600; SameSite=Lax';localStorage.setItem('owner',owner);
+        document.cookie='owner='+owner+'; Path=/; Max-Age=3600; SameSite=Lax';localStorage.setItem('owner',owner);
         const report={owner,before,after:{cookie:readCookie(),local:localStorage.getItem('owner')}};
         const result=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
         if(!result.ok)throw Error('report failed');document.getElementById('status').textContent='LYCO verified '+owner;

@@ -8,8 +8,12 @@ appId: top.lain42.lycobrowser
 - tapOn:
     id: "环境名称"
 - inputText: ${NAME}
-- assertVisible: ${NAME}
 - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: "环境名称"
+    direction: UP
+- assertVisible: ${NAME}
 - scrollUntilVisible:
     element:
       id: "首页 URL"
@@ -18,6 +22,10 @@ appId: top.lain42.lycobrowser
     id: "首页 URL"
 - eraseText
 - inputText: ${URL}
-- assertVisible: ${URL.split('?').join('\\?').split('.').join('\\.')}
 - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: "首页 URL"
+    direction: DOWN
+- assertVisible: ${URL.split('?').join('\\?').split('.').join('\\.')}
 - tapOn: "保存环境"

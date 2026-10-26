@@ -1,8 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {ActivityIndicator,BackHandler,Keyboard,Linking,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
+import {ActivityIndicator,Alert,BackHandler,Keyboard,KeyboardAvoidingView,Linking,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
 import Browser from './Browser';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {closeMobileProfiles} from './mobile-browser';
+import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 
@@ -14,10 +14,10 @@ function Action({title,label,onPress,secondary=false,disabled=false}:{title:stri
   <Text style={[styles.actionText,secondary&&{color:COLOR.text}]}>{title}</Text>
  </Pressable>;
 }
-function Field({label,value,onChangeText,placeholder,secureTextEntry=false}:{label:string;value:string;onChangeText:(value:string)=>void;placeholder?:string;secureTextEntry?:boolean}){
+function Field({label,value,onChangeText,placeholder,secureTextEntry=false,disabled=false}:{label:string;value:string;onChangeText:(value:string)=>void;placeholder?:string;secureTextEntry?:boolean;disabled?:boolean}){
  return <View style={{gap:6,marginBottom:13}}>
   <Text style={styles.label}>{label}</Text>
-  <TextInput testID={label} style={styles.input} defaultValue={value} onChangeText={onChangeText} placeholder={placeholder}
+  <TextInput testID={label} style={styles.input} defaultValue={value} onChangeText={onChangeText} placeholder={placeholder} editable={!disabled}
    placeholderTextColor="#7183a1" autoCapitalize="none" autoCorrect={false}
    returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
@@ -30,12 +30,14 @@ export default function App(){
  const [token,setToken]=useState(''),[me,setMe]=useState<Account|null>(null);
  const [busy,setBusy]=useState(false),[note,setNote]=useState('');
  const [profiles,setProfiles]=useState<Profile[]>([]);
+ const [profilesLoaded,setProfilesLoaded]=useState(false),[savingProfiles,setSavingProfiles]=useState(false);
+ const profileMutation=useRef(false);
  const [name,setName]=useState(''),[url,setUrl]=useState('');
  const [openProfile,setOpenProfile]=useState<Profile|null>(null);
  useEffect(()=>{
   let live=true;
   closeMobileProfiles().catch(()=>{if(live)setNote('无法核实旧浏览环境是否已停止，请重新打开应用')});
-  readProfiles().then(rows=>{if(live)setProfiles(rows)}).catch(()=>{if(live)setNote('无法读取本地环境列表')});
+  readProfiles().then(rows=>{if(live){setProfiles(rows);setProfilesLoaded(true)}}).catch(()=>{if(live)setNote('无法读取本地环境列表，请重新打开应用后再修改环境')});
   return()=>{live=false};
  },[]);
  useEffect(()=>{
@@ -80,17 +82,44 @@ export default function App(){
   catch{setNote('环境尚未停止，请关闭原生浏览窗口后重试')}
  }
  async function addProfile(){
+  if(!beginProfileMutation())return;
   try{
    if(profiles.length>=100)throw Error('每台设备最多保存100个环境');
    const next=[...profiles,createProfile(name,url)];
    await saveProfiles(next);setProfiles(next);setName('');setUrl('');setFieldEpoch(value=>value+1);setNote('已建立本地环境条目');
   }catch(e){setNote((e as Error).message)}
+  finally{endProfileMutation()}
  }
+ function beginProfileMutation(){
+  if(!profilesLoaded||profileMutation.current)return false;
+  profileMutation.current=true;setSavingProfiles(true);return true;
+ }
+ function endProfileMutation(){profileMutation.current=false;setSavingProfiles(false)}
  async function removeProfile(id:string){
+  if(!beginProfileMutation())return;
   try{
    const next=profiles.filter(x=>x.id!==id);
    await saveProfiles(next);setProfiles(next);setNote('环境列表条目已删除；原生网站数据仍保留在本机');
   }catch(e){setNote((e as Error).message)}
+  finally{endProfileMutation()}
+ }
+ function confirmProfileData(profile:Profile,remove:boolean){
+  Alert.alert(remove?'删除环境':'清除网站数据',
+   `将清除「${profile.name}」的网页登录、Cookie、缓存和本地存储。${remove?'环境条目也会删除。':'环境条目保留，可重新打开。'}其他环境不受影响。`,
+   [{text:'取消',style:'cancel'},{text:remove?'删除':'清除',style:'destructive',onPress:()=>{void clearProfileData(profile.id,remove)}}]);
+ }
+ async function clearProfileData(id:string,remove:boolean){
+  if(!beginProfileMutation())return;
+  try{
+   await clearMobileProfile(id);
+   if(remove){
+    const next=profiles.filter(row=>row.id!==id);
+    try{await saveProfiles(next)}catch{throw Error('网站数据已清除，但列表保存失败，请重试删除环境')}
+    setProfiles(next);
+   }
+   setNote(remove?'已删除环境及网站数据':'已清除所选环境的网站数据');
+  }catch(e){setNote((e as Error).message)}
+  finally{endProfileMutation()}
  }
  async function openSite(address:string){
   try{await Linking.openURL(address)}catch{setNote('无法打开网页，请确认浏览器已安装')}
@@ -99,6 +128,7 @@ export default function App(){
  if(openProfile)return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
   <Browser profile={openProfile} onClose={closeBrowser} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
  return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
+  <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
   <View style={styles.header}>
    <Text style={styles.kicker}>LYCO / UNIFIED CLIENT</Text>
    <Text style={styles.title}>LYCO Browser</Text>
@@ -114,8 +144,8 @@ export default function App(){
    {screen==='home'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>网站账号 / Billing</Text>
      {!token?<><Text style={styles.hint}>与 lain42.top 共用账户，管理员令牌和支付密钥不进入客户端。</Text>
-      <Field key={'user-'+fieldEpoch} label="网站用户名" value={user} onChangeText={setUser} placeholder="输入用户名"/>
-      <Field key={'password-'+fieldEpoch} label="网站密码" value={password} onChangeText={setPassword} placeholder="至少8位" secureTextEntry/>
+      <Field key={'user-'+fieldEpoch} label="网站用户名" value={user} onChangeText={setUser} placeholder="输入用户名" disabled={busy}/>
+      <Field key={'password-'+fieldEpoch} label="网站密码" value={password} onChangeText={setPassword} placeholder="至少8位" secureTextEntry disabled={busy}/>
       <Action title={busy?'登录中…':'登录并验证权益'} disabled={busy} onPress={doLogin}/>
      </>:<>
       <Text style={styles.value}>✓ {me?.username||user}</Text>
@@ -141,15 +171,18 @@ export default function App(){
    {screen==='profiles'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>新建环境条目</Text>
      <Text style={styles.hint}>环境名称与网址保存在本设备。移动端为每个环境分配独立网站数据，启动时选择官网线路或自备代理。连接仅覆盖当前浏览环境。</Text>
-     <Field key={'name-'+fieldEpoch} label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A"/>
-     <Field key={'url-'+fieldEpoch} label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com"/>
-     <Action title="保存环境" onPress={addProfile}/>
+     <Field key={'name-'+fieldEpoch} label="环境名称" value={name} onChangeText={setName} placeholder="例如 客户 A" disabled={!profilesLoaded||savingProfiles}/>
+     <Field key={'url-'+fieldEpoch} label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com" disabled={!profilesLoaded||savingProfiles}/>
+     <Action title="保存环境" disabled={!profilesLoaded||savingProfiles} onPress={addProfile}/>
     </View>
     {profiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无环境，先添加一个。</Text></View>:
      profiles.map(row=><View style={styles.card} key={row.id}>
       <Text style={styles.cardTitle}>{row.name}</Text><Text style={styles.hint}>{row.url}</Text>
-      <View style={styles.actions}><Action title="打开网页" label={"打开环境 "+row.name} onPress={()=>setOpenProfile(row)}/>
-       <Action title="删除条目" secondary onPress={()=>removeProfile(row.id)}/></View></View>)}
+      <View style={styles.actions}><Action title="打开网页" label={"打开环境 "+row.name} disabled={savingProfiles} onPress={()=>setOpenProfile(row)}/>
+       {Platform.OS==='android'||Platform.OS==='ios'?<>
+        <Action title="清除网站数据" label={"清除环境 "+row.name} secondary disabled={savingProfiles} onPress={()=>confirmProfileData(row,false)}/>
+        <Action title="删除环境" label={"删除环境 "+row.name} secondary disabled={savingProfiles} onPress={()=>confirmProfileData(row,true)}/>
+       </>:<Action title="删除条目" secondary disabled={savingProfiles} onPress={()=>removeProfile(row.id)}/>}</View></View>)}
    </>}
    {screen==='about'&&<View style={styles.card}><Text style={styles.cardTitle}>支持范围与限制</Text>
     <Text style={styles.hint}>Android 9 及以上：原生 WebView 使用环境专用数据目录和独立进程。每次只打开一个环境，关闭后终止浏览进程。需要系统 WebView 支持代理覆盖。</Text>
@@ -158,10 +191,11 @@ export default function App(){
     <Text style={styles.hint}>反检测并非隐身承诺。独立账号、合法授权、合规使用，且不同平台的指纹能力不能保证完全相同。</Text>
     <Action title="官网帮助" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
    </View>}
-   {busy&&<ActivityIndicator color={COLOR.gold}/>}
+   {(busy||savingProfiles)&&<ActivityIndicator color={COLOR.gold}/>}
    {!!note&&<Text style={styles.note} accessibilityRole="alert">{note}</Text>}
    <Text style={styles.footer}>LYCO Browser · Internal preview · GitHub Actions-only builds</Text>
   </ScrollView>
+  </KeyboardAvoidingView>
  </SafeAreaView>;
 }
 const styles=StyleSheet.create({

@@ -30,10 +30,10 @@ else
   direct_origin='http://127.0.0.1:18080'
 fi
 maestro --device "$device" test --format junit --output "$evidence/initial.xml" --test-output-dir "$evidence/initial" --debug-output "$evidence/initial-debug" --flatten-debug-output -e "PROXY=$proxy" "$root/flows/initial.yaml"
-expected_reports=3
+expected_reports=5
 if [[ "$platform" == android ]]; then
   maestro --device "$device" test --format junit --output "$evidence/background-close.xml" --test-output-dir "$evidence/background-close" --debug-output "$evidence/background-close-debug" --flatten-debug-output -e "PROXY=$proxy" "$root/flows/background-close.yaml"
-  expected_reports=4
+  expected_reports=6
   for attempt in 1 2 3 4 5; do
     if ! adb shell pidof 'top.lain42.lycobrowser:lyco_browser' >/dev/null; then break; fi
     sleep 1
@@ -43,6 +43,7 @@ if [[ "$platform" == android ]]; then
     exit 1
   fi
 fi
+maestro --device "$device" test --format junit --output "$evidence/clear-data.xml" --test-output-dir "$evidence/clear-data" --debug-output "$evidence/clear-data-debug" --flatten-debug-output -e "PROXY=$proxy" "$root/flows/clear-data.yaml"
 touch "$evidence/stop-proxy"
 python3 - "$evidence/proxy-stopped" <<'PY'
 import sys,time

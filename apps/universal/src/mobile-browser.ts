@@ -4,7 +4,7 @@ import type {Profile,BrowserSession} from './profiles';
 import type {MobileSubscription} from './billing';
 import type {MobileNode} from './subscription.mjs';
 
-type NativeBrowser = {open(options:Record<string,string>):Promise<void>;closeAll():Promise<void>};
+type NativeBrowser = {open(options:Record<string,string>):Promise<void>;closeAll():Promise<void>;clearProfile(id:string):Promise<void>};
 // A close requested while a native launch is being dispatched must run after
 // that launch. Native calls use different queues on Android.
 let nativeOperations:Promise<void>=Promise.resolve();
@@ -37,4 +37,13 @@ export async function openPaidMobileProfile(profile:Profile,subscription:MobileS
 export async function closeMobileProfiles():Promise<void>{
  const native=requireOptionalNativeModule<NativeBrowser>('LycoMobileBrowser');
  if(native)await inNativeOrder(()=>native.closeAll());
+}
+
+export async function clearMobileProfile(id:string):Promise<void>{
+ const native=requireOptionalNativeModule<NativeBrowser>('LycoMobileBrowser');
+ if(!native)throw Error('清除网站数据需要原生移动客户端');
+ await inNativeOrder(async()=>{
+  await native.closeAll();
+  try{await native.clearProfile(id)}finally{await native.closeAll()}
+ });
 }

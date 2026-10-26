@@ -20,7 +20,19 @@ public class LycoMobileBrowserModule: Module {
       self.active = controller
       presenter.present(controller, animated: true)
     }.runOnQueue(.main)
-    AsyncFunction("closeAll") { self.active?.shutdown() }.runOnQueue(.main)
+    AsyncFunction("closeAll") { (promise: Promise) in
+      guard let controller = self.active else { promise.resolve(); return }
+      controller.shutdown { self.active = nil; promise.resolve() }
+    }.runOnQueue(.main)
+    AsyncFunction("clearProfile") { (id: String, promise: Promise) in
+      guard #available(iOS 17.0, *), let identifier = UUID(uuidString: id), self.active == nil else {
+        promise.reject(BrowserError("请先关闭当前环境，再清除网站数据")); return
+      }
+      WKWebsiteDataStore.remove(forIdentifier: identifier) { error in
+        if error != nil { promise.reject(BrowserError("无法清除网站数据，环境条目已保留")) }
+        else { promise.resolve() }
+      }
+    }.runOnQueue(.main)
   }
 }
 
@@ -193,8 +205,9 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     status.text = "官网权益已失效或长时间无法核实，环境已停止"
   }
   deinit { paidGuard?.close(); try? tunnel?.close(); NotificationCenter.default.removeObserver(self) }
-  fileprivate func shutdown() { closeEnvironment() }
-  @objc private func closeEnvironment() {
+  fileprivate func shutdown(completion: @escaping () -> Void) { finishClose(completion: completion) }
+  @objc private func closeEnvironment() { finishClose(completion: {}) }
+  private func finishClose(completion: @escaping () -> Void) {
     stopped = true
     paidGuard?.close(); paidGuard = nil
     try? tunnel?.close(); tunnel = nil
@@ -205,7 +218,8 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     updateNavigation()
     // Keep proxy settings on the data store: existing service workers must
     // never become direct when the visible view closes.
-    dismiss(animated: true)
+    if presentingViewController != nil { dismiss(animated: true, completion: completion) }
+    else { completion() }
   }
   private static func allowed(_ url: URL) -> Bool {
     ["http", "https"].contains(url.scheme?.lowercased() ?? "") && url.host != nil && url.user == nil && url.password == nil

@@ -3,6 +3,11 @@
   <permission android:name="top.lain42.lycobrowser.CONTROL_ENVIRONMENT" android:protectionLevel="signature" />
   <uses-permission android:name="top.lain42.lycobrowser.CONTROL_ENVIRONMENT" />
   <application>
+    <activity android:name="top.lain42.browser.ProfileDataActivity"
+      android:exported="false" android:process=":lyco_browser"
+      android:excludeFromRecents="true" android:taskAffinity="top.lain42.lycobrowser.environment"
+      android:configChanges="orientation|screenSize|keyboardHidden"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar" />
     <activity android:name="top.lain42.browser.ProfileBrowserActivity"
       android:exported="false" android:process=":lyco_browser"
       android:launchMode="singleTask" android:excludeFromRecents="true"
