@@ -1,5 +1,12 @@
 name: Investigate iOS public proxy routing (not release acceptance)
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/mobile/ios-proxy-probe.swift'
+      - 'tests/mobile/run-ios-proxy-probe.sh'
+      - 'tests/mobile/proxy-probe-fixture.py'
+      - '.github/workflows/probe-ios-proxy-routing.yml'
   workflow_dispatch:
 permissions:
   contents: read
