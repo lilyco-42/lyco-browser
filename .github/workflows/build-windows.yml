@@ -35,7 +35,7 @@ jobs:
           node --check src/diagnostics-ui.js
           node --test tests/diagnostics-controller.test.js
           node --test tests/release-preview.test.js tests/third-party-notices.test.js
-          node --test tests/update-policy.test.js
+          node --test tests/update-policy.test.js tests/update-download.test.js
           node --test tests/browser-webgl-identity.test.mjs
 
   windows-x64:
@@ -221,7 +221,7 @@ jobs:
             npm run $suite
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
-          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js ../../lyco/tests/upstream-update-download.test.js
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Download pinned official Mihomo for LYCO local proxy

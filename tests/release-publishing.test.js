@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
+const {createHash}=require('node:crypto');
 
 function publish(t,{held=true,existing=false,approved=false}={}) {
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lyco-publish-'));
@@ -25,8 +26,15 @@ exit 0
  if(held)env.LYCO_DESKTOP_PUBLIC_RELEASE='false';else if(approved)env.LYCO_DESKTOP_PUBLIC_RELEASE='true';else delete env.LYCO_DESKTOP_PUBLIC_RELEASE;
  const result=spawnSync('bash',[path.join(__dirname,'../scripts/ci-publish-release.sh'),asset],{env,encoding:'utf8'});
  assert.equal(result.status,0,result.stderr);
- return {calls:fs.readFileSync(calls,'utf8').trim().split('\n'),stdout:result.stdout};
+ return {calls:fs.readFileSync(calls,'utf8').trim().split('\n'),stdout:result.stdout,
+  checksum:fs.readFileSync(asset+'.sha256','utf8')};
 }
+
+test('each artifact upload includes a checksum sidecar for its actual bytes',t=>{
+ const result=publish(t);
+ assert.equal(result.checksum,createHash('sha256').update('CI-only fixture').digest('hex')+'  preview.zip\n');
+ assert.match(result.calls.find(line=>line.startsWith('release upload ')),/preview\.zip .*preview\.zip\.sha256/);
+});
 
 test('unapproved desktop builds are created and retained as drafts before asset upload',t=>{
  const result=publish(t);

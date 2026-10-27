@@ -76,7 +76,7 @@ jobs:
             node --check "upstream/Browserapp/$f"
           done
           node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/third-party-notices.test.js
-          node --test lyco/tests/update-policy.test.js
+          node --test lyco/tests/update-policy.test.js lyco/tests/update-download.test.js
 
       - uses: actions/setup-python@v5
         with:
@@ -137,7 +137,7 @@ jobs:
           npm run selftest
           npm run selftest:isolation
           npm run selftest:proxyconcurrency
-          node --test ../../lyco/tests/upstream-start-failure.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-update-download.test.js
 
       - name: Package desktop application in runner only
         working-directory: upstream/Browserapp

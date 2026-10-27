@@ -8,9 +8,11 @@ on:
       - '.github/workflows/build-universal.yml'
       - 'tests/mobile-*.mjs'
       - 'tests/mobile/**'
+      - 'scripts/ci-publish-release.sh'
+      - 'scripts/artifact-sha256.mjs'
   pull_request:
     branches: [main]
-    paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', '.github/workflows/build-universal.yml']
+    paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', 'scripts/artifact-sha256.mjs', '.github/workflows/build-universal.yml']
   workflow_dispatch:
     inputs:
       signed_android:
