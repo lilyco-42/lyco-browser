@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apps/universal/**'
+      - 'mobile/core/**'
       - '.github/workflows/build-universal.yml'
       - 'tests/mobile-*.mjs'
       - 'tests/mobile/**'
@@ -14,7 +15,7 @@ on:
       - 'tests/product-version.test.js'
   pull_request:
     branches: [main]
-    paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', 'scripts/artifact-sha256.mjs', 'src/product-version.js', 'tests/product-version.test.js', '.github/workflows/build-universal.yml']
+    paths: ['apps/universal/**', 'mobile/core/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', 'scripts/artifact-sha256.mjs', 'src/product-version.js', 'tests/product-version.test.js', '.github/workflows/build-universal.yml']
   workflow_dispatch:
     inputs:
       signed_android:

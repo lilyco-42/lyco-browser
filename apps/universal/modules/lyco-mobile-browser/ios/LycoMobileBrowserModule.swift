@@ -64,7 +64,6 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
     }
     let host: String
     let portValue: UInt16
-    let scheme: String
     var core: LycotunnelSession?
     var paidToken: String?
     var paidOwner: String?
@@ -78,7 +77,7 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       var failure: NSError?
       guard let session = LycotunnelStart(outbound, true, &failure) else { throw BrowserError("无法准备官网线路，请刷新订阅或更新客户端") }
       core = session
-      host = "127.0.0.1"; portValue = UInt16(session.port()); scheme = "http"
+      host = "127.0.0.1"; portValue = UInt16(session.port())
       paidToken = token; paidOwner = owner; verificationDeadline = Date(timeIntervalSince1970: value / 1000)
     } else {
       guard let address = options["host"], address.range(of: "^[A-Za-z0-9.-]{1,253}$", options: .regularExpression) != nil,
@@ -90,27 +89,21 @@ private final class ProfileBrowserController: UIViewController, WKNavigationDele
       var failure: NSError?
       guard let session = LycotunnelStart(content, true, &failure) else { throw BrowserError("无法准备自备代理，请检查地址或更新客户端") }
       core = session
-      host = "127.0.0.1"; portValue = UInt16(session.port()); scheme = "http"
+      host = "127.0.0.1"; portValue = UInt16(session.port())
     }
     guard let port = NWEndpoint.Port(rawValue: portValue) else { try? core?.close(); throw BrowserError("代理端口无效") }
     startURL = url
     environmentName = String((options["name"] ?? "独立环境").prefix(90))
     let store = WKWebsiteDataStore(forIdentifier: id)
-    var proxy = ProxyConfiguration(httpCONNECTProxy: .hostPort(host: .init(host), port: port),
-      tlsOptions: scheme == "https" ? NWProtocolTLS.Options() : nil)
+    // The source-built mixed listener accepts authenticated SOCKS5 as well as
+    // HTTP. Use the public transport-level SOCKS5 configuration for every web
+    // destination. The previous HTTP path failed the local negative control;
+    // the unchanged native acceptance must verify this transport as well.
+    // The remote HTTP(S) or subscription outbound still belongs to the core.
+    var proxy = ProxyConfiguration(socksv5Proxy: .hostPort(host: .init(host), port: port))
     proxy.allowFailover = false
     if let core { proxy.applyCredential(username: core.username(), password: core.password()) }
-    // Network.framework may exempt loopback from its default catch-all. Give
-    // those hosts an explicit rule as well, retaining the global rule for
-    // ordinary websites. Both rules use the same fail-closed authenticated core.
-    // Keep separate native configurations so the loopback rule's domain
-    // mutations cannot constrain the ordinary-site catch-all.
-    var loopbackProxy = ProxyConfiguration(httpCONNECTProxy: .hostPort(host: .init(host), port: port),
-      tlsOptions: scheme == "https" ? NWProtocolTLS.Options() : nil)
-    loopbackProxy.allowFailover = false
-    if let core { loopbackProxy.applyCredential(username: core.username(), password: core.password()) }
-    loopbackProxy.matchDomains = ["localhost", "127.0.0.1", "::1"]
-    store.proxyConfigurations = [loopbackProxy, proxy]
+    store.proxyConfigurations = [proxy]
     let config = WKWebViewConfiguration()
     config.websiteDataStore = store
     config.preferences.javaScriptCanOpenWindowsAutomatically = false
