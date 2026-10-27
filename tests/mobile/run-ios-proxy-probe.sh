@@ -5,6 +5,8 @@ root=$(cd "$(dirname "$0")" && pwd)
 evidence="$RUNNER_TEMP/lyco-ios-proxy-probe"
 app="$RUNNER_TEMP/LYCOProxyProbe.app"
 mkdir -p "$evidence" "$app" "$RUNNER_TEMP/probe-core"
+stage() { date -u '+%Y-%m-%dT%H:%M:%SZ' | tr '\n' ' '; echo "$1"; }
+stage 'Extract native core' | tee -a "$evidence/stages.txt"
 tar xzf "$RUNNER_TEMP/lyco-tunnel-apple.tar.gz" -C "$RUNNER_TEMP/probe-core"
 framework=$(python3 - <<'PY'
 import os,plistlib
@@ -18,10 +20,12 @@ PY
 )
 sdk=$(xcrun --sdk iphonesimulator --show-sdk-path)
 arch=$(uname -m)
+stage 'Compile minimal UIKit application' | tee -a "$evidence/stages.txt"
 xcrun --sdk iphonesimulator swiftc -swift-version 5 -target "$arch-apple-ios17.0-simulator" -sdk "$sdk" \
   -F "$framework" -framework Lycotunnel -framework UIKit -framework WebKit -framework Network \
   -framework Foundation -framework Security -framework CFNetwork -framework CoreFoundation -lresolv \
   "$root/ios-proxy-probe.swift" -o "$app/LYCOProxyProbe"
+stage 'Compiled application; prepare metadata' | tee -a "$evidence/stages.txt"
 python3 - "$app/Info.plist" <<'PY'
 import plistlib,sys
 from pathlib import Path
@@ -40,18 +44,23 @@ devices=json.load(open(sys.argv[1]))['devices']
 print(next(d['udid'] for group in devices.values() for d in group if d['name'].startswith('iPhone') and d.get('isAvailable')))
 PY
 )
+echo "$device" > "$evidence/simulator-udid.txt"
 python3 "$root/proxy-probe-fixture.py" "$evidence" > "$evidence/fixture.log" 2>&1 &
 fixture_pid=$!
 trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+stage 'Boot simulator' | tee -a "$evidence/stages.txt"
 xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
+stage 'Install minimal application' | tee -a "$evidence/stages.txt"
 xcrun simctl install "$device" "$app"
+stage 'Launch minimal application' | tee -a "$evidence/stages.txt"
 xcrun simctl launch "$device" top.lain42.lycoproxyprobe > "$evidence/launch.txt"
 container=$(xcrun simctl get_app_container "$device" top.lain42.lycoproxyprobe data)
 for attempt in $(seq 1 180); do
   if [[ -s "$container/Documents/results.json" ]]; then break; fi
   sleep 1
 done
+stage 'Collect application observations' | tee -a "$evidence/stages.txt"
 cp "$container/Documents/results.json" "$evidence/results.json"
 python3 - "$evidence" <<'PY'
 import json,os,sys

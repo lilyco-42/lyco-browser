@@ -28,7 +28,18 @@ jobs:
         working-directory: mobile/core
         run: bash build-native.sh apple
       - name: Compile and run the minimal native proxy matrix
+        timeout-minutes: 9
         run: bash tests/mobile/run-ios-proxy-probe.sh
+      - name: Collect original simulator diagnostics after the investigation
+        if: always()
+        timeout-minutes: 1
+        run: |
+          evidence="$RUNNER_TEMP/lyco-ios-proxy-probe"
+          if [[ -s "$evidence/simulator-udid.txt" ]]; then
+            device=$(cat "$evidence/simulator-udid.txt")
+            xcrun simctl io "$device" screenshot "$evidence/probe-screen.png" || true
+            xcrun simctl spawn "$device" log show --style compact --last 5m --predicate 'process == "LYCOProxyProbe"' > "$evidence/probe-system.log" 2>&1 || true
+          fi
       - name: Retain the original investigation observations even on failure
         if: always()
         uses: actions/upload-artifact@v4
