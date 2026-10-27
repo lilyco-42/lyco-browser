@@ -48,5 +48,9 @@ class Proxy(http.server.BaseHTTPRequestHandler):
 for port,handler in [(18080,Origin),(18081,Proxy)]:
     server=http.server.ThreadingHTTPServer(('127.0.0.1',port),handler)
     threading.Thread(target=server.serve_forever,daemon=True).start()
+class IPv6Server(http.server.ThreadingHTTPServer):
+    address_family=socket.AF_INET6
+server=IPv6Server(('::1',18081),Proxy)
+threading.Thread(target=server.serve_forever,daemon=True).start()
 (root/'network.json').write_text('[]\n')
 threading.Event().wait()

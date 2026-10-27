@@ -38,6 +38,8 @@ Path(sys.argv[1]).write_bytes(plistlib.dumps({
 }))
 PY
 xcrun simctl list devices available --json > "$evidence/simulators.json"
+xcodebuild -version > "$evidence/xcode-version.txt"
+xcrun --sdk iphonesimulator --show-sdk-version > "$evidence/sdk-version.txt"
 device=$(python3 - "$evidence/simulators.json" <<'PY'
 import json,sys
 devices=json.load(open(sys.argv[1]))['devices']
@@ -66,7 +68,7 @@ python3 - "$evidence" <<'PY'
 import json,os,sys
 from pathlib import Path
 root=Path(sys.argv[1]);rows=json.loads((root/'results.json').read_text());events=json.loads((root/'network.json').read_text())
-assert len(rows)==19, 'All proxy modes and their independent phases must finish'
+assert len(rows)==22, 'All proxy modes and their independent phases must finish'
 baseline=[e for e in events if e['case']=='direct-control-local']
 assert baseline and all(not e['viaProxy'] for e in baseline), 'Direct positive control did not reach the same live origin'
 safe=[];modes=sorted({row['mode'] for row in rows if row['mode']!='direct-control'})

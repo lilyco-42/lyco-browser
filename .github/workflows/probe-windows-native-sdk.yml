@@ -1,0 +1,47 @@
+name: Investigate pinned Windows native SDK ordering (not release acceptance)
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tests/native-sdk-order-probe.mjs', '.github/workflows/probe-windows-native-sdk.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native-sdk:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: lyco, persist-credentials: false}
+      - uses: actions/checkout@v4
+        with:
+          repository: sheying2013/OpenBrowser
+          ref: 5fa3b9d0bd218a948da15820b35fe598c362eba0
+          path: upstream
+          lfs: true
+          persist-credentials: false
+          sparse-checkout: |
+            /*
+            !/Browserapp/kernels/macos-x64/
+            !/Browserapp/kernels/macos-arm64/
+            !/Browserapp/kernels/openbrowser/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Prepare pinned host modules
+        working-directory: upstream/Browserapp
+        run: npm ci --ignore-scripts
+      - name: Measure native writes before and after protocol readiness
+        timeout-minutes: 6
+        run: node lyco/tests/native-sdk-order-probe.mjs upstream/Browserapp
+      - name: Preserve bounded hardware observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-windows-sdk-investigation-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-sdk-order-probe
+          if-no-files-found: warn
+          retention-days: 7

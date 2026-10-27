@@ -17,7 +17,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
   private var finishedGeneration = -1
   private var row: [String: Any] = [:]
   private var results: [[String: Any]] = []
-  private let modes = ["direct-control", "direct-http", "core-http", "core-socks", "core-socks-empty", "core-socks-explicit", "core-socks-wildcard"]
+  private let modes = ["direct-control", "direct-http", "direct-http-v6", "core-http", "core-socks", "core-socks-empty", "core-socks-explicit", "core-socks-wildcard"]
   private lazy var cases: [(String, String)] = modes.flatMap { mode in
     mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
   }
@@ -46,7 +46,9 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
         guard let session = LycotunnelStart(outbound,true,&error) else {finish("core-start-failed");return}
         core = session;port = UInt16(session.port())
       }
-      let endpoint = NWEndpoint.hostPort(host: "127.0.0.1",port: NWEndpoint.Port(rawValue: port)!)
+      // Different proxy and origin IPs distinguish a proxy-server-address
+      // exemption from a general loopback exemption. Product gates stay intact.
+      let endpoint = NWEndpoint.hostPort(host: mode == "direct-http-v6" ? "::1" : "127.0.0.1",port: NWEndpoint.Port(rawValue: port)!)
       var proxy = mode.contains("socks") ? ProxyConfiguration(socksv5Proxy: endpoint) : ProxyConfiguration(httpCONNECTProxy: endpoint,tlsOptions: nil)
       row["initialMatchCount"] = proxy.matchDomains.count;row["initialExcludedCount"] = proxy.excludedDomains.count
       if let core {proxy.applyCredential(username: core.username(),password: core.password())}
