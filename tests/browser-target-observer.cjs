@@ -6,8 +6,21 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
   const nativeCalls = [];
   Object.defineProperty(records, 'nativeCalls', {value: nativeCalls});
   const startupReadiness = [];
+  const expectedHardware = new WeakMap();
   Object.defineProperty(records, 'startupReadiness', {value: startupReadiness});
   const nativeMethods = new Set(['Wayfern.getFingerprint', 'Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
+  const fingerprintReceipt = (result, requested) => {
+    let value = result?.fingerprint ?? result;
+    if (typeof value === 'string') { try {value = JSON.parse(value);} catch {return {readable: false};} }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {readable: false};
+    // Fixed contract field names and types only; no identity IDs, configuration
+    // values, licence credentials, complete objects or arbitrary property names.
+    const fields = ['identityId','identity','overrides','staticConfig','dynamicConfig','hardwareConcurrency','deviceMemory'];
+    const shape = Object.fromEntries(fields.filter(key => Object.hasOwn(value,key)).map(key => [key,typeof value[key]]));
+    const requestedHardware = requested && Object.fromEntries(['hardwareConcurrency','deviceMemory']
+      .filter(key => typeof requested[key] === 'number').map(key => [key,value[key] === requested[key]]));
+    return {readable: true, shape, ...(requestedHardware ? {requestedHardware} : {})};
+  };
   const reasonFor = error => {
     const message = String(error?.message || '');
     return /timed?\s*out|timeout/i.test(message) ? 'timeout'
@@ -71,7 +84,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
       startedAt: Date.now(), done: false, failed: false};
     if (nativeCalls.length < 256) nativeCalls.push(event);
     const started = Date.now();
-    try {const result = await call.call(this, socket, method, params, timeout); event.done = true; return result;}
+    try {
+      const result = await call.call(this, socket, method, params, timeout); event.done = true;
+      if (method.startsWith('Wayfern.')) event.receipt = fingerprintReceipt(result, method==='Wayfern.setFingerprint' ? params : null);
+      return result;
+    }
     catch (error) {event.done = true; event.failed = true; event.reason = reasonFor(error); throw error;}
     finally {event.elapsedMs = Math.max(0, Date.now() - started);}
   };
@@ -97,6 +114,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
         return command.call(this, method, params, options);
       }
       const event = {kind: 'command', method, session: id(options?.sessionId), startedAt: Date.now(), done: false, failed: false};
+      if (method === 'Wayfern.setFingerprint') {
+        const expected = expectedHardware.get(connection)?.get(options?.sessionId);
+        if (expected) event.requestMatchesDocument = Object.fromEntries(['hardwareConcurrency','deviceMemory']
+          .map(key => [key,params?.[key] === expected[key]]));
+      }
       if (method === 'Page.addScriptToEvaluateOnNewDocument') event.immediate = params?.runImmediately === true;
       if (method === 'Target.setAutoAttach') {
         event.pause = Boolean(params?.waitForDebuggerOnStart);
@@ -105,7 +127,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
       record(event);
       if (nativeMethods.has(method) && nativeCalls.length < 256) nativeCalls.push(event);
       const started = Date.now();
-      try { const result = await command.call(this, method, params, options); event.done = true; return result; }
+      try {
+        const result = await command.call(this, method, params, options); event.done = true;
+        if (method === 'Wayfern.setFingerprint') event.receipt = fingerprintReceipt(result, params);
+        return result;
+      }
       catch (error) {
         event.done = true; event.failed = true;
         // Fixed enums only: raw errors may include URLs, source or credentials.
@@ -124,6 +150,11 @@ function installBrowserTargetObserver({BrowserEngine, cdp}) {
   const apply = BrowserEngine.prototype.applyFingerprintToSession;
   BrowserEngine.prototype.applyFingerprintToSession = function (connection, sessionId, item, fingerprint, targetInfo) {
     const profile = item?.profile || {}, fp = fingerprint || item?.fingerprint || {};
+    if (connection && typeof connection === 'object') {
+      let sessions = expectedHardware.get(connection);
+      if (!sessions) {sessions = new Map();expectedHardware.set(connection,sessions);}
+      if (sessions.size < 2048) sessions.set(sessionId,{hardwareConcurrency:fp.hardwareConcurrency,deviceMemory:fp.deviceMemory});
+    }
     // Export comparisons only, never user settings or the native device.
     record({kind: 'page-config', session: id(sessionId),
       currentLanguage: fp.languages?.[0] === item?.fingerprint?.languages?.[0],

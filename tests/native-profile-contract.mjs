@@ -179,6 +179,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
             report.newTabNative ||= {};
             report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+            report.newTabNative[phase].contractShape = Object.fromEntries(
+              ['identityId','identity','overrides','staticConfig','dynamicConfig','hardwareConcurrency','deviceMemory']
+                .filter(key=>Object.hasOwn(native||{},key)).map(key=>[key,typeof native[key]]));
             report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
             const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
               expression: readOnlyProfileProbeSource()}, 3000);
