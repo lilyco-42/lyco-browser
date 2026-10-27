@@ -157,7 +157,7 @@ function entRow(name,status,exp,key){
   return d;
 }
 var NAMES={susong_full:'《宿松》完整剧情激活卡',zombieraid_pass:'《Zombie Raid》赛季通行证',
-   congyu_beta:'《丛雨》悬浮窗内测资格',proxy_1m:'不限量不限速代理 · 月卡',proxy_3m:'不限量不限速代理 · 季卡',proxy_1y:'不限量不限速代理 · 年卡',
+   congyu_beta:'《丛雨》悬浮窗内测资格',proxy_1m:'不限量不限速代理 · 月卡',proxy_3m:'不限量不限速代理 · 季卡',proxy_4m:'不限量不限速代理 · 120天套餐',proxy_1y:'不限量不限速代理 · 年卡',
    ai_member_1m:'ChatGPT Plus · 30 天（人工代充）',rembg_creator:'Rembg Studio 创作者版',rembg_studio:'Rembg Studio 小团队版'};
 
 function notify(kind,title,detail,ttl){
@@ -218,7 +218,7 @@ function loadMeThen(render){
     var es=o.j.entitlements||[];
     es.sort(function(a,b){return (a.status==='active'?0:1)-(b.status==='active'?0:1)});
     if(!es.length)box.textContent='暂无权益，购买后会显示在这里。';
-    es.forEach(function(e){box.appendChild(entRow(NAMES[e.product]||e.product,e.status,e.expires_at,e.license_key))});
+    es.forEach(function(e){var purchased=e.purchase_product||(e.meta||{}).purchase_product;var code=e.product==='proxy_1m'&&['proxy_1m','proxy_3m','proxy_4m','proxy_1y'].indexOf(purchased)>=0?purchased:e.product;box.appendChild(entRow(NAMES[code]||code,e.status,e.expires_at,e.license_key))});
     render&&render(es);
   });
 }
@@ -259,8 +259,8 @@ function loadPlans(){
         :(p.price_usdt+' <small>USDT · TRC20</small>'+(p.price_cny?' <small>≈ ¥'+p.price_cny+'</small>':''));
       d.querySelector('.desc').textContent=p.desc;
       var ul=d.querySelector('ul');
-      var tips=p.code==='proxy_1m'
-        ?['30 天有效期，不限流量、不限速','VLESS-Reality + VMess 双节点','ghboost / Clash / sing-box 通用','支付后自动开通并生成订阅']
+      var tips=['proxy_1m','proxy_3m','proxy_4m','proxy_1y'].indexOf(p.code)>=0
+        ?[(p.duration_days||30)+' 天有效期，不限流量、不限速','VLESS-Reality + VMess 双节点','ghboost / Clash / sing-box 通用','支付后自动开通并生成订阅']
         :p.code==='ai_member_1m'
         ?['30 天 ChatGPT Plus，人工审核开通','最惠区参考成本约 ¥120 + 人工及开票对接费 ¥60','合计 ¥180 / 1800 积分（按人民币积分包换算）','不包含 Pro；如需发票请先确认开票主体和项目','人工交付，开通地区和时效需实际确认']
         :p.code.indexOf('rembg_')===0
@@ -371,8 +371,8 @@ function pollOrder(no,product){
     if(st==='paid'){
       clearInterval(pollTimer);
       document.getElementById('orderDot').className='status-dot done';
-      document.getElementById('goSub').style.display=['proxy_1m','proxy_3m','proxy_1y'].indexOf(product)>=0?'':'none';
-      if(['proxy_1m','proxy_3m','proxy_1y'].indexOf(product)>=0)document.getElementById('goSub').style.display='';
+      document.getElementById('goSub').style.display=['proxy_1m','proxy_3m','proxy_4m','proxy_1y'].indexOf(product)>=0?'':'none';
+      if(['proxy_1m','proxy_3m','proxy_4m','proxy_1y'].indexOf(product)>=0)document.getElementById('goSub').style.display='';
       if(activeOrder&&activeOrder.button)restoreButton(activeOrder.button);
       if(!orderNoticeShown){
         orderNoticeShown=true;

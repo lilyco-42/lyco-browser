@@ -12,8 +12,9 @@ const origin='https://proxy-plans.fixture.invalid';
 const products=[
  {code:'proxy_1m',name:'不限量不限速代理 · 月卡',points_price:299,duration_days:30},
  {code:'proxy_3m',name:'不限量不限速代理 · 季卡',points_price:852,duration_days:90},
+ {code:'proxy_4m',name:'不限量不限速代理 · 120天套餐',points_price:1136,duration_days:120},
  {code:'proxy_1y',name:'不限量不限速代理 · 年卡',points_price:3050,duration_days:365},
-];
+].map(product=>({...product,purchase_method:'points',price_usdt:product.points_price/10,desc:product.duration_days+' 天代理订阅'}));
 let browser;
 before(async()=>{await fs.mkdir(evidence,{recursive:true});browser=await chromium.launch();});
 after(async()=>{await browser?.close();});
@@ -63,7 +64,7 @@ async function fixture({width=1280,loggedIn=false,missingYear=false,unavailable=
  return {page,context,state};
 }
 
-for(const width of [390,1280])test(`three current proxy offers and links fit ${width}px`,async()=>{
+for(const width of [390,1280])test(`four current proxy offers and links fit ${width}px`,async()=>{
  const f=await fixture({width});
  try{
   await f.page.goto(origin+'/vpn/');
@@ -74,6 +75,7 @@ for(const width of [390,1280])test(`three current proxy offers and links fit ${w
    assert.match(await f.page.locator('#planDesc-'+product.code).textContent(),new RegExp(product.duration_days+' 天'));
   }
   assert.match(await f.page.locator('#planBadge-proxy_3m').textContent(),/95 折/);
+  assert.match(await f.page.locator('#planBadge-proxy_4m').textContent(),/95 折/);
   assert.match(await f.page.locator('#planBadge-proxy_1y').textContent(),/85 折/);
   assert.equal(await f.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await f.page.locator('#plans').screenshot({path:path.join(evidence,'vpn-plans-'+width+'.png')});
@@ -93,7 +95,7 @@ test('missing or unavailable catalogue does not invent a purchasable annual plan
  }
 });
 
-for(const [code,price] of [['proxy_3m',852],['proxy_1y',3050]])test(`${code} checkout quotes and submits the selected term`,async()=>{
+for(const [code,price] of [['proxy_3m',852],['proxy_4m',1136],['proxy_1y',3050]])test(`${code} checkout quotes and submits the selected term`,async()=>{
  const f=await fixture({loggedIn:true,width:390});
  try{
   await f.page.goto(origin+'/shop/#'+code);
@@ -110,15 +112,28 @@ for(const [code,price] of [['proxy_3m',852],['proxy_1y',3050]])test(`${code} che
 });
 
 test('account and service status show the purchased term behind the compatible service code',async()=>{
- const entitlement={product:'proxy_1m',purchase_product:'proxy_1y',status:'active',license_key:'fixture-only',
-  expires_at:new Date(Date.now()+365*86400000).toISOString(),meta:{purchase_product:'proxy_1y'}};
+ for(const [code,label,days] of [['proxy_4m','120天套餐',120],['proxy_1y','年卡',365]]){
+ const entitlement={product:'proxy_1m',purchase_product:code,status:'active',license_key:'fixture-only',
+  expires_at:new Date(Date.now()+days*86400000).toISOString(),meta:{purchase_product:code}};
  const f=await fixture({loggedIn:true,entitlements:[entitlement]});
  try{
   await f.page.goto(origin+'/account/');
-  await f.page.waitForFunction(()=>document.getElementById('entitlements')?.textContent.includes('年卡'));
-  assert.match(await f.page.locator('#entitlements').textContent(),/代理 · 年卡/);
+  await f.page.waitForFunction(label=>document.getElementById('entitlements')?.textContent.includes(label),label);
+  assert.ok((await f.page.locator('#entitlements').textContent()).includes('代理 · '+label));
   await f.page.goto(origin+'/vpn/');
-  await f.page.waitForFunction(()=>document.getElementById('accountTitle')?.textContent==='年卡已生效');
+  await f.page.waitForFunction(label=>document.getElementById('accountTitle')?.textContent===label+'已生效',label);
+  assert.deepEqual(f.state.posts,[]);
+ }finally{await f.context.close();}
+ }
+});
+
+test('legacy purchase page also explains the 120-day term and its account entitlement',async()=>{
+ const f=await fixture({loggedIn:true,entitlements:[{product:'proxy_1m',purchase_product:'proxy_4m',
+  status:'active',expires_at:new Date(Date.now()+120*86400000).toISOString(),license_key:'fixture-only',meta:{purchase_product:'proxy_4m'}}]});
+ try{
+  await f.page.goto(origin+'/sub/buy.html');
+  await f.page.waitForFunction(()=>document.getElementById('plans')?.textContent.includes('120 天有效期'));
+  await f.page.waitForFunction(()=>document.getElementById('myEnts')?.textContent.includes('120天套餐'));
   assert.deepEqual(f.state.posts,[]);
  }finally{await f.context.close();}
 });
