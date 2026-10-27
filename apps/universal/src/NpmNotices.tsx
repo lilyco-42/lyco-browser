@@ -16,7 +16,7 @@ export default function NpmNotices(){
     <View style={styles.header}><Text accessibilityRole="header" style={styles.title}>依赖开源许可</Text>
      <Pressable accessibilityRole="button" onPress={close} style={styles.button}><Text style={styles.text}>关闭许可页</Text></Pressable></View>
     <Text style={styles.hint}>{notices.generated?'以下为此构建安装的 JavaScript 依赖及原始版权文本，包含构建工具。网络核心许可请在关于页面查看。':'此开发构建尚未生成依赖许可清单。'}</Text>
-    <TextInput accessibilityLabel="搜索依赖名称" placeholder="搜索依赖名称" placeholderTextColor="#a6b3ce" value={query} onChangeText={value=>{setQuery(value);setSelected(null)}} autoCorrect={false} autoCapitalize="none" style={styles.input}/>
+    <TextInput testID="npm-notice-search" accessibilityLabel="搜索依赖名称" placeholder="搜索依赖名称" placeholderTextColor="#a6b3ce" value={query} onChangeText={value=>{setQuery(value);setSelected(null)}} autoCorrect={false} autoCapitalize="none" style={styles.input}/>
     <FlatList data={rows} keyExtractor={row=>row.id} extraData={selected} keyboardShouldPersistTaps="handled"
      ListEmptyComponent={<Text style={styles.hint}>没有匹配的依赖。</Text>}
      renderItem={({item})=><View style={styles.row}>

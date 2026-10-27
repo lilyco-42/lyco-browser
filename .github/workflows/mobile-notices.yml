@@ -36,6 +36,7 @@ jobs:
           path: |
             apps/universal/src/npm-notices.json
             apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
             ${{ runner.temp }}/lyco-npm-notice-evidence
           if-no-files-found: error
           retention-days: 7

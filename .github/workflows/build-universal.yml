@@ -60,6 +60,7 @@ jobs:
           path: |
             apps/universal/src/npm-notices.json
             apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - name: Retain resolved dependency lock for reproducible builds
         uses: actions/upload-artifact@v4
@@ -102,6 +103,7 @@ jobs:
           path: |
             apps/universal/src/npm-notices.json
             apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
@@ -234,6 +236,7 @@ jobs:
           path: |
             apps/universal/src/npm-notices.json
             apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
@@ -336,6 +339,7 @@ jobs:
           path: |
             apps/universal/src/npm-notices.json
             apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
