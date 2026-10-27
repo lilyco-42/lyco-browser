@@ -6,6 +6,7 @@ import http from 'node:http';
 import {spawn, execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createRequire} from 'node:module';
+import {prepareNativeIdentity} from '../src/native-identity.js';
 if (process.env.GITHUB_ACTIONS !== 'true' || process.platform !== 'win32') throw Error('Windows Actions only');
 const appRoot = path.resolve(process.argv[2]);
 const requireApp = createRequire(path.join(appRoot, 'package.json'));
@@ -124,6 +125,18 @@ try {
         rows.push(row);
         await fs.writeFile(path.join(evidence,'results.json'),JSON.stringify(rows,null,2)+'\n');
         await connection.command('Target.closeTarget',{targetId});
+      }
+      if(mode==='native-settings') {
+        let refused=false;
+        try {
+          await prepareNativeIdentity({enabled:true,profileRoot:profile,profileId:'sdk-probe',port,cdp,
+            settings:{...settings,...wanted}});
+        } catch(error) {if(error.code!=='LYCO_NATIVE_CONFIGURATION_REFUSED') throw error;refused=true;}
+        await fs.writeFile(path.join(evidence,'product-refusal.json'),JSON.stringify({
+          scope:'Actual product preparation against the pinned SDK; not full application acceptance',
+          refusedIncompatibleSettings:refused,
+        },null,2)+'\n');
+        if(!refused) throw Error('Product preparation accepted incompatible native hardware');
       }
       if(failures.length) throw Error('Native setup failed');
     } finally {
