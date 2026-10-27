@@ -10,10 +10,12 @@
 | Windows 后续独立构建 | `afbd179`，[40486858031](https://github.com/lilyco-42/lyco-browser/actions/runs/40486858031) | 新标签首脚本再次读到 CPU 4、内存 8，配置期望 6/4，预检失败；稍后读取变成 6/4，但原生 getFingerprint 中仍不匹配。表明此前单轮成功不能证明竞争已彻底修复，继续阻止当前版本发行。新增只含固定字段类型及匹配布尔值的协议回执观察，保持原始首读断言 |
 | Windows 成品版本及安装运行 | `0aa95b1`，[40488997798](https://github.com/lilyco-42/lyco-browser/actions/runs/40488997798) | 原生预检和便携版通过，实际运行版本与随包清单一致；安装版在普通新标签的首脚本读到内存 8、期望 4，严格断言失败。实际 A 环境的原生写入请求与声明配置一致，但写入回执及随后 getFingerprint 的硬件字段已不匹配；其他环境的匹配回执不能证明 A 成功，当前版本禁止发行 |
 | Windows 最小 SDK 顺序研究 | `b7ef7a9`，[40494532652](https://github.com/lilyco-42/lyco-browser/actions/runs/40494532652) | 不含产品脚本的 6 个新页面案例，初始化前/后写入及附加 CPU override 均正确返回、读取和首读非默认硬件值。尚未证明完整应用可用；继续分别加入原生语言/显卡声明和启动 persona 参数定位差异 |
+| Windows 原生显卡与硬件组合 | `82f6a38`，[40495755896](https://github.com/lilyco-42/lyco-browser/actions/runs/40495755896) | 20 个最小案例确认：原生显卡设置触发 CPU/内存 4/8，语言/时区和启动参数本身不触发。重发完整身份和仅补写硬件字段均未修复。噪声种子、语言、时区及显卡仍保留。`e4ad769` 增加产品回执核验，不符即阻止启动；这不等于已经支持该自定义组合，仍待完整验收 |
 | macOS ARM64、Linux x64 | `0ddadfa`，[40455032067](https://github.com/lilyco-42/lyco-browser/actions/runs/40455032067) | 真实打包应用、Mihomo、两个受管环境、代理流量、Cookie/localStorage 隔离与 A 重开、受控 RTC peer/STUN、退出、HTTP/WebSocket/TLS ClientHello 失效代理检查及真实直连环境对照通过；实际更新器的完整性拦截、桌面应用版本与随包版本清单也通过 |
 | Go 移动核心与源码包 | `6979216`，[40376368484](https://github.com/lilyco-42/lyco-browser/actions/runs/40376368484) | HTTP、本机认证、停止、SOCKS5、SS、VMess、VLESS、Trojan、Hysteria2、TUIC、VMess/VLESS WebSocket、VLESS gRPC 真实服务链及 race 检查通过；Android/Apple 绑定成功，源码审阅包首次保留了 405 个应用和绑定工具模块 |
 | iOS 原生运行 | `a0ddb5c`，[40451827758](https://github.com/lilyco-42/lyco-browser/actions/runs/40451827758) | 地址栏/历史/刷新、A/B Cookie/localStorage/IndexedDB 隔离及 A 重开、清除 A 后三项为空且 B 保留、删除 A 并重启确认列表均通过；停代理后的 C 仍请求本机源站并完成三项写入，严格负向失败，禁止发行 |
 | iOS 最小原生代理研究 | `c5a6a83`，[40491562899](https://github.com/lilyco-42/lyco-browser/actions/runs/40491562899) | 独立 UIKit/WKWebView 程序完成 19 个观察：6 种 HTTP/SOCKS5/域名配置的普通域名均经代理；健康及停止状态下的 127.0.0.1 目标均直连，包括 allowFailover=false。无 Expo 或产品指纹脚本；研究失败不是产品验收通过，下一步区分代理地址排除与一般回环排除 |
+| iOS 不同代理地址对照 | `c066a0f`，[40494805956](https://github.com/lilyco-42/lyco-browser/actions/runs/40494805956) | 22 个观察中，代理地址改为 ::1 后普通域名仍经代理，而 127.0.0.1 源站在健康/停止状态仍直连。环境为 iOS 26.4 模拟器 / iPhone 17 Pro、SDK 26.5；仅此运行范围，不推断所有 iOS 版本或真机表现 |
 | Android 正常预览 | `afbd179`，[40486858035](https://github.com/lilyco-42/lyco-browser/actions/runs/40486858035) | 首次完成新数据根布局的完整原生运行：A/B 三项存储隔离、重开、后台进程退出、清除 A 保留 B、删除与重启、真实代理和停代理负向均通过；源站有 6 份预期报告，C 请求为 0 |
 | Android 已签名候选 | `0aa95b1`，[40489237355](https://github.com/lilyco-42/lyco-browser/actions/runs/40489237355) | 实际 APK 签名匹配保留证书；编译成品标识、1.0.25 / build 2 及完整原生运行均通过。APK SHA-256：`7226766a75ae24dda081a3a56a68ae75db7497f2e1ccd2e60078a188cc6c2cd6`。证书 SHA-256：`1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae`。未上架或作为全平台正式版发布 |
 | iPhone ARM64 设备编译 | `a0ddb5c`，[40451856981](https://github.com/lilyco-42/lyco-browser/actions/runs/40451856981) | 首次使用 iPhoneOS SDK 26.5 构建并归档成功，主程序 Mach-O 平台为 IOS、最低版本 17，Payload 内有设备程序和离线 JS；无 provisioning profile、不能直接安装、未做真机运行验收。IPA SHA-256 为 `6484675c5e50cfc504c705fcbb8309ef416df3e0e6cc8522d6ccc9db91f6f6fc` |
@@ -25,8 +27,8 @@ PR 工作流的 `GITHUB_SHA` 是 GitHub 测试合并提交；报告记录该 SHA
 
 ## 正在修复及尚需完成
 
-- iOS 显式 loopback 与普通网站双 HTTP 规则在 `a0ddb5c` 的本机负向中失败；改为公共 SOCKS5 API 后，`afbd179` 同样通过普通网页、三项存储清除和删除，但停代理仍访问本机源站，整体失败。普通域名与停代理原生用例继续使用原断言。独立研究已证明 6 种配置在代理健康时也绕过本机目标；增加 IPv6 代理地址对照来进一步定位，不能以研究代替产品验收。
-- Windows 新增仅运行固定内核的最小 SDK 顺序复现，比较 Page/Runtime 初始化前后的原生写入、写入回执、后续原生读取与真实首脚本。测试值特意不同于生成身份的默认值，避免碰巧匹配造成误判；不注入产品指纹脚本，不导出完整身份或凭据，不能替代完整应用验收。
+- iOS 显式 loopback 与普通网站双 HTTP 规则在 `a0ddb5c` 的本机负向中失败；改为公共 SOCKS5 API 后，`afbd179` 同样通过普通网页、三项存储清除和删除，但停代理仍访问本机源站，整体失败。普通域名与停代理原生用例继续使用原断言。独立研究及不同代理地址对照均确认代理健康时也绕过本机目标，不能靠更换 IPv4/IPv6 代理地址宣称解决；不以研究代替产品验收。
+- Windows 最小 SDK 复现已定位原生显卡设置与自定义硬件的冲突。测试值特意不同于生成身份的默认值；不注入产品指纹脚本，不导出完整身份或凭据。公开 `/json/protocol` 确认该固定内核使用平面可选整数硬件字段，不能据其他版本的 identityId/overrides 格式擅自迁移。产品新增回执拒绝和缓存保留检查；仍需真正支持配置组合并通过完整应用门禁。
 - 公共 SOCKS5 配置已有成熟实现先例：[OnionBrowser Tab.swift](https://github.com/OnionBrowser/OnionBrowser/blob/ed3324efc87b39a332f68e8853347be82c1cd4c2/OnionBrowser/Browsing/Tab.swift) 与 [Apple ProxyConfiguration](https://developer.apple.com/documentation/network/proxyconfiguration)。LYCO 继续复用自己的源码代理核心及公开 API，不改为自造 HTTP/HTTPS 加载器，不改变原有负向页面或期望。先例只支持技术选择，不能替代本应用运行结果。
 - Cookie 持久化夹具桌面使用 `Max-Age=600`、移动使用 `Max-Age=3600`，覆盖多轮原生驱动启动的测试窗口；会话 Cookie 退出浏览器后失效属于正常语义，不将其伪造为永久 Cookie。
 - 移动端退出、切换账号或返回列表时关闭原生环境；Android 额外验收后台浏览进程确实退出。

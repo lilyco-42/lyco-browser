@@ -82,6 +82,13 @@ try {
           {webglVendor:'Google Inc. (Intel)',webglRenderer:'ANGLE (Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11)'} : {}),
       };
       const device = {...seed,...settings,...wanted};
+      if(mode==='cold') {
+        await prepareNativeIdentity({enabled:true,profileRoot:profile,profileId:'sdk-positive',port,cdp,settings:wanted});
+        await fs.writeFile(path.join(evidence,'product-positive.json'),JSON.stringify({
+          scope:'Actual product preparation against the pinned SDK; not full application acceptance',
+          acceptedSupportedHardware:true,
+        },null,2)+'\n');
+      }
       const pending = new Map();
       const failures = [];
       connection = await new cdp.PersistentConnection(await cdp.browserSocket(port),{onEvent:event=>{
