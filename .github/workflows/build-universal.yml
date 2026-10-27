@@ -122,13 +122,17 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --init-script ../scripts/android-signing.gradle --no-daemon --stacktrace
       - name: Verify Android signature and retain standalone preview
+        env:
+          LYCO_REQUIRE_RELEASE_SIGNATURE: ${{ inputs.signed_android }}
         run: |
           set -euo pipefail
           cp android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
           test -n "$signer"
-          "$signer" verify --verbose --print-certs "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
-          sha256sum "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk" > "$RUNNER_TEMP/ANDROID-SHA256SUMS.txt"
+          "$signer" verify --verbose --print-certs "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk" | tee "$RUNNER_TEMP/ANDROID-SIGNATURE.txt"
+          python3 scripts/verify-android-signature.py "$RUNNER_TEMP/ANDROID-SIGNATURE.txt" ../../resources/signing/android-release-certificate.pem
+          cd "$RUNNER_TEMP"
+          sha256sum LYCO-Browser-Android-preview.apk ANDROID-SIGNATURE-PROVENANCE.json > ANDROID-SHA256SUMS.txt
       - uses: actions/setup-python@v5
         with: {python-version: '3.13'}
       - name: Install pinned mobile UI test driver
@@ -164,6 +168,8 @@ jobs:
           path: |
             ${{ runner.temp }}/LYCO-Browser-Android-preview.apk
             ${{ runner.temp }}/ANDROID-SHA256SUMS.txt
+            ${{ runner.temp }}/ANDROID-SIGNATURE.txt
+            ${{ runner.temp }}/ANDROID-SIGNATURE-PROVENANCE.json
           if-no-files-found: error
           retention-days: 7
       - name: Upload Android APK to GitHub prerelease
