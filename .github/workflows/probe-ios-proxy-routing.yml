@@ -1,0 +1,32 @@
+name: Investigate iOS public proxy routing (not release acceptance)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  isolated-wkwebview:
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache-dependency-path: mobile/core/go.sum}
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - name: Build the actual pinned Apple core for the isolated application
+        working-directory: mobile/core
+        run: bash build-native.sh apple
+      - name: Compile and run the minimal native proxy matrix
+        run: bash tests/mobile/run-ios-proxy-probe.sh
+      - name: Retain the original investigation observations even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-ios-proxy-investigation-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-ios-proxy-probe
+          if-no-files-found: warn
+          retention-days: 7
