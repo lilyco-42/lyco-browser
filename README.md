@@ -121,14 +121,14 @@ tests/network.test.js
 | 目标 | 应用 | 浏览环境隔离 | 浏览代理 | GitHub Actions 目标 |
 |---|---|---|---|---|
 | Android 9+ | RN/Expo APK | System WebView 环境专用数据目录、独立浏览进程 | 源码构建 sing-box；官网线路或自备 HTTP(S) | `build-universal.yml / android` |
-| iOS 17+ | RN/Expo 原生 App | WKWebView 独立持久 WKWebsiteDataStore | 源码构建 sing-box；带本机随机认证的 HTTP CONNECT | `build-universal.yml / ios-simulator` |
+| iOS 17+ | RN/Expo 原生 App | WKWebView 独立持久 WKWebsiteDataStore | 源码构建 sing-box；带本机随机认证的 SOCKS5，回环目标绕过问题未解决 | `build-universal.yml / ios-simulator` |
 | Windows x64 | OpenBrowser 桌面版 | Wayfern 独立环境与保存身份 | Mihomo 绑定独立环境 | `build-windows.yml` |
 | macOS ARM64 | OpenBrowser 桌面版 | Wayfern 独立环境与保存身份 | Mihomo 绑定独立环境 | `build-desktop-unix.yml` |
 | Linux x64 | OpenBrowser 桌面版 | 随包 Chromium 独立数据目录 | Mihomo 绑定独立环境 | `build-desktop-unix.yml` |
 
-Android 一次打开一个环境，关闭时结束浏览进程，防止旧 worker 沿用其他环境的代理。iOS 在建视图前给环境数据存储配置代理；关闭后保留拒绝直连的配置。官网线路在启动前核实账号与有效月卡，原生层定期续验，失效或超过核实期限后停止。支持的订阅协议与实际测试范围以当前 Actions 为准，不能从编译成功推断所有节点均可连接。
+Android 一次打开一个环境，关闭时结束浏览进程，防止旧 worker 沿用其他环境的代理。iOS 在建视图前给环境数据存储配置代理并关闭 failover；独立原生复现仍观察到本机目标直连，因此这项配置不足以证明故障时禁止直连。官网线路在启动前核实账号与有效月卡，原生层定期续验，失效或超过核实期限后停止。支持的订阅协议与实际测试范围以当前 Actions 为准，不能从编译成功推断所有节点均可连接。
 
-移动端提供原生地址栏、前进后退与刷新。环境列表的“清除网站数据”保留环境条目，“删除环境”在原生清除成功后删除条目，均由用户确认；其他环境的数据保留。Android 清除接口需要更新的系统 WebView 支持，失败会保留条目并提示更新。当前实现仍须通过包含 A/B 清除对照的原生验收。
+移动端提供原生地址栏、前进后退与刷新。环境列表的“清除网站数据”保留环境条目，“删除环境”在原生清除成功后删除条目，均由用户确认；其他环境的数据保留。Android 使用公开 API 设置环境自有的数据与缓存根，浏览进程停止后删除该根。Android 已签名候选已通过 A/B Cookie、localStorage、IndexedDB 隔离、清除与删除的完整原生验收；iOS 同样通过存储流程，但代理故障负向未通过，见[发行进度](docs/ALL-PLATFORM-READINESS.md)。
 
 **能力边界：** 移动端独立网站数据与浏览代理不能等同于独立硬件指纹、全设备 VPN 或 WebRTC/DNS 零泄漏。RN Web 产物是会员管理控制台，不能代替三个桌面应用；不同内核的指纹能力分别验收。代理故障直连、DNS/IPv6、真机与商业发行门禁仍需完成。
 
@@ -136,7 +136,7 @@ Android 一次打开一个环境，关闭时结束浏览进程，防止旧 worke
 
 **构建边界：** `npm install` / Expo prebuild / TypeScript check / Gradle / Xcode / macOS DMG / Linux tar.gz / Windows EXE 的构建和运行只能发生在 GitHub Actions runners。AgentDock 只处理版本管理、编辑、提交，不在设备/生产服务器上编译或执行。
 
-Android 默认构建打包 JS 的独立预览 APK；正式签名候选通过手动工作流使用仓库 Secrets，运行门禁通过后仅留候选 Artifact。iOS 目前构建**未签名模拟器 App**，不是可安装到真实 iPhone 的 IPA；真实设备和商店分发仍需有效 Apple 签名资格。macOS 签名公证、Windows 商业代码签名和商店账号尚未完成。**不要把 CI 检查等同于真机验收、商店上架或真实付款。**
+Android 默认构建打包 JS 的独立预览 APK；签名候选通过手动工作流使用保留的 LYCO 密钥，运行门禁通过后仅留候选 Artifact。iOS 可构建未签名模拟器 App 和独立的 iPhone ARM64 设备归档；设备 IPA 尚无有效签名，不能直接安装，真实设备和商店分发仍需有效 Apple 签名资格。macOS 签名公证、Windows 商业代码签名和商店账号尚未完成。**不要把 CI 检查等同于真机验收、商店上架或真实付款。**
 
 ## 路线
 
