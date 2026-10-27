@@ -36,7 +36,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const nativeSettings = (device, expected) => Object.fromEntries([
     ['language', expected.language], ['timezone', expected.timezone],
     ['hardwareConcurrency', expected.cores], ['deviceMemory', expected.memory],
-  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key), matches: device?.[key] === expectedValue}]));
+  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key),
+    type: typeof device?.[key], matches: device?.[key] === expectedValue,
+    numericValueMatches: typeof expectedValue === 'number' ? Number(device?.[key]) === expectedValue : undefined}]));
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
   const cdp = requireApp('./cdp');
