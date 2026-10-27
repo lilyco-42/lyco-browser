@@ -143,6 +143,7 @@ export default function App(){
      <Text style={[styles.tabText,tab===screen&&styles.activeTabText]}>{label}</Text>
     </Pressable>)}
   </View>
+  {!!note&&<Text style={[styles.note,{marginHorizontal:16,marginTop:12}]} accessibilityRole="alert">{note}</Text>}
   <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
    {screen==='home'&&<>
     <View style={styles.card}><Text style={styles.cardTitle}>网站账号 / Billing</Text>
@@ -204,7 +205,6 @@ export default function App(){
     </View>}
    </View>}
    {(busy||savingProfiles)&&<ActivityIndicator color={COLOR.gold}/>}
-   {!!note&&<Text style={styles.note} accessibilityRole="alert">{note}</Text>}
    <Text style={styles.footer}>LYCO Browser · Internal preview · GitHub Actions-only builds</Text>
   </ScrollView>
   </KeyboardAvoidingView>

@@ -11,6 +11,12 @@ function one(file,from,to){
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// Native kernels may expose a navigator member directly on the instance.
+// Keep absent APIs absent, but do not skip an exposed own member just because
+// it is not installed on Navigator.prototype.
+one('automation/fingerprint.js',
+ '        try { if (!(key in navProto)) continue; } catch (_) { continue; }',
+ '        try { if (!(key in navProto) && !(typeof navigator !== "undefined" && key in navigator)) continue; } catch (_) { continue; }');
 // A newly discovered country cannot confirm the country of a stale/default
 // saved timezone. Preserve valid exact network timezones and explicit custom
 // settings; only let IP-mode fallback derive from the newly known country.
@@ -95,7 +101,7 @@ for(const [pattern,replacement] of [
  [/function updateUrlIsAllowed\(value, assetName\) \{[\s\S]*?\n\}\n(?=\nfunction updateUserAgent)/g,
   'function updateUrlIsAllowed(value, assetName) {\n  return updateAssetUrlIsAllowed(value, assetName);\n}\n'],
 ]){
- const matches=fs.readFileSync(path.join(app,'main.js'),'utf8').match(pattern);
+ const matches=fs.readFileSync(path.join(app,'main.js'),'utf8').replace(/\r\n/g,'\n').match(pattern);
  if(matches?.length!==1)throw Error('Pinned updater function boundary mismatch');
  one('main.js',matches[0],replacement);
 }
