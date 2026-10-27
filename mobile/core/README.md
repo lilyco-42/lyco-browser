@@ -17,6 +17,16 @@ is integrated into both native applications for paid and manual browser routes.
 Native runtime gates remain mandatory; passing a Go or binding build alone does
 not establish WebView/WKWebView routing or all-platform release readiness.
 
+`network_boundaries_test.go` adds actual IPv6 HTTP, CA-verified HTTPS and WSS
+traffic through both authenticated local inbounds. Remote-only destination
+names must reach the selected upstream unchanged. After stopping that upstream,
+all requests must fail while independent direct controls still reach the origin.
+The entire race-enabled suite passed in Actions 40550598220 at `92ddbd7`.
+This is core evidence, not mobile WebView, DNS/RTC or device-VPN acceptance.
+Manual workflow dispatch can set `routing_only=true` to run the full core suite
+without rebuilding unchanged Android/Apple bindings; ordinary PR checks still
+include both binding builds.
+
 The native-binding Actions job also retains `lyco-mobile-core-source.tar.gz`
 with the tested tracked application tree, resolved Go lock files, original module
 ZIPs (including their license files), Go checksums and SHA-256 digests. It includes

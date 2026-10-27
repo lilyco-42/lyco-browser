@@ -4,6 +4,12 @@
 
 ## 已有证据
 
+2026-10-28 补查：`72c6753` 的 Windows [40496745914](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745914) 和 macOS [40496746024](https://github.com/lilyco-42/lyco-browser/actions/runs/40496746024) 在实际启动时拒绝不符的硬件/显卡回执；同一 Unix 运行的 Linux 任务通过。拒绝是保护行为，不是配置组合已修复。移动 [40496745927](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745927) 的 Android 第一次尝试在模拟器下载损坏（`Error on ZipFile unknown archive`）阶段停止，未执行原生用例；正在单独重跑 Android。iOS 的原生负向仍失败，不能将 Android 基础设施错误解释为应用回归，亦不能把旧候选成功扩展到当前全部平台。
+
+`92ddbd7` 的核心 [40550598220](https://github.com/lilyco-42/lyco-browser/actions/runs/40550598220) 已通过整个 `go test -race -tags with_quic,with_utls -count=1 ./...`。新增用例通过认证 HTTP 和 SOCKS5 两种入站，实际连接 IPv6 HTTP、验证 CI CA 的 HTTPS、远端域名 HTTPS/WSS；共 8 次源站访问均经过指定上游。停止上游后相同 8 次请求全部失败，源站访问数保持不变；随后 3 次独立直连成功证明源站仍可达。此结果只证明 Go 核心的边界，不能替代 WebView/WKWebView、设备 DNS/RTC、客户线路或全设备 VPN 验收。该次仅重跑核心测试，未重编未变更的原生绑定。
+
+独立套餐 P0 已于 2026-10-28 部署到 [lain42.top](https://lain42.top/vpn/#plans)：月卡 299/30天、季卡 852/90天、120天套餐 1136/120天、年卡 3050/365天。后端 [studio-billing#1](https://github.com/lilyco-42/studio-billing/pull/1) 与网站 [#32](https://github.com/lilyco-42/lyco-browser/pull/32) 保持草稿，源码与数据库已在服务器私有目录备份。未发起真实付款，商城原有爱发电充值核验异常提示仍存在；该 P0 不代表浏览器五平台已发行。
+
 | 范围 | 源码提交及 Actions | 证明的范围 |
 | --- | --- | --- |
 | Windows | `0ddadfa`，[40455032137](https://github.com/lilyco-42/lyco-browser/actions/runs/40455032137) | 整体成功：预检 49、便携包 49、安装版 48 及安装/图标/快捷方式/卸载 6 项通过；三次普通新标签、恢复会话与首脚本 CPU/内存保持严格，含受控 RTC、HTTP/WebSocket/TLS 断代理与直连对照。新候选只存为未发布草稿，尚不作为全平台正式版 |
