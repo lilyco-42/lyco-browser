@@ -179,6 +179,7 @@ export default function App(){
      <Field key={'url-'+fieldEpoch} label="首页 URL" value={url} onChangeText={setUrl} placeholder="https://example.com" disabled={!profilesLoaded||savingProfiles}/>
      <Action title="保存环境" disabled={!profilesLoaded||savingProfiles} onPress={addProfile}/>
     </View>
+    {profilesLoaded&&<Text style={styles.hint}>已保存 {profiles.length} 个环境</Text>}
     {profiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无环境，先添加一个。</Text></View>:
      profiles.map(row=><View style={styles.card} key={row.id}>
       <Text style={styles.cardTitle}>{row.name}</Text><Text style={styles.hint}>{row.url}</Text>
