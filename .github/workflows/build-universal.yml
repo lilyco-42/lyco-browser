@@ -10,9 +10,11 @@ on:
       - 'tests/mobile/**'
       - 'scripts/ci-publish-release.sh'
       - 'scripts/artifact-sha256.mjs'
+      - 'src/product-version.js'
+      - 'tests/product-version.test.js'
   pull_request:
     branches: [main]
-    paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', 'scripts/artifact-sha256.mjs', '.github/workflows/build-universal.yml']
+    paths: ['apps/universal/**', 'tests/mobile-*.mjs', 'tests/mobile/**', 'scripts/ci-publish-release.sh', 'scripts/artifact-sha256.mjs', 'src/product-version.js', 'tests/product-version.test.js', '.github/workflows/build-universal.yml']
   workflow_dispatch:
     inputs:
       signed_android:
@@ -52,7 +54,7 @@ jobs:
           name: lyco-universal-dependency-lock-${{ github.run_id }}
           path: apps/universal/package-lock.json
           retention-days: 7
-      - run: node --test ../../tests/release-publishing.test.js ../../tests/third-party-notices.test.js
+      - run: node --test ../../tests/release-publishing.test.js ../../tests/third-party-notices.test.js ../../tests/product-version.test.js
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - run: npx tsc --noEmit
       - run: npx expo export --platform web --output-dir dist-web

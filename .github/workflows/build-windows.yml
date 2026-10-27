@@ -3,10 +3,10 @@ name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   pull_request:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   workflow_dispatch:
 
 concurrency:
@@ -35,7 +35,7 @@ jobs:
           node --check src/diagnostics-ui.js
           node --test tests/diagnostics-controller.test.js
           node --test tests/release-preview.test.js tests/third-party-notices.test.js
-          node --test tests/update-policy.test.js tests/update-download.test.js
+          node --test tests/update-policy.test.js tests/update-download.test.js tests/product-version.test.js
           node --test tests/browser-webgl-identity.test.mjs
 
   windows-x64:
@@ -221,7 +221,7 @@ jobs:
             npm run $suite
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
-          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js ../../lyco/tests/upstream-update-download.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js ../../lyco/tests/upstream-update-download.test.js ../../lyco/tests/upstream-product-version.test.js
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Download pinned official Mihomo for LYCO local proxy

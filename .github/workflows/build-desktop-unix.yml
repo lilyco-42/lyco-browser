@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'apps/universal/src/product.json'
+      - 'tests/product-version.test.js'
+      - 'tests/upstream-product-version.test.js'
       - 'scripts/**'
       - 'tests/native-unix-workspaces.mjs'
       - 'tests/proxy-failure-probe.mjs'
@@ -14,7 +17,7 @@ on:
       - '.github/workflows/build-desktop-unix.yml'
   pull_request:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
+    paths: ['src/**', 'scripts/**', 'apps/universal/src/product.json', 'tests/product-version.test.js', 'tests/upstream-product-version.test.js', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
 
 concurrency:
@@ -76,7 +79,7 @@ jobs:
             node --check "upstream/Browserapp/$f"
           done
           node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/third-party-notices.test.js
-          node --test lyco/tests/update-policy.test.js lyco/tests/update-download.test.js
+          node --test lyco/tests/update-policy.test.js lyco/tests/update-download.test.js lyco/tests/product-version.test.js
 
       - uses: actions/setup-python@v5
         with:
@@ -137,7 +140,7 @@ jobs:
           npm run selftest
           npm run selftest:isolation
           npm run selftest:proxyconcurrency
-          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-update-download.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-update-download.test.js ../../lyco/tests/upstream-product-version.test.js
 
       - name: Package desktop application in runner only
         working-directory: upstream/Browserapp

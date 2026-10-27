@@ -6,6 +6,7 @@ import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 import coreNotices from './core-notices.json';
+import product from './product.json';
 
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
@@ -206,7 +207,7 @@ export default function App(){
     </View>}
    </View>}
    {(busy||savingProfiles)&&<ActivityIndicator color={COLOR.gold}/>}
-   <Text style={styles.footer}>LYCO Browser · Internal preview · GitHub Actions-only builds</Text>
+   <Text style={styles.footer}>LYCO Browser · {product.version} · {product.channel==='stable'?'正式版':'内部测试版'}</Text>
   </ScrollView>
   </KeyboardAvoidingView>
  </SafeAreaView>;

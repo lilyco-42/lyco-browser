@@ -4,8 +4,15 @@ const fs=require('node:fs'),path=require('node:path');
 const {replaceOne}=require('./source-patch');
 const {nativeGetterMatches}=require('../src/native-navigator');
 const {noisyRectGeometry}=require('../src/rect-geometry');
+const {parseProductVersion}=require('../src/product-version');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
+const productFile=path.join(base,'apps','universal','src','product.json');
+const product=parseProductVersion(JSON.parse(fs.readFileSync(productFile,'utf8')));
+const packageFile=path.join(app,'package.json');
+const packageInfo=JSON.parse(fs.readFileSync(packageFile,'utf8'));
+packageInfo.version=product.version;
+fs.writeFileSync(packageFile,JSON.stringify(packageInfo,null,2)+'\n');
 function one(file,from,to){
  const p=path.join(app,file),s=fs.readFileSync(p,'utf8');
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
@@ -82,6 +89,7 @@ for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
 fs.mkdirSync(path.join(app,'lyco','core'),{recursive:true});
+fs.copyFileSync(productFile,path.join(app,'lyco','product.json'));
 fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.txt'),path.join(app,'lyco','core','LICENSE-MIHOMO.txt'));
 fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.source.json'),path.join(app,'lyco','core','LICENSE-MIHOMO.source.json'));
 const view=fs.readFileSync(path.join(base,'src','view.html'),'utf8');
