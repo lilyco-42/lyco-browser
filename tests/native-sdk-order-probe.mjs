@@ -18,7 +18,7 @@ const rows = [], observations = new Map();
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
   const key = url.searchParams.get('case');
-  if (!/^(cold|ready|ready-cpu)-[12]$/.test(key || '')) {res.writeHead(404).end();return;}
+  if (!/^(cold|ready|ready-cpu|native-settings|persona-launch|combined)-[12]$/.test(key || '')) {res.writeHead(404).end();return;}
   if (url.pathname === '/report' && req.method === 'POST') {
     let body = '';for await (const chunk of req) {body += chunk;if(body.length > 2048) {res.writeHead(413).end();return;}}
     const value = JSON.parse(body);
@@ -42,10 +42,13 @@ try {
   // Use the same upstream, owner-authorized initialization as the application.
   // It accepts the vendor terms; it does not supply or manufacture a token.
   await ensureKernelReadyForLaunch({path: binary});
-  for (const mode of ['cold','ready','ready-cpu']) {
+  for (const mode of ['cold','ready','ready-cpu','native-settings','persona-launch','combined']) {
     const profile = await fs.mkdtemp(path.join(process.env.RUNNER_TEMP,'lyco-sdk-profile-'));
+    const persona = ['--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
+      '--lang=en-GB','--accept-lang=en-GB,en','--force-device-scale-factor=1','--disable-blink-features=AutomationControlled'];
     const child = spawn(binary,['--user-data-dir='+profile,'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1',
-      '--no-first-run','--no-default-browser-check','--disable-background-networking','about:blank'],{stdio:'ignore',windowsHide:false});
+      '--no-first-run','--no-default-browser-check','--disable-background-networking',
+      ...(['persona-launch','combined'].includes(mode)?persona:[]),'about:blank'],{stdio:'ignore',windowsHide:false});
     let connection;
     try {
       let port;
@@ -61,7 +64,12 @@ try {
       // Both hardware values must differ from the original native defaults, so
       // a coincidentally matching generated identity cannot pass this probe.
       const wanted = {hardwareConcurrency:seed.hardwareConcurrency===6?8:6,deviceMemory:seed.deviceMemory===4?2:4};
-      const device = {...seed,...wanted};
+      const settings = ['native-settings','combined'].includes(mode) ? {
+        languages:['en-GB','en'],language:'en-GB',timezone:'Asia/Tokyo',
+        webglVendor:'Google Inc. (Intel)',
+        webglRenderer:'ANGLE (Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11)',
+      } : {};
+      const device = {...seed,...settings,...wanted};
       const pending = new Map();
       const failures = [];
       connection = await new cdp.PersistentConnection(await cdp.browserSocket(port),{onEvent:event=>{
@@ -70,10 +78,11 @@ try {
         const operation = (async()=>{
           const row = {mode,paused:waitingForDebugger,baselineDiffers:matches(seed,wanted),requested:wanted};
           const command = (method,params={})=>connection.command(method,params,{sessionId,timeout:5000});
-          if (mode!=='cold') {await command('Page.enable');await command('Runtime.enable');}
+          const ready = ['ready','ready-cpu'].includes(mode);
+          if (ready) {await command('Page.enable');await command('Runtime.enable');}
           row.receiptMatches=matches(unpack(await command('Wayfern.setFingerprint',device)),wanted);
           row.immediateNativeMatches=matches(unpack(await command('Wayfern.getFingerprint')),wanted);
-          if(mode==='cold') {await command('Page.enable');await command('Runtime.enable');}
+          if(!ready) {await command('Page.enable');await command('Runtime.enable');}
           if(mode==='ready-cpu') await command('Emulation.setHardwareConcurrencyOverride',{hardwareConcurrency:wanted.hardwareConcurrency});
           await command('Runtime.runIfWaitingForDebugger');
           return {row,sessionId,targetId:targetInfo.targetId};
@@ -107,5 +116,5 @@ try {
   }
   console.log(JSON.stringify({scope:'Pinned SDK ordering investigation, not release acceptance',cases:rows.length,
     modes:rows.map(row=>({case:row.case,firstScriptMatches:row.firstScriptMatches,laterNativeMatches:row.laterNativeMatches}))},null,2));
-  if(rows.length!==6 || rows.some(row=>!row.firstScript)) throw Error('Investigation incomplete');
+  if(rows.length!==12 || rows.some(row=>!row.firstScript)) throw Error('Investigation incomplete');
 } finally {await new Promise(resolve=>server.close(resolve));}
