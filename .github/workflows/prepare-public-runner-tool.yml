@@ -1,0 +1,26 @@
+name: Prepare verified public Actions runner tool archive
+on:
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/prepare-public-runner-tool.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-tool:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Download the unchanged official public tool and verify its release digest
+        run: |
+          curl --fail --location --silent --show-error --retry 2 --max-time 120 \
+            https://github.com/actions/runner/releases/download/v2.338.2/actions-runner-linux-x64-2.338.2.tar.gz \
+            -o "$RUNNER_TEMP/actions-runner-linux-x64-2.338.2.tar.gz"
+          printf '%s  %s\n' baebf204307bac6193480852732f0aba2ae97b6c5597c244f4d5558390147c40 \
+            "$RUNNER_TEMP/actions-runner-linux-x64-2.338.2.tar.gz" | sha256sum --check --strict
+      - uses: actions/upload-artifact@v4
+        with:
+          name: official-public-actions-runner-2.338.2
+          path: ${{ runner.temp }}/actions-runner-linux-x64-2.338.2.tar.gz
+          compression-level: 0
+          retention-days: 1
