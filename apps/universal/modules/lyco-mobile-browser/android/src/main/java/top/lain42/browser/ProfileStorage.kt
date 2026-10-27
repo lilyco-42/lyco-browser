@@ -29,7 +29,7 @@ object ProfileStorage {
 
   // Must run in the isolated browser process before ANY WebView initialization.
   fun configure(context: Context, id: String) {
-    check(WebViewFeature.isStartupFeatureSupported(WebViewFeature.STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS, context)) {
+    check(WebViewFeature.isStartupFeatureSupported(context, WebViewFeature.STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS)) {
       "请更新系统 WebView，以使用可完整管理数据的独立环境"
     }
     val data = owned(context, id, false)
