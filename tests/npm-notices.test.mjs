@@ -49,3 +49,30 @@ test('locked traversal paths and external notice symlinks cannot enter a public 
  await fs.symlink(path.join(f.root,'outside.txt'),license);
  await assert.rejects(collectNotices(f.root),/Notice file leaves its package/);
 });
+test('a nested distribution notice and complete original README license are found',async t=>{
+ const f=await fixture(t);
+ await fs.unlink(path.join(f.root,'node_modules/react/LICENSE'));
+ const nested=path.join(f.root,'node_modules/react/dist/third-party');await fs.mkdir(nested,{recursive:true});
+ await fs.writeFile(path.join(nested,'LICENSE'),'Original nested BSD fixture notice\n');
+ await fs.unlink(path.join(f.root,'node_modules/expo/LICENSE'));
+ const readme='Usage text\nCopyright Fixture\nPermission is hereby granted\nTHE SOFTWARE IS PROVIDED\n';
+ await fs.writeFile(path.join(f.root,'node_modules/expo/README.md'),readme);
+ const result=await collectNotices(f.root);
+ assert.equal(result.packages.find(row=>row.name==='react').files[0].text,'Original nested BSD fixture notice\n');
+ assert.equal(result.packages.find(row=>row.name==='expo').files[0].text,readme);
+ assert.deepEqual(result.review,[]);
+});
+test('original upstream supplements require the exact artifact, license and text digest',async t=>{
+ const f=await fixture(t);await fs.unlink(path.join(f.root,'node_modules/react/LICENSE'));
+ f.packages['node_modules/react'].integrity='sha512-fixture';await f.save();
+ const head='a'.repeat(40),text='Exact upstream fixture copyright\n';
+ const row={name:'react',version:'1.0.0',license:'MIT',integrity:'sha512-fixture',gitHead:head,
+  files:[{name:'LICENSE',source:'https://raw.githubusercontent.com/fixture/repo/'+head+'/LICENSE',text,sha256:createHash('sha256').update(text).digest('hex')}]};
+ const folder=path.join(f.root,'third-party');await fs.mkdir(folder);
+ const save=()=>fs.writeFile(path.join(folder,'npm-notice-supplements.json'),JSON.stringify({schema:1,entries:[row]}));
+ await save();
+ const result=await collectNotices(f.root);assert.equal(result.packages.find(p=>p.name==='react').files[0].text,text);
+ row.integrity='sha512-other-artifact';await save();await assert.rejects(collectNotices(f.root),/does not match the locked package/);
+ row.integrity='sha512-fixture';row.license='Apache-2.0';await save();await assert.rejects(collectNotices(f.root),/does not match the locked package/);
+ row.license='MIT';row.files[0].text+='changed';await save();await assert.rejects(collectNotices(f.root),/Invalid original upstream notice/);
+});

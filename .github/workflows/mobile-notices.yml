@@ -2,7 +2,7 @@ name: Verify offline mobile dependency notices
 on:
   pull_request:
     branches: [main]
-    paths: ['apps/universal/src/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/package-lock.json', 'tests/npm-notices*', '.github/workflows/mobile-notices.yml']
+    paths: ['apps/universal/src/**', 'apps/universal/third-party/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/package-lock.json', 'tests/npm-notices*', '.github/workflows/mobile-notices.yml']
   workflow_dispatch:
 permissions:
   contents: read
