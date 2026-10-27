@@ -15,8 +15,7 @@ appId: top.lain42.lycobrowser
     visible: "LYCO verified mobile-A"
     timeout: 30000
 - runFlow: navigation.yaml
-- tapOn: "关闭环境"
-- tapOn: "返回环境列表"
+- runFlow: close.yaml
 - runFlow:
     file: create.yaml
     env:
@@ -29,8 +28,7 @@ appId: top.lain42.lycobrowser
 - extendedWaitUntil:
     visible: "LYCO verified mobile-B"
     timeout: 30000
-- tapOn: "关闭环境"
-- tapOn: "返回环境列表"
+- runFlow: close.yaml
 - runFlow:
     file: open.yaml
     env:
@@ -38,5 +36,4 @@ appId: top.lain42.lycobrowser
 - extendedWaitUntil:
     visible: "LYCO verified mobile-A"
     timeout: 30000
-- tapOn: "关闭环境"
-- tapOn: "返回环境列表"
+- runFlow: close.yaml

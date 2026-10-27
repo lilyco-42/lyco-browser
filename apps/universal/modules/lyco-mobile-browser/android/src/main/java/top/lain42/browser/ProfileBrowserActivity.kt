@@ -132,8 +132,9 @@ class ProfileBrowserActivity : Activity() {
       check(port in 1..65535) { "代理端口无效" }
       paidGuard?.start()
       if (closing) return
-      // Must precede ANY android.webkit/WebViewFeature call in this process.
-      WebView.setDataDirectorySuffix("lyco_$id")
+      // Startup-feature inspection does not initialize the provider. Configure
+      // the explicit data/cache bases and suffix before loading WebView.
+      ProfileStorage.configure(this, id)
       check(WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) { "请更新 Android System WebView 以支持代理" }
       val config = ProxyConfig.Builder().addProxyRule("$scheme://$host:$port")
         .addBypassRule("<-loopback>").build()

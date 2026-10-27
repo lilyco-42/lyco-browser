@@ -5,13 +5,6 @@ import android.content.Context
 import android.app.ActivityManager
 import android.os.Process
 import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.ResultReceiver
-import android.app.Activity
-import java.util.UUID
-import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.functions.Queues
@@ -24,10 +17,12 @@ class LycoMobileBrowserModule : Module() {
       val context = appContext.reactContext ?: error("应用尚未就绪")
       val intent = Intent(context, ProfileBrowserActivity::class.java)
       for ((key, value) in options) intent.putExtra(key, value)
-      val preferences = context.getSharedPreferences(ProfileControl.PREFERENCES, Context.MODE_PRIVATE)
-      intent.putExtra(ProfileControl.EPOCH, preferences.getLong(ProfileControl.EPOCH, 0))
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      context.startActivity(intent)
+      synchronized(ProfileControl) {
+        val preferences = context.getSharedPreferences(ProfileControl.PREFERENCES, Context.MODE_PRIVATE)
+        intent.putExtra(ProfileControl.EPOCH, preferences.getLong(ProfileControl.EPOCH, 0))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+      }
     }.runOnQueue(Queues.MAIN)
     AsyncFunction("closeAll") {
       val context = appContext.reactContext ?: error("应用尚未就绪")
@@ -48,24 +43,21 @@ class LycoMobileBrowserModule : Module() {
       while (android.os.SystemClock.elapsedRealtime() < stoppedDeadline && manager.runningAppProcesses.orEmpty().any { it.processName == name }) Thread.sleep(30)
       check(manager.runningAppProcesses.orEmpty().none { it.processName == name }) { "浏览环境尚未停止，请重试" }
     }
-    AsyncFunction("clearProfile") { id: String, promise: Promise ->
+    AsyncFunction("clearProfile") { id: String ->
       val context = appContext.reactContext ?: error("应用尚未就绪")
-      val normalized = UUID.fromString(id).toString()
-      val handler = Handler(Looper.getMainLooper())
-      var settled = false
-      fun settle(success: Boolean, message: String?) {
-        if (settled) return
-        settled = true
-        handler.removeCallbacksAndMessages(null)
-        if (success) promise.resolve() else promise.reject("ERR_PROFILE_DATA", message ?: "无法清除网站数据，环境条目已保留", null)
+      synchronized(ProfileControl) {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        check(manager.runningAppProcesses.orEmpty().none { it.processName == context.packageName + ":lyco_browser" }) {
+          "请先关闭浏览环境，再清除网站数据"
+        }
+        // Invalidate an already-queued Activity launch before deleting its
+        // storage. A new open waits on this same lock until deletion completes.
+        val preferences = context.getSharedPreferences(ProfileControl.PREFERENCES, Context.MODE_PRIVATE)
+        check(preferences.edit().putLong(ProfileControl.EPOCH, preferences.getLong(ProfileControl.EPOCH, 0) + 1).commit()) {
+          "无法停止待启动环境，数据条目已保留"
+        }
+        ProfileStorage.clear(context, id)
       }
-      val receiver = object : ResultReceiver(handler) {
-        override fun onReceiveResult(code: Int, data: Bundle?) { settle(code == Activity.RESULT_OK, data?.getString("message")) }
-      }
-      handler.postDelayed({ settle(false, "清除超时，环境条目已保留") }, 25000)
-      try {
-        context.startActivity(Intent(context, ProfileDataActivity::class.java).putExtra("id", normalized).putExtra("result", receiver).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-      } catch (_: Exception) { settle(false, "无法打开网站数据清除功能，环境条目已保留") }
-    }.runOnQueue(Queues.MAIN)
+    }
   }
 }

@@ -1,0 +1,12 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "关闭环境"
+# Keep the control app in front without terminating it. Native dismissal must
+# still return to the existing Browser control screen, not restart at Home.
+- launchApp:
+    stopApp: false
+- scrollUntilVisible:
+    element: "返回环境列表"
+    direction: DOWN
+- tapOn: "返回环境列表"
+- assertVisible: "环境管理"

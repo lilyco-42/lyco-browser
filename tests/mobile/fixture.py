@@ -37,8 +37,22 @@ class Origin(http.server.BaseHTTPRequestHandler):
         (async()=>{const owner=OWNER;
         const readCookie=()=>document.cookie.split('; ').find(x=>x.startsWith('owner='))?.slice(6)||null;
         const before={cookie:readCookie(),local:localStorage.getItem('owner')};
+        const idbOwner=write=>new Promise((resolve,reject)=>{
+          const opening=indexedDB.open('lyco-native-isolation',1);
+          opening.onupgradeneeded=()=>opening.result.createObjectStore('identity');
+          opening.onerror=()=>reject(opening.error);
+          opening.onsuccess=()=>{
+            const db=opening.result;
+            const tx=db.transaction('identity',write===undefined?'readonly':'readwrite');
+            const store=tx.objectStore('identity'),read=store.get('owner');let previous=null;
+            read.onsuccess=()=>{previous=read.result??null;if(write!==undefined)store.put(write,'owner')};
+            tx.oncomplete=()=>{db.close();resolve(previous)};
+            tx.onabort=()=>{db.close();reject(tx.error)};
+          };
+        });
+        before.indexedDB=await idbOwner(owner);
         document.cookie='owner='+owner+'; Path=/; Max-Age=3600; SameSite=Lax';localStorage.setItem('owner',owner);
-        const report={owner,before,after:{cookie:readCookie(),local:localStorage.getItem('owner')}};
+        const report={owner,before,after:{cookie:readCookie(),local:localStorage.getItem('owner'),indexedDB:await idbOwner()}};
         const result=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
         if(!result.ok)throw Error('report failed');document.getElementById('status').textContent='LYCO verified '+owner;
         })().catch(()=>document.getElementById('status').textContent='LYCO fixture failed');</script>'''.replace('OWNER',json.dumps(owner))
