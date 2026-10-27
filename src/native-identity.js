@@ -147,11 +147,16 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // Actions exposed memory 8 instead of configured 4 when those records were
   // coalesced. Both paths retain the same device; neither mints a new seed.
   const applied = new Set();
-  const apply = async tabs => {
+  const apply = async (tabs, preparedTargetIds) => {
     const current = pageTargets(tabs, port);
     const live = new Set(current.map(tab => tab.webSocketDebuggerUrl));
     for (const target of applied) if (!live.has(target)) applied.delete(target);
     for (const tab of current) {
+      // A completed owning-session pipeline already restored this identity
+      // and installed document scripts. Rewriting the native device from the
+      // polling fallback can overwrite those scripts immediately before the
+      // first user script. A native ACK alone is not this readiness signal.
+      if (typeof tab.id === 'string' && preparedTargetIds instanceof Set && preparedTargetIds.has(tab.id)) continue;
       if (applied.has(tab.webSocketDebuggerUrl)) continue;
       try {
         await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
@@ -169,7 +174,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     }
   };
   await apply(targets);
-  const applySession = async (connection, sessionId, targetInfo = {}) => {
+  const prepareSession = async (connection, sessionId, targetInfo = {}, restoreDevice = true) => {
     if (targetInfo.type !== 'page') return;
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId || '') || !/^[A-Za-z0-9_-]{1,128}$/.test(targetInfo.targetId || '')) {
       throw Error('新页面的原生身份目标无效');
@@ -177,7 +182,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     try {
       // The engine's existing flattened auto-attach connection owns this
       // paused target. Restore the complete saved device before resuming it.
-      await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+      if (restoreDevice) await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
       if (declared.hardwareConcurrency !== undefined) {
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
@@ -192,11 +197,16 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       throw error;
     }
   };
+  const applySession = (connection, sessionId, targetInfo) => prepareSession(connection, sessionId, targetInfo, true);
+  // Generic UA/metrics preparation can invalidate Chromium's CPU override.
+  // Reassert that one protocol setting after document preparation, without
+  // resetting native navigator properties that the document script just set.
+  const finalizeSession = (connection, sessionId, targetInfo) => prepareSession(connection, sessionId, targetInfo, false);
   const seed = device.canvasNoiseSeed;
   const ownsHtmlCanvasNoise = Object.hasOwn(device, 'canvasNoiseSeed')
     && ((typeof seed === 'number' && Number.isFinite(seed)) || (typeof seed === 'string' && seed.length > 0));
   return {digest: createHash('sha256').update(JSON.stringify(device)).digest('hex'),
-    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession};
+    ownsHtmlCanvasNoise, hasNativeFontInventory: fontInventoryAvailable, apply, applySession, finalizeSession};
 }
 
 function nativeCanvasFingerprint(value, identity) {

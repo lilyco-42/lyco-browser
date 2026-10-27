@@ -292,11 +292,11 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
-// Generic UA/metrics preparation runs after the first native restore. Reassert
-// the same saved identity on this paused owning session as the final step,
-// before its target can resume; a later watch pass cannot repair first reads.
+// Generic UA/metrics preparation may invalidate Chromium's CPU override.
+// Finalize only that override after document scripts: restoring the complete
+// native device here would overwrite their configured navigator properties.
 one('engine.js', '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();', join(
- '    await item?.lycoNativeIdentity?.applySession(connection, sessionId, targetInfo);',
+ '    await item?.lycoNativeIdentity?.finalizeSession(connection, sessionId, targetInfo);',
  '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();'));
 one('engine.js', '        const destroyedId = event.params?.targetId;', join(
  '        const destroyedId = event.params?.targetId;',
@@ -431,7 +431,7 @@ one('engine.js', '      item.cdpError = error.message;', join(
 one('engine.js',
  '    const tabs = await cdp.tabs(port);',
  join('    const tabs = await cdp.tabs(port);',
- '    await options.trackOn?.lycoNativeIdentity?.apply(tabs);'));
+ '    await options.trackOn?.lycoNativeIdentity?.apply(tabs, options.trackOn?.fpAppliedTargets);'));
 one('engine.js',
  "      let bypass = '<-loopback>;127.0.0.1;localhost';",
  "      let bypass = this.lycoIsManagedProfile?.(profile) ? '<-loopback>' : '<-loopback>;127.0.0.1;localhost';");

@@ -14,14 +14,18 @@ async function nativeSessionPreparation(refuseFinal=false){
   privacy:{deviceProfile:'default',cores:6,memory:4,clientRects:'noise',languageMode:'profile',langFromIp:false,timezoneMode:'custom',timezone:'Asia/Tokyo'}});
  const fp=buildFingerprint(profile);
  const item={profile,lycoNativeIdentity:{ownsHtmlCanvasNoise:false,async applySession(){
-  if(refuseFinal&&events.includes('Page.addScriptToEvaluateOnNewDocument'))throw Error('Final native preparation refused');
-  events.push('native');state.cores=6;state.memory=4;
+  events.push('native');state.cores=6;state.memory=8;
+ },async finalizeSession(){
+  if(refuseFinal)throw Error('Final native preparation refused');
+  events.push('final-cpu');state.cores=6;
  }}};
  const connection={async command(method){
   events.push(method);
   // Reproduce an intervening generic override invalidating native hardware
   // preparation. Success requires native finalization before page readiness.
-  if(['Emulation.setUserAgentOverride','Network.setUserAgentOverride','Emulation.clearDeviceMetricsOverride'].includes(method)){state.cores=4;state.memory=8}
+  if(['Emulation.setUserAgentOverride','Network.setUserAgentOverride'].includes(method)){state.cores=4;state.memory=8}
+  if(['Emulation.clearDeviceMetricsOverride','Emulation.setDeviceMetricsOverride'].includes(method))state.cores=4;
+  if(method==='Page.addScriptToEvaluateOnNewDocument'){state.cores=6;state.memory=4}
   return method==='Page.addScriptToEvaluateOnNewDocument'?{identifier:'ci-document-start'}:{};
  }};
  const engine=Object.assign(Object.create(BrowserEngine.prototype),{networkInfo:new Map()});
@@ -35,7 +39,8 @@ test('native session hardware is finalized after generic document preparation an
  await preparation;
  assert.deepEqual(state,{cores:6,memory:4});
  assert.ok(events.indexOf('native')<events.indexOf('Page.addScriptToEvaluateOnNewDocument'));
- assert.equal(events.at(-1),'native','An intervening generic override must not be the final preparation');
+ assert.equal(events.filter(event=>event==='native').length,1,'The full device must not be restored after document scripts');
+ assert.equal(events.at(-1),'final-cpu','Only the Chromium CPU override is reasserted before readiness');
  assert.equal(item.fpAppliedTargets.has('ci-page-false'),true);
 });
 

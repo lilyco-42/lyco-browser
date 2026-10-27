@@ -183,6 +183,22 @@ test('a session acknowledgement cannot suppress the independent live-page native
   assert.deepEqual(f.calls.map(row => row.method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
 });
 
+test('completed document preparation prevents the polling fallback from rewriting native navigator state', async t => {
+  const f=await fixture(t);
+  const identity=await prepareNativeIdentity({...f.args,settings:{hardwareConcurrency:6,deviceMemory:4}});
+  const page={id:'document-ready',type:'page',webSocketDebuggerUrl:'ws://127.0.0.1:19341/devtools/page/document-ready'};
+  f.tabs.push(page);f.calls.length=0;
+  await identity.apply(f.tabs,new Set([page.id]));
+  assert.equal(f.calls.length,0,'A completed owning-session pipeline must not be overwritten by the live-page fallback');
+  await identity.apply(f.tabs,new Set());
+  assert.deepEqual(f.calls.map(row=>row.method),['Wayfern.setFingerprint','Emulation.setHardwareConcurrencyOverride'],
+    'Unprepared pages still receive the independent native fallback');
+  const sent=[];
+  await identity.finalizeSession({command:async(...args)=>sent.push(args)},'cpu-finalization',{type:'page',targetId:page.id});
+  assert.deepEqual(sent,[['Emulation.setHardwareConcurrencyOverride',{hardwareConcurrency:6},{sessionId:'cpu-finalization',timeout:5000}]],
+    'Finalization must not reset the device after document scripts have installed navigator settings');
+});
+
 test('declared settings reach native pages without changing saved device/noise or accepting unrelated overrides', async t => {
   const f = await fixture(t);
   await prepareNativeIdentity(f.args);
