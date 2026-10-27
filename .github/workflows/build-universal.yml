@@ -17,6 +17,10 @@ on:
         description: 'Build a signed Android candidate in an owner-only draft (not a commercial release)'
         type: boolean
         default: false
+      ios_device:
+        description: 'Compile an unsigned iPhone device archive for signing and device review (not installable as-is)'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
@@ -31,7 +35,7 @@ defaults:
 
 jobs:
   web:
-    if: ${{ !inputs.signed_android }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device }}
     name: React Native Web / Windows macOS Linux shared UI
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -59,6 +63,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
 
   android:
+    if: ${{ !inputs.ios_device }}
     name: Android standalone preview / signed candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 70
@@ -169,7 +174,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
 
   ios-simulator:
-    if: ${{ !inputs.signed_android }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device }}
     name: iOS 26 simulator unsigned app · no signing
     runs-on: macos-26
     timeout-minutes: 90
@@ -256,4 +261,55 @@ jobs:
         with:
           name: lyco-ios-simulator-${{ github.run_id }}
           path: ${{ runner.temp }}/LYCO-Browser-iOS-simulator.zip
+          retention-days: 7
+
+  ios-device:
+    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android
+    name: iPhone ARM64 unsigned device archive · signing and runtime review required
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsc --noEmit
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
+      - name: Build Apple network core from pinned source
+        working-directory: mobile/core
+        run: |
+          set -euo pipefail
+          bash build-native.sh apple
+          go test -tags with_quic,with_utls -count=1 ./...
+          mkdir -p ../../apps/universal/modules/lyco-mobile-browser/ios/Frameworks
+          tar xzf "$RUNNER_TEMP/lyco-tunnel-apple.tar.gz" -C ../../apps/universal/modules/lyco-mobile-browser/ios/Frameworks
+      - run: npx expo prebuild --clean --platform ios --non-interactive
+      - name: Compile iPhone device application without signing credentials
+        run: |
+          set -euo pipefail
+          cd ios
+          pod install
+          WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
+          test -n "$WORKSPACE"
+          SCHEME="$(basename "$WORKSPACE" .xcworkspace)"
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath "$RUNNER_TEMP/LYCO_Device" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+      - name: Verify device platform and package unsigned signing input
+        run: bash ../../scripts/ci-package-ios-device.sh
+      - name: Retain unsigned device archive and build provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-ios-device-unsigned-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/LYCO-Browser-iOS-device-unsigned.ipa
+            ${{ runner.temp }}/IOS-DEVICE-PROVENANCE.json
+            ${{ runner.temp }}/IOS-DEVICE-SHA256SUMS.txt
+            ${{ runner.temp }}/ios-device-platform.txt
+          if-no-files-found: error
           retention-days: 7
