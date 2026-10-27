@@ -13,6 +13,7 @@ provisioning profile。生成的 Artifact：
 
 - `LYCO-Browser-iOS-device-unsigned.ipa`：供后续签名使用的 Payload 结构。
 - `IOS-DEVICE-PROVENANCE.json`：实际提交、运行 ID、版本及 SDK；明确记录未使用签名凭据、不能直接安装、尚无真机运行证据。
+- `IOS-DEVICE-VERSION-PROVENANCE.json`：核对编译后 Info.plist 的版本、build 和应用标识与共同版本清单一致；该检查加入后的候选仍须重新在 Actions 构建。
 - `IOS-DEVICE-SHA256SUMS.txt` 和 `ios-device-platform.txt`：下载完整性及设备平台记录。
 
 该 IPA 尚不能直接安装到普通 iPhone。后续签名、设备授权与真机运行检查必须

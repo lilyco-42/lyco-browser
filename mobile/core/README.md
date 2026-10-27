@@ -1,11 +1,12 @@
 # LYCO mobile subscription core
 
 A source-built, in-process sing-box integration for browser environment traffic.
-It provides a loopback HTTP listener with a single explicit remote outbound. It
+It provides a loopback HTTP/SOCKS5 mixed listener with a single explicit remote outbound. It
 does not install a device VPN, add a DIRECT fallback, accept arbitrary feed
 inbounds/rules, or write node credentials and configurations to disk.
 
-iOS listeners use random local credentials; closed listener ports stay reserved
+iOS uses the public SOCKS5 proxy configuration with random local credentials;
+the unchanged native routing gate must verify this path. Closed listener ports stay reserved
 until the app process ends. Android browser processes terminate on close.
 
 Dependency: SagerNet/sing-box v1.14.4, source commit

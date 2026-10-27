@@ -1,4 +1,4 @@
-// Package lycotunnel provides a browser-only loopback HTTP proxy. It does not
+// Package lycotunnel provides a browser-only loopback HTTP/SOCKS5 proxy. It does not
 // install a device VPN, alter system routes, or expose subscription credentials.
 package lycotunnel
 
