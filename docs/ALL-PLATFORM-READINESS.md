@@ -7,6 +7,7 @@
 | 范围 | 源码提交及 Actions | 证明的范围 |
 | --- | --- | --- |
 | Windows | `0ddadfa`，[40455032137](https://github.com/lilyco-42/lyco-browser/actions/runs/40455032137) | 整体成功：预检 49、便携包 49、安装版 48 及安装/图标/快捷方式/卸载 6 项通过；三次普通新标签、恢复会话与首脚本 CPU/内存保持严格，含受控 RTC、HTTP/WebSocket/TLS 断代理与直连对照。新候选只存为未发布草稿，尚不作为全平台正式版 |
+| Windows 后续独立构建 | `afbd179`，[40486858031](https://github.com/lilyco-42/lyco-browser/actions/runs/40486858031) | 新标签首脚本再次读到 CPU 4、内存 8，配置期望 6/4，预检失败；稍后读取变成 6/4，但原生 getFingerprint 中仍不匹配。表明此前单轮成功不能证明竞争已彻底修复，继续阻止当前版本发行。新增只含固定字段类型及匹配布尔值的协议回执观察，保持原始首读断言 |
 | macOS ARM64、Linux x64 | `0ddadfa`，[40455032067](https://github.com/lilyco-42/lyco-browser/actions/runs/40455032067) | 真实打包应用、Mihomo、两个受管环境、代理流量、Cookie/localStorage 隔离与 A 重开、受控 RTC peer/STUN、退出、HTTP/WebSocket/TLS ClientHello 失效代理检查及真实直连环境对照通过；实际更新器的完整性拦截、桌面应用版本与随包版本清单也通过 |
 | Go 移动核心与源码包 | `6979216`，[40376368484](https://github.com/lilyco-42/lyco-browser/actions/runs/40376368484) | HTTP、本机认证、停止、SOCKS5、SS、VMess、VLESS、Trojan、Hysteria2、TUIC、VMess/VLESS WebSocket、VLESS gRPC 真实服务链及 race 检查通过；Android/Apple 绑定成功，源码审阅包首次保留了 405 个应用和绑定工具模块 |
 | iOS 原生运行 | `a0ddb5c`，[40451827758](https://github.com/lilyco-42/lyco-browser/actions/runs/40451827758) | 地址栏/历史/刷新、A/B Cookie/localStorage/IndexedDB 隔离及 A 重开、清除 A 后三项为空且 B 保留、删除 A 并重启确认列表均通过；停代理后的 C 仍请求本机源站并完成三项写入，严格负向失败，禁止发行 |

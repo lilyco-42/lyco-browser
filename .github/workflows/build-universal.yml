@@ -29,7 +29,9 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
-  cancel-in-progress: true
+  # Preserve the active native runtime evidence; newer pushes replace only the
+  # pending run. A long iOS/Android acceptance must not be erased by a docs fix.
+  cancel-in-progress: false
 
 permissions:
   contents: write
