@@ -7,6 +7,7 @@ import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billin
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 import coreNotices from './core-notices.json';
 import product from './product.json';
+import NpmNotices from './NpmNotices';
 
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
@@ -196,6 +197,7 @@ export default function App(){
     <Text style={styles.hint}>Windows / macOS / Linux：使用 OpenBrowser 桌面内核。React Native Web 可作为跨平台会员控制界面，但 Electron 容器和原生进程不同于移动端 WebView。</Text>
     <Text style={styles.hint}>反检测并非隐身承诺。独立账号、合法授权、合规使用，且不同平台的指纹能力不能保证完全相同。</Text>
     <Action title="官网帮助" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
+    <NpmNotices/>
     <Action title={showCoreLicense?'收起网络组件许可':'网络组件开源许可'} secondary onPress={()=>setShowCoreLicense(value=>!value)}/>
     {showCoreLicense&&<View style={{gap:12}}>
      <Text style={styles.value}>{coreNotices.name} {coreNotices.version}</Text>

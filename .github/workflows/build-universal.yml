@@ -51,6 +51,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: npm ci --no-audit --no-fund
+      - name: Collect original installed JavaScript dependency notices
+        run: node scripts/collect-npm-notices.mjs
+      - name: Retain the exact offline notice bundle for this build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.job }}-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          retention-days: 7
       - name: Retain resolved dependency lock for reproducible builds
         uses: actions/upload-artifact@v4
         with:
@@ -83,6 +93,16 @@ jobs:
         with: {distribution: 'temurin', java-version: '17'}
       # Ubuntu GitHub-hosted runner already provides the Android SDK; avoid legacy 'tools' package.
       - run: npm ci --no-audit --no-fund
+      - name: Collect original installed JavaScript dependency notices
+        run: node scripts/collect-npm-notices.mjs
+      - name: Retain the exact offline notice bundle for this build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.job }}-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - uses: actions/setup-go@v5
@@ -205,6 +225,16 @@ jobs:
       - name: Display GitHub runner Xcode environment
         run: xcodebuild -version
       - run: npm ci --no-audit --no-fund
+      - name: Collect original installed JavaScript dependency notices
+        run: node scripts/collect-npm-notices.mjs
+      - name: Retain the exact offline notice bundle for this build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.job }}-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - uses: actions/setup-go@v5
@@ -297,6 +327,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: npm ci --no-audit --no-fund
+      - name: Collect original installed JavaScript dependency notices
+        run: node scripts/collect-npm-notices.mjs
+      - name: Retain the exact offline notice bundle for this build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.job }}-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          retention-days: 7
       - run: npx tsc --noEmit
       - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
       - uses: actions/setup-go@v5
