@@ -57,6 +57,16 @@ try {
         await sleep(200);
       }
       if (!Number.isInteger(port) || port<1024 || port>65535) throw Error('Owned kernel did not provide a loopback debugger');
+      if(mode==='cold') {
+        // Public debugger protocol metadata, never device payloads or tokens.
+        const protocol=await cdp.json('http://127.0.0.1:'+port+'/json/protocol');
+        const domain=protocol.domains?.find(value=>value.domain==='Wayfern');
+        const descriptor=value=>({name:value.name,type:value.type,ref:value.$ref,optional:value.optional});
+        await fs.writeFile(path.join(evidence,'native-protocol.json'),JSON.stringify({
+          available:Boolean(domain),commands:domain?.commands?.map(value=>({name:value.name,parameters:value.parameters?.map(descriptor)})),
+          types:domain?.types?.map(value=>({id:value.id,type:value.type,properties:value.properties?.map(descriptor)})),
+        },null,2)+'\n');
+      }
       const tabs = await cdp.tabs(port);
       const blank = tabs.find(tab=>tab.type==='page' && tab.url==='about:blank');
       if (!blank) throw Error('No initial blank page');
