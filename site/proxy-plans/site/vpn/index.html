@@ -52,13 +52,13 @@ footer{margin-top:75px;border-top:1px solid var(--line);padding-top:22px;color:v
   for(const term of terms){
    const p=data.products.find(p=>p.code===term.code),buy=document.getElementById('planBuy-'+term.code);
    if(!p||!Number.isSafeInteger(p.points_price)||p.points_price<0){set('planPrice-'+term.code,'未上架');set('planDesc-'+term.code,'请到商城查看当前可售套餐。');continue}
-   set('planName-'+term.code,p.name);set('planPrice-'+term.code,p.points_price);
+   set('planName-'+term.code,p.name.replace(/^不限量不限速代理\s*·\s*/,''));document.getElementById('planName-'+term.code).title=p.name;set('planPrice-'+term.code,p.points_price);
    const days=Number.isSafeInteger(p.duration_days)&&p.duration_days>0?p.duration_days:term.days;
    const discounted=term.rate&&Number.isSafeInteger(monthly?.points_price)&&p.points_price===Math.round(monthly.points_price*term.months*term.rate/100);
    set('planBadge-'+term.code,days+' 天'+(discounted?' · '+(term.rate===95?'95 折':'85 折'):''));
    set('planDesc-'+term.code,'有效期 '+days+' 天 · 使用积分购买，不自动续费。');
    if(p.sale_open===false){buy.textContent='暂未开售 · 查看商城';continue}
-   buy.href='/shop/#'+term.code;buy.textContent='使用积分购买'+term.label+' →';
+   buy.href='/shop/#'+term.code;buy.textContent='购买'+term.label+' →';
   }
  }catch(e){for(const term of terms){set('planPrice-'+term.code,'详见商城');set('planDesc-'+term.code,'套餐接口暂时不可用，请在商城确认价格。')}}
 
