@@ -4,6 +4,7 @@ set -euo pipefail
 app_path=$(find "$RUNNER_TEMP/LYCO_Device/Build/Products/Release-iphoneos" -maxdepth 1 -name '*.app' | head -1)
 test -d "$app_path"
 test ! -e "$app_path/embedded.mobileprovision"
+python3 scripts/verify-built-version.py ios-device "$app_path/Info.plist" "$RUNNER_TEMP/IOS-DEVICE-VERSION-PROVENANCE.json"
 app_executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app_path/Info.plist")
 xcrun vtool -show-build "$app_path/$app_executable" > "$RUNNER_TEMP/ios-device-platform.txt"
 python3 - "$app_path/Info.plist" <<'PY'
@@ -27,4 +28,4 @@ mkdir -p "$RUNNER_TEMP/LYCO-device-package/Payload"
 ditto "$app_path" "$RUNNER_TEMP/LYCO-device-package/Payload/$(basename "$app_path")"
 ditto -c -k --keepParent "$RUNNER_TEMP/LYCO-device-package/Payload" "$RUNNER_TEMP/LYCO-Browser-iOS-device-unsigned.ipa"
 cd "$RUNNER_TEMP"
-shasum -a 256 LYCO-Browser-iOS-device-unsigned.ipa IOS-DEVICE-PROVENANCE.json > IOS-DEVICE-SHA256SUMS.txt
+shasum -a 256 LYCO-Browser-iOS-device-unsigned.ipa IOS-DEVICE-PROVENANCE.json IOS-DEVICE-VERSION-PROVENANCE.json > IOS-DEVICE-SHA256SUMS.txt

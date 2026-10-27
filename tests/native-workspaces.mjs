@@ -111,6 +111,12 @@ try {
   throw error;
  } finally {await hostControlBrowser?.close();}
  report.checks.push('unconfigured-host-browser-font-positive-control');
+ const product=JSON.parse(await fs.readFile(path.join(import.meta.dirname,'../apps/universal/src/product.json'),'utf8'));
+ const bundledProduct=JSON.parse(await fs.readFile(path.join(appRoot,'lyco/product.json'),'utf8'));
+ assert.deepEqual(bundledProduct,product);
+ report.product={...bundledProduct,runningVersion:await application.evaluate(({app})=>app.getVersion())};
+ assert.equal(report.product.runningVersion,product.version,'The actual installed or portable application must expose the shared version');
+ report.checks.push('packaged-and-running-product-version-matches-shared-manifest');
  // Observe the actual installed/portable core without changing product files,
  // timeout, proxy selection or permissions. Raw output/secrets are discarded.
  await application.evaluate((_electron,{appRoot,observer})=>{

@@ -137,8 +137,10 @@ jobs:
           test -n "$signer"
           "$signer" verify --verbose --print-certs "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk" | tee "$RUNNER_TEMP/ANDROID-SIGNATURE.txt"
           python3 scripts/verify-android-signature.py "$RUNNER_TEMP/ANDROID-SIGNATURE.txt" ../../resources/signing/android-release-certificate.pem
+          "${signer%/*}/aapt" dump badging "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk" > "$RUNNER_TEMP/ANDROID-PACKAGE.txt"
+          python3 scripts/verify-built-version.py android "$RUNNER_TEMP/ANDROID-PACKAGE.txt" "$RUNNER_TEMP/ANDROID-VERSION-PROVENANCE.json"
           cd "$RUNNER_TEMP"
-          sha256sum LYCO-Browser-Android-preview.apk ANDROID-SIGNATURE-PROVENANCE.json > ANDROID-SHA256SUMS.txt
+          sha256sum LYCO-Browser-Android-preview.apk ANDROID-SIGNATURE-PROVENANCE.json ANDROID-VERSION-PROVENANCE.json > ANDROID-SHA256SUMS.txt
       - uses: actions/setup-python@v5
         with: {python-version: '3.13'}
       - name: Install pinned mobile UI test driver
@@ -176,6 +178,8 @@ jobs:
             ${{ runner.temp }}/ANDROID-SHA256SUMS.txt
             ${{ runner.temp }}/ANDROID-SIGNATURE.txt
             ${{ runner.temp }}/ANDROID-SIGNATURE-PROVENANCE.json
+            ${{ runner.temp }}/ANDROID-VERSION-PROVENANCE.json
+            ${{ runner.temp }}/ANDROID-PACKAGE.txt
           if-no-files-found: error
           retention-days: 7
       - name: Upload Android APK to GitHub prerelease
@@ -229,6 +233,7 @@ jobs:
           xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/LYCO_iOS" CODE_SIGNING_ALLOWED=NO build
           APP="$(find "$RUNNER_TEMP/LYCO_iOS/Build/Products/Release-iphonesimulator" -maxdepth 1 -name '*.app' | head -1)"
           test -d "$APP"
+          python3 ../scripts/verify-built-version.py ios-simulator "$APP/Info.plist" "$RUNNER_TEMP/IOS-SIMULATOR-VERSION-PROVENANCE.json"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$RUNNER_TEMP/LYCO-Browser-iOS-simulator.zip"
       - uses: actions/setup-python@v5
         with: {python-version: '3.13'}
@@ -272,7 +277,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lyco-ios-simulator-${{ github.run_id }}
-          path: ${{ runner.temp }}/LYCO-Browser-iOS-simulator.zip
+          path: |
+            ${{ runner.temp }}/LYCO-Browser-iOS-simulator.zip
+            ${{ runner.temp }}/IOS-SIMULATOR-VERSION-PROVENANCE.json
           retention-days: 7
 
   ios-device:
@@ -321,6 +328,7 @@ jobs:
           path: |
             ${{ runner.temp }}/LYCO-Browser-iOS-device-unsigned.ipa
             ${{ runner.temp }}/IOS-DEVICE-PROVENANCE.json
+            ${{ runner.temp }}/IOS-DEVICE-VERSION-PROVENANCE.json
             ${{ runner.temp }}/IOS-DEVICE-SHA256SUMS.txt
             ${{ runner.temp }}/ios-device-platform.txt
           if-no-files-found: error

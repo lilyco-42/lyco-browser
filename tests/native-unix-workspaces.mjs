@@ -98,6 +98,12 @@ try{
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|HOME|USER|LOGNAME|TMPDIR|TEMP|TMP|DISPLAY|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR|XDG_CONFIG_HOME|XDG_DATA_HOME|LANG|LC_ALL)$/.test(key)));
  app=await electron.launch({executablePath:binary,args:[appRoot],env:{...cleanEnv,OPENBROWSER_API_PORT:String(52000+Math.floor(Math.random()*1000))},timeout:60000});
  const page=await app.firstWindow();page.setDefaultTimeout(30000);await page.waitForLoadState('domcontentloaded');
+ const product=JSON.parse(await fs.readFile(path.join(import.meta.dirname,'../apps/universal/src/product.json'),'utf8'));
+ const bundledProduct=JSON.parse(await fs.readFile(path.join(appRoot,'lyco/product.json'),'utf8'));
+ assert.deepEqual(bundledProduct,product);
+ report.product={...bundledProduct,runningVersion:await app.evaluate(({app})=>app.getVersion())};
+ assert.equal(report.product.runningVersion,product.version,'The actual packaged application must expose the shared version');
+ report.checks.push('packaged-and-running-product-version-matches-shared-manifest');
  await app.evaluate((_electron,{appRoot,observer})=>{
   const require=process.mainModule.require.bind(process.mainModule);
   globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork);
