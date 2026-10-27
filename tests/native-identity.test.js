@@ -14,7 +14,8 @@ async function fixture(t) {
   let counter = 0;
   const cdp = {tabs: async () => tabs, call: async (target, method, params) => {
     calls.push({target, method, params});
-    return method === 'Wayfern.getFingerprint' ? {fingerprint: {canvasSeed: ++counter, fonts: '["Arial"]'}} : {};
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: {canvasSeed: ++counter, fonts: '["Arial"]'}}
+      : method === 'Wayfern.setFingerprint' ? {fingerprint: params} : {};
   }};
   return {root, tabs, calls, cdp, args: {enabled: true, profileRoot: root, profileId: 'owner-profile', port: 19341, cdp}};
 }
@@ -165,7 +166,7 @@ test('a session acknowledgement cannot suppress the independent live-page native
   const page = {type: 'page', webSocketDebuggerUrl: 'ws://localhost:19341/devtools/page/new-owned'};
   f.tabs.push(page);
   const sent = [];
-  await identity.applySession({command: async (...args) => sent.push(args)}, 'session-owned',
+  await identity.applySession({command: async (...args) => {sent.push(args);return {fingerprint:args[1]};}}, 'session-owned',
     {type: 'page', targetId: 'new-owned'});
   assert.deepEqual(sent.map(([method]) => method), ['Wayfern.setFingerprint', 'Emulation.setHardwareConcurrencyOverride']);
   f.calls.length = 0;
@@ -216,7 +217,7 @@ test('declared settings reach native pages without changing saved device/noise o
     method: 'Emulation.setHardwareConcurrencyOverride', params: {hardwareConcurrency: 6}});
   assert.equal(f.calls.some(call => call.method === 'Wayfern.getFingerprint'), false);
   const sent = [];
-  await identity.applySession({command: async (...args) => sent.push(args)}, 'new-session', {type: 'page', targetId: 'new-page'});
+  await identity.applySession({command: async (...args) => {sent.push(args);return {fingerprint:args[1]};}}, 'new-session', {type: 'page', targetId: 'new-page'});
   assert.deepEqual(sent[0][1], expected);
   assert.deepEqual(sent[1], ['Emulation.setHardwareConcurrencyOverride', {hardwareConcurrency: 6},
     {sessionId: 'new-session', timeout: 5000}]);
@@ -244,7 +245,7 @@ test('a rejected native CPU override cannot ready a target or reset its saved id
   const sent = [], connection = {command: async (...args) => {
     sent.push(args);
     if (args[0] === 'Emulation.setHardwareConcurrencyOverride') throw Error('unsupported or refused');
-    return {};
+    return {fingerprint: args[1]};
   }};
   await assert.rejects(identity.applySession(connection, 'cpu-refused', {type: 'page', targetId: 'page-refused'}),
     error => error.code === 'LYCO_NATIVE_IDENTITY_REFUSED');
@@ -262,7 +263,8 @@ test('configured GPU metadata reaches every native page without replacing the sa
     webglParameters: '{"nativeParameter":123}', webgl2Parameters: '{"nativeParameter":456}', fonts: '["Arial"]'};
   f.cdp.call = async (target, method, params) => {
     f.calls.push({target, method, params});
-    return method === 'Wayfern.getFingerprint' ? {fingerprint: saved} : {};
+    return method === 'Wayfern.getFingerprint' ? {fingerprint: saved}
+      : method === 'Wayfern.setFingerprint' ? {fingerprint: params} : {};
   };
   await prepareNativeIdentity(f.args);
   const file = path.join(f.root, 'lyco-native-identity-owner-profile.json');
@@ -273,7 +275,7 @@ test('configured GPU metadata reaches every native page without replacing the sa
   assert.deepEqual(f.calls[0].params, {...saved, ...selected});
   assert.equal(f.calls.some(row => row.method === 'Wayfern.getFingerprint'), false);
   const sent = [];
-  await identity.applySession({command: async (...args) => sent.push(args)}, 'gpu-page-session', {type: 'page', targetId: 'gpu-page'});
+  await identity.applySession({command: async (...args) => {sent.push(args);return {fingerprint:args[1]};}}, 'gpu-page-session', {type: 'page', targetId: 'gpu-page'});
   assert.deepEqual(sent[0], ['Wayfern.setFingerprint', {...saved, ...selected}, {sessionId: 'gpu-page-session', timeout: 5000}]);
   assert.deepEqual(await fs.readFile(file), bytes, 'An explicit UI GPU override must not rewrite the saved device/noise');
 });
@@ -287,6 +289,39 @@ test('invalid native UI settings fail before reading or changing the saved ident
     await assert.rejects(prepareNativeIdentity({...f.args, settings}));
   }
   assert.equal(f.calls.length, 0);
+});
+
+test('effective native defaults cannot silently replace declared hardware or GPU settings', async t => {
+  const f=await fixture(t);
+  const saved={canvasNoiseSeed:'retained-seed',fonts:'["Arial"]'};
+  const settings={hardwareConcurrency:6,deviceMemory:4,webglVendor:'Selected vendor',webglRenderer:'Selected renderer'};
+  let refused=null;
+  f.cdp.call=async(target,method,params)=>{
+    f.calls.push({target,method,params});
+    if(method==='Wayfern.getFingerprint') return {fingerprint:saved};
+    if(method==='Wayfern.setFingerprint') return {fingerprint:JSON.stringify({...params,...(refused||{})})};
+    return {};
+  };
+  await prepareNativeIdentity(f.args);
+  const file=path.join(f.root,'lyco-native-identity-owner-profile.json'),bytes=await fs.readFile(file);
+  for(const replaced of [{hardwareConcurrency:4},{deviceMemory:8},{webglRenderer:'Other renderer'},{canvasNoiseSeed:'changed'}]) {
+    refused=replaced;f.calls.length=0;
+    await assert.rejects(prepareNativeIdentity({...f.args,settings}),error=>error.code==='LYCO_NATIVE_CONFIGURATION_REFUSED');
+    assert.deepEqual(f.calls.map(row=>row.method),['Wayfern.setFingerprint'], 'A refused native receipt must stop preparation before other overrides');
+    assert.deepEqual(await fs.readFile(file),bytes);
+  }
+  refused=null;
+  const identity=await prepareNativeIdentity({...f.args,settings});
+  const sent=[],connection={command:async(method,params,options)=>{
+    sent.push({method,params,options});
+    return method==='Wayfern.setFingerprint' ? {fingerprint:{...params,deviceMemory:8}} : {};
+  }};
+  await assert.rejects(identity.applySession(connection,'refused-receipt',{type:'page',targetId:'refused-page'}),
+    error=>error.code==='LYCO_NATIVE_IDENTITY_REFUSED');
+  assert.equal(connection.lycoIdentityRefusedSessions.has('refused-receipt'),true);
+  assert.deepEqual(sent.map(row=>row.method),['Wayfern.setFingerprint','Target.closeTarget']);
+  assert.equal(sent.some(row=>row.method==='Runtime.runIfWaitingForDebugger'),false);
+  assert.deepEqual(await fs.readFile(file),bytes);
 });
 
 test('native HTML ownership never bypasses all canvas APIs or replaces saved seeds', async t => {

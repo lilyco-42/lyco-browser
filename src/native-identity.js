@@ -139,6 +139,21 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
   // explicit UI settings must agree in the native engine and document script;
   // otherwise a new document initially exposes the saved device's defaults.
   device = {...device, ...declared};
+  const verifyReceipt = result => {
+    const fields = ['hardwareConcurrency','deviceMemory','webglVendor','webglRenderer']
+      .filter(key => Object.hasOwn(declared, key));
+    if (!fields.length) return;
+    // The pinned native API returns its effective complete fingerprint. A
+    // successful RPC alone is insufficient: applying GPU metadata can replace
+    // requested CPU/memory with the native persona's defaults (Actions
+    // 40495461724). Never let document scripts conceal that refused setting.
+    const effective = fingerprint(result?.fingerprint ?? result);
+    if (fields.some(key => effective[key] !== declared[key])
+        || (Object.hasOwn(device,'canvasNoiseSeed') && effective.canvasNoiseSeed !== device.canvasNoiseSeed)) {
+      throw Object.assign(Error('内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置'),
+        {code:'LYCO_NATIVE_CONFIGURATION_REFUSED'});
+    }
+  };
   const fontInventoryAvailable = hasNativeFontInventory(device.fonts);
   if (requireNativeFontLayout && !fontInventoryAvailable) {
     throw Error('内核未提供有效的字体隔离配置，一致布局保护未启动');
@@ -159,7 +174,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
       if (typeof tab.id === 'string' && preparedTargetIds instanceof Set && preparedTargetIds.has(tab.id)) continue;
       if (applied.has(tab.webSocketDebuggerUrl)) continue;
       try {
-        await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000);
+        verifyReceipt(await cdp.call(tab.webSocketDebuggerUrl, 'Wayfern.setFingerprint', device, 5000));
         // Wayfern's saved payload alone can leave an isolated world's CPU at
         // the host value. Apply the explicit setting through Chromium as well,
         // before this page is ready; do not depend on a main-world JS getter.
@@ -167,7 +182,8 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
           await cdp.call(tab.webSocketDebuggerUrl, 'Emulation.setHardwareConcurrencyOverride',
             {hardwareConcurrency: declared.hardwareConcurrency}, 5000);
         }
-      } catch {
+      } catch (error) {
+        if (error.code === 'LYCO_NATIVE_CONFIGURATION_REFUSED') throw error;
         throw Error('原生身份恢复失败，环境未启动；已保存身份不会被重置');
       }
       applied.add(tab.webSocketDebuggerUrl);
@@ -182,7 +198,7 @@ async function prepareNativeIdentity({enabled, profileRoot, profileId, port, cdp
     try {
       // The engine's existing flattened auto-attach connection owns this
       // paused target. Restore the complete saved device before resuming it.
-      if (restoreDevice) await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000});
+      if (restoreDevice) verifyReceipt(await connection.command('Wayfern.setFingerprint', device, {sessionId, timeout: 5000}));
       if (declared.hardwareConcurrency !== undefined) {
         await connection.command('Emulation.setHardwareConcurrencyOverride',
           {hardwareConcurrency: declared.hardwareConcurrency}, {sessionId, timeout: 5000});
