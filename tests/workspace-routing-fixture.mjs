@@ -5,7 +5,7 @@ import net from 'node:net';
 import {protectConnectHandler} from './connect-handler.mjs';
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 export async function createWorkspaceRoutingFixture(){
- const connections=new Map(),observations=[],checks=[],nodes=[];
+ const connections=new Map(),observations=[],checks=[],pageRequests=[],nodes=[];
  const origin=http.createServer(async(req,res)=>{
   const route=connections.get(req.socket.remotePort)||'direct',url=new URL(req.url,'http://fixture');
   if(url.pathname==='/report'){
@@ -17,6 +17,7 @@ export async function createWorkspaceRoutingFixture(){
   }
   if(url.pathname!=='/page'){res.writeHead(404).end();return;}
   const owner=url.searchParams.get('owner'),phase=url.searchParams.get('phase');
+  pageRequests.push({phase,route});
   res.setHeader('Content-Type','text/html');res.setHeader('Cache-Control','no-store');
   res.end(`<!doctype html><title>LYCO selected route fixture</title><script>(async()=>{
    const readCookie=()=>document.cookie.split('; ').find(s=>s.startsWith('routeOwner='))?.slice(11)||null;
@@ -56,7 +57,7 @@ export async function createWorkspaceRoutingFixture(){
   const node=nodes.find(row=>row.route===route);if(!node||node.stopped)return;
   node.stopped=true;for(const socket of node.sockets)socket.destroy();await new Promise(resolve=>node.proxy.close(resolve));
  }
- return {originUrl,observations,checks,
+ return {originUrl,observations,checks,pageRequests,
   subscription:{proxies:nodes.map(node=>({name:'CI route '+node.route,type:'http',server:'127.0.0.1',port:node.port,username:node.username,password:node.password})),
    'proxy-groups':[{name:'PROXY',type:'select',proxies:['CI route A','CI route B']}]},stopNode,
   async close(){await Promise.all(nodes.map(node=>stopNode(node.route)));origin.closeAllConnections();geo.closeAllConnections();await Promise.all([new Promise(resolve=>origin.close(resolve)),new Promise(resolve=>geo.close(resolve))])},

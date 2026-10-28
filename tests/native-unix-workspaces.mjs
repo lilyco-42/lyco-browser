@@ -10,6 +10,7 @@ import {protectConnectHandler} from './connect-handler.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
 import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
+import {verifyNativeWorkspaceRoutes} from './native-workspace-routes.mjs';
 import {_electron as electron,chromium} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
@@ -116,7 +117,10 @@ try{
    if(url===root+'/login')return new Response(JSON.stringify({token:'CI_UNIX_ONLY'}));
    if(options.headers?.Authorization!=='Bearer CI_UNIX_ONLY')return new Response('{}',{status:401});
    if(url===root+'/me')return new Response(JSON.stringify({username:'ci-unix-owner',entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoUnixPlan,status:'active',expires_at:'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIunixfixture'}}]}));
-   if(url===root+'/sub/CIunixfixture/clash')return new Response(JSON.stringify({proxies:[{name:'ci-http',type:'http',server:'127.0.0.1',port}],'proxy-groups':[{name:'PROXY',type:'select',proxies:['ci-http']}]}));
+   if(url===root+'/sub/CIunixfixture/clash'){
+    const proxies=globalThis.__lycoUnixRouteNodes||[{name:'ci-http',type:'http',server:'127.0.0.1',port}];
+    return new Response(JSON.stringify({proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}));
+   }
    throw Error('Unexpected CI Billing endpoint');
   };
  },proxyPort);
@@ -207,6 +211,7 @@ try{
  report.unmanagedProxyControl=await failureProbe.auditUnmanaged(directPage);
  await page.evaluate(id=>window.ops.stopProfile(id),directProfile.id);
  report.checks.push('unmanaged-native-http-websocket-tls-direct-positive-controls');
+ await verifyNativeWorkspaceRoutes({app,page,report,evidence});
  await page.evaluate(()=>window.ops.lycoLogout());
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).logged_in,false);
  report.checks.push('native-logout');
