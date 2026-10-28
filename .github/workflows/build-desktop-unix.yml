@@ -195,6 +195,7 @@ jobs:
           path: |
             ${{ runner.temp }}/lyco-unix-*/report.json
             ${{ runner.temp }}/lyco-unix-*/workbench.png
+            ${{ runner.temp }}/lyco-unix-*/account-proxy_*.png
           retention-days: 7
 
       - name: Upload macOS DMG to GitHub prerelease

@@ -52,7 +52,7 @@ chrome.runtime.onMessage.addListener((request,sender,reply)=>{
   if(request?.action==='connect')return connect(request.code);
   if(request?.action==='disconnect')return disconnect();
   if(request?.action==='open-account'){await chrome.tabs.create({url:'https://lain42.top/account/'});return {opened:true}}
-  if(request?.action==='open-shop'){await chrome.tabs.create({url:'https://lain42.top/shop/#proxy_1m'});return {opened:true}}
+  if(request?.action==='open-shop'){await chrome.tabs.create({url:'https://lain42.top/vpn/#plans'});return {opened:true}}
   if(request?.action==='open-guide'){await chrome.tabs.create({url:'https://lain42.top/proxy-guide/'});return {opened:true}}
   throw Error('未知操作');
  }).then(value=>reply({ok:true,...value}),error=>reply({ok:false,error:error.message}));return true;
