@@ -11,6 +11,11 @@ chmod 700 "$private_ca" "$private_storage"
 node "$root/fixture.mjs" > "$evidence/fixture.log" 2>&1 &
 fixture_pid=$!
 cleanup(){
+  result=$?
+  if [[ $result != 0 ]]; then
+    adb shell uiautomator dump /data/local/tmp/lyco-paid-failure.xml >/dev/null 2>&1 || true
+    adb pull /data/local/tmp/lyco-paid-failure.xml "$evidence/failure-ui.xml" >/dev/null 2>&1 || true
+  fi
   adb shell settings put global http_proxy :0 >/dev/null 2>&1 || true
   kill "${mitm_pid:-}" "$fixture_pid" 2>/dev/null || true
   rm -rf "$private_ca" "$private_storage"
@@ -24,6 +29,24 @@ for attempt in $(seq 1 100); do [[ -f "$private_ca/mitmproxy-ca-cert.pem" ]] && 
 adb root
 adb wait-for-device
 adb shell settings put global http_proxy 10.0.2.2:18082
+# Check the same host alias and real proxy tunnel before starting product UI.
+# No /page request is made, so this positive control cannot create storage.
+python3 - "$evidence/fixture.json" <<'PY'
+import json,socket,sys
+x=json.load(open(sys.argv[1]));p=x['originPort']
+with socket.create_connection(('127.0.0.1',18082),timeout=10) as s:
+    s.sendall(f'CONNECT 10.0.2.2:{p} HTTP/1.1\r\nHost: 10.0.2.2:{p}\r\n\r\n'.encode())
+    header=b''
+    while b'\r\n\r\n' not in header:header+=s.recv(4096)
+    assert b'200 Connection established' in header or b'200 Connection Established' in header,header
+    s.sendall(f'GET /check?key=system-proxy-control HTTP/1.1\r\nHost: 10.0.2.2:{p}\r\nConnection: close\r\n\r\n'.encode())
+    response=b''
+    while True:
+        chunk=s.recv(4096)
+        if not chunk:break
+        response+=chunk
+    assert b'200 OK' in response and b'"route":"direct"' in response,'System-proxy tunnel did not reach the same origin'
+PY
 maestro_test(){
  local name=$1;shift
  local label="$name${LYCO_PHASE_SUFFIX:-}"
