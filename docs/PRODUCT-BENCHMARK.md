@@ -18,4 +18,6 @@
 
 后续最小验证应先在真实 Actions 中证明两个环境各用指定代理、数据互不共享、重开保留身份及断代理无直连，再扩大界面改造。现有长期套餐 P0 保持优先；本评估不等于已完成紫鸟/站斧全部功能。
 
+`7d19d6c` 已实现并验证 [逐环境官网节点绑定](WORKSPACE-ROUTES.md)：三种桌面系统的真实 Mihomo 核心路由通过，Linux 完整成品验收通过，Windows 原生预检的新功能用例通过但后续既有 CPU 配置失败，macOS 原生配置仍被拒绝。当前有明确的功能进展，不等于对标全部完成或五平台可发行。
+
 只读源码核对固定 Clash Verge Rev 提交 `3953e125b223defcec28a3c822c292c743fc1b1e`：[`proxies.tsx`](https://github.com/clash-verge-rev/clash-verge-rev/blob/3953e125b223defcec28a3c822c292c743fc1b1e/src/pages/proxies.tsx) 依赖其数据 provider 和命令层，[`bindings.ts`](https://github.com/clash-verge-rev/clash-verge-rev/blob/3953e125b223defcec28a3c822c292c743fc1b1e/src/services/bindings.ts) 通过 Tauri invoke 读取运行状态、配置代理、管理服务等。故 UI 复用需要适配这些接口；仅更换品牌样式不能自动连接现有 LYCO 后台。未执行该第三方仓库的构建或脚本。
