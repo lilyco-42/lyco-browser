@@ -31,6 +31,7 @@ import android.widget.TextView
 import androidx.webkit.ProxyConfig
 import androidx.webkit.ProxyController
 import androidx.webkit.WebViewFeature
+import androidx.webkit.WebViewCompat
 import java.util.UUID
 import org.json.JSONObject
 import top.lain42.lycotunnel.Lycotunnel
@@ -157,6 +158,9 @@ class ProfileBrowserActivity : Activity() {
           view.settings.displayZoomControls = false
           CookieManager.getInstance().setAcceptThirdPartyCookies(view, false)
           view.webChromeClient = WebChromeClient() // Permission requests are denied by default.
+          check(WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) { "请更新系统 WebView 以启用 RTC 线路保护" }
+          val rtcPolicy = assets.open("lyco-rtc-policy.js").bufferedReader().use { it.readText() }
+          WebViewCompat.addDocumentStartJavaScript(view, rtcPolicy, setOf("*"))
           view.webViewClient = object : WebViewClient() {
             private var mainError: String? = null
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = !allowedUrl(request.url.toString())
