@@ -17,3 +17,7 @@
 当前修复候选复用已支持的 [document-start API](https://github.com/androidx/androidx/blob/androidx-main/webkit/webkit/src/main/java/androidx/webkit/WebViewCompat.java)：在导航前向全部匹配帧注册实际 RTC 配置约束，只允许 relay 与明确 TURN TCP/TLS；后续 setConfiguration、旧构造器别名和原型构造器也保留约束。WebRTC 原生事件、SDP、统计和候选不替换，不伪装策略或 native 函数文本。保留现有 Chromium 网站数据空间，不换引擎或增加设备 VPN。
 
 这只是待验证实现，不能以 STUN URL 被过滤或单元模型通过宣称边界已修复。必须补充真实首脚本/嵌套帧/初始空文档、原生 SDP/getStats、恶意配置改写，以及实际 TURN TCP 通信经所选代理的正向和断线负向。若原生 TURN TCP 绕过代理或任何上下文仍漏出地址，则保持失败并继续修复。网站仅提供 UDP/STUN 时无法建立媒体直连，这是所测 HTTP 代理下的传输限制，不能扩大为所有 RTC 站点均可用。
+
+扩展探测直接运行所构建的原签名 APK：每个阶段用八个不同 STUN 端口，覆盖首脚本、初始 about:blank、srcdoc 的嵌套空帧、跨域子帧、原型构造器、可用的旧别名、setConfiguration 和被改写的基础方法。所有原生事件、SDP 和 local-candidate 统计原样保留。断线阶段复用预先加载的子帧，避免把子帧下载失败误当作保护；实际完成状态先取原生 UI 和上游停止快照，再仅恢复报告上传路径。
+
+功能正向使用测试自有 [coturn](https://github.com/coturn/coturn/blob/master/README.turnserver) TCP 入口和 [aiortc](https://aiortc.readthedocs.io/en/latest/api.html) 对端。coturn 只绑定 runner 的回环地址，使用明确 CI 凭据和测试专用回环 relay；数据通道必须实际收发 PING/ACK，TURN 原始 TCP 按连接源端口区分所选代理与直接连接。前后同 provider 的普通 WebView 同样必须通过真实 TURN 数据通道，防止服务夹具失效造成伪阴性。原始 relay 地址允许出现在 TURN 正向记录中，设备 host/srflx 和相关地址仍拒绝；STUN 场景原有无字面 IP 断言不变。本探测不是摄像头/音频、所有网站或公网 TURN 可用性证明。

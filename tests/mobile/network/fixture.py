@@ -11,6 +11,7 @@ import struct
 import threading
 import time
 from urllib.parse import parse_qs, urlsplit
+from turn_peer import TurnPeer
 
 if os.environ.get('GITHUB_ACTIONS') != 'true':
     raise SystemExit('Native network probes run only in GitHub Actions')
@@ -18,21 +19,23 @@ root = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
 root.mkdir(parents=True, exist_ok=True)
 lock = threading.RLock()
 sources, active, ports = set(), set(), {}
-state = {'pageRequests': [], 'reports': [], 'udp': [], 'proxyConnections': 0, 'stopped': False}
+phases = ['control', 'lyco', 'stopped', 'control-after']
+cases = ['first-script', 'initial-aboutblank', 'srcdoc-nested', 'cross-origin', 'prototype-constructor', 'legacy-constructor', 'set-configuration', 'changed-primordials']
+state = {'pageRequests': [], 'reports': [], 'udp': [], 'proxyConnections': 0, 'stopped': False, 'stopEvents': []}
 def save():
     with lock:
         temporary = root / 'network.json.tmp'
         temporary.write_text(json.dumps(state, indent=2))
         temporary.replace(root / 'network.json')
 
-def stun(phase):
+def stun(phase, case):
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp.bind(('127.0.0.1', 0)); ports[phase] = udp.getsockname()[1]
+    udp.bind(('127.0.0.1', 0)); ports[phase][case] = udp.getsockname()[1]
     while True:
         data, peer = udp.recvfrom(65535)
         valid = len(data) >= 20 and data[:2] == b'\x00\x01' and data[4:8] == b'\x21\x12\xa4\x42'
         with lock:
-            state['udp'].append({'phase': phase, 'peer': peer[0], 'port': peer[1], 'validStun': valid})
+            state['udp'].append({'phase': phase, 'case': case, 'peer': peer[0], 'port': peer[1], 'validStun': valid, 'upstreamStopped': state['stopped']})
             save()
         if valid:
             # XOR-MAPPED-ADDRESS reflects the real received endpoint. No fake
@@ -41,41 +44,16 @@ def stun(phase):
             value = struct.pack('!BBHI', 0, 1, peer[1] ^ 0x2112, address)
             udp.sendto(b'\x01\x01\x00\x0c' + data[4:20] + b'\x00\x20\x00\x08' + value, peer)
 
-def page(phase):
-    config = json.dumps({'phase': phase, 'ports': ports})
-    return ('''<!doctype html><meta name="viewport" content="width=device-width">
-<h2 id="status">Running RTC</h2><div id="details" role="status"></div>
-<button id="again">Run stopped-route RTC</button><script>
-const config=CONFIG;
-async function run(phase){
- const audit={phase,apiPresent:typeof RTCPeerConnection==='function',offerCreated:false,blocked:false,literalIP:false,candidates:[],gatheringState:null,completed:false};
- let pc;
- try{
-  pc=new RTCPeerConnection({iceServers:[{urls:'stun:10.0.2.2:'+config.ports[phase]}]});
-  pc.onicecandidate=event=>{
-   if(!event.candidate)return;
-   const value=String(event.candidate.candidate||'').split(/\\s+/),address=value[4]||'';
-   if(/^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(address)||address.includes(':'))audit.literalIP=true;
-   if(audit.candidates.length<64)audit.candidates.push({address,type:value[7]||'',protocol:value[2]||''});
-  };
-  pc.createDataChannel('lyco-owned-probe');
-  await pc.setLocalDescription(await pc.createOffer());audit.offerCreated=true;
-  await new Promise(resolve=>{
-   const timeout=setTimeout(resolve,4500);
-   const done=()=>{if(pc.iceGatheringState==='complete'){clearTimeout(timeout);resolve()}};
-   pc.addEventListener('icegatheringstatechange',done);done();
-  });
-  audit.gatheringState=pc.iceGatheringState;
- }catch(error){audit.blocked=true;audit.errorType=error.name}
- finally{if(pc)pc.close()}
- audit.completed=true;
- document.getElementById('details').textContent='LYCO_RTC_JSON:'+JSON.stringify(audit);
- document.getElementById('status').textContent='LYCO RTC '+phase+' completed';
- try{await fetch('/report?phase='+encodeURIComponent(phase),{method:'POST',body:JSON.stringify(audit)})}catch{}
-}
-document.getElementById('again').onclick=()=>run('stopped');
-run(config.phase);
-</script>'''.replace('CONFIG', config)).encode()
+def page(phase, case=None, script=False):
+    config = json.dumps({'phase': phase, 'case': case, 'ports': ports, 'turnPorts': turn.ports})
+    source = (Path(__file__).parent/'rtc-page.js').read_text().replace('LYCO_FIXTURE_CONFIGURATION', config)
+    if script: return source.encode()
+    # The fixture's first page script starts native RTC before any page script
+    # or dynamically-created frame can act. The product policy stays unchanged.
+    return ('''<!doctype html><script>''' + source + '''</script><meta name="viewport" content="width=device-width">
+<h2 id="status">Running RTC</h2><div id="details" role="status" style="max-height:160px;overflow:auto;word-break:break-all;font-size:10px"></div>
+<button id="again">Run stopped-route RTC</button>
+<button id="upload">Upload retained RTC report</button>''').encode()
 
 class Origin(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
@@ -86,28 +64,46 @@ class Origin(http.server.BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(body)
     def do_GET(self):
         url = urlsplit(self.path)
-        if url.path == '/rtc':
+        if url.path in ('/rtc', '/frame'):
             phase = parse_qs(url.query).get('phase', [''])[0]
             if phase not in ports: self.send_error(400); return
+            case = parse_qs(url.query).get('case', [None])[0]
+            script = parse_qs(url.query).get('script', [''])[0]=='1'
+            if url.path=='/frame' and case not in cases: self.send_error(400); return
             with lock:
-                state['pageRequests'].append({'phase': phase, 'route': 'selected' if self.client_address[1] in sources else 'direct'})
+                state['pageRequests'].append({'phase': phase, 'case': case, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'upstreamStopped': state['stopped']})
                 save()
-            self.reply(page(phase), 'text/html; charset=utf-8')
+            self.reply(page(phase, case, script), 'application/javascript' if script else 'text/html; charset=utf-8')
         elif url.path == '/health': self.reply({'alive': True})
         else: self.send_error(404)
     def do_POST(self):
         url = urlsplit(self.path)
-        if int(self.headers.get('Content-Length', '0')) > 16384: self.send_error(413); return
+        global proxy
+        if int(self.headers.get('Content-Length', '0')) > 262144: self.send_error(413); return
         body = self.rfile.read(int(self.headers.get('Content-Length', '0')))
         if url.path == '/control':
             action = json.loads(body)
             if action.get('stop'):
-                with lock: state['stopped'] = True; peers = list(active)
+                with lock:
+                    state['stopped'] = True; peers = list(active)
+                    state['stopEvents'].append({'action': 'stop', 'time': time.time()})
                 for peer in peers:
                     try: peer.shutdown(socket.SHUT_RDWR); peer.close()
                     except OSError: pass
                 proxy.shutdown(); proxy.server_close()
+            if action.get('recover'):
+                # Recovery is only to upload the original retained observation.
+                # The stopped peer has already completed and was screenshotted.
+                proxy = http.server.ThreadingHTTPServer(('127.0.0.1', 18081), Proxy)
+                with lock:
+                    state['stopped'] = False
+                    state['stopEvents'].append({'action': 'recover', 'time': time.time()})
+                threading.Thread(target=proxy.serve_forever, daemon=True).start()
             save(); self.reply({'ok': True}); return
+        if url.path == '/offer':
+            phase = parse_qs(url.query).get('phase', [''])[0]
+            if phase not in ports: self.send_error(400); return
+            self.reply(turn.answer(phase, json.loads(body), 'selected' if self.client_address[1] in sources else 'direct')); return
         if url.path != '/report': self.send_error(404); return
         phase = parse_qs(url.query).get('phase', [''])[0]
         with lock:
@@ -118,8 +114,9 @@ class Origin(http.server.BaseHTTPRequestHandler):
 class Proxy(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
     def do_CONNECT(self):
-        if self.path != '10.0.2.2:18080': self.send_error(502); return
-        remote = socket.create_connection(('127.0.0.1', 18080), 5)
+        url = urlsplit('http://'+self.path)
+        if url.hostname != '10.0.2.2' or url.port not in [18080, 18082, *turn.ports.values()]: self.send_error(502); return
+        remote = socket.create_connection(('127.0.0.1', url.port), 5)
         source = remote.getsockname()[1]
         with lock:
             sources.add(source); active.update([self.connection, remote]); state['proxyConnections'] += 1
@@ -143,8 +140,8 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             remote.close(); save()
     def relay(self):
         url = urlsplit(self.path)
-        if url.hostname != '10.0.2.2' or url.port != 18080: self.send_error(502); return
-        connection = http.client.HTTPConnection('127.0.0.1', 18080, timeout=10)
+        if url.hostname != '10.0.2.2' or url.port not in (18080, 18082): self.send_error(502); return
+        connection = http.client.HTTPConnection('127.0.0.1', url.port, timeout=25)
         source = None
         try:
             connection.connect(); source = connection.sock.getsockname()[1]
@@ -165,11 +162,14 @@ class Proxy(http.server.BaseHTTPRequestHandler):
     do_GET = relay
     do_POST = relay
 
-for phase in ['control', 'lyco', 'stopped', 'control-after']:
-    threading.Thread(target=stun, args=(phase,), daemon=True).start()
-while len(ports) != 4: time.sleep(.01)
+for phase in phases:
+    ports[phase] = {}
+    for case in cases: threading.Thread(target=stun, args=(phase, case), daemon=True).start()
+while any(len(ports[phase])!=len(cases) for phase in phases): time.sleep(.01)
+turn = TurnPeer(phases, state, lock, save, sources, active)
 origin = http.server.ThreadingHTTPServer(('127.0.0.1', 18080), Origin)
+frames = http.server.ThreadingHTTPServer(('127.0.0.1', 18082), Origin)
 proxy = http.server.ThreadingHTTPServer(('127.0.0.1', 18081), Proxy)
-for server in [origin, proxy]: threading.Thread(target=server.serve_forever, daemon=True).start()
-(root / 'fixture.json').write_text(json.dumps({'ports': ports}))
+for server in [origin, frames, proxy]: threading.Thread(target=server.serve_forever, daemon=True).start()
+(root / 'fixture.json').write_text(json.dumps({'ports': ports, 'turnPorts': turn.ports}))
 while True: save(); time.sleep(.25)

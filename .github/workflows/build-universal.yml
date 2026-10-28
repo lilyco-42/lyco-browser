@@ -503,6 +503,21 @@ jobs:
           bash tests/mobile/network/download-candidate.sh
       - name: Build only a separate plain WebView positive control with matching target SDK
         run: bash tests/mobile/network/build-control.sh
+      - name: Prepare owned TURN TCP and real data-channel peer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends coturn
+          sudo systemctl stop coturn || true
+          python3 -m venv "$RUNNER_TEMP/lyco-network-peer"
+          "$RUNNER_TEMP/lyco-network-peer/bin/pip" install aiortc==1.15.0
+          "$RUNNER_TEMP/lyco-network-peer/bin/pip" freeze > "$RUNNER_TEMP/lyco-mobile-network/peer-dependencies.txt"
+          dpkg-query -W coturn > "$RUNNER_TEMP/lyco-mobile-network/coturn-version.txt"
+          echo "LYCO_NETWORK_PYTHON=$RUNNER_TEMP/lyco-network-peer/bin/python" >> "$GITHUB_ENV"
+      - name: Check network fixture syntax before the native observation
+        run: |
+          python3 -m py_compile tests/mobile/network/fixture.py tests/mobile/network/turn_peer.py tests/mobile/network/assert-evidence.py
+          node --check tests/mobile/network/rtc-page.js
+          bash -n tests/mobile/network/run-probe.sh
       - name: Install pinned native UI driver
         run: bash tests/mobile/install-maestro.sh
       - name: Enable KVM for actual native observations
