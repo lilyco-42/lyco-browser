@@ -1,6 +1,8 @@
-# 紫鸟 / 站斧对标与复用边界
+# 紫鸟 / 站斧 / RoxyBrowser 对标与复用边界
 
 用户明确以紫鸟、站斧浏览器为产品对标，并提出复用 Clash Verge Rev 的内核和界面，再接 Chromium。目标仍是五平台代理连接和独立浏览环境；本记录评估复用路线，不把尚未验收的能力写作已完成。
+
+2026-10-28 用户补充确认：RoxyBrowser 也作为对标，参考功能和界面。已核对官方环境、代理、成员、指纹和同步文档，并查看官方产品界面示例；具体交互、优先级与验收要求记录在 [RoxyBrowser 对标](ROXY-BENCHMARK.md)。这是功能与交互参考，不是更换内核的决定。
 
 [紫鸟官方功能说明](https://www.ziniao.com/help/docs/Overview/ziniao-browser-overview/)重点包括独立登录环境、店铺网络、成员权限及操作控制；[站斧官方产品说明](https://www.zhanfubrowser.com/product)包含独立网络、店铺访问与异地协作。这些产品说明用于确定对标项，不替代 LYCO 自己的运行验收。
 
