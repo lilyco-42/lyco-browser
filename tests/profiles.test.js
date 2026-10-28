@@ -37,7 +37,7 @@ test('before every launch verifies account and overrides a stale or manually rem
  assert.equal(started.proxy,'http://127.0.0.1:18002');assert.equal(started.proxyId,profile.proxyId);
  assert.equal(started.proxyMeta.lycoManaged,true);assert.equal(started.proxyMeta.directBypass,false);
  state.username='owner-b';await assert.rejects(()=>engine.start(profile),/另一网站账号/);
- state.username='owner-a';state.entitled=false;await assert.rejects(()=>engine.start(profile),/有效代理月卡/);
+ state.username='owner-a';state.entitled=false;await assert.rejects(()=>engine.start(profile),/有效代理订阅/);
  assert.equal(calls.starts.length,1);
 });
 test('ownership survives application restart and other user environments are preserved',async t=>{
