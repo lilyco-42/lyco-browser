@@ -19,3 +19,5 @@
 JavaScript SHA-256：Android `405cfe09f4e0a4e520d5098083daa629e2de7d7f6efc23714b436c2bc701c847`；iOS `c20a8502c8043ab3a5ff7e876755813ab56fdc0b6fc5e86aa8fc21df79d00400`。报告同时保存原始 map 摘要、长度、来源计数、实际安装版本集合及缺失文本记录。
 
 这些结果仅支持这次单独 JS 导出的来源观察。仍需关联实际分发成品及其全部原生组件；不能据此宣称三项缺失版权原文已补齐、全部分发义务完成，或 iOS 真机/路由已经通过。原本离线许可页验收默认流程保持；现有 `mobile-notices.yml` 的 `native_js_inventory=true` 手动输入才执行此研究分支。
+
+`60766b2` 增加 sourceRoot 形态拒绝后的 [40636765364](https://github.com/lilyco-42/lyco-browser/actions/runs/40636765364) 两平台复验成功，七项解析用例和上述来源、包名及目标观察均保持；下载的原始 bundle/map 摘要与 Actions 报告一致。
