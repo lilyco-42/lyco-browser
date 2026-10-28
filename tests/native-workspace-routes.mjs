@@ -7,6 +7,10 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
  if(process.env.GITHUB_ACTIONS!=='true')throw Error('Packaged workspace route acceptance requires Actions');
  const fixture=await createWorkspaceRoutingFixture(),created=[],connections=[];
  const result=report.workspaceRoutes={observations:[],pageRequests:[],checks:[]};
+ const choose=async(id,label)=>{
+  await page.locator('#'+id+'-button').click();
+  await page.locator('#'+id+'-menu').getByRole('option',{name:label,exact:true}).click();
+ };
  const waitPhase=async(phase,expected,previous)=>{
   const deadline=Date.now()+45000;
   while(Date.now()<deadline&&!fixture.observations.some(row=>row.phase===phase))await new Promise(resolve=>setTimeout(resolve,150));
@@ -28,7 +32,7 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   assert.doesNotMatch(JSON.stringify(options),/CI_PRIVATE_ROUTE|password|127\.0\.0\.1/);
   for(const owner of ['A','B']){
    await page.locator('[data-view="lyco"]').click();
-   await page.locator('#lyco-create-route').selectOption({label:'CI route '+owner});
+   await choose('lyco-create-route','CI route '+owner);
    const selected=await page.locator('#lyco-create-route').inputValue();
    await page.locator('#lyco-load-routes').click();
    await page.waitForFunction(()=>document.getElementById('view-lyco').getAttribute('aria-busy')==='false'&&document.getElementById('lyco-feedback').textContent.includes('官网线路已加载'));
@@ -70,7 +74,7 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   result.checks.push('selected-A-loss-no-fallback-or-direct-while-native-B-remains-usable');
   await page.locator('[data-view="lyco"]').click();
   const row=page.locator(`[data-profile-route="${created[0].id}"]`);
-  await row.locator('select').selectOption({label:'CI route B'});await row.locator('button').click();
+  await choose('lyco-route-'+created[0].id,'CI route B');await row.getByRole('button',{name:'停止并更换线路',exact:true}).click();
   await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('线路已保存'));
   sessions=await page.evaluate(()=>window.ops.syncSessions());
   assert.equal(sessions.some(item=>item.id===created[0].id),false);assert.ok(sessions.some(item=>item.id===created[1].id));

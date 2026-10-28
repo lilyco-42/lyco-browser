@@ -25,7 +25,7 @@
     const item=document.createElement('div');item.className='lyco-route-row';item.dataset.profileRoute=row.id;
     const heading=document.createElement('strong');heading.textContent=row.name;
     const label=document.createElement('label');label.textContent='环境线路';
-    const select=document.createElement('select');select.id='lyco-route-'+row.id;label.htmlFor=select.id;
+    const select=document.createElement('select');select.id='lyco-route-'+row.id;select.setAttribute('aria-label','环境线路：'+row.name);label.htmlFor=select.id;
     routeOptions(select,row.routeId,row.routeName);label.append(select);
     const apply=document.createElement('button');apply.type='button';apply.className='outline';apply.textContent='停止并更换线路';
     apply.onclick=()=>{const routeId=select.value;void run(()=>window.ops.lycoSetProfileRoute({id:row.id,routeId}),'线路已保存，下次启动时生效')};
