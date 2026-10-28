@@ -30,9 +30,13 @@ on:
         description: 'Verify an already-built signed Android candidate run with CI Billing and actual saved node routing'
         type: string
         default: ''
+      network_probe_candidate:
+        description: Probe actual native RTC boundaries of an unchanged signed Android candidate with same-device direct controls
+        type: string
+        default: ''
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.paid_routes_candidate && 'paid-routes' || 'platform-build' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build') }}
   # Preserve the active native runtime evidence; newer pushes replace only the
   # pending run. A long iOS/Android acceptance must not be erased by a docs fix.
   cancel-in-progress: false
@@ -46,7 +50,7 @@ defaults:
 
 jobs:
   web:
-    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
     name: React Native Web / Windows macOS Linux shared UI
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -86,7 +90,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
 
   android:
-    if: ${{ !inputs.ios_device && !inputs.paid_routes_candidate }}
+    if: ${{ !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
     name: Android standalone preview / signed candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 70
@@ -218,7 +222,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
 
   ios-simulator:
-    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
     name: iOS 26 simulator unsigned app · no signing
     runs-on: macos-26
     timeout-minutes: 90
@@ -322,7 +326,7 @@ jobs:
           retention-days: 7
 
   ios-device:
-    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android && !inputs.paid_routes_candidate
+    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android && !inputs.paid_routes_candidate && !inputs.network_probe_candidate
     name: iPhone ARM64 unsigned device archive · signing and runtime review required
     runs-on: macos-26
     timeout-minutes: 60
@@ -385,7 +389,7 @@ jobs:
           retention-days: 7
 
   android-paid-routes:
-    if: ${{ inputs.paid_routes_candidate != '' }}
+    if: ${{ inputs.paid_routes_candidate != '' && !inputs.network_probe_candidate }}
     name: Actual signed Android saved-node acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -469,3 +473,61 @@ jobs:
       - name: Clean private disposable certificate and storage copies
         if: always()
         run: rm -rf "$RUNNER_TEMP/lyco-paid-private-ca" "$RUNNER_TEMP/lyco-paid-private-storage"
+
+  android-network-probe:
+    if: ${{ inputs.network_probe_candidate != '' }}
+    name: Actual signed Android native RTC boundary probe
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    env:
+      LYCO_NETWORK_CANDIDATE_RUN: ${{ inputs.network_probe_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 1, persist-credentials: false}
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Read successful signed candidate and refuse changed product sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LYCO_PAID_CANDIDATE_RUN: ${{ inputs.paid_routes_candidate }}
+        run: |
+          test -z "$LYCO_PAID_CANDIDATE_RUN"
+          bash tests/mobile/network/download-candidate.sh
+      - name: Build only a separate plain WebView positive control with matching target SDK
+        run: bash tests/mobile/network/build-control.sh
+      - name: Install pinned native UI driver
+        run: bash tests/mobile/install-maestro.sh
+      - name: Enable KVM for actual native observations
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Observe healthy and stopped product RTC with independent direct controls
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: bash tests/mobile/network/run-probe.sh
+      - name: Preserve original RTC, TCP, STUN, provider and visible UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-mobile-network-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-mobile-network
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Remove disposable control signing material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/lyco-network-control-private"

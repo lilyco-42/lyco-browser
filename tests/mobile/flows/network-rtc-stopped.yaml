@@ -1,0 +1,7 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "Run stopped-route RTC"
+- extendedWaitUntil:
+    visible: "LYCO RTC stopped completed"
+    timeout: 30000
+- takeScreenshot: actual-stopped-route-rtc
