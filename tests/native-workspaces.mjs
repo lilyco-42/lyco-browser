@@ -18,6 +18,7 @@ import {protectConnectHandler} from './connect-handler.mjs';
 import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
 import {verifyNativeEgressLocale} from './native-egress-locale-contract.mjs';
 import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
+import {verifyNativeWorkspaceRoutes} from './native-workspace-routes.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -138,7 +139,10 @@ try {
    if(url===root+'/login')return new Response(JSON.stringify({token:'CI_FIXTURE_TOKEN'}),{status:200});
    if(options.headers?.Authorization!=='Bearer CI_FIXTURE_TOKEN')return new Response('{}',{status:401});
    if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoFixturePlan,status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
-   if(url===root+'/sub/CIfixture123456/clash')return new Response(JSON.stringify({proxies:[{name:'ci-node',type:'http',server:'127.0.0.1',port}], 'proxy-groups':[{name:'PROXY',type:'select',proxies:['ci-node']}]}),{status:200});
+   if(url===root+'/sub/CIfixture123456/clash'){
+    const proxies=globalThis.__lycoWorkspaceRouteNodes||[{name:'ci-node',type:'http',server:'127.0.0.1',port}];
+    return new Response(JSON.stringify({proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}),{status:200});
+   }
    throw Error('Unexpected fixture endpoint');
   };
  },proxyPort);
@@ -317,6 +321,8 @@ try {
  assert.ok(report.proxyRequests.some(row=>row.path==='/mihomo-probe'&&row.proxied));
  report.checks.push('packaged-native-login-create-profile','actual-bundled-mihomo-http-routing');
  await page.screenshot({path:path.join(evidence,'windows-workspace.png')});
+ await verifyNativeWorkspaceRoutes({app:application,page,report,evidence});
+ await page.locator('[data-view="profiles"]').click();
  // Exercise the actual existing engine with the bound profile and bundled browser.
  await checkpoint('managed-browser-probe');
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;

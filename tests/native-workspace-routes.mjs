@@ -20,8 +20,8 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
    advanced:{...profile.advanced,startUrls:target,saveCookies:true},privacy:{...profile.privacy,languageMode:'profile',langFromIp:false,timezoneFromIp:false,geoFromIp:false,refreshFingerprintOnStart:false}}),{profile,target});
  };
  try{
-  await app.evaluate((_electron,subscription)=>{globalThis.__lycoUnixRouteNodes=subscription.proxies},fixture.subscription);
-  await page.evaluate(()=>{window.__lycoRouteOriginalAdopt=window.adoptLycoProfile;window.adoptLycoProfile=profile=>{const value=window.__lycoRouteOriginalAdopt(profile);window.__lycoRouteCreated=value;return value}});
+  await app.evaluate((_electron,subscription)=>{globalThis.__lycoWorkspaceRouteNodes=subscription.proxies},fixture.subscription);
+  await page.evaluate(()=>{window.__lycoRoutePreviousCreated={present:Object.hasOwn(window,'__lycoCreated'),value:window.__lycoCreated};window.__lycoRouteOriginalAdopt=window.adoptLycoProfile;window.adoptLycoProfile=profile=>{const value=window.__lycoRouteOriginalAdopt(profile);window.__lycoRouteCreated=value;return value}});
   await page.locator('[data-view="lyco"]').click();await page.locator('#lyco-load-routes').click();
   await page.locator('#lyco-create-route option').filter({hasText:'CI route A'}).waitFor({state:'attached'});
   const options=await page.locator('#lyco-create-route option').evaluateAll(nodes=>nodes.map(node=>({id:node.value,label:node.textContent})));
@@ -85,8 +85,8 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
  }finally{
   for(const profile of created)await page.evaluate(id=>window.ops.stopProfile(id),profile.id).catch(()=>{});
   for(const connection of connections)await connection.close().catch(()=>{});
-  await page.evaluate(()=>{if(window.__lycoRouteOriginalAdopt)window.adoptLycoProfile=window.__lycoRouteOriginalAdopt;delete window.__lycoRouteOriginalAdopt;delete window.__lycoRouteCreated}).catch(()=>{});
-  await app.evaluate(()=>{delete globalThis.__lycoUnixRouteNodes}).catch(()=>{});
+  await page.evaluate(()=>{if(window.__lycoRouteOriginalAdopt)window.adoptLycoProfile=window.__lycoRouteOriginalAdopt;if(window.__lycoRoutePreviousCreated?.present)window.__lycoCreated=window.__lycoRoutePreviousCreated.value;else delete window.__lycoCreated;delete window.__lycoRoutePreviousCreated;delete window.__lycoRouteOriginalAdopt;delete window.__lycoRouteCreated}).catch(()=>{});
+  await app.evaluate(()=>{delete globalThis.__lycoWorkspaceRouteNodes}).catch(()=>{});
   result.observations=fixture.observations;result.pageRequests=fixture.pageRequests;result.directChecks=fixture.checks;result.proxyProbes=fixture.proxyProbes;
   await fixture.close();
  }
