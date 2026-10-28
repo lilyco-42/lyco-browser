@@ -4,7 +4,9 @@ import Browser from './Browser';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,proxyPlanName,type Account} from './billing';
-import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
+import {createProfile,readProfiles,saveProfiles,type Profile,type RouteBinding} from './profiles';
+import {assertProfileAccess} from './mobile-route-policy.mjs';
+import {routeBinding} from './profile-metadata.mjs';
 import coreNotices from './core-notices.json';
 import product from './product.json';
 import NpmNotices from './NpmNotices';
@@ -100,9 +102,28 @@ export default function App(){
   profileMutation.current=true;setSavingProfiles(true);return true;
  }
  function endProfileMutation(){profileMutation.current=false;setSavingProfiles(false)}
+ async function bindProfileRoute(binding:RouteBinding):Promise<Profile>{
+  if(!beginProfileMutation())throw Error('正在保存环境，请稍后重试');
+  const generation=authGeneration.current;
+  try{
+   const route=routeBinding(binding);
+   if(!token||me?.username!==route.owner)throw Error('所属网站账号已变化，请重新登录');
+   const profile=profiles.find(row=>row.id===openProfile?.id);
+   if(!profile)throw Error('环境已变化，请重新打开');
+   assertProfileAccess(profile,route.owner);
+   await closeMobileProfiles();
+   if(generation!==authGeneration.current)throw Error('登录会话已变化，请重新操作');
+   const nextProfile={...profile,route},next=profiles.map(row=>row.id===profile.id?nextProfile:row);
+   await saveProfiles(next);
+   setProfiles(next);setOpenProfile(current=>current?.id===profile.id?nextProfile:current);
+   return nextProfile;
+  }finally{endProfileMutation()}
+ }
  async function removeProfile(id:string){
   if(!beginProfileMutation())return;
   try{
+   const profile=profiles.find(row=>row.id===id);if(!profile)throw Error('环境已变化');
+   assertProfileAccess(profile,me?.username);
    const next=profiles.filter(x=>x.id!==id);
    await saveProfiles(next);setProfiles(next);setNote('环境列表条目已删除；原生网站数据仍保留在本机');
   }catch(e){setNote((e as Error).message)}
@@ -116,6 +137,8 @@ export default function App(){
  async function clearProfileData(id:string,remove:boolean){
   if(!beginProfileMutation())return;
   try{
+   const profile=profiles.find(row=>row.id===id);if(!profile)throw Error('环境已变化');
+   assertProfileAccess(profile,me?.username);
    await clearMobileProfile(id);
    if(remove){
     const next=profiles.filter(row=>row.id!==id);
@@ -130,8 +153,9 @@ export default function App(){
   try{await Linking.openURL(address)}catch{setNote('无法打开网页，请确认浏览器已安装')}
  }
  const entitlement=me?proxyEntitlement(me):null;
+ const visibleProfiles=profiles.filter(row=>!row.route||row.route.owner===me?.username);
  if(openProfile)return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
-  <Browser profile={openProfile} onClose={closeBrowser} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
+  <Browser profile={openProfile} onClose={closeBrowser} onBindRoute={bindProfileRoute} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
  return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
   <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
   <View style={styles.header}>
@@ -182,9 +206,11 @@ export default function App(){
      <Action title="保存环境" disabled={!profilesLoaded||savingProfiles} onPress={addProfile}/>
     </View>
     {profilesLoaded&&<Text style={styles.hint}>已保存 {profiles.length} 个环境</Text>}
-    {profiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无环境，先添加一个。</Text></View>:
-     profiles.map(row=><View style={styles.card} key={row.id}>
+    {visibleProfiles.length<profiles.length&&<Text style={styles.hint}>部分环境已绑定其他网站账号，登录所属账号后可查看。</Text>}
+    {visibleProfiles.length===0?<View style={styles.card}><Text style={styles.hint}>暂无可见环境，可添加新环境或登录所属账号。</Text></View>:
+     visibleProfiles.map(row=><View style={styles.card} key={row.id}>
       <Text style={styles.cardTitle}>{row.name}</Text><Text style={styles.hint}>{row.url}</Text>
+      {row.route&&<Text style={styles.hint}>官网线路：{row.route.routeName}</Text>}
       <View style={styles.actions}><Action title="打开网页" label={"打开环境 "+row.name} disabled={savingProfiles} onPress={()=>setOpenProfile(row)}/>
        {Platform.OS==='android'||Platform.OS==='ios'?<>
         <Action title="清除网站数据" label={"清除环境 "+row.name} secondary disabled={savingProfiles} onPress={()=>confirmProfileData(row,false)}/>

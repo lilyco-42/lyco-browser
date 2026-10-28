@@ -1,0 +1,12 @@
+import type {Profile,RouteBinding} from './profile-metadata.mjs';
+import type {MobileNode} from './subscription.mjs';
+import type {MobileSubscription} from './billing';
+export type IdentifiedMobileNode=MobileNode&{id:string};
+export type IdentifiedMobileSubscription=Omit<MobileSubscription,'nodes'>&{nodes:IdentifiedMobileNode[]};
+export function nodeIdentityInput(node:MobileNode):string;
+export function bindingForNode(owner:string,node:IdentifiedMobileNode):RouteBinding;
+export function assertProfileAccess(profile:Profile,owner?:string):void;
+export function assertManualProfile(profile:Profile):void;
+export function restoredRouteSelection(profile:Profile,current?:string):string;
+export function selectedMobileNode(subscription:IdentifiedMobileSubscription,id:string):IdentifiedMobileNode;
+export function assertPaidProfile(profile:Profile,subscription:IdentifiedMobileSubscription,node:IdentifiedMobileNode,session:{token:string;username:string},now?:number):void;

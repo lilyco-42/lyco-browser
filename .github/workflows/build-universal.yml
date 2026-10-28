@@ -70,7 +70,7 @@ jobs:
           retention-days: 7
       - run: node --test ../../tests/release-publishing.test.js ../../tests/third-party-notices.test.js ../../tests/product-version.test.js
       - run: python3 scripts/test_android_signature.py
-      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs
       - run: npx tsc --noEmit
       - run: npx expo export --platform web --output-dir dist-web
       - name: Upload React Native Web to GitHub prerelease
@@ -106,7 +106,7 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
-      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
@@ -239,7 +239,7 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
-      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
@@ -342,7 +342,7 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
           retention-days: 7
       - run: npx tsc --noEmit
-      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs
+      - run: node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
