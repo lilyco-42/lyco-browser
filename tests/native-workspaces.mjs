@@ -140,8 +140,8 @@ try {
    if(options.headers?.Authorization!=='Bearer CI_FIXTURE_TOKEN')return new Response('{}',{status:401});
    if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoFixturePlan,status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
    if(url===root+'/sub/CIfixture123456/clash'){
-    const proxies=globalThis.__lycoWorkspaceRouteNodes||[{name:'ci-node',type:'http',server:'127.0.0.1',port}];
-    return new Response(JSON.stringify({proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}),{status:200});
+    const proxies=[{name:'ci-node',type:'http',server:'127.0.0.1',port}];
+    return new Response(JSON.stringify(globalThis.__lycoWorkspaceRouteSubscription||{proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}),{status:200});
    }
    throw Error('Unexpected fixture endpoint');
   };

@@ -118,8 +118,8 @@ try{
    if(options.headers?.Authorization!=='Bearer CI_UNIX_ONLY')return new Response('{}',{status:401});
    if(url===root+'/me')return new Response(JSON.stringify({username:'ci-unix-owner',entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoUnixPlan,status:'active',expires_at:'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIunixfixture'}}]}));
    if(url===root+'/sub/CIunixfixture/clash'){
-    const proxies=globalThis.__lycoWorkspaceRouteNodes||[{name:'ci-http',type:'http',server:'127.0.0.1',port}];
-    return new Response(JSON.stringify({proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}));
+    const proxies=[{name:'ci-http',type:'http',server:'127.0.0.1',port}];
+    return new Response(JSON.stringify(globalThis.__lycoWorkspaceRouteSubscription||{proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}));
    }
    throw Error('Unexpected CI Billing endpoint');
   };

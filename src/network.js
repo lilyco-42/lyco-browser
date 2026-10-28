@@ -53,6 +53,9 @@ function makeConfig(input, port) {
       typeof node.type!=='string' || !node.type ||
       isBypass(node.name) || ['direct','pass','dns'].includes(node.type.toLowerCase()) ||
       isBypass(node['dialer-proxy']))throw Error('订阅包含不安全的直连节点');
+    // These exact names are created/overwritten by the pinned Mihomo parser.
+    if(['GLOBAL','REJECT','REJECT-DROP'].includes(node.name))throw Error('订阅节点使用内核保留名称');
+    if(node['dialer-proxy']!==undefined&&typeof node['dialer-proxy']!=='string')throw Error('订阅节点的链式代理引用无效');
     return {...node};
   });
   const groups=obj['proxy-groups'].map(group=>{
@@ -62,12 +65,15 @@ function makeConfig(input, port) {
       !group.proxies.every(name=>typeof name==='string') ||
       group.use?.length || group['include-all'] || group['include-all-proxies'] ||
       group['include-all-providers'])throw Error('订阅含无法验证的代理分组');
+    if(['DIRECT','REJECT','REJECT-DROP','COMPATIBLE','PASS','PASS-RULE'].includes(group.name))throw Error('订阅分组使用内核保留名称');
     const allowed=group.proxies.filter(name=>!isBypass(name));
     if(!allowed.length)throw Error('代理分组没有非直连节点');
     return {...group,proxies:allowed,'empty-fallback':'REJECT',
       'default-selected':allowed.includes(group['default-selected'])?group['default-selected']:allowed[0],
       'include-all':false,'include-all-proxies':false,'include-all-providers':false};
   });
+  const names=[...proxies,...groups].map(row=>row.name);
+  if(new Set(names).size!==names.length)throw Error('订阅存在重复节点或分组名称');
   const known=new Set([...proxies.map(node=>node.name),...groups.map(group=>group.name),'REJECT','REJECT-DROP']);
   if(!groups.some(group=>group.name==='PROXY') ||
     groups.some(group=>group.proxies.some(name=>!known.has(name))) ||

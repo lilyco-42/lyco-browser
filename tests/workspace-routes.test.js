@@ -41,10 +41,64 @@ test('catalog exposes only opaque identities and labels; duplicate names cannot 
 });
 test('fixed selection contains one named outbound and preserves the no-direct policy',()=>{
  const source=subscription(),{config,nodes}=routesFromSubscription(source);
- const selected=fixedConfig(config,nodes[1],18002),group=selected['proxy-groups'].find(row=>row.name==='PROXY');
+ const selected=fixedConfig(config,nodes[1],18002),group=selected['proxy-groups'].at(-1);
  assert.equal(group.type,'select');assert.deepEqual(group.proxies,['CI route B']);assert.equal(group['empty-fallback'],'REJECT');
- assert.deepEqual(selected.rules,['MATCH,PROXY']);assert.equal(selected['allow-lan'],false);
+ assert.deepEqual(selected.rules,['MATCH,'+group.name]);assert.equal(selected['allow-lan'],false);
+ assert.deepEqual(selected.proxies.map(row=>row.name),['CI route B']);
+ assert.equal(selected['proxy-groups'].length,1);
  assert.equal(selected['external-controller'],undefined);assert.ok(source['proxy-groups'][0].proxies.includes('DIRECT'));
+});
+test('fixed routes preserve PROXY dialer policies and prune unrelated nodes, credentials and health checks',()=>{
+ const source=subscription();source.proxies.push({name:'ENTRY',type:'http',server:'127.0.0.1',port:19003,password:'ENTRY_PRIVATE'});
+ source.proxies[0]['dialer-proxy']='PROXY';
+ source['proxy-groups']=[{name:'PROXY',type:'fallback',proxies:['ENTRY','REJECT'],url:'https://ci.invalid/health',interval:60},
+  {name:'UNUSED',type:'url-test',proxies:['CI route B'],url:'https://unused.invalid/health',interval:30}];
+ const original=JSON.stringify(source),selected=fixedConfig(source,{name:'CI route A'},18002);
+ assert.deepEqual(selected.proxies.map(row=>row.name),['CI route A','ENTRY']);
+ assert.equal(selected.proxies[0]['dialer-proxy'],'PROXY');
+ const group=selected['proxy-groups'].find(row=>row.name==='PROXY');
+ assert.equal(group.type,'fallback');assert.deepEqual(group.proxies,['ENTRY','REJECT']);assert.equal(group.interval,60);
+ assert.doesNotMatch(JSON.stringify(selected),/CI route B|UNUSED|unused\.invalid/);
+ assert.deepEqual(selected['proxy-groups'].at(-1).proxies,['CI route A']);
+ assert.equal(JSON.stringify(source),original);
+});
+test('private root avoids reachable name collisions and never embeds provider names into rule syntax',()=>{
+ const source={proxies:[{name:'LYCO_WORKSPACE_ROUTE',type:'http',server:'127.0.0.1',port:19001,'dialer-proxy':'LYCO_WORKSPACE_ROUTE_1'},
+  {name:'ENTRY,NAME\nMATCH,DIRECT',type:'http',server:'127.0.0.1',port:19002}],
+  'proxy-groups':[{name:'LYCO_WORKSPACE_ROUTE_1',type:'select',proxies:['ENTRY,NAME\nMATCH,DIRECT']},{name:'PROXY',type:'select',proxies:['LYCO_WORKSPACE_ROUTE']}]};
+ const selected=fixedConfig(source,{name:'LYCO_WORKSPACE_ROUTE'},18002);
+ assert.deepEqual(selected.rules,['MATCH,LYCO_WORKSPACE_ROUTE_2']);
+ assert.deepEqual(selected['proxy-groups'].at(-1).proxies,['LYCO_WORKSPACE_ROUTE']);
+ assert.ok(selected.proxies.some(row=>row.name==='ENTRY,NAME\nMATCH,DIRECT'));
+ assert.throws(()=>fixedConfig(source,{name:'PROXY'},18002),/节点无效/);
+});
+test('node, group and mixed dependency cycles fail before spawning a core',()=>{
+ for(const kind of ['node','group','mixed']){
+  const source=subscription();
+  if(kind==='node'){source.proxies[0]['dialer-proxy']='CI route B';source.proxies[1]['dialer-proxy']='CI route A'}
+  if(kind==='group'){source.proxies[0]['dialer-proxy']='PROXY';source['proxy-groups']=[{name:'PROXY',type:'select',proxies:['LOOP']},{name:'LOOP',type:'select',proxies:['PROXY']}]}
+  if(kind==='mixed'){source.proxies[0]['dialer-proxy']='PROXY';source['proxy-groups'][0].proxies=['CI route A']}
+  assert.throws(()=>fixedConfig(source,{name:'CI route A'},18002),/循环代理依赖/);
+ }
+});
+test('shared dependencies are retained once and long chains do not exhaust the JavaScript call stack',()=>{
+ const proxies=Array.from({length:12000},(_,index)=>({name:'node-'+index,type:'http',server:'127.0.0.1',port:19001,...(index<11999?{'dialer-proxy':'node-'+(index+1)}:{})}));
+ const selected=fixedConfig({proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:['node-0']}]},{name:'node-0'},18002);
+ assert.equal(selected.proxies.length,12000);assert.equal(selected['proxy-groups'].length,1);
+ const shared=subscription();shared.proxies[0]['dialer-proxy']='PROXY';shared['proxy-groups']=[{name:'PROXY',type:'select',proxies:['LEFT','RIGHT']},
+  {name:'LEFT',type:'select',proxies:['CI route B']},{name:'RIGHT',type:'select',proxies:['CI route B']}];
+ const result=fixedConfig(shared,{name:'CI route A'},18002);assert.equal(result.proxies.length,2);assert.equal(result['proxy-groups'].length,4);
+});
+test('unrelated subscription changes keep an active lease; reachable credential changes require explicit restart',async t=>{
+ const {pool,authorization,setSource,children}=fixture(t),{nodes}=await pool.catalog(authorization());
+ const a=await pool.acquire('profile-a',nodes[0].id,authorization());
+ const changed=subscription();changed.proxies[1].password='UNRELATED_PRIVATE';
+ changed['proxy-groups'].push({name:'LYCO_WORKSPACE_ROUTE',type:'url-test',proxies:['CI route B'],url:'https://unused.invalid',interval:1});
+ setSource(changed);assert.equal(await pool.acquire('profile-a',nodes[0].id,authorization()),a);assert.equal(children.length,1);
+ changed.proxies[0].password='CHANGED_REACHABLE_PRIVATE';setSource(changed);
+ await assert.rejects(()=>pool.acquire('profile-a',nodes[0].id,authorization()),/配置已变化/);
+ assert.equal(a.child.killed,false);await pool.stop('profile-a');
+ const replacement=await pool.acquire('profile-a',nodes[0].id,authorization());assert.equal(replacement.child.config.proxies[0].password,'CHANGED_REACHABLE_PRIVATE');
 });
 test('two workspaces get separate tracked cores and stopping A leaves B alive',async t=>{
  const {pool,children,authorization}=fixture(t);const {nodes}=await pool.catalog(authorization());

@@ -5,7 +5,7 @@ import {chromium} from 'playwright';
 import {createWorkspaceRoutingFixture} from './workspace-routing-fixture.mjs';
 export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
  if(process.env.GITHUB_ACTIONS!=='true')throw Error('Packaged workspace route acceptance requires Actions');
- const fixture=await createWorkspaceRoutingFixture(),created=[],connections=[];
+ const fixture=await createWorkspaceRoutingFixture({chainedA:true}),created=[],connections=[];
  const result=report.workspaceRoutes={observations:[],pageRequests:[],checks:[]};
  const choose=async(id,label)=>{
   await page.locator('#'+id+'-button').click();
@@ -24,7 +24,7 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
    advanced:{...profile.advanced,startUrls:target,saveCookies:true},privacy:{...profile.privacy,languageMode:'profile',langFromIp:false,timezoneFromIp:false,geoFromIp:false,refreshFingerprintOnStart:false}}),{profile,target});
  };
  try{
-  await app.evaluate((_electron,subscription)=>{globalThis.__lycoWorkspaceRouteNodes=subscription.proxies},fixture.subscription);
+  await app.evaluate((_electron,subscription)=>{globalThis.__lycoWorkspaceRouteSubscription=subscription},fixture.subscription);
   await page.evaluate(()=>{window.__lycoRoutePreviousCreated={present:Object.hasOwn(window,'__lycoCreated'),value:window.__lycoCreated};window.__lycoRouteOriginalAdopt=window.adoptLycoProfile;window.adoptLycoProfile=profile=>{const value=window.__lycoRouteOriginalAdopt(profile);window.__lycoRouteCreated=value;return value}});
   await page.locator('[data-view="lyco"]').click();await page.locator('#lyco-load-routes').click();
   await page.locator('#lyco-create-route option').filter({hasText:'CI route A'}).waitFor({state:'attached'});
@@ -64,6 +64,17 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
    const connection=await chromium.connectOverCDP('http://127.0.0.1:'+session.port);connections.push(connection);
    const tab=connection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url().startsWith(fixture.originUrl+'/page'));assert.ok(tab);pages.push(tab);
   }
+  assert.ok(fixture.entryProbes.some(row=>row.authorized&&row.targetIsA&&row.connected),'A must traverse the authenticated entry hop');
+  assert.ok(fixture.proxyProbes.some(row=>row.route==='A'&&row.authorized&&row.viaEntry===true),'A egress must observe the real entry TCP source');
+  await fixture.stopNode('ENTRY');
+  await pages[0].goto(fixture.originUrl+'/page?owner=A&phase=selected-entry-stopped',{timeout:15000}).catch(()=>{});
+  assert.equal(fixture.pageRequests.some(row=>row.phase==='selected-entry-stopped'),false,'Failed entry must not reach A directly, B, or the origin');
+  await pages[1].goto(fixture.originUrl+'/page?owner=B&phase=selected-B-after-entry-stopped',{timeout:15000});
+  await waitPhase('selected-B-after-entry-stopped','B','B');
+  await fixture.restartNode('ENTRY');
+  await pages[0].goto(fixture.originUrl+'/page?owner=A&phase=selected-entry-recovered',{timeout:15000});
+  await waitPhase('selected-entry-recovered','A','A');
+  result.checks.push('real-entry-hop-loss-no-direct-egress-and-recovery-with-original-storage');
   await fixture.stopNode('A');
   await pages[0].goto(fixture.originUrl+'/page?owner=A&phase=selected-A-stopped',{timeout:15000}).catch(()=>{});
   assert.equal(fixture.pageRequests.some(row=>row.phase==='selected-A-stopped'),false,'Failed selected A must not reach the origin via B or directly');
@@ -90,8 +101,8 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   for(const profile of created)await page.evaluate(id=>window.ops.stopProfile(id),profile.id).catch(()=>{});
   for(const connection of connections)await connection.close().catch(()=>{});
   await page.evaluate(()=>{if(window.__lycoRouteOriginalAdopt)window.adoptLycoProfile=window.__lycoRouteOriginalAdopt;if(window.__lycoRoutePreviousCreated?.present)window.__lycoCreated=window.__lycoRoutePreviousCreated.value;else delete window.__lycoCreated;delete window.__lycoRoutePreviousCreated;delete window.__lycoRouteOriginalAdopt;delete window.__lycoRouteCreated}).catch(()=>{});
-  await app.evaluate(()=>{delete globalThis.__lycoWorkspaceRouteNodes}).catch(()=>{});
-  result.observations=fixture.observations;result.pageRequests=fixture.pageRequests;result.directChecks=fixture.checks;result.proxyProbes=fixture.proxyProbes;
+  await app.evaluate(()=>{delete globalThis.__lycoWorkspaceRouteSubscription}).catch(()=>{});
+  result.observations=fixture.observations;result.pageRequests=fixture.pageRequests;result.directChecks=fixture.checks;result.proxyProbes=fixture.proxyProbes;result.entryProbes=fixture.entryProbes;
   await fixture.close();
  }
 }

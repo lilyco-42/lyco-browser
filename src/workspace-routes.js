@@ -33,10 +33,33 @@ function routesFromSubscription(input){
 }
 function fixedConfig(source,node,port){
  const config=makeConfig(source,port);
- // Constant MATCH rule avoids interpreting provider-controlled labels as rules.
- config['proxy-groups']=config['proxy-groups'].map(group=>group.name==='PROXY'?{
-  name:'PROXY',type:'select',proxies:[node.name],'default-selected':node.name,'empty-fallback':'REJECT',
- }:group);
+ const rows=new Map([
+  ...config.proxies.map(row=>[row.name,{row,refs:row['dialer-proxy']?[row['dialer-proxy']]:[],outbound:true}]),
+  ...config['proxy-groups'].map(row=>[row.name,{row,refs:row.proxies,outbound:false}]),
+ ]);
+ if(!rows.get(node?.name)?.outbound)throw Error('所选官网节点无效');
+ // Walk only reachable dependencies, preserving every entry hop and group
+ // policy. Iterative DFS also rejects node/group cycles without stack overflow.
+ const states=new Map(),stack=[{name:node.name,leave:false}];
+ while(stack.length){
+  const {name,leave}=stack.pop();
+  if(name==='REJECT'||name==='REJECT-DROP')continue;
+  if(leave){states.set(name,2);continue}
+  if(states.get(name)===2)continue;
+  if(states.get(name)===1)throw Error('所选官网线路存在循环代理依赖');
+  const entry=rows.get(name);if(!entry)throw Error('所选官网线路存在未知代理依赖');
+  states.set(name,1);stack.push({name,leave:true});
+  for(let index=entry.refs.length-1;index>=0;index--)stack.push({name:entry.refs[index],leave:false});
+ }
+ const byName=(a,b)=>a.name<b.name?-1:a.name>b.name?1:0;
+ config.proxies=config.proxies.filter(row=>states.has(row.name)).sort(byName);
+ config['proxy-groups']=config['proxy-groups'].filter(row=>states.has(row.name)).sort(byName);
+ // Do not rewrite a provider's PROXY: an outbound may use that group as its
+ // dialer. A private ASCII selector avoids both collisions and rule injection.
+ let root='LYCO_WORKSPACE_ROUTE',suffix=0;
+ while(states.has(root))root='LYCO_WORKSPACE_ROUTE_'+(++suffix);
+ config['proxy-groups'].push({name:root,type:'select',proxies:[node.name],'default-selected':node.name,'empty-fallback':'REJECT'});
+ config.rules=['MATCH,'+root];
  return config;
 }
 class LycoWorkspaceRoutes {

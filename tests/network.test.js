@@ -31,6 +31,24 @@ test('safe Mihomo config never exposes external controller nor LAN listener',()=
   assert.throws(()=>makeConfig({proxies:[], 'proxy-groups':[]},12345));
   assert.throws(()=>makeConfig(source,22));
 });
+test('reserved Mihomo names, duplicate identities and invalid dialer references are refused',()=>{
+ const base=()=>({proxies:[{name:'node',type:'http',server:'127.0.0.1',port:19001}],'proxy-groups':[{name:'PROXY',type:'select',proxies:['node']}]});
+ for(const name of ['GLOBAL','REJECT','REJECT-DROP']){
+  const source=base();source.proxies[0].name=name;source['proxy-groups'][0].proxies=[name];
+  assert.throws(()=>makeConfig(source,18001),/保留名称/);
+ }
+ for(const name of ['DIRECT','REJECT','REJECT-DROP','COMPATIBLE','PASS','PASS-RULE']){
+  const source=base();source['proxy-groups'].push({name,type:'select',proxies:['node']});
+  assert.throws(()=>makeConfig(source,18001),/保留名称/);
+ }
+ const duplicate=base();duplicate.proxies.push({...duplicate.proxies[0]});assert.throws(()=>makeConfig(duplicate,18001),/重复/);
+ const collision=base();collision.proxies[0].name='PROXY';collision['proxy-groups'][0].proxies=['PROXY'];assert.throws(()=>makeConfig(collision,18001),/重复/);
+ for(const reference of [0,false,null,{},[]]){
+  const source=base();source.proxies[0]['dialer-proxy']=reference;assert.throws(()=>makeConfig(source,18001),/链式代理引用无效/);
+ }
+ const global=base();global['proxy-groups'].push({name:'GLOBAL',type:'select',proxies:['node']});
+ assert.ok(makeConfig(global,18001)['proxy-groups'].some(group=>group.name==='GLOBAL'));
+});
 test('login fetches site entitlement and holds JWT privately in main only',async()=>{
   const calls=[];
   const mockFetch=async(url,req)=>{
