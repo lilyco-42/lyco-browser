@@ -46,7 +46,7 @@ jobs:
       OPENBROWSER_PACKAGE_ARCH: x86_64
       OPENBROWSER_PACKAGE_VARIANT: with-kernel
       OPENBROWSER_BUNDLE_KERNEL: 'true'
-      LYCO_DESKTOP_PUBLIC_RELEASE: 'true'
+      LYCO_DESKTOP_PUBLIC_RELEASE: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Enable long paths before checkout
