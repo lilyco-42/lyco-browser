@@ -30,6 +30,10 @@ on:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
         default: false
+      font_inventory_only:
+        description: Inspect original font metadata from the retained e5ed180 archive without building or running a product
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
@@ -40,6 +44,7 @@ permissions:
 
 jobs:
   workspace-routes:
+    if: ${{ inputs.font_inventory_only != true }}
     name: workspace routes · ${{ matrix.target }}
     strategy:
       fail-fast: false
@@ -102,7 +107,7 @@ jobs:
           retention-days: 7
   desktop:
     needs: workspace-routes
-    if: ${{ inputs.routes_only != true }}
+    if: ${{ inputs.routes_only != true && inputs.font_inventory_only != true }}
     name: ${{ matrix.target }}
     strategy:
       fail-fast: false
@@ -285,3 +290,35 @@ jobs:
         if: matrix.target == 'linux-x64' && github.event_name != 'pull_request'
         shell: bash
         run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
+
+  packaged-font-inventory:
+    if: ${{ inputs.font_inventory_only == true }}
+    name: Retained desktop fonts · original metadata only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install isolated pinned metadata decoders
+        run: |
+          python3 -m venv "$RUNNER_TEMP/font-audit-tools"
+          "$RUNNER_TEMP/font-audit-tools/bin/pip" install fonttools==4.60.1 Brotli==1.1.0
+      - name: Read only the retained candidate with its exact reviewed digest
+        run: |
+          mkdir -p "$RUNNER_TEMP/font-audit-input"
+          gh release download ci-e5ed18067c7a -R "$GITHUB_REPOSITORY" -p LYCO-Browser-Linux-x64-MVP.tar.gz -D "$RUNNER_TEMP/font-audit-input"
+          "$RUNNER_TEMP/font-audit-tools/bin/python" scripts/audit-packaged-fonts.py "$RUNNER_TEMP/font-audit-input/LYCO-Browser-Linux-x64-MVP.tar.gz" "$RUNNER_TEMP/font-audit-evidence"
+      - name: Retain original copyright and license fields with file hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-packaged-font-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/font-audit-evidence
+          if-no-files-found: warn
+          retention-days: 7
