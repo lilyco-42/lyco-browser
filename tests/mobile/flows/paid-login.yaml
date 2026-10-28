@@ -19,5 +19,8 @@ appId: top.lain42.lycobrowser
     direction: DOWN
 - tapOn: "登录并验证权益"
 - extendedWaitUntil:
-    visible: "代理年卡有效"
+    visible: "官网登录成功，已同步代理权益"
     timeout: 30000
+- scrollUntilVisible:
+    element: "代理年卡有效"
+    direction: UP
