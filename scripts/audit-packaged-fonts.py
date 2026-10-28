@@ -11,6 +11,8 @@ from collections import Counter
 
 if os.environ.get('GITHUB_ACTIONS') != 'true':
     raise SystemExit('Packaged font inspection runs on GitHub Actions only')
+if os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN'):
+    raise SystemExit('Font decoder must run without repository token environment')
 from fontTools.ttLib import TTFont
 
 archive, output = map(Path, sys.argv[1:])

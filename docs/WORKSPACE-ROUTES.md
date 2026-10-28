@@ -34,4 +34,4 @@
 
 ## 剩余范围
 
-上述证明覆盖认证 HTTP 普通上游及所测 ENTRY → A 链，包含 Linux 原生成品场景；不是客户公网出口、所有节点协议/分组策略/多层链、完整 DNS/IPv6/RTC 或防关联效果的通用证明。Windows/macOS 的新链式原生用例仍未通过。Android/iOS 共享控制层已在 `655e071` 实现[环境保存官网线路](MOBILE-WORKSPACE-ROUTES.md)，新增付费绑定原生验收尚未通过；团队授权与同步等对标项仍需继续完成。浏览器原生硬件/显卡兼容、iOS 路由、签名与商店等五平台发行门禁保持。
+上述证明覆盖认证 HTTP 普通上游及所测 ENTRY → A 链，包含 Linux 原生成品场景；不是客户公网出口、所有节点协议/分组策略/多层链、完整 DNS/IPv6/RTC 或防关联效果的通用证明。Windows/macOS 的新链式原生用例仍未通过。Android/iOS 共享控制层已在 `655e071` 实现[环境保存官网线路](MOBILE-WORKSPACE-ROUTES.md)，Android [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 已对原签名包完成官网绑定整组原生验收；iOS 仅设备编译成功，仍无新增运行通过证明；团队授权与同步等对标项仍需继续完成。浏览器原生硬件/显卡兼容、iOS 路由、签名与商店等五平台发行门禁保持。

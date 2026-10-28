@@ -25,3 +25,5 @@
 只读源码核对固定 Clash Verge Rev 提交 `3953e125b223defcec28a3c822c292c743fc1b1e`：[`proxies.tsx`](https://github.com/clash-verge-rev/clash-verge-rev/blob/3953e125b223defcec28a3c822c292c743fc1b1e/src/pages/proxies.tsx) 依赖其数据 provider 和命令层，[`bindings.ts`](https://github.com/clash-verge-rev/clash-verge-rev/blob/3953e125b223defcec28a3c822c292c743fc1b1e/src/services/bindings.ts) 通过 Tauri invoke 读取运行状态、配置代理、管理服务等。故 UI 复用需要适配这些接口；仅更换品牌样式不能自动连接现有 LYCO 后台。未执行该第三方仓库的构建或脚本。
 
 `e5ed180` 进一步修复固定出口的链式中转依赖，移除无关节点配置，拒绝循环和保留名称冲突。三平台各 54 个单元门禁、普通及链式真实核心路由通过；Linux 完整成品也通过中转断开/恢复和出口断开场景。Windows/macOS 本轮仍被原生硬件配置门禁阻止，详见 [逐环境线路的当前证据](WORKSPACE-ROUTES.md)。
+
+移动端 `655e071` 增加逐环境保存官网节点与账号归属，Android 原签名包 [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 已通过整组 12 项原生验收，包括重开、线路缺失/断开、换线、跨账号、升级/降级恢复和原生撤权。iOS 仍只有设备编译证明，详见 [移动环境线路](MOBILE-WORKSPACE-ROUTES.md)。

@@ -1,0 +1,5765 @@
+{
+  "assetSource": "e5ed18067c7abf0650c5e57c110a269622eb3b71",
+  "archiveSha256": "358b88196047cec4473c54871785b1d9cb970d56bbccc763a9b77d16ac20b582",
+  "auditSource": "80179074e21e33cd19a4c541acf5029173be602b",
+  "run": "40712032938",
+  "scope": "Original font metadata, including compressed WOFF2, from a retained archive. No product execution, font installation, rendering or licensing clearance.",
+  "formatCounts": {
+    ".ttf": 155,
+    ".woff2": 181,
+    ".otf": 21
+  },
+  "fontBytes": 46421408,
+  "unparsedFaces": [],
+  "files": [
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-new-tai-lue.ttf",
+      "bytes": 39532,
+      "sha256": "3715f810266f54364d31f0f8d10965c60c1187fcd03e1b34f1cab3ed0551c3d4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft New Tai Lue"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/nirmala-ui.woff2",
+      "bytes": 40320,
+      "sha256": "2507aa9878ca51431748186ff9f45481000b75bc0438fec5f40e10f58bb24f67",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nirmala UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ms-gothic.woff2",
+      "bytes": 9756,
+      "sha256": "b44a2ffb0e8ec25696c7151c65255ca19312f9e8ed55f66b02dd77c48ab8a0b2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MS Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/malgun-gothic.ttf",
+      "bytes": 37604,
+      "sha256": "f20ee378ceee889b2e27570d11306ba23936c8201ea1b9acdabf87741aaf1570",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Malgun Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/arial.ttf",
+      "bytes": 114680,
+      "sha256": "9fde3da40132c94885200ab3a837162f24d319c878092a2576233c35193c2354",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-phagspa.woff2",
+      "bytes": 8772,
+      "sha256": "1d3048d660ab364051101cdfc846f74673d2bfd34ac3e4680fa5b5a24d3ad5a9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft PhagsPa"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-symbol.ttf",
+      "bytes": 89432,
+      "sha256": "8b28dcd969942511b1cdbcd78e83cd89b358f9005c2dc554805c2b2220fd3044",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Symbol"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/hololens-mdl2-assets.ttf",
+      "bytes": 34104,
+      "sha256": "f8833f6be794de37d0edd3da4cd72d26b8c07d06b0674ca95e3578cfce8080f5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "HoloLens MDL2 Assets"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/leelawadee-ui.ttf",
+      "bytes": 38956,
+      "sha256": "09653480505491b8563c3c147fd6fa8d6886fd47707a8111f4d077172a6b1188",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Leelawadee UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/gadugi.woff2",
+      "bytes": 24052,
+      "sha256": "fa03a06a0b68b1eabb4af2da7ccdc71c19db068047c124f060425e8dc79a84f3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gadugi"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mongolian-baiti.ttf",
+      "bytes": 46732,
+      "sha256": "19efdd1aa93af4da2d7fe7597d8e8074c59ca66689ca28a0c3409ed68eb56a69",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Mongolian Baiti"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/franklin-gothic-medium.ttf",
+      "bytes": 46940,
+      "sha256": "1b7ec0e873c539b8742a30552fce0fbadf8ccec3a85e092637ef079618c79dba",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Franklin Gothic Medium"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/georgia.ttf",
+      "bytes": 89576,
+      "sha256": "5b219cb5e393292278913f0b636e4d5696882abd8596c0c04e8dcaa1751cc7c1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Georgia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-sans-serif.ttf",
+      "bytes": 59104,
+      "sha256": "8f53406783ea4439c0dca0e2094fe19fe2482d0106f50cd5626a0493461070b6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Sans Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ms-gothic.ttf",
+      "bytes": 25864,
+      "sha256": "9760180376f5bb0aa7d00e8f3d9efa7e705fe5463da8e68c1caa54620cb09a44",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MS Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/constantia.woff2",
+      "bytes": 38648,
+      "sha256": "9be001bef177e66ec04998385590e9c2a48cd2486918a0d5d2734e95a2c00d4c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Constantia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/candara.ttf",
+      "bytes": 63572,
+      "sha256": "0b7ac615e8e9b6bb7e70025df913d75c8690e1443cb76545062effa5cceb2d1f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Candara"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/arial.woff2",
+      "bytes": 58520,
+      "sha256": "2eaaad1da073111b1d0e05201402430dce0a88e03e8209f3630571f5f628e2cf",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/webdings.ttf",
+      "bytes": 4580,
+      "sha256": "c45870e226a03b4ec8b61f8b4c51c69f9ef90c1c6213cac46f239b9fc5961042",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Webdings"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-mdl2-assets.woff2",
+      "bytes": 14880,
+      "sha256": "948ccdde1afde6aed216ef23de321293a5ab4f029516ac8aaf092c1e9f483d17",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe MDL2 Assets"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-jhenghei.ttf",
+      "bytes": 40768,
+      "sha256": "ae9940f63142199f9862abb774acae8f56d4954735236cb21d35913920d2e068",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft JhengHei"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/consolas.ttf",
+      "bytes": 70996,
+      "sha256": "a25e24b72e748bb2c444f20f7ad95fcc67e886580614069b5f113eab263ce37d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Consolas"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-script.woff2",
+      "bytes": 122920,
+      "sha256": "77db1681a77c13fe9c4c226803af6e83c10ca105ebaaf16bea79316a91c1d199",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Script"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-tai-le.woff2",
+      "bytes": 20780,
+      "sha256": "10a50d36abd828d95df173e17afe68930959592713dc22212cd4a03d449d028b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Tai Le"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/lucida-sans-unicode.woff2",
+      "bytes": 20404,
+      "sha256": "bb9c5fe6dae43b97ddb47b0bc5cc81b03cac01b2fff1532ad07fb9229ca5815c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Sans Unicode"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/verdana.ttf",
+      "bytes": 78068,
+      "sha256": "e15ac1f488c662bd4f122458f6f13e9a197c0d7079e9fa629eae8f8f013d7052",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Verdana"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/courier-new.woff2",
+      "bytes": 38604,
+      "sha256": "8c24ce36eeb2d0bd33b8cc4342baa2bd2e67311f60a58b1c1946100742dfdb06",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier New"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-sans-serif.woff2",
+      "bytes": 29460,
+      "sha256": "f2a5119b0fd0ca3d947c68d75d24da88477c845c05411379490a3030c90d7bea",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Sans Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/marlett.woff2",
+      "bytes": 2200,
+      "sha256": "0fe59ee5e62ce213cacb5bd304da1f24172bff3b68860e279575292138693300",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Marlett"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/corbel.ttf",
+      "bytes": 71552,
+      "sha256": "87148e1660365730c031f6768384c2b3caf7ba650d68536d521ad30a09951a10",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Corbel"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ink-free.woff2",
+      "bytes": 16140,
+      "sha256": "355631ca88aca99cb6053bd6ad1db6096e56cc04068b9c53ce30b1e7e39adc57",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ink Free"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/symbol.woff2",
+      "bytes": 3564,
+      "sha256": "31569eae63f716877ac7b22cd0cc3344c8c1c3bb634cb57ed06ae02242aaf8f7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Symbol"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/franklin-gothic-medium.woff2",
+      "bytes": 26424,
+      "sha256": "ecb3983b49a8f5949faca043195bab2d0d6347601c818eacd5bd957cf824ab62",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Franklin Gothic Medium"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/cambria-math.ttf",
+      "bytes": 162264,
+      "sha256": "beeaf43474dbdefad1a6401506b80d19b19d95a7b420c5b43aa7b1c92acadb9f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cambria Math"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/yu-gothic.ttf",
+      "bytes": 558888,
+      "sha256": "a34e4f3f1c2781d3f928ecfc5ab847e34ca327ccf1b32f09cbe25516c9428d54",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Yu Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-fluent-icons.woff2",
+      "bytes": 20300,
+      "sha256": "459cc271a583eaee25715bffe2589f3e636f7756dd42bf9df58cb4f8c33bb31f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Fluent Icons"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/cambria.ttf",
+      "bytes": 113760,
+      "sha256": "a300658b590d99beaf390a40bca6714eb20b305a0d9f51919983c1125e800357",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cambria"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-historic.ttf",
+      "bytes": 47752,
+      "sha256": "4e487a669e53ea3a3d9046279d555a0a060230b362b81a6db4e1be748508699a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Historic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-fluent-icons.ttf",
+      "bytes": 50356,
+      "sha256": "4b906954344f9b0dba2b1519fc76019e24dd1f9407950e375f4d86d317b98257",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Fluent Icons"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/aldhabi.ttf",
+      "bytes": 56692,
+      "sha256": "0a4a1f144428e6789b1a14088bec3bc8aa497e39f465f10798d3bc7bde7de735",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Aldhabi"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-emoji.woff2",
+      "bytes": 26372,
+      "sha256": "d9563f60497056e76831bc027e2e8c3798c4924bb85696680a0b2e3d876b9515",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/lucida-console.ttf",
+      "bytes": 27724,
+      "sha256": "66e3cb14a0a6aa640a3d42ea653898894743dde37e99cb9e59fc06e1d8f927b2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Console"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/candara.woff2",
+      "bytes": 29900,
+      "sha256": "9a2ee0a66267715acf83c61d28ca32ee4d8f883bfcb7b4c380023eacad159e09",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Candara"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/myanmar-text.woff2",
+      "bytes": 20716,
+      "sha256": "b436c366177652424851579d9aef9b82800b92be7ddcb4632bfb0227e8082cfd",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Myanmar Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/sitka.woff2",
+      "bytes": 99464,
+      "sha256": "491bc79cf78c0808f978b2cf4e74e2c28a99bf9b6f329e72c67a102283c0b343",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Sitka"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/leelawadee-ui.woff2",
+      "bytes": 19512,
+      "sha256": "16af22b8c1d353e0173e5035db7385d568048696acdbe12221d30472129fe00a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Leelawadee UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/aldhabi.woff2",
+      "bytes": 29480,
+      "sha256": "e011444245fe7579131f21e51ea88ca46dcaa67c2dbcd8d43a3ef37d89f18143",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Aldhabi"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/impact.ttf",
+      "bytes": 117484,
+      "sha256": "487587154069c4c7798cdbd8fe8cdbe37e1c19ac2cb97840f99ddf1b26d17193",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Impact"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/sylfaen.ttf",
+      "bytes": 66676,
+      "sha256": "2ac6fa3e0d59b1b55f6c1bb6ec189e35da9f1bb924b3b5560aa3f4ac4e124411",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Sylfaen"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/cambria.woff2",
+      "bytes": 44448,
+      "sha256": "f173b3e4e40d8cb983d0a4b554357a1f424d1e2dc2f580e7c5a75821dcdb809b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cambria"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/georgia.woff2",
+      "bytes": 48860,
+      "sha256": "a474e01d15ae070e95a07fb5d49427a6704420c1f1d7e6e279761edfea941f1b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Georgia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/times-new-roman.woff2",
+      "bytes": 16372,
+      "sha256": "5157dbd16ca7a1017547bfa33d4ca5a1b786e9b99b851476a3237db301427835",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times New Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/hololens-mdl2-assets.woff2",
+      "bytes": 14884,
+      "sha256": "aae3ffce0ac6c55a85ba7294c5e67496d6c4267e54c3a87dd3ef8d9f421064c0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "HoloLens MDL2 Assets"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/marlett.ttf",
+      "bytes": 11376,
+      "sha256": "21ff384e1023689a342694637498fef8572aee2845c00bf50bac426b4c06c47b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Marlett"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/simsun.woff2",
+      "bytes": 23504,
+      "sha256": "c0182fd1104c3f14494170fc1f3a9b64d96659754d0f69edc2588d6f1fd363c9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SimSun"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/webdings.woff2",
+      "bytes": 2208,
+      "sha256": "9b5f98a3c577be1cb2e1ee665e6d3fb5505c868a8a81cdd0572371d9e40aa2e8",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Webdings"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/gadugi.ttf",
+      "bytes": 50216,
+      "sha256": "97aef5d5d33466bc81f4262ab9f15d93e5d4bbe7532fbd733331fc0b12837b92",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gadugi"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/bahnschrift.woff2",
+      "bytes": 47572,
+      "sha256": "9cbd6ed09b2a68e450a4404ecb26a235199a6b2029c80ad37f2a4878c9769ebc",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bahnschrift"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-historic.woff2",
+      "bytes": 22652,
+      "sha256": "06cca2a3889fed2d8a9f8dd81b53c9f44d2a41bdaa69a1bb40d22a808a33b685",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Historic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/palatino-linotype.woff2",
+      "bytes": 126032,
+      "sha256": "4978af7fa1c60f15cac626c531a92308da4e5ec75a47b5a8ebed06d5f579b863",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Palatino Linotype"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/yu-gothic.woff2",
+      "bytes": 184444,
+      "sha256": "08727583b9b4bc44d63d34fab13b3cf05ffc956feade0433193bf4a45af89749",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Yu Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-print.ttf",
+      "bytes": 55144,
+      "sha256": "6166569a861e8546ae3f20e8a4e29cf9354720cb5df4fbaedbf9ede6e7b7b029",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Print"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/courier-new.ttf",
+      "bytes": 71012,
+      "sha256": "dee7b34c66fac5995e9cdd60066e269d46ff63cd5cda90b542bc14e42c132b35",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier New"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-script.ttf",
+      "bytes": 269820,
+      "sha256": "7e7ff4ced46ff1caeecbc31e4bc0cea2311dbdcc09402f51d303aeff28b7ba4d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Script"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/sitka.ttf",
+      "bytes": 184840,
+      "sha256": "22f3b25140fa78c913d39b7109af02518403f83c3e07f1ce535a08121f30a172",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Sitka"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/sylfaen.woff2",
+      "bytes": 38944,
+      "sha256": "0cd0f1b3eb22e67e66ed57635d6a8f2ebb9852aa454bd4def9c2dc4d09b3fa31",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Sylfaen"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/wingdings.ttf",
+      "bytes": 7436,
+      "sha256": "c4d56072bbed0dc51154e2d8d494fb0fad0a2895ce9a9db43b134f5a99c576e7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Wingdings"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mingliu-extb.woff2",
+      "bytes": 11880,
+      "sha256": "f19a92424eba6dd112431bfc1c13d4de027a9b946b2d6f1caa09baf769caa36b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MingLiU-ExtB"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-himalaya.woff2",
+      "bytes": 25732,
+      "sha256": "13b35595903f63e7aa89ffe79338a7de4746cdd64d09b0d705fb836da20e9304",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Himalaya"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-jhenghei.woff2",
+      "bytes": 20984,
+      "sha256": "61f366e40a88f72ed2934fe9b5fddeaf15ec0b8cbacb9451716c8f97bd7c50f6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft JhengHei"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/calibri.woff2",
+      "bytes": 68636,
+      "sha256": "a1f19ce10b364973167aea32796cb70efb7ca532c8fe836843e76f5faba516fc",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Calibri"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-yahei.ttf",
+      "bytes": 40740,
+      "sha256": "38a595ee79e14cb26c4d0cc1a090caaddd1db9716a26e470692c3851e08d880c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft YaHei"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/impact.woff2",
+      "bytes": 47044,
+      "sha256": "92a5f1b55d6844d8a8c6f6623a152c1e4edbda5264986ef5c87d76399bc5eee6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Impact"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-print.woff2",
+      "bytes": 31080,
+      "sha256": "e975bf0ecf74abe2d3b400d8233bab24f2d3339e95391ef7201442da5a985066",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe Print"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/wingdings.woff2",
+      "bytes": 3152,
+      "sha256": "651fe1f5aa4315a970d877838832caf0d9a4c0c94463da5922c0ea335539bb78",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Wingdings"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/comic-sans-ms.ttf",
+      "bytes": 89096,
+      "sha256": "c171f21732f426db4e683b43fd2fa17e7f5f0b720a6dc9a8d5a4e93e31664a59",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Comic Sans MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-emoji.ttf",
+      "bytes": 56868,
+      "sha256": "7c09957dea23c2be261e64a0eeb3e87ace6791a45c74fedf99dcff2003f855e5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui.woff2",
+      "bytes": 40204,
+      "sha256": "88895f4efd6d88e121e3d27916982072eb3ce723f83d6826576a3fd58432cde6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/arial-black.ttf",
+      "bytes": 65884,
+      "sha256": "e960e6de14d9a2f22b7b96f972c4c636df3aed7c91c3dd6be35ed267566261b0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Black"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/consolas.woff2",
+      "bytes": 34664,
+      "sha256": "ca2a0ccbd14ddd3f7c9a376f7b1d7e84681dea56a0162cb9571d6e16b6b39dc8",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Consolas"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/javanese-text.ttf",
+      "bytes": 40440,
+      "sha256": "bc0601b6f8262ca04aa261f1ce13259ee8406bdeb7706f19fc5eee92e4fce147",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Javanese Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-mdl2-assets.ttf",
+      "bytes": 34080,
+      "sha256": "f187941874740ac57ebdebbf1c81384931c40042f52cab6042b9ca70cc1db20e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe MDL2 Assets"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/javanese-text.woff2",
+      "bytes": 19368,
+      "sha256": "b8f7840ca07ce9e9982e5b1701ee256364042969cab4674cea5744f5cc835518",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Javanese Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ebrima.woff2",
+      "bytes": 18228,
+      "sha256": "78ecf0960b7297eecfde41e75d006d13e688f3cf45a6e2a01ae3b466c6ae89c6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ebrima"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/tahoma.ttf",
+      "bytes": 73484,
+      "sha256": "41da100eef0f654685f7e79a9119a99d4a3223bbafa3c7074a5f7adf24954168",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Tahoma"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/lucida-sans-unicode.ttf",
+      "bytes": 39864,
+      "sha256": "e10dcacb2c45c3cbd760fac768a6e5ad90e208b12eb00140c9be5af4d66600fb",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Sans Unicode"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui-symbol.woff2",
+      "bytes": 40924,
+      "sha256": "48c5fb1cf936474f0e6341656626fb19e64f52b516f9687731e8032975e32f21",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI Symbol"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/arial-black.woff2",
+      "bytes": 33616,
+      "sha256": "dee638aaff89bc254fc143925cb9eb337a9f386da26bab97c0ec835f1e66ce2b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Black"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-himalaya.ttf",
+      "bytes": 42752,
+      "sha256": "4215de9ac8d3d7da16bea20a10ee59e92af21b296726e864365f0db944ef76a5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Himalaya"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/corbel.woff2",
+      "bytes": 31532,
+      "sha256": "37c723c6735b97df498cc9783bf2c3e7aa0a026bee4b57be654511b756799c72",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Corbel"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/nirmala-ui.ttf",
+      "bytes": 88824,
+      "sha256": "586c0962f626666b18a11513f3c7bc5b450f700fbd636aa9211e36d138994477",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nirmala UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mingliu-extb.ttf",
+      "bytes": 26480,
+      "sha256": "e1210250485d635d01abaa28bb420370087970a24373cf6234ca85f3538a3b91",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MingLiU-ExtB"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/malgun-gothic.woff2",
+      "bytes": 19504,
+      "sha256": "979221f0ed44be70c8477e59d58229f591010e8fcb474c8871ad43bac7bef84c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Malgun Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/lucida-console.woff2",
+      "bytes": 15184,
+      "sha256": "69dce4957ad6f0fde0f3e42dc603866a211023ef4fd1a03b3dd00ad2a1dc5833",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Console"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/bahnschrift.ttf",
+      "bytes": 91116,
+      "sha256": "28ba0c60b3e9fc4cf5119ba694943f9a9078df497acad5ec88e9956de841ec54",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bahnschrift"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/comic-sans-ms.woff2",
+      "bytes": 50892,
+      "sha256": "e170139ed9281404ef39d94639c0a4be167dea4146dfee7f2b4ff76fde93afa2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Comic Sans MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/gabriola.ttf",
+      "bytes": 529708,
+      "sha256": "312633208a44df45f53420022db1f3c280c7c2b6eba40d7a940b9ef7d719754b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gabriola"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/trebuchet-ms.ttf",
+      "bytes": 93172,
+      "sha256": "c514245b305085870e725d8487fa3a84806818f292105c7f921097b57460f6e7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trebuchet MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/cambria-math.woff2",
+      "bytes": 70672,
+      "sha256": "6e0cdc504bc2c93826cd5786fea76453c76f7dc25c22f9ff3d27a25468fcb27b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cambria Math"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mongolian-baiti.woff2",
+      "bytes": 25260,
+      "sha256": "c53d3b1fb28ee82d7b584726173002814409dfdac1fd3b48893d2352061e9561",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Mongolian Baiti"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/trebuchet-ms.woff2",
+      "bytes": 43012,
+      "sha256": "558233585b2b858149a25d754695c2700d1fbc54a09d88e73be8a433dab4fd1f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trebuchet MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/palatino-linotype.ttf",
+      "bytes": 219292,
+      "sha256": "aca2fe33009f30c899726bfcac59a4ba6864293539b88439aefe09d89b070de5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Palatino Linotype"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-phagspa.ttf",
+      "bytes": 17304,
+      "sha256": "3064b4965c8e3eda2afdb890e1014876c942d1c8490f747559e2cfa0faef50d2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft PhagsPa"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-yahei.woff2",
+      "bytes": 20648,
+      "sha256": "74695eda2df844be3777fee7cff3cdf88cf400d3e3ab1f07a829ea9037fb6873",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft YaHei"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-tai-le.ttf",
+      "bytes": 39776,
+      "sha256": "de18c983a258de8ffa4c838c672c0a7b3846a7a2bcaf59458fc632fe7359ad46",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Tai Le"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/gabriola.woff2",
+      "bytes": 151720,
+      "sha256": "6391622b46538731dcdba23214461ad70a906772f2fb38ecec288f3667588887",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gabriola"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/myanmar-text.ttf",
+      "bytes": 39928,
+      "sha256": "b2f9eb03ae683a6ee2807ca4a43783cac98c7d2ddb048e493ed30be5b83cb8d5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Myanmar Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mv-boli.woff2",
+      "bytes": 31232,
+      "sha256": "e397682343714393fd278aa406b3a721fdf0ed8f8680517caf8696cccb4837ca",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MV Boli"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/verdana.woff2",
+      "bytes": 38116,
+      "sha256": "cfe25dd770d2a5f4965a491d604ca7aba32c3ef6fb92db89b2498d5e7c99a9f6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Verdana"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/microsoft-new-tai-lue.woff2",
+      "bytes": 20656,
+      "sha256": "6bf44436a17e62939ffd9155f8664f1d2e11efd49991ac0fb5f0ee384a88ee29",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft New Tai Lue"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ebrima.ttf",
+      "bytes": 34852,
+      "sha256": "f2631ef7fcfdeef35b0087268e3b24a02b8d0ca046c8e527ba7826d26e9b5343",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ebrima"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/constantia.ttf",
+      "bytes": 105416,
+      "sha256": "07520994ad8be226c45ef69b7369e7e86366abdaa07b324034f0bf41de476cc2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Constantia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/calibri.ttf",
+      "bytes": 164436,
+      "sha256": "313741b64f790fae66efd6803d3675fb3151ec6262a77cd4f155a378393a1718",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Calibri"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/symbol.ttf",
+      "bytes": 6256,
+      "sha256": "317a82d45d7e21432baa02aed9865cda61a2c8c07255bae3d1d4b4041aff9a47",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Symbol"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/ink-free.ttf",
+      "bytes": 28724,
+      "sha256": "530c1cc8945faba44e442d813ce70292cc2e559fce5b3cfbd2152a1c4dd2df2b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ink Free"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/tahoma.woff2",
+      "bytes": 36356,
+      "sha256": "dc9226f38ec13baf0b013321c1c17d181113addabb1d974f3c0805be9282506e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Tahoma"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/times-new-roman.otf",
+      "bytes": 29848,
+      "sha256": "e43917e45ced24add76ca05aef2d95f748c06e6e6dcdd9e27099fa74ec68b5bd",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times New Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/simsun.ttf",
+      "bytes": 58288,
+      "sha256": "9b5a0f0de459ae025263495c277606b4d935d97ebf0b83dfb0e8a8316cc193fd",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SimSun"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/segoe-ui.ttf",
+      "bytes": 88804,
+      "sha256": "afe6e11a142f276425f0cc8c5b46858d5d91f61984cd5644d460a7d31dfda75c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Segoe UI"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/windows/mv-boli.ttf",
+      "bytes": 50160,
+      "sha256": "00a11c453e8c4c3f4aa511344ad9bd8b34f66254d322950b6129759aa0c7471b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MV Boli"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/big-caslon.woff2",
+      "bytes": 24796,
+      "sha256": "e9a57eac2a6f49a0a3b46d2a24cc5edccb0f334bb114ef4f84a6beebdd195838",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Big Caslon"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/american-typewriter-semibold.ttf",
+      "bytes": 53140,
+      "sha256": "f297f74d9d41efba0077fb98d51e2133b1a8bc568dedf17394663e8e009211c1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "American Typewriter Semibold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/marker-felt.woff2",
+      "bytes": 33052,
+      "sha256": "2a31608d4cc03e47369bc1877bf810ea4ec981181c3f08fd4001c1b2dac27ffe",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Marker Felt"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/charter.woff2",
+      "bytes": 20112,
+      "sha256": "5d54b169ea82d0b73f2e1a0dec4d8c81a09927593671247a59ad25bef6386536",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Charter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noteworthy.woff2",
+      "bytes": 30304,
+      "sha256": "d4eb1f18eb0723fece9843a6a173dbb6f0d6d6f83efa42044f4a74f0fef72138",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noteworthy"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/rockwell.woff2",
+      "bytes": 19708,
+      "sha256": "4f5469a684b5d089e670668b34b40876eeb9023751a5bba7b66c361e69350ba0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Rockwell"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-rounded-mt-bold.woff2",
+      "bytes": 17964,
+      "sha256": "5152ddb8605522be3b497b84fd2e51e3a30e6b0b7695802ff2e6bf1119730ece",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Rounded MT Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-masaram-gondi-regular.otf",
+      "bytes": 2916,
+      "sha256": "61140e35f6cb04b9a11c2d004326470ec7798840d28e7d878015f41e5ec34e56",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Masaram Gondi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial.ttf",
+      "bytes": 72120,
+      "sha256": "ded28273fe71ad3fa70ab801ffdc6dcca7e9c53fdec87c9dd0a2d8380aee6574",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/cochin.woff2",
+      "bytes": 23948,
+      "sha256": "037e056f943b516afe058bf5fd067c9f66d2084511e8692e337cf3147efb02e7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cochin"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/signpainter-housescript-semibold.woff2",
+      "bytes": 32076,
+      "sha256": "7f46827bbda552fc57cc857351bdc8bdac50ec52da0d0e595c69bdbde948dad6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SignPainter-HouseScript Semibold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/savoye-let.woff2",
+      "bytes": 12236,
+      "sha256": "4e3709bc21222c237fa1057ba0a85e032eb5342cdd5eef92ace2745002052727",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Savoye LET"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/times.ttf",
+      "bytes": 53004,
+      "sha256": "1c69a995fbb7fd5f492172f0e562b75a9aaa4fe4a0cba64b56238316f7eb3b94",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/georgia.ttf",
+      "bytes": 60164,
+      "sha256": "dfddb7ba612da38383ec23d664f200c5e76d493261739d6b0752d32b9b4b4c27",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Georgia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/bradley-hand.woff2",
+      "bytes": 60224,
+      "sha256": "3fb1705e755dc0f8c522c4e5e03dc8c2ec3250b2543f41e6205a9ab7eb03be9c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bradley Hand"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/microsoft-sans-serif.ttf",
+      "bytes": 57120,
+      "sha256": "fa1a9e84ae7840e5e1f33a6f98adc614c6321e12dbe6ae12e2dcda63e652fdb7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Sans Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/gill-sans.ttf",
+      "bytes": 42304,
+      "sha256": "830345ab610b988dbd5e7991630345cdb90503990b81233dc2da00c636ddd247",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gill Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial.woff2",
+      "bytes": 40088,
+      "sha256": "4ce3e429e29fdb99a6120421b60b593f84460abef1209d88962650ad347da787",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/phosphate.woff2",
+      "bytes": 11056,
+      "sha256": "1a577392eb07b25add17ce8258e16fbea5ff56d2a5d9479a760bde69ca5f77dd",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Phosphate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/optima.woff2",
+      "bytes": 12880,
+      "sha256": "d8f8c5bc17a9c47535304fa59c7c58e8bb4f43ef448e076283a83728e27942e7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Optima"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-rounded-mt-bold.ttf",
+      "bytes": 32164,
+      "sha256": "a3482c3b80be1f0c6f60e0892ce1b4596ba056e19d45f4812614876be2cb85d4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Rounded MT Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/luminari.ttf",
+      "bytes": 111792,
+      "sha256": "3f5fc6c5649bbf06a600050839e64c9bfa98c5b00970a7af25e343eacaa0214b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Luminari"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkduster.ttf",
+      "bytes": 320136,
+      "sha256": "43cc6a3050708723a36aed806c90fec9f1e9f43a12437373daadb2564b748eee",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkduster"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/herculanum.woff2",
+      "bytes": 21884,
+      "sha256": "e905d06167ce117210d25db962892d2c2f046a118ad95f8fded9f24bd38ecb26",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Herculanum"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/stix-two-text-regular.ttf",
+      "bytes": 81936,
+      "sha256": "c1b81a68f2812af90ad581cdf4149f22ef15ad9e32454f14c5d31b631d6de39a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "STIX Two Text Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/hiragino-sans.otf",
+      "bytes": 428528,
+      "sha256": "3fd6a57b4957b852d045ca1b6ca769b9e430e2c76da60a0486c81260a32ab857",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Hiragino Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/charter.ttf",
+      "bytes": 56732,
+      "sha256": "ef1287f8beef7a41ac383f98a99c9e9ed2f815e6088ca64710ba0dec166861c4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Charter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/marker-felt.ttf",
+      "bytes": 85208,
+      "sha256": "2990f3f581792d0337714a088768e67f02491e845ba349562da986a8ef919d24",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Marker Felt"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/palatino.woff2",
+      "bytes": 26700,
+      "sha256": "989a94a85b5a210ac4099e1d0e0b8d525dab6ad2f590a231c865cdcec02db3b2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Palatino"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-unicode-ms.ttf",
+      "bytes": 57996,
+      "sha256": "8b4451657d376775c734d1b3513150cced91326084cca9c2143000e610efce07",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Unicode MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/bodoni-72.woff2",
+      "bytes": 26412,
+      "sha256": "3dd970922865948114b7d08822482b2793f2fe86dbce217e08c39729b8feb124",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bodoni 72"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/apple-sd-gothic-neo-extrabold.woff2",
+      "bytes": 52492,
+      "sha256": "25c8e9204262b3d22d440d9fab7c85ebecf68421a5907d0200368038b83cacab",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Apple SD Gothic Neo ExtraBold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/gill-sans.woff2",
+      "bytes": 23432,
+      "sha256": "6c814de2e144f70857d59233e036780661673c526ede031b628b7b342d9b3e6e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Gill Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/pingfang-hk-light.otf",
+      "bytes": 240144,
+      "sha256": "71b7312a51b82c5963eec610f0789355dafe6f96d2b6be103a8e9cd900b4ce6c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "PingFang HK Light"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/verdana.ttf",
+      "bytes": 54060,
+      "sha256": "59d3e9eeabfbe983a3c02c4f1c6b3ea7cbfa3399a799ddb0b48852b78d491e15",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Verdana"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/trattatello.ttf",
+      "bytes": 424808,
+      "sha256": "f69fea444692a3775ffc1b0211c0f88d4fd672062ecbc3d5219e9b77de8e23d6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trattatello"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-canadian-aboriginal-regular.woff2",
+      "bytes": 704,
+      "sha256": "4bfe3b621644dee4cf4a6eb00df66cdc5454ccac2e4f3c3aae895b5b0a21aff6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Canadian Aboriginal Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/courier-new.woff2",
+      "bytes": 38284,
+      "sha256": "ce6adfc39f675faacaa737eb41700f5a653291eb5c7c535dc712c7680a479b36",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier New"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/snell-roundhand.woff2",
+      "bytes": 33420,
+      "sha256": "b17a6182b97b0be0e695856c0a2e365a34154cd3df41c63b4576922e35d7ea0d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Snell Roundhand"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-gunjala-gondi-regular.otf",
+      "bytes": 2796,
+      "sha256": "1b257fcdc6fdd6eab87d4adbfa709bec62d391ddb7ab1e1d04948ade0c005cee",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Gunjala Gondi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/microsoft-sans-serif.woff2",
+      "bytes": 28628,
+      "sha256": "1a4afd617a463bab11e1e84dae2181206617f19eeb2b2128fef1177e55cde922",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Microsoft Sans Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir-next-condensed.woff2",
+      "bytes": 31592,
+      "sha256": "9123c803d418fa143855b04eda679d9f556b258387394116b3dba8e9788a5128",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir Next Condensed"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/helvetica-neue.woff2",
+      "bytes": 18016,
+      "sha256": "dad47e4dcf1259cf99f84db5fe355a5af02f46d97227c9d2e9291c5a4fc2ebe5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Helvetica Neue"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/bradley-hand.ttf",
+      "bytes": 118384,
+      "sha256": "24c9dc58948258afd0070d2b7f414e572e76b338050f132f7f90f3ee921bf9e0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bradley Hand"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/baskerville.ttf",
+      "bytes": 24564,
+      "sha256": "a6e1e9b23f8342d56d36d577c798683fae328d813e9db42218d36cb23d5e9e94",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Baskerville"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/galvji.woff2",
+      "bytes": 10096,
+      "sha256": "532109fc03c8e9d5dc8aff49b99893d78ad2a07d54e47a335bc99bd068906090",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Galvji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/luminari.woff2",
+      "bytes": 36536,
+      "sha256": "eac30299994ea39190b5400df46db05ea70e399e18922ae85698195687ddcd05",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Luminari"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/signpainter-housescript-semibold.otf",
+      "bytes": 53708,
+      "sha256": "f67f2835ee76e7aae189d6159acbce1c36bd58e967d8535b6676b1cbb27ad5ba",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SignPainter-HouseScript Semibold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/papyrus.woff2",
+      "bytes": 45420,
+      "sha256": "76558034aafdf36559b7396a59274bdee877d6ddbcccaaaca51644c027b9a370",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Papyrus"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/times.woff2",
+      "bytes": 31908,
+      "sha256": "9ebd3b4c86a90adb17064a5ce4ead466c27b83cb7d69109b24d42ebe9f1c1b1f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/kohinoor-devanagari-medium.otf",
+      "bytes": 27004,
+      "sha256": "0eb58b5b1f646e3a2bf0af76ba1f975c2f35bec7a83840d3456d81d8475e5127",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Kohinoor Devanagari Medium"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/signpainter.woff2",
+      "bytes": 40156,
+      "sha256": "f4175ab421e65e09860f21d9273cd2009326507bb41448223c1b311a25ee2cf0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SignPainter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/pingfang-sc.woff2",
+      "bytes": 80152,
+      "sha256": "09993aea51217aaf75d1966d35b31cef7c70b83331bf1adb42dd2d8fe4ddbe3e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "PingFang SC"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkboard-se.ttf",
+      "bytes": 68480,
+      "sha256": "993ef585b50aba92bc8018689e3122f4873d4615c05987f3c55c1ff7f8ea23c3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkboard SE"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/stix-two-math-regular.otf",
+      "bytes": 58832,
+      "sha256": "7ef4b24890381de8fc9b68c4e4995d389796a1fa43627c86c4f81c8c8fc78cea",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "STIX Two Math Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-serif-yezidi-regular.otf",
+      "bytes": 1264,
+      "sha256": "224b1ad888c9dd68bda45b4229dd5c77f06ec88de5876076f6c37b60bd046185",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif Yezidi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/american-typewriter.ttf",
+      "bytes": 79108,
+      "sha256": "18580a0fb283d2558ce45d3de8c60a57fd480c7420028235aaed6202a960b90e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "American Typewriter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/menlo.ttf",
+      "bytes": 35448,
+      "sha256": "4010bb69650da20e2ff74df5a9e8f46f99d548d5f871d4a9ce2606e6287c825f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Menlo"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/din-alternate.ttf",
+      "bytes": 46864,
+      "sha256": "ae7e2aba4036f9a345d30fad436f313b87143630bbb59df874ddd0ecc43ba86b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DIN Alternate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/din-alternate.woff2",
+      "bytes": 22912,
+      "sha256": "cae4b4e0506d7e619ddd28abdd655129c81aef8757b19d1f2cff40b25506ae4c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DIN Alternate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/hiragino-sans.woff2",
+      "bytes": 191980,
+      "sha256": "9971824769ae1cd6072f8023626596503dbdc3bb15052d07346a7341e7eab23a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Hiragino Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/pingfang-sc.otf",
+      "bytes": 241632,
+      "sha256": "b70776d546ef9c25ee04246a4f9a5d482e658144a9f9d891fcb526fc1fd5f926",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "PingFang SC"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir-next.woff2",
+      "bytes": 33028,
+      "sha256": "7268ebb64984fe527f61d79f306d1665a1279fcb24fc8a03343213f4e627a5f6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir Next"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/snell-roundhand.ttf",
+      "bytes": 117980,
+      "sha256": "d0501bb6aa8a5e3b19390b6a34725906f817dd26aab86095d420ba957131fe22",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Snell Roundhand"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/lucida-grande.woff2",
+      "bytes": 29764,
+      "sha256": "159b6891f0e6a94d321b2a44287cf37f4be0904fff82c2000b46463ff811d658",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Grande"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir-next.ttf",
+      "bytes": 135592,
+      "sha256": "b528ff5faeedad6b720f9e86a9dd4e721ff3548f165f5a58dd8f13879707dba2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir Next"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/geneva.woff2",
+      "bytes": 26532,
+      "sha256": "ca3d3027b0548964b6e51398a980208fbab7a19d8947ac78ec27e7b107f24f86",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Geneva"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-narrow.woff2",
+      "bytes": 30516,
+      "sha256": "43baeebfa540aacce7b93d5f4a78c886ebbb2b87eec0f5b394f6a1c209cd6178",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Narrow"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/courier.woff2",
+      "bytes": 21696,
+      "sha256": "da7b4e1b789e4511be6860f2560233536cf840e338f6f3c3be8e0ef008aa20d1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkboard.ttf",
+      "bytes": 55312,
+      "sha256": "52b45fc5b77e6d491d8a54881adb7182aee4980309f08b0d1f61e0fbf7664afc",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkboard"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/brush-script-mt.woff2",
+      "bytes": 25060,
+      "sha256": "d2ff717f377223a8f1ed946a9dd0e023f072a5ae01b734372a8c4b4711e37e2d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Brush Script MT"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/geneva.ttf",
+      "bytes": 46760,
+      "sha256": "69b2c2950a9d25c97bbd978e481b7792577e7eff4fc794b492e094b958191641",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Geneva"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/papyrus.ttf",
+      "bytes": 81084,
+      "sha256": "d3e4bfb7981d84f094045e523126f9f9bb1a23e5c5008fcdeb6d7e4dd01c3cac",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Papyrus"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/courier.ttf",
+      "bytes": 59220,
+      "sha256": "b4a30c45fb96a7dd583ee6aa342feda2ab8595168ba29c767912139fe88dc268",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/stix-two-text-regular.woff2",
+      "bytes": 39904,
+      "sha256": "dd05e395ad611822f62e720b515b9d6dca9dab1d104d999c4d376cf04b6d4982",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "STIX Two Text Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/impact.ttf",
+      "bytes": 47592,
+      "sha256": "b75d750081a74c75055800b014c17c72195eb4e3ebc04107698ef1ecd0f21229",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Impact"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/hoefler-text.woff2",
+      "bytes": 27476,
+      "sha256": "a7fc5c3694805d7628f125ef6625c6e85756bd8f216ff4b5cd56d857d52d53c9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Hoefler Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/trattatello.woff2",
+      "bytes": 140720,
+      "sha256": "ac2eca0fa7cb9d2307bb3b6a0514d7b3897776904e738c46157a60ed57536762",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trattatello"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/georgia.woff2",
+      "bytes": 34132,
+      "sha256": "9d1d0e86b53133b7f489b4853fcc360a10245f14892a4aea4e1c5f2b12a955a8",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Georgia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/copperplate.ttf",
+      "bytes": 60744,
+      "sha256": "5ff46083308620922f858292ded46bc9f62701fd8a0ec2b2c01ecdbe88e2d35d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Copperplate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/times-new-roman.woff2",
+      "bytes": 52888,
+      "sha256": "8653e057a34ce6cccbb0bf312b16eb5336dec3f454d2bf7ab6a3911f05b07f24",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times New Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/hoefler-text.ttf",
+      "bytes": 50400,
+      "sha256": "5744e48e26a460537468056a6503adea2a9ee7996a1bf8deee589fe4c3dd149f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Hoefler Text"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/american-typewriter-semibold.woff2",
+      "bytes": 21528,
+      "sha256": "98bb64033ff798856258aed01fa0fd3a2bbefaf2a8e8eaa7cc1c7ff76a2b385e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "American Typewriter Semibold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/kohinoor-devanagari-medium.woff2",
+      "bytes": 13824,
+      "sha256": "85405980ce25a000083be704c024e80804237dcb1f5674d2856034bb8ced6c3d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Kohinoor Devanagari Medium"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/american-typewriter.woff2",
+      "bytes": 32036,
+      "sha256": "c28ac6b7fc74615cd3d0b6dd67a2011cae4c9232fd20907e4c757875767a30eb",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "American Typewriter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/rockwell.ttf",
+      "bytes": 39188,
+      "sha256": "ab8eedf56a65c1c635a973759d8b401009670cce49115674a333ee1308d920d7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Rockwell"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/muktamahee-regular.woff2",
+      "bytes": 17584,
+      "sha256": "3cf2db1a487bb603ab4c814e7a16d882033a6a1dab2716c8c110d9b140042ec7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MuktaMahee Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/phosphate.ttf",
+      "bytes": 28580,
+      "sha256": "c28568f69db3e5f64ef29b91d0d79d1606cd586a83014e85102a3ad5532ce9db",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Phosphate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/savoye-let.ttf",
+      "bytes": 23020,
+      "sha256": "a680c474129f873e298ffd991d148d1090385b275e86f47b98a025454a297a41",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Savoye LET"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-unicode-ms.woff2",
+      "bytes": 32976,
+      "sha256": "fd424ceb9d3e1666f345b9641efc76f6fe7e55428d43b4f4048598cc2bb48064",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Unicode MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/helvetica-neue.ttf",
+      "bytes": 46180,
+      "sha256": "abb6ff9f4255d2e16bd450df97df9b0b495cf49711ec1f72807c3d4e58ea4de2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Helvetica Neue"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-masaram-gondi-regular.woff2",
+      "bytes": 1724,
+      "sha256": "14844661320b3c47fd5efe71dab7a2c947e98e55aaf863dfe32af74fb99ef23d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Masaram Gondi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/copperplate.woff2",
+      "bytes": 20196,
+      "sha256": "e25f0f4c73226da1ead5349f8e5d529ddec3ece14574a8fcc2fb54d648670bea",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Copperplate"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-narrow.ttf",
+      "bytes": 56184,
+      "sha256": "6ed540036f17a3e5759b9a111894e1819cb60f07cf154313b1b280ce6cb188eb",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Narrow"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/monaco.woff2",
+      "bytes": 24420,
+      "sha256": "d12d36fcfffd278044535a20a0442f1e119b4539e0bc76708e31bede44ea41b1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Monaco"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/courier-new.ttf",
+      "bytes": 70408,
+      "sha256": "aaa7edb6ae9f3c88866f3c3cc0ff2115cc4c0d9110fb8426f5a13e910e7c6165",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Courier New"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/pingfang-hk-light.woff2",
+      "bytes": 78144,
+      "sha256": "985471b72887017b7238c98f3a9c1704a498779f4232e1b4213cf14913e8f371",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "PingFang HK Light"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/lucida-grande.ttf",
+      "bytes": 52868,
+      "sha256": "f2ddd1ecf2653b45d379de0f294dd96e1b62245c4cfc5dde14913f22df90da6e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Lucida Grande"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/times-new-roman.ttf",
+      "bytes": 88780,
+      "sha256": "8dcaddd20f7e7ea8c75cefb66ede3ac52d5eb1518483e87d765c275ae7cc63ae",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Times New Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/skia.ttf",
+      "bytes": 145556,
+      "sha256": "a9ce7b4e79a97dd9ac1d67df002536d1eb55801caa16838bdbbbcdde568ad755",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Skia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/signpainter.otf",
+      "bytes": 79476,
+      "sha256": "dbd45abd47ae6d678f3c937e20194f64f17da45b608d817e4283e29b9a7bbfb7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "SignPainter"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir.ttf",
+      "bytes": 62752,
+      "sha256": "38e15505f352e3364b591fbac7b313fd97acdc8c2c222fe6fa7252f5cf94e8d3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/zapfino.ttf",
+      "bytes": 34768,
+      "sha256": "1d1cc4576876e7b774ad086aaaf5b02d26786602439699a249afa46f448a7a50",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Zapfino"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-canadian-aboriginal-regular.otf",
+      "bytes": 1384,
+      "sha256": "040ee853310ba8a2d78fd152827f7970ef593aee811038531b88effc6e0e9de9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Canadian Aboriginal Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/cochin.ttf",
+      "bytes": 72528,
+      "sha256": "0505e1619e0ebb59f728cd6c22f8a6d9f176335c5ec553c693c18ccaf39b6fc9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cochin"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/skia.woff2",
+      "bytes": 91896,
+      "sha256": "52584ed85966da5389a5fa2cc2bdd8531b57fe043b409678854ef91f29816a53",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Skia"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/stix-two-math-regular.woff2",
+      "bytes": 40556,
+      "sha256": "d2c5cf61742723575d754d1c1adf924716c8919cb3b9edef907244d0e4a2f00b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "STIX Two Math Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/didot.woff2",
+      "bytes": 23888,
+      "sha256": "479be50e7ae47e05d17f7670112340d34f0db76690faedb7307bae148a2b128f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Didot"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/muktamahee-regular.ttf",
+      "bytes": 48052,
+      "sha256": "3715a184b55d9928a199663fe425bdf7d9cdf85e993436a5f5f8445513fd7896",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "MuktaMahee Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/din-condensed.woff2",
+      "bytes": 9684,
+      "sha256": "9cb4f05455a5c0c90fa791e0cbb8092c99a1a4d318ba3ebca0ebc8c8976c1e24",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DIN Condensed"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/impact.woff2",
+      "bytes": 24172,
+      "sha256": "14daa64a610f27d347bd1fa05a6178e35bc4bd52648d417e670dfa4102376750",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Impact"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/andale-mono.ttf",
+      "bytes": 38588,
+      "sha256": "5887f4d60e7c3cad5bf0978225eae01029e4036470f61d3626baeb414e30cb36",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Andale Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-sans-gunjala-gondi-regular.woff2",
+      "bytes": 1672,
+      "sha256": "c9987e94d83eeb90537c29e584cd5df2dcd3b5691cf17dd8a9bfbf4be7532f33",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans Gunjala Gondi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/comic-sans-ms.ttf",
+      "bytes": 52856,
+      "sha256": "cd6db191c19a4790e9e0536215731512f9393d449702a577a8f49488ef55a669",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Comic Sans MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-black.ttf",
+      "bytes": 41068,
+      "sha256": "f13eb3c0b30253a963f375a6790f6b37dd8ceac1c138777642f700a989ab92c5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Black"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/bodoni-72.ttf",
+      "bytes": 62052,
+      "sha256": "7ec39b29a02ed792859143ca98a450be1b7c3e749246f7db3ea86e214020d5c7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Bodoni 72"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/herculanum.ttf",
+      "bytes": 67820,
+      "sha256": "d39c982404642be63310bdf324418119d287e5b7ae65759bb6b6c395decd9030",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Herculanum"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/inaimathi-bold.woff2",
+      "bytes": 11612,
+      "sha256": "b670b117adb7e858a48ffbb178991e987a19b4bd5c927030ec93e940def1e776",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "InaiMathi Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/big-caslon.ttf",
+      "bytes": 76092,
+      "sha256": "8cafa46668316cfcf0a785caa8f5df1f4dd748a044172f10f89e725901d19707",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Big Caslon"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/helvetica.ttf",
+      "bytes": 45452,
+      "sha256": "ac291394659b3383c7f6bc4c6f843628529ab001508b082a28e70f0d8c600d9a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Helvetica"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/tahoma.ttf",
+      "bytes": 47580,
+      "sha256": "7c6ddeb6e85032b3f4d91b9d530736c642cde122732daf232c8a3df558f74b5c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Tahoma"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/din-condensed.ttf",
+      "bytes": 29076,
+      "sha256": "ff898bcb99d99a2a5d2227e47eb53f5ce5b141f15babf91456eb7ee9c6e289ee",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DIN Condensed"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/galvji.ttf",
+      "bytes": 20696,
+      "sha256": "d5fb869b2c39c7a99380cd9ce8b420b536236de089d2c7e497c49d20d0ad1c2d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Galvji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/inaimathi-bold.ttf",
+      "bytes": 29452,
+      "sha256": "3f85733a9845a519376fb8df80a3064e2ae8f0570fcc5460689b922484604682",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "InaiMathi Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkduster.woff2",
+      "bytes": 148336,
+      "sha256": "fe2ac358b9c1061be949752f24054ea1a4a06d40c166c86ca45361ee9cfc937e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkduster"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noto-serif-yezidi-regular.woff2",
+      "bytes": 648,
+      "sha256": "2e73f6d38c6762ec12a8b54080615d6e68d0a56770a62ded6ddfe78c4b495caf",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif Yezidi Regular"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/arial-black.woff2",
+      "bytes": 22352,
+      "sha256": "764729c9e3058590ec194bfb1492f96ac00b8678df8eb7f501f6d7e02a2d0512",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Arial Black"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/andale-mono.woff2",
+      "bytes": 21604,
+      "sha256": "f29c91e17ad2d511a040a53efc61e7f58c97fec1be3d27d32b4aef733727c359",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Andale Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/futura-bold.woff2",
+      "bytes": 14828,
+      "sha256": "c21705e9af69d8dd5711c6fe227e1066ccc0da259dd9d565e6bfb3662c07e6a5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Futura Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/futura.ttf",
+      "bytes": 27764,
+      "sha256": "f83bd6e9e29d83a1f817114cfacd505dac6c468a0e2e0b2ba5724eb508fafaee",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Futura"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/didot.ttf",
+      "bytes": 75200,
+      "sha256": "e046f1cd9a6fe2b63c7cba6db5305c333241ff6b33533c38b5ea53c5cef9ff83",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Didot"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/zapfino.woff2",
+      "bytes": 18680,
+      "sha256": "e291b9e93f95bd9b37975ab0a4e36b94c6fcb99b03a7754d0d483ea88425bde3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Zapfino"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/comic-sans-ms.woff2",
+      "bytes": 32972,
+      "sha256": "42c7444a41e5169dfdd89ae821cea0ad665f854daa6ea1d13cb7915115c6ed24",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Comic Sans MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/palatino.ttf",
+      "bytes": 69568,
+      "sha256": "739e5676eb403b3148f92c22dd038eca7106da6b403ccb2c3a3fb87fd7f49718",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Palatino"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/trebuchet-ms.ttf",
+      "bytes": 52820,
+      "sha256": "c1936e390b8397506fc0284c1ba9447e828a1af64cbad352f655000294e0adb2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trebuchet MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/menlo.woff2",
+      "bytes": 16616,
+      "sha256": "52cc2b4eb307031e8bf414810dd16f7fb1ae4c3838ff483cb0a84e7deea6bbf2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Menlo"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkboard.woff2",
+      "bytes": 24244,
+      "sha256": "54b5cb9643fc37c5a9ce8919d53627e59a2cf5c046f913976a39ab305d248bca",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkboard"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/trebuchet-ms.woff2",
+      "bytes": 27040,
+      "sha256": "24ce24b0317b7d9b0b7dcf99875373dd89bda10527afb01cb468ad4d2a1d529e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Trebuchet MS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/futura.woff2",
+      "bytes": 11156,
+      "sha256": "bb5e27effd12a487f6385f8f04d1ae0a9a3187c894beb1eb04ce0dd5550c9dcd",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Futura"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/optima.ttf",
+      "bytes": 32652,
+      "sha256": "9623873f3928f7b5877dc796f41f49584edd67af3244f7102ed61ef446b02b61",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Optima"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/monaco.ttf",
+      "bytes": 46212,
+      "sha256": "7edab2aa4e2c6db32f26776aa680e65846c1cb76ea704f2ecd4c29ac2a21a05d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Monaco"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/verdana.woff2",
+      "bytes": 28380,
+      "sha256": "2cec55fb0f374d5f9770e391c0015276e6255d0896801d24fd6e86f9cf0a99db",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Verdana"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/apple-sd-gothic-neo-extrabold.otf",
+      "bytes": 92756,
+      "sha256": "f3aef7fa9d2868c8c8e7e4a6e507e15949a7a5590d77bf9f72ab20dce4a431b0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Apple SD Gothic Neo ExtraBold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/chalkboard-se.woff2",
+      "bytes": 27992,
+      "sha256": "e2b48c6082924761689f711cc8c6bae0da5af0e2e8ec92878849074b3de4b213",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Chalkboard SE"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/noteworthy.ttf",
+      "bytes": 71200,
+      "sha256": "fc492c4b11a250eb628b8cffec8635f63fdbf42fae1270857d9ea151fa98ba57",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noteworthy"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir.woff2",
+      "bytes": 20388,
+      "sha256": "510db59d0394ed4c0980da06cbb750e00b1dc3740a1e66ecc33ea2c2f7378580",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/tahoma.woff2",
+      "bytes": 26036,
+      "sha256": "a339e9eae25c657ea87dd2d09c303376515d10dc1a4f23795839f016a5c61112",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Tahoma"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/brush-script-mt.ttf",
+      "bytes": 50968,
+      "sha256": "6ee81aa8fea4d930804cdf5a4e4b476ec976a9d7733e347fbd2ed013326d66fc",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Brush Script MT"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/avenir-next-condensed.ttf",
+      "bytes": 133436,
+      "sha256": "9e0468138caa1f6a93143ee6ab425ac47ea1ad4a1d459710520f916391be91e0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Avenir Next Condensed"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/futura-bold.ttf",
+      "bytes": 40312,
+      "sha256": "3a14740340e16512fc846bfb5d09bcd2935334f9fc1710a44e349794da193add",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Futura Bold"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/helvetica.woff2",
+      "bytes": 25624,
+      "sha256": "ced2943b9f6c29adf114f0a2b846f2b9839b3be6ae85d5d07004f3bdb85e7d22",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Helvetica"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/macos/baskerville.woff2",
+      "bytes": 12468,
+      "sha256": "91e0f24434feb5f08f2362ee525e3f945b1933b06314312893aa5b80f6f8ecc9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Baskerville"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/coming-soon.ttf",
+      "bytes": 46536,
+      "sha256": "bc715c5138a90f060c9ee4007c6229bbbf4efbe9df857c22345a41d2313e5cf5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Coming Soon"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-color-emoji.ttf",
+      "bytes": 6716,
+      "sha256": "0b64a9a49ec713c785f871b55377053746ffe189351ff94ec3b82198227cdf17",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Color Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-sans.ttf",
+      "bytes": 22552,
+      "sha256": "793ec10417e21f45c4405fd0c2a198be734b028c6cdff4e390a1e55efa300511",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/carrois-gothic.ttf",
+      "bytes": 32972,
+      "sha256": "44b84d4a1a8fae9ea5a84d35894222335a2b0e8100718ca75feee0ba6e522aa3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Carrois Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/dancing-script.ttf",
+      "bytes": 86912,
+      "sha256": "da01423aa74a06c147313ef91cef11e4e7d08a0e334131e82804ad78530d47c1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Dancing Script"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/droid-sans-mono.woff2",
+      "bytes": 17400,
+      "sha256": "d410ad1d5b5f92233148d8879668b0edecab2e7c8e37e2a8ffb5a11084a2050a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Droid Sans Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/roboto.woff2",
+      "bytes": 131940,
+      "sha256": "90de9ee95178e06046f610f27d1774a19992acf326f12ab98cb91c07f7fe90f2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Roboto"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/droid-sans-mono.ttf",
+      "bytes": 30776,
+      "sha256": "dc616bda8f149c0b7b35b02ec5ec8a95f1bb824bd6d383c5efa6e75115dd0624",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Droid Sans Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-serif.woff2",
+      "bytes": 12952,
+      "sha256": "4394f3b728e652d5ef8623ddb20cf64aa816ff67c64a533fce07da085e072f2d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-color-emoji.woff2",
+      "bytes": 3772,
+      "sha256": "3b0da38f6a84b827b00228dbe8ea767a70b6b6a5173e6815f59bad79becd48a4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Color Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/roboto.ttf",
+      "bytes": 267556,
+      "sha256": "ef431bb91c27274d12451e1b99f556233170a842ce5f8b5f02d704c358cf0436",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Roboto"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/cutive-mono.ttf",
+      "bytes": 44280,
+      "sha256": "c1860322defa64b7fbe0a9bbc4ef87139d05a29a65c3e76b987b9b83fd8e75fb",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cutive Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/droid-sans.woff2",
+      "bytes": 131888,
+      "sha256": "93e6dfe41bb71b753b6c8813ea060b2113d96091fb7cc10d62899400836aa15d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Droid Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/droid-sans.ttf",
+      "bytes": 267608,
+      "sha256": "4085b649a4abb6b2d96e17b89fc5b9d53336ef2df2da68b1b6d0d9219392e7a0",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Droid Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/cutive-mono.woff2",
+      "bytes": 19840,
+      "sha256": "389642807f9f576a7c5d1f9887733a7d00a2f5aea99a263ea26019397c711371",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cutive Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/coming-soon.woff2",
+      "bytes": 21636,
+      "sha256": "2a03cb0168a9e87333e30617d6dee6fc12c99f6bf59a65eb6743a1ea2431375c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Coming Soon"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/carrois-gothic.woff2",
+      "bytes": 13700,
+      "sha256": "990456889934bba15ab8a63cde9f90d7087ee3b99b3f38f4749c26df13a9f563",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Carrois Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-sans.woff2",
+      "bytes": 10856,
+      "sha256": "85680c1903f6ec2201d54825325aaedbd0d16a015d10408f289062aeaa30dcab",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/dancing-script.woff2",
+      "bytes": 42688,
+      "sha256": "0bec011d6cd1a7ffd604d5cabc424609d31fccc6e92854adacfcd6ceca1e44bb",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Dancing Script"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/android/noto-serif.ttf",
+      "bytes": 26840,
+      "sha256": "8b324ba88ad78c38e93ddb0df4ede18db7ec1094f64040535f5ca312fb7bc764",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/p052.woff2",
+      "bytes": 23196,
+      "sha256": "50cde27319cc4b713bb4f460608cf210b28e49263755be3913c4d6481ec9ba18",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "P052"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/z003.otf",
+      "bytes": 41136,
+      "sha256": "ead46e83bc3f7d2d43d973166e68817ffefbe8ba5741c67684960beca7db1934",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Z003"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-color-emoji.ttf",
+      "bytes": 6716,
+      "sha256": "5cd5860b337fb89a9d48d565a90dbbe9486d6f818ee1524604e1a0bb4a79237d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Color Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-roman.otf",
+      "bytes": 32336,
+      "sha256": "03c271052fa4fb81036a897af451c4d98cbe3e1541b097ad5bc2ab0a1c0b0564",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-sans.ttf",
+      "bytes": 51176,
+      "sha256": "6ef6177a4a4f0d597ab361d1d38f5a1ed92fbcb7774e1361b8d8bc714f2ef273",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/urw-gothic.otf",
+      "bytes": 26772,
+      "sha256": "3fb1bdf9d2a3fe3d7b9247488d97348aac19c8a678b487a808fe74cca1d9eb87",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "URW Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/urw-gothic.woff2",
+      "bytes": 17240,
+      "sha256": "93bc8a21825d7fb2fa75bd04d456d902cef46b606ceaabebb4124128e87a951c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "URW Gothic"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-sans-mono.woff2",
+      "bytes": 15736,
+      "sha256": "e3b8250a791cab606d6fc033c8a3881161da631d219a80b3550a35602c408bb2",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Sans Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-mono-ps.otf",
+      "bytes": 23236,
+      "sha256": "6f47a0416b5cf399ea0276ace59e9a8a35678c302983d975e42907ff574a8b9b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Mono PS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-sans-mono.ttf",
+      "bytes": 29280,
+      "sha256": "609182c965482937fb486b76310c17e22348b5247cbe3044ad443a7ceb472329",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Sans Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/ubuntu.woff2",
+      "bytes": 91016,
+      "sha256": "c762acedc8ece90e4a691e44ad446a94e03fb4541e667e0b7cbe76101c9289e4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ubuntu"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/ubuntu-mono.ttf",
+      "bytes": 42288,
+      "sha256": "4ca82c9f98a14f5f3428911541fdf8a31521f1fadada74ccadafbbd830d551ad",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ubuntu Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-serif.woff2",
+      "bytes": 23992,
+      "sha256": "2d922eb439c28a6e6d53ca926002dc155f38dbb0143ee17f22ef177a791e2e24",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-sans.woff2",
+      "bytes": 21784,
+      "sha256": "88ea03ee321d797a56e9a2b85d1a0bc58f4418f83b86167f7e6c6b62956fd51e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/urw-bookman.woff2",
+      "bytes": 21932,
+      "sha256": "1ba6de984e57658e1779602fed35d18986456bd98aeb8ebe287db3e2caa880ff",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "URW Bookman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/ubuntu-mono.woff2",
+      "bytes": 21192,
+      "sha256": "80765f3ad2d9b1f2f716a0184e3d309d61be48ea342ffcc0ab0c86ca6b3c1a9f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ubuntu Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-sans.woff2",
+      "bytes": 20932,
+      "sha256": "cde1924d198ad15acb47880e25d37276330030441a2ab6da81385f77040b9f13",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-sans.otf",
+      "bytes": 26832,
+      "sha256": "2a088a75c7d3018b37f07b99c2fb79b28c0c6176ad74e671f3f69213949ef8f5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-serif.ttf",
+      "bytes": 43692,
+      "sha256": "a740863d8a300d99f9437ffb55cf9a4306483a705a6ab53a37cfa680b0981464",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-sans-narrow.woff2",
+      "bytes": 19520,
+      "sha256": "f2ea38193cb963a263c699e1a3322e728e61518662cdd23a4a73cd05f8d79042",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Sans Narrow"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/z003.woff2",
+      "bytes": 29696,
+      "sha256": "bce8665afc4db64dbf76e9649246664eceb46878cfe7fdc293d4b605d490ed4a",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Z003"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/ubuntu.ttf",
+      "bytes": 220108,
+      "sha256": "783d8b8eca29600bff957e098cf6c48b63f7abb90932db33083bda97065d7568",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ubuntu"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/freemono.ttf",
+      "bytes": 116976,
+      "sha256": "0f27f0dee65a5ea2ea52df9816d8f444a136346e1c846e71e15e76f90246c3cf",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "FreeMono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-roman.woff2",
+      "bytes": 22508,
+      "sha256": "c2085621454c32754f7f1705cf38e4ff4712fdd3d76aae340c787a4100891ad5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Roman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-mono-ps.woff2",
+      "bytes": 17384,
+      "sha256": "edd18e7b444561bc4ce6f97111de4e796a5f528592006866d6ee106c4a8958d1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Mono PS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/freesans.woff2",
+      "bytes": 50544,
+      "sha256": "28cf0cf31f69af57a3b43c39d6d8958962fca16bcd680d73eec45472f15c4c5c",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "FreeSans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/abyssinica-sil.ttf",
+      "bytes": 31496,
+      "sha256": "b080090f4be7306e3ff25ca5fb06209f6cf25d8576e51e13a2123b381f4ff599",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Abyssinica SIL"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-serif.woff2",
+      "bytes": 24180,
+      "sha256": "894214b6bed0a03852b7af41cc87439fd6c063d845276462ebf86bdc6f570126",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-color-emoji.woff2",
+      "bytes": 3776,
+      "sha256": "e8b95329cf688f6e39360977a693ce021cf7afe16d670a1e19f16d1b2cf66a6e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Color Emoji"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/standard-symbols-ps.woff2",
+      "bytes": 15900,
+      "sha256": "af272613ca840d810d01a37695618240f75376e1ec1df29cff4f3eff4f4e2bd3",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Standard Symbols PS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-sans.ttf",
+      "bytes": 44228,
+      "sha256": "cf8aed449e7a9b33d48ea52550109db56465d7668450d1a3358aaefd25f22120",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/p052.otf",
+      "bytes": 34064,
+      "sha256": "1fc13d610a18feb17973e02748d293ddbb1893e668ee7ebd668b875067776ba7",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "P052"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/standard-symbols-ps.otf",
+      "bytes": 20988,
+      "sha256": "e4fc572c8c2eb59c864195283a77b263cd8891a500aada2dd55cd96071300942",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Standard Symbols PS"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/freesans.ttf",
+      "bytes": 152032,
+      "sha256": "0e7c0be1ca6dcd558304c334ca7a4bd5bf078354e5dbcda46bbeaecac54cda00",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "FreeSans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-sans-narrow.ttf",
+      "bytes": 38400,
+      "sha256": "3f6c254b1b5b0ce5f19dceb1471b5a69674867e484fad8325ad9bf1044486b89",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Sans Narrow"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/nimbus-sans.woff2",
+      "bytes": 17912,
+      "sha256": "5b20f0d6ac61217468861e3445cd3851eba7adec4f0edfcc1585ec9365801fff",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Nimbus Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-sans.ttf",
+      "bytes": 40844,
+      "sha256": "decb3b6841a27b3577d8b8ece327ba2344bd0e21414832cc5f226a15907382d5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-mono.woff2",
+      "bytes": 17408,
+      "sha256": "c15b84e211958d5d552d5ae9f38815d5b42803dc66639a023066a97349bafa61",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/urw-bookman.otf",
+      "bytes": 32000,
+      "sha256": "a41e5103f44cece030d1aeb43ea7d281e8481abdb9e8047ad1454da437556230",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "URW Bookman"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/abyssinica-sil.woff2",
+      "bytes": 14608,
+      "sha256": "66054e146b2f8339c46469699ade48458fb5b559ad9d560d36608fb2f4eb76c6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Abyssinica SIL"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/freemono.woff2",
+      "bytes": 48892,
+      "sha256": "f6086c5ca098bd19b6fcd0b7b93a5b7e5236966cc2f08f893f7b1a7829bdd42f",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "FreeMono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-serif.ttf",
+      "bytes": 51976,
+      "sha256": "5411a584dbbaf94d79456e67bd01173d881a925e993526f791945ae7942bee67",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/dejavu-serif.woff2",
+      "bytes": 21020,
+      "sha256": "24dfc45b329c960e7fdf4f85f56ad3382e17ea26af0c6fd9d8bb609e360d34e5",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "DejaVu Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-mono.ttf",
+      "bytes": 30716,
+      "sha256": "0caac09f31ff735b2a1e22b058e36e883566c0f4574385c15fda298e542feb48",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-mono.ttf",
+      "bytes": 33832,
+      "sha256": "b7aa0d2947c44d837f5766f715de6249fd0384046a59be6577a5fc381c67e861",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/liberation-mono.woff2",
+      "bytes": 17244,
+      "sha256": "39de92eeecc1de03ddb45a67889232ad889dcd7a7b7b71e41cfd29081ca24ada",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Liberation Mono"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-sans.woff2",
+      "bytes": 22420,
+      "sha256": "e26c233ea8c1df797bf4d4b7c99f7bdcb7464fddb2215ae63f0d00544c155e6e",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/font-subsets/linux/noto-serif.ttf",
+      "bytes": 59504,
+      "sha256": "395d257c2a1e59ff6959f7f3f3f8bd36e225a6105c8b8375499d2e4aa3677f0d",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Serif"
+          ],
+          "copyrightPresent": false,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/ArkPixel12-zh_cn.woff2",
+      "bytes": 747716,
+      "sha256": "5117bc4d1580698347ce73346ff0c2f3cdb51be075962ff51d4cde3cbc80cf84",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ark Pixel 12px Prop zh_cn"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/ark-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/PixelifySans-600.ttf",
+      "bytes": 49644,
+      "sha256": "24f4a626bee444156e5c0d8cf14183da358bfde9c61fb6b51340c5f9e18a9845",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Pixelify Sans SemiBold"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": [
+            "https://scripts.sil.org/OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/ArkPixel12-latin.woff2",
+      "bytes": 744276,
+      "sha256": "762d0d78373fb0c2c842a2d4077bd8506f0067bda010c426740b69bfbdc990ce",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ark Pixel 12px Prop latin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/ark-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/PixelifySans-500.ttf",
+      "bytes": 49612,
+      "sha256": "14c3fa62e8b6ee421f6b9621e44a604af9f07add97ed3653356cd7d6933883d1",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Pixelify Sans Medium"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": [
+            "https://scripts.sil.org/OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/PixelifySans-700.ttf",
+      "bytes": 49396,
+      "sha256": "c67401df48ce6be02ffdf8129cdf274c5d7b27a673e15ed0f018e465028a8363",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Pixelify Sans"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": [
+            "https://scripts.sil.org/OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/PixelifySans-400.ttf",
+      "bytes": 49840,
+      "sha256": "616f3be4921e2e79ad58fc15fcfd0b3c3508a615811b1a518130d623030764e9",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Pixelify Sans"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": [
+            "https://scripts.sil.org/OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/cubic11.woff2",
+      "bytes": 400228,
+      "sha256": "d28e92846e00c3696b30d950d4eddf445dd90b2a970e67cdb629796c1997ef67",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cubic 11",
+            "俐方體11號",
+            "俐方體11号",
+            "俐方体11号"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/fusion-bold-latin.woff2",
+      "bytes": 907200,
+      "sha256": "6d8d5c7e0232048ac33ca501839b89fb7d2f7ff1a885172fe88ee32d39730bc6",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Fusion Bold Pixel 12px Prop latin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/pixel-font-studio/fusion-bold-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/fusion-zh_hans.woff2",
+      "bytes": 917432,
+      "sha256": "87886f3c93cc4528575f1c58f67fd8a94c9483a3e466006a97c6ddc63086d25b",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Fusion Pixel 12px Prop zh_hans"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/fusion-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/cubic11.ttf",
+      "bytes": 2773732,
+      "sha256": "0193f5f033612496df6b45ee92ac3b335bc6a5a24ff95da55ca87b33e57dcf62",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Cubic 11",
+            "俐方體11號",
+            "俐方體11号",
+            "俐方体11号"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": false,
+          "licenseUrls": []
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/ark-zh_cn.woff2",
+      "bytes": 747716,
+      "sha256": "5117bc4d1580698347ce73346ff0c2f3cdb51be075962ff51d4cde3cbc80cf84",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ark Pixel 12px Prop zh_cn"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/ark-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/fusion-bold-zh_hans.woff2",
+      "bytes": 911884,
+      "sha256": "918f62f4188225735bfa4765890ac61180ba664cc7cd6f0810855a78343e4043",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Fusion Bold Pixel 12px Prop zh_hans"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/pixel-font-studio/fusion-bold-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/ark-latin.woff2",
+      "bytes": 744276,
+      "sha256": "762d0d78373fb0c2c842a2d4077bd8506f0067bda010c426740b69bfbdc990ce",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Ark Pixel 12px Prop latin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/ark-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/jelly-zh_cn.woff2",
+      "bytes": 73140,
+      "sha256": "8de213c74d1c8077d34f88a7d7018a43e31509f3d6d474a874cea116e3547dd4",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Jelly Pixel 12px Prop zh_cn"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/jelly-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/jelly-latin.woff2",
+      "bytes": 74460,
+      "sha256": "cc84da4d0fff08a1ccdbc9dd640371557a29215d77eb55371255deaae67c0b38",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Jelly Pixel 12px Prop latin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/jelly-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/assets/fonts/_preview/fonts/fusion-latin.woff2",
+      "bytes": 911436,
+      "sha256": "96160aa0153502788c72d70bf3e9dd2cfbbe7943940b1477afe67b88f2084139",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Fusion Pixel 12px Prop latin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "https://github.com/TakWolf/fusion-pixel-font/blob/master/LICENSE-OFL"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/lyco/ui-font/NotoSansSC-VF.ttf",
+      "bytes": 17772300,
+      "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+      "faces": [
+        {
+          "index": 0,
+          "family": [
+            "Noto Sans SC Thin"
+          ],
+          "copyrightPresent": true,
+          "licenseDescriptionPresent": true,
+          "licenseUrls": [
+            "http://scripts.sil.org/OFL"
+          ]
+        }
+      ]
+    }
+  ],
+  "originalInventorySha256": "3491253ba2531d6f1485bda504fbeffac7ae1b8e9318e698a4bc8050a7d9afd4"
+}

@@ -300,8 +300,6 @@ jobs:
       # GitHub exposes draft assets only to push-capable credentials. This
       # isolated job only downloads the pinned private candidate; no publishing.
       contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
@@ -312,9 +310,13 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/font-audit-tools"
           "$RUNNER_TEMP/font-audit-tools/bin/pip" install fonttools==4.60.1 Brotli==1.1.0
       - name: Read only the retained candidate with its exact reviewed digest
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$RUNNER_TEMP/font-audit-input"
           gh release download ci-e5ed18067c7a -R "$GITHUB_REPOSITORY" -p LYCO-Browser-Linux-x64-MVP.tar.gz -D "$RUNNER_TEMP/font-audit-input"
+      - name: Decode original font metadata without repository credentials
+        run: |
           "$RUNNER_TEMP/font-audit-tools/bin/python" scripts/audit-packaged-fonts.py "$RUNNER_TEMP/font-audit-input/LYCO-Browser-Linux-x64-MVP.tar.gz" "$RUNNER_TEMP/font-audit-evidence"
       - name: Retain original copyright and license fields with file hashes
         if: always()
