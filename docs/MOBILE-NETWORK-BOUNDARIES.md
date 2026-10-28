@@ -21,3 +21,13 @@
 扩展探测直接运行所构建的原签名 APK：每个阶段用八个不同 STUN 端口，覆盖首脚本、初始 about:blank、srcdoc 的嵌套空帧、跨域子帧、原型构造器、可用的旧别名、setConfiguration 和被改写的基础方法。所有原生事件、SDP 和 local-candidate 统计原样保留。断线阶段复用预先加载的子帧，避免把子帧下载失败误当作保护；实际完成状态先取原生 UI 和上游停止快照，再仅恢复报告上传路径。
 
 功能正向使用测试自有 [coturn](https://github.com/coturn/coturn/blob/master/README.turnserver) TCP 入口和 [aiortc](https://aiortc.readthedocs.io/en/latest/api.html) 对端。coturn 只绑定 runner 的回环地址，使用明确 CI 凭据和测试专用回环 relay；数据通道必须实际收发 PING/ACK，TURN 原始 TCP 按连接源端口区分所选代理与直接连接。前后同 provider 的普通 WebView 同样必须通过真实 TURN 数据通道，防止服务夹具失效造成伪阴性。原始 relay 地址允许出现在 TURN 正向记录中，设备 host/srflx 和相关地址仍拒绝；STUN 场景原有无字面 IP 断言不变。本探测不是摄像头/音频、所有网站或公网 TURN 可用性证明。
+
+## 扩展原生结果：部分约束有效，空文档仍绕过
+
+`ced08fe` 签名构建 [40721798567](https://github.com/lilyco-42/lyco-browser/actions/runs/40721798567) 的原有原生回归成功。对其同一未修改 APK，扩展 [40724556782](https://github.com/lilyco-42/lyco-browser/actions/runs/40724556782) 已完整运行并明确失败，`validProbe=true`。APK SHA-256 为 `3b8ba20629c1f8d9d0661318740938c31ab7225f4624fde5b91e1be6c9995038`，保留签名匹配，运行时源码差异为空。
+
+前后普通 WebView 的八个场景各收到实际 STUN，真实 TURN 数据通道也各收到 ACK。产品主页面、跨域页面、原型/旧别名、setConfiguration 和基础方法改写均实际为 relay，原始候选、候选 SDP 与 local-candidate 统计无设备地址；主页面实际 TURN TCP 经所选上游并收到真实 ACK，断线上游后未出现直接 TURN TCP 或 ACK。
+
+**初始 about:blank 与 srcdoc 内新建空帧仍为 `iceTransportPolicy=all`。** 健康及断线上游时各收到两次实际 STUN，两个上下文均在原生事件、SDP 和统计暴露实际 IPv4/IPv6 host 与 NAT srflx 地址。断线阶段的原始 UI、上游停止快照及恢复后上传的原观察均保留；没有重复健康条件下的停止探测，也没有改写 native 读数。全部 PeerConnection 均真实创建，因此不能归为不支持 RTC 或对照无效。
+
+下一步决策：document-start 策略不能作为完整新上下文的安全边界。不能用只拦 `contentWindow` 的 getter 来覆盖现有两个测试后宣称修复，因为同源窗口还可经 `window.frames`、`contentDocument.defaultView`、文档同步写入等路径取得。继续评估能在原生引擎层统一生效的公开策略；GeckoView 的 WebExtension `privacy.network.webRTCIPHandlingPolicy` 有原生候选，但尚无本产品原生证据，且引擎更换必须处理并保留现有 Chromium Cookie/IndexedDB 数据，不能静默丢弃。当前未更换产品引擎、未增加 VPN、未批准商业发行。
