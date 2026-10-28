@@ -297,7 +297,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
-      contents: read
+      # GitHub exposes draft assets only to push-capable credentials. This
+      # isolated job only downloads the pinned private candidate; no publishing.
+      contents: write
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
