@@ -129,14 +129,14 @@ try {
   globalThis.__lycoStartupReadinessEvidence=globalThis.__lycoTargetEvidence.startupReadiness;
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await application.evaluate(async({shell},port)=>{
-  globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
+  globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];globalThis.__lycoFixturePlan='proxy_1m';
   shell.openExternal=async url=>{globalThis.__lycoOpened.push(url)};
   globalThis.fetch=async(url,options={})=>{
    const root='https://lain42.top/studio/api';
    if(!String(url).startsWith(root+'/'))throw Error('Unexpected fixture host');
    if(url===root+'/login')return new Response(JSON.stringify({token:'CI_FIXTURE_TOKEN'}),{status:200});
    if(options.headers?.Authorization!=='Bearer CI_FIXTURE_TOKEN')return new Response('{}',{status:401});
-   if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
+   if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoFixturePlan,status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
    if(url===root+'/sub/CIfixture123456/clash')return new Response(JSON.stringify({proxies:[{name:'ci-node',type:'http',server:'127.0.0.1',port}], 'proxy-groups':[{name:'PROXY',type:'select',proxies:['ci-node']}]}),{status:200});
    throw Error('Unexpected fixture endpoint');
   };
@@ -161,7 +161,7 @@ try {
  // not split our complete localized strings into Chinese/English fragments.
  for (const locale of ['zh-CN','en']) {
   assert.equal(await page.evaluate(locale=>window.OpenBrowserI18n.setLocale(locale),locale),locale);
-  assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证月卡');
+  assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证订阅');
   assert.equal(await page.locator('#lyco-copy-extension').textContent(),'复制浏览器插件连接码');
   assert.equal(await page.locator('[data-view="lyco"] span').textContent(),'账户与代理');
   assert.equal(await page.locator('#lyco-password').getAttribute('placeholder'),'网站密码');
@@ -174,8 +174,19 @@ try {
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);
- assert.equal(await page.locator('#lyco-account-chip').textContent(),'月卡可用');
+ assert.equal(await page.locator('#lyco-account-chip').textContent(),'代理月卡可用');
  report.checks.push('native-login-valid-entitlement');
+ for(const [code,label] of [['proxy_3m','代理季卡'],['proxy_4m','代理120天套餐'],['proxy_1y','代理年卡']]){
+  await application.evaluate((_electron,code)=>{globalThis.__lycoFixturePlan=code},code);
+  await page.locator('#lyco-refresh').click();
+  await page.waitForFunction(label=>document.getElementById('lyco-account-chip').textContent===label+'可用',label);
+  assert.ok((await page.locator('#lyco-account-status').textContent()).includes('有效'+label));
+  await page.screenshot({path:path.join(evidence,'account-'+code+'.png')});
+ }
+ await application.evaluate(()=>{globalThis.__lycoFixturePlan='proxy_1m'});
+ await page.locator('#lyco-refresh').click();
+ await page.waitForFunction(()=>document.getElementById('lyco-account-chip').textContent==='代理月卡可用');
+ report.checks.push('native-long-term-proxy-plan-labels-and-compatible-entitlement');
  const connections=await page.evaluate(()=>Promise.all([window.ops.lycoConnect(),window.ops.lycoConnect()]));
  assert.equal(connections[0].port,connections[1].port);
  report.checks.push('concurrent-connect-same-core-port');
@@ -411,7 +422,7 @@ try {
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#lyco-buy').click();
  await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('已在系统浏览器打开'));
- assert.deepEqual(await application.evaluate(()=>globalThis.__lycoOpened),['https://lain42.top/shop/#proxy_1m']);
+ assert.deepEqual(await application.evaluate(()=>globalThis.__lycoOpened),['https://lain42.top/vpn/#plans']);
  await application.evaluate(()=>{globalThis.__lycoFixtureOwner='ci-owner-b'});
  await assert.rejects(()=>page.evaluate(()=>window.ops.startProfile(window.__lycoCreated)),/另一网站账号/);
  await application.evaluate(()=>{globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=true});

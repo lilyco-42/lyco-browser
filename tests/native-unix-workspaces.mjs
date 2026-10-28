@@ -109,11 +109,12 @@ try{
   globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork);
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await app.evaluate((_electron,port)=>{
+  globalThis.__lycoUnixPlan='proxy_1m';
   globalThis.fetch=async(url,options={})=>{
    const root='https://lain42.top/studio/api';
    if(url===root+'/login')return new Response(JSON.stringify({token:'CI_UNIX_ONLY'}));
    if(options.headers?.Authorization!=='Bearer CI_UNIX_ONLY')return new Response('{}',{status:401});
-   if(url===root+'/me')return new Response(JSON.stringify({username:'ci-unix-owner',entitlements:[{product:'proxy_1m',status:'active',expires_at:'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIunixfixture'}}]}));
+   if(url===root+'/me')return new Response(JSON.stringify({username:'ci-unix-owner',entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoUnixPlan,status:'active',expires_at:'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIunixfixture'}}]}));
    if(url===root+'/sub/CIunixfixture/clash')return new Response(JSON.stringify({proxies:[{name:'ci-http',type:'http',server:'127.0.0.1',port}],'proxy-groups':[{name:'PROXY',type:'select',proxies:['ci-http']}]}));
    throw Error('Unexpected CI Billing endpoint');
   };
@@ -123,6 +124,17 @@ try{
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);
  report.checks.push('native-login');
+ for(const [code,label] of [['proxy_3m','代理季卡'],['proxy_4m','代理120天套餐'],['proxy_1y','代理年卡']]){
+  await app.evaluate((_electron,code)=>{globalThis.__lycoUnixPlan=code},code);
+  await page.locator('#lyco-refresh').click();
+  await page.waitForFunction(label=>document.getElementById('lyco-account-chip').textContent===label+'可用',label);
+  assert.ok((await page.locator('#lyco-account-status').textContent()).includes('有效'+label));
+  await page.screenshot({path:path.join(evidence,'account-'+code+'.png')});
+ }
+ await app.evaluate(()=>{globalThis.__lycoUnixPlan='proxy_1m'});
+ await page.locator('#lyco-refresh').click();
+ await page.waitForFunction(()=>document.getElementById('lyco-account-chip').textContent==='代理月卡可用');
+ report.checks.push('native-long-term-proxy-plan-labels-and-compatible-entitlement');
  const profiles=[];
  for(let i=0;i<2;i++){
   const result=await page.evaluate(()=>window.ops.lycoCreateProfile());

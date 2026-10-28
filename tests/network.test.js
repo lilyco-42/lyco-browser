@@ -14,7 +14,7 @@ test('entitlement strictly requires valid paid-product status, domain and expiry
   assert.equal(extractEntitlement({entitlements:[{...active,product:'rembg_creator'}]}),null);
   assert.equal(extractEntitlement({entitlements:[{...active,expires_at:'2020-01-01T00:00:00Z'}]}),null);
   assert.equal(extractEntitlement({entitlements:[{...active,meta:{sub_url:'https://fake.example/sub/abc'}}]}),null);
-  assert.match(SHOP,/^https:\/\/lain42\.top\/shop\//);
+  assert.equal(SHOP,'https://lain42.top/vpn/#plans');
   assert.match(ACCOUNT,/^https:\/\/lain42\.top\/account\//);
 });
 test('safe Mihomo config never exposes external controller nor LAN listener',()=>{
@@ -54,9 +54,23 @@ test('login fetches site entitlement and holds JWT privately in main only',async
 });
 test('rejects anonymous connection, invalid login and bad core path',async()=>{
  const app=new LycoNetwork({dataDir:__dirname,fetchFn:async()=>{throw Error('must not fetch');}});
- await assert.rejects(()=>app.connect(),/proxy_1m/);
+ await assert.rejects(()=>app.connect(),/代理订阅/);
  await assert.rejects(()=>app.login({username:'hi',password:'a'}));
  assert.throws(()=>app.selectCore('C:\\fake\\other.exe'));
+});
+test('long-term purchase names cross the renderer boundary without subscription secrets',async()=>{
+ for(const [code,label] of [['proxy_3m','代理季卡'],['proxy_4m','代理120天套餐'],['proxy_1y','代理年卡'],['constructor','代理订阅']]){
+  for(const fromMeta of [false,true]){
+   const item={...active,...(fromMeta?{meta:{...active.meta,purchase_product:code}}:{purchase_product:code})};
+   const app=new LycoNetwork({dataDir:__dirname,fetchFn:async url=>new Response(JSON.stringify(url.endsWith('/login')?{token:'CI_PLAN_PRIVATE_TOKEN'}:{username:'CI-plan-owner',entitlements:[item]}))});
+   try{
+    const state=await app.login({username:'CI-plan-owner',password:'CI-plan-password'});
+    assert.equal(state.entitled,true);assert.equal(state.plan_name,label);assert.equal(state.expires_at,active.expires_at);
+    assert.doesNotMatch(JSON.stringify(state),/CI_PLAN_PRIVATE_TOKEN|abcdef098765|sub_url/);
+   }finally{await app.logout()}
+  }
+ }
+ assert.equal(extractEntitlement({entitlements:[{...active,product:'proxy_3m'}]}),null);
 });
 
 test('logout cancels a pending login response instead of reviving the session',async()=>{

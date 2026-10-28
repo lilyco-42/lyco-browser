@@ -8,7 +8,7 @@ const net = require('node:net');
 const { spawn } = require('node:child_process');
 
 const API = 'https://lain42.top/studio/api';
-const SHOP = 'https://lain42.top/shop/#proxy_1m';
+const SHOP = 'https://lain42.top/vpn/#plans';
 const ACCOUNT = 'https://lain42.top/account/';
 const SUB_REGEX = /^https:\/\/lain42\.top\/panel\/api\/sub\/([A-Za-z0-9_-]{6,128})$/;
 const TOKEN_REGEX = /^[A-Za-z0-9_-]{6,128}$/;
@@ -21,7 +21,15 @@ function extractEntitlement(me, now = Date.now()) {
     if (!match) continue;
     const expire = item.expires_at ? Date.parse(item.expires_at) : null;
     if (item.expires_at && (!Number.isFinite(expire) || expire <= now)) continue;
-    return { token: match[1], expires_at: item.expires_at || null };
+    const purchased=item.purchase_product||item.meta?.purchase_product||item.product;
+    let plan_name='代理订阅';
+    switch(purchased){
+      case 'proxy_1m':plan_name='代理月卡';break;
+      case 'proxy_3m':plan_name='代理季卡';break;
+      case 'proxy_4m':plan_name='代理120天套餐';break;
+      case 'proxy_1y':plan_name='代理年卡';break;
+    }
+    return { token: match[1], expires_at: item.expires_at || null, plan_name };
   }
   return null;
 }
@@ -223,13 +231,14 @@ class LycoNetwork {
     return {
       username: this.username || '', logged_in: Boolean(this.token),
       entitled: Boolean(this.entitlement), expires_at: this.entitlement?.expires_at || null,
+      plan_name: this.entitlement ? this.entitlement.plan_name||'代理订阅' : null,
       connected, port: connected ? this.port : null,
       has_core: Boolean(this.findCore()),
     };
   }
   async extensionConnection() {
     const state = await this.refresh();
-    if (!state.entitled || !state.connected) throw Error('请先登录有效月卡并连接本地代理');
+    if (!state.entitled || !state.connected) throw Error('请先登录有效代理订阅并连接本地代理');
     const issuedAt = Date.now();
     const expiresAt = Math.min(issuedAt + 8 * 60 * 60 * 1000,
       this.entitlement?.expires_at ? Date.parse(this.entitlement.expires_at) : Infinity);
@@ -259,7 +268,7 @@ class LycoNetwork {
     const epoch=this.connectionEpoch;
     const stillCurrent=()=>{if(epoch!==this.connectionEpoch)throw Error('连接已取消，请重新连接');};
     if (this.status().connected) return this.status();
-    if (!this.token || !this.entitlement) throw Error('需要先购买并激活 proxy_1m 代理月卡');
+    if (!this.token || !this.entitlement) throw Error('需要先购买并激活代理订阅');
     if (!TOKEN_REGEX.test(this.entitlement.token)) throw Error('订阅令牌无效');
     const core = this.findCore();
     if (!core) throw Error('请先导入官方 mihomo.exe 代理内核');

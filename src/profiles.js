@@ -38,7 +38,7 @@ class LycoProfiles {
   }
   async authorized(owner) {
     const state=await this.network.refresh();
-    if(!state.logged_in || !state.entitled || !state.username) throw Error('请登录并开通有效代理月卡');
+    if(!state.logged_in || !state.entitled || !state.username) throw Error('请登录并开通有效代理订阅');
     if(owner && state.username!==owner) throw Error('此环境属于另一网站账号，请切回原账号后启动');
     const connectionEpoch=this.network.connectionEpoch;
     const connected=await this.network.connect();
@@ -55,7 +55,7 @@ class LycoProfiles {
   }
   async proxy(state, existingId) {
     const payload={name:'LYCO 专属线路',protocol:'http',host:'127.0.0.1',port:state.port,
-      raw:'http://127.0.0.1:'+state.port,remark:'LYCO Browser · 网站月卡管理'};
+      raw:'http://127.0.0.1:'+state.port,remark:'LYCO Browser · 网站订阅管理'};
     const store=typeof this.proxyStore==='function'?this.proxyStore():this.proxyStore;
     if(!store) throw Error('代理库尚未就绪，请稍后重试');
     const record=await (existingId ? store.update(existingId,payload) : store.create(payload));

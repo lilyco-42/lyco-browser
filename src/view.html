@@ -1,23 +1,23 @@
 <section class="view" id="view-lyco" lang="zh-CN" translate="no" aria-labelledby="lyco-panel-title">
  <div class="lyco-panel-shell">
   <header class="lyco-panel-header">
-   <div><p class="lyco-panel-eyebrow">LYCO BROWSER / 账户与网络</p><h1 id="lyco-panel-title">你的账户、网络与独立环境</h1><p class="lyco-panel-intro">登录已有网站账号，核对月卡，再创建并启动环境。浏览器和环境数据保存在本机。</p></div>
+   <div><p class="lyco-panel-eyebrow">LYCO BROWSER / 账户与网络</p><h1 id="lyco-panel-title">你的账户、网络与独立环境</h1><p class="lyco-panel-intro">登录已有网站账号，核对订阅，再创建并启动环境。浏览器和环境数据保存在本机。</p></div>
    <span class="lyco-panel-local">本机工作区</span>
   </header>
   <ol id="lyco-steps" class="lyco-panel-steps" aria-label="开始使用的四个步骤">
    <li><span>01</span><div><strong>登录账户</strong><p>使用你的网站账号</p></div></li>
-   <li><span>02</span><div><strong>确认权益</strong><p>核对月卡与到期时间</p></div></li>
+   <li><span>02</span><div><strong>确认权益</strong><p>核对订阅与到期时间</p></div></li>
    <li><span>03</span><div><strong>创建环境</strong><p>自动绑定本站网络</p></div></li>
    <li><span>04</span><div><strong>启动使用</strong><p>到环境列表点击启动</p></div></li>
   </ol>
   <div class="lyco-panel-grid">
    <article class="card lyco-panel-card" aria-labelledby="lyco-account-heading">
-    <header class="lyco-panel-card-header"><div><p class="lyco-panel-eyebrow">账户</p><h2 id="lyco-account-heading">登录及月卡</h2></div><span id="lyco-account-chip" class="lyco-panel-state">待登录</span></header>
+    <header class="lyco-panel-card-header"><div><p class="lyco-panel-eyebrow">账户</p><h2 id="lyco-account-heading">登录及订阅</h2></div><span id="lyco-account-chip" class="lyco-panel-state">待登录</span></header>
     <p class="lyco-panel-copy">使用 lain42.top 账号登录。密码仅用于本次登录验证。</p>
     <form id="lyco-login" class="lyco-panel-login">
      <label for="lyco-username">用户名<input id="lyco-username" autocomplete="username" required minlength="3" maxlength="120" placeholder="网站用户名"></label>
      <label for="lyco-password">密码<input id="lyco-password" type="password" autocomplete="current-password" required minlength="8" placeholder="网站密码"></label>
-     <button type="submit" class="primary">登录并验证月卡</button>
+     <button type="submit" class="primary">登录并验证订阅</button>
     </form>
     <p id="lyco-account-status" class="lyco-panel-status" role="status">尚未登录</p>
     <div class="lyco-panel-actions"><button type="button" id="lyco-refresh" class="outline">刷新权益</button><button type="button" id="lyco-logout" class="outline">退出账号</button></div>
@@ -27,14 +27,14 @@
     <p class="lyco-panel-copy">一键创建会连接本站网络并绑定环境；已有自有代理也可以在代理库中配置。</p>
     <p id="lyco-network-status" class="lyco-panel-status" role="status">未连接</p>
     <div class="lyco-panel-primary-actions"><button type="button" id="lyco-create-profile" class="primary">一键创建专属代理环境</button><button type="button" id="lyco-go-profiles" class="outline">查看环境列表</button></div>
-    <p class="lyco-panel-hint">创建后，在环境列表点击启动。每次启动会核对所属账号及月卡；退出账号会关闭本站受管环境。</p>
+    <p class="lyco-panel-hint">创建后，在环境列表点击启动。每次启动会核对所属账号及订阅；退出账号会关闭本站受管环境。</p>
     <div class="lyco-panel-actions"><button type="button" id="lyco-connect" class="outline">连接代理</button><button type="button" id="lyco-disconnect" class="outline">断开代理</button></div>
     <button type="button" id="lyco-copy-extension" class="outline lyco-panel-wide">复制浏览器插件连接码</button>
     <details class="lyco-panel-advanced" id="lyco-network-advanced"><summary>高级网络设置</summary><p class="lyco-panel-hint">仅为选定的浏览器环境提供连接，不修改系统网络设置。使用自有代理时，先打开代理库。</p><div class="lyco-panel-actions"><button type="button" id="lyco-pick-core" class="outline">导入 mihomo.exe</button><button type="button" id="lyco-import" class="outline" disabled>导入当前代理到代理库</button><button type="button" id="lyco-go-proxies" class="outline">打开代理库</button></div></details>
    </article>
    <article class="card lyco-panel-card lyco-panel-purchase" aria-labelledby="lyco-purchase-heading">
-    <div><p class="lyco-panel-eyebrow">购买与续费</p><h2 id="lyco-purchase-heading">在官网完成结算，回到这里刷新权益</h2><p class="lyco-panel-copy">充值、月卡和订单均在官网管理。已购买但状态未更新时，点击上方「刷新权益」。</p></div>
-    <div class="lyco-panel-actions"><button type="button" id="lyco-buy" class="primary">购买 / 续费代理月卡</button><button type="button" id="lyco-account" class="outline">官网账户 / 订单</button></div>
+    <div><p class="lyco-panel-eyebrow">购买与续费</p><h2 id="lyco-purchase-heading">在官网完成结算，回到这里刷新权益</h2><p class="lyco-panel-copy">月卡、90天季卡、120天套餐和年卡均在官网选择，充值和订单也在官网管理。已购买但状态未更新时，点击上方「刷新权益」。</p></div>
+    <div class="lyco-panel-actions"><button type="button" id="lyco-buy" class="primary">购买 / 续费代理订阅</button><button type="button" id="lyco-account" class="outline">官网账户 / 订单</button></div>
    </article>
   </div>
   <p id="lyco-feedback" role="status" aria-live="polite" class="lyco-panel-feedback"></p>

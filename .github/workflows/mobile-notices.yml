@@ -20,6 +20,7 @@ jobs:
       - run: node apps/universal/scripts/collect-npm-notices.mjs
       - run: node --test tests/npm-notices.test.mjs
       - run: node --experimental-strip-types --test tests/mobile-billing.test.mjs
+      - run: node --test tests/network.test.js tests/profiles.test.js
       - run: npx tsc --noEmit
         working-directory: apps/universal
       - run: npx expo export --platform web --output-dir dist-web
