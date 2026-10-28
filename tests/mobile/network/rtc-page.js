@@ -2,7 +2,7 @@
 // statistics, configurations, transports or the product's script policy.
 (async () => {
  const config=LYCO_FIXTURE_CONFIGURATION;
- const cases=['first-script','initial-aboutblank','srcdoc-nested','cross-origin','prototype-constructor','legacy-constructor','set-configuration','changed-primordials'];
+ const cases=config.cases;
  const literal=address=>/^(?:\d{1,3}\.){3}\d{1,3}$/.test(address)||address.includes(':');
  const candidate=value=>{
   const fields=String(value||'').replace(/^a=/,'').split(/\s+/);
@@ -106,28 +106,44 @@
  async function run(phase){
   // The first page script creates a real PC before constructing other contexts.
   const first=observe(window,'first-script',phase);
-  const blank=document.createElement('iframe');blank.style.display='none';document.documentElement.appendChild(blank);
-  const initial=observe(blank.contentWindow,'initial-aboutblank',phase).finally(()=>blank.remove());
-  const remaining=cases.slice(2).map(name=>child(name,phase,name==='srcdoc-nested'));
+  const blankNames=['initial-aboutblank','frames-index','document-default-view'];
+  const blanks=blankNames.map(name=>{
+   const frame=document.createElement('iframe');frame.style.display='none';document.documentElement.appendChild(frame);
+   const scope=name==='frames-index'?window.frames[window.frames.length-1]:name==='document-default-view'?frame.contentDocument.defaultView:frame.contentWindow;
+   return observe(scope,name,phase).finally(()=>frame.remove());
+  });
+  const remaining=cases.filter(name=>name!=='first-script'&&!blankNames.includes(name)).map(name=>child(name,phase,name==='srcdoc-nested'));
   const turn=observe(window,'turn-tcp',phase,true);
-  const observations=await Promise.all([first,initial,...remaining]);
+  const loopbacks=Promise.all(config.loopbacks.map(async host=>{
+   const result={host,phase,ok:false};const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),3500);
+   try{const response=await fetch('http://'+host+':18080/loopback?phase='+phase+'&family='+encodeURIComponent(host),{signal:controller.signal});
+    result.ok=response.ok&&(await response.json()).alive===true;
+   }catch(error){result.errorType=error.name}finally{clearTimeout(timeout)}return result;
+  }));
+  const observations=await Promise.all([first,...blanks,...remaining]);
   retained={phase,completed:true,apiPresent:true,offerCreated:observations.every(row=>row.applicable===false||row.offerCreated),
-   blocked:observations.some(row=>row.blocked),literalIP:observations.some(row=>row.literalIP),cases:observations,turn:await turn};
+   blocked:observations.some(row=>row.blocked),literalIP:observations.some(row=>row.literalIP),cases:observations,turn:await turn,loopbacks:await loopbacks};
   document.getElementById('details').textContent='LYCO_RTC_JSON:'+JSON.stringify({phase,completed:true,offerCreated:retained.offerCreated,
    cases:observations.map(row=>({case:row.case,applicable:row.applicable,completed:row.completed,offerCreated:row.offerCreated,blocked:row.blocked,literalIP:row.literalIP})),
    turn:{completed:retained.turn.completed,dataAck:retained.turn.dataAck,offerCreated:retained.turn.offerCreated}});
   document.getElementById('status').textContent='LYCO RTC '+phase+' completed';
+  document.title='LYCO RTC '+phase+' completed';
   try{await upload()}catch{}
  }
  async function upload(){
   const response=await fetch('/report?phase='+encodeURIComponent(retained.phase),{method:'POST',body:JSON.stringify(retained)});
   if(!response.ok)throw Error('Report upload failed');
  }
+ async function uploadRetained(){
+  try{await upload();document.getElementById('status').textContent='LYCO RTC stopped report retained';document.title='LYCO RTC stopped report retained'}catch{}
+ }
+ window.addEventListener('hashchange',()=>{
+  if(location.hash==='#stopped')run('stopped');
+  if(location.hash==='#upload')uploadRetained();
+ });
  document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('again').onclick=()=>run('stopped');
-  document.getElementById('upload').onclick=async()=>{
-   try{await upload();document.getElementById('status').textContent='LYCO RTC stopped report retained'}catch{}
-  };
+  document.getElementById('upload').onclick=uploadRetained;
  });
  await run(config.phase);
 })();

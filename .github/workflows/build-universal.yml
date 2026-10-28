@@ -34,9 +34,13 @@ on:
         description: Probe actual native RTC boundaries of an unchanged signed Android candidate with same-device direct controls
         type: string
         default: ''
+      native_engine_probe:
+        description: 'Standalone non-debuggable Gecko native policy capability experiment; no product engine change'
+        type: boolean
+        default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build') }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.native_engine_probe && 'engine-probe' || (inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build')) }}
   # Preserve the active native runtime evidence; newer pushes replace only the
   # pending run. A long iOS/Android acceptance must not be erased by a docs fix.
   cancel-in-progress: false
@@ -50,7 +54,7 @@ defaults:
 
 jobs:
   web:
-    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate && !inputs.native_engine_probe }}
     name: React Native Web / Windows macOS Linux shared UI
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -90,7 +94,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
 
   android:
-    if: ${{ !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
+    if: ${{ !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate && !inputs.native_engine_probe }}
     name: Android standalone preview / signed candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 70
@@ -222,7 +226,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
 
   ios-simulator:
-    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate && !inputs.network_probe_candidate && !inputs.native_engine_probe }}
     name: iOS 26 simulator unsigned app · no signing
     runs-on: macos-26
     timeout-minutes: 90
@@ -326,7 +330,7 @@ jobs:
           retention-days: 7
 
   ios-device:
-    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android && !inputs.paid_routes_candidate && !inputs.network_probe_candidate
+    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android && !inputs.paid_routes_candidate && !inputs.network_probe_candidate && !inputs.native_engine_probe
     name: iPhone ARM64 unsigned device archive · signing and runtime review required
     runs-on: macos-26
     timeout-minutes: 60
@@ -389,7 +393,7 @@ jobs:
           retention-days: 7
 
   android-paid-routes:
-    if: ${{ inputs.paid_routes_candidate != '' && !inputs.network_probe_candidate }}
+    if: ${{ inputs.paid_routes_candidate != '' && !inputs.network_probe_candidate && !inputs.native_engine_probe }}
     name: Actual signed Android saved-node acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -475,7 +479,7 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/lyco-paid-private-ca" "$RUNNER_TEMP/lyco-paid-private-storage"
 
   android-network-probe:
-    if: ${{ inputs.network_probe_candidate != '' }}
+    if: ${{ inputs.network_probe_candidate != '' && !inputs.native_engine_probe }}
     name: Actual signed Android native RTC boundary probe
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -504,15 +508,7 @@ jobs:
       - name: Build only a separate plain WebView positive control with matching target SDK
         run: bash tests/mobile/network/build-control.sh
       - name: Prepare owned TURN TCP and real data-channel peer
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends coturn
-          sudo systemctl stop coturn || true
-          python3 -m venv "$RUNNER_TEMP/lyco-network-peer"
-          "$RUNNER_TEMP/lyco-network-peer/bin/pip" install aiortc==1.15.0
-          "$RUNNER_TEMP/lyco-network-peer/bin/pip" freeze > "$RUNNER_TEMP/lyco-mobile-network/peer-dependencies.txt"
-          dpkg-query -W coturn > "$RUNNER_TEMP/lyco-mobile-network/coturn-version.txt"
-          echo "LYCO_NETWORK_PYTHON=$RUNNER_TEMP/lyco-network-peer/bin/python" >> "$GITHUB_ENV"
+        run: bash tests/mobile/network/prepare-peer.sh
       - name: Check network fixture syntax before the native observation
         run: |
           python3 -m py_compile tests/mobile/network/fixture.py tests/mobile/network/turn_peer.py tests/mobile/network/assert-evidence.py
@@ -546,3 +542,64 @@ jobs:
       - name: Remove disposable control signing material
         if: always()
         run: rm -rf "$RUNNER_TEMP/lyco-network-control-private"
+
+  android-native-engine-probe:
+    if: ${{ inputs.native_engine_probe }}
+    name: Standalone Gecko native policy experiment · not the product
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions: {contents: read}
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Require an isolated experiment dispatch
+        env:
+          SIGNED: ${{ inputs.signed_android }}
+          IOS: ${{ inputs.ios_device }}
+          PAID: ${{ inputs.paid_routes_candidate }}
+          NETWORK: ${{ inputs.network_probe_candidate }}
+        run: test "$SIGNED" = false && test "$IOS" = false && test -z "$PAID" && test -z "$NETWORK"
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: gradle/actions/setup-gradle@v4
+        with: {gradle-version: '8.13', cache-disabled: true}
+      - name: Build the standalone release-mode engine experiment
+        run: bash tests/mobile/engine/build-probe.sh
+      - name: Prepare owned TURN and peer, then check fixture syntax
+        run: |
+          bash tests/mobile/network/prepare-peer.sh
+          python3 -m py_compile tests/mobile/network/fixture.py tests/mobile/network/turn_peer.py tests/mobile/network/assert-evidence.py
+          node --check tests/mobile/network/rtc-page.js
+          bash -n tests/mobile/engine/run-probe.sh
+      - name: Enable KVM for native engine observations
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Native before-after controls, empty frames, TURN and real loopback targets
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: bash tests/mobile/engine/run-probe.sh
+      - name: Preserve original experiment binary, native observations and counterexamples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-engine-experiment-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-mobile-network
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Remove experiment signing material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/lyco-engine-private"

@@ -1,0 +1,10 @@
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+if (System.getenv('GITHUB_ACTIONS') != 'true') {
+    throw new GradleException('Native engine experiments run only in GitHub Actions')
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories { google(); mavenCentral(); maven { url 'https://maven.mozilla.org/maven2' } }
+}
+rootProject.name = 'LycoNativeEngineExperiment'
+include ':app'

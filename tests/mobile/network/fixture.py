@@ -20,8 +20,9 @@ root.mkdir(parents=True, exist_ok=True)
 lock = threading.RLock()
 sources, active, ports = set(), set(), {}
 phases = ['control', 'lyco', 'stopped', 'control-after']
-cases = ['first-script', 'initial-aboutblank', 'srcdoc-nested', 'cross-origin', 'prototype-constructor', 'legacy-constructor', 'set-configuration', 'changed-primordials']
-state = {'pageRequests': [], 'reports': [], 'udp': [], 'proxyConnections': 0, 'stopped': False, 'stopEvents': []}
+cases = json.loads((Path(__file__).parent/'rtc-cases.json').read_text())
+engine_probe = os.environ.get('LYCO_NATIVE_ENGINE_PROBE') == 'true'
+state = {'pageRequests': [], 'reports': [], 'udp': [], 'proxyConnections': 0, 'stopped': False, 'stopEvents': [], 'loopbackRequests': []}
 def save():
     with lock:
         temporary = root / 'network.json.tmp'
@@ -45,7 +46,8 @@ def stun(phase, case):
             udp.sendto(b'\x01\x01\x00\x0c' + data[4:20] + b'\x00\x20\x00\x08' + value, peer)
 
 def page(phase, case=None, script=False):
-    config = json.dumps({'phase': phase, 'case': case, 'ports': ports, 'turnPorts': turn.ports})
+    config = json.dumps({'phase': phase, 'case': case, 'cases': cases, 'ports': ports, 'turnPorts': turn.ports,
+                         'loopbacks': ['127.0.0.1', '[::1]', 'localhost'] if engine_probe else []})
     source = (Path(__file__).parent/'rtc-page.js').read_text().replace('LYCO_FIXTURE_CONFIGURATION', config)
     if script: return source.encode()
     # The fixture's first page script starts native RTC before any page script
@@ -74,6 +76,16 @@ class Origin(http.server.BaseHTTPRequestHandler):
                 state['pageRequests'].append({'phase': phase, 'case': case, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'upstreamStopped': state['stopped']})
                 save()
             self.reply(page(phase, case, script), 'application/javascript' if script else 'text/html; charset=utf-8')
+        elif url.path == '/loopback':
+            phase = parse_qs(url.query).get('phase', [''])[0]
+            family = parse_qs(url.query).get('family', [''])[0]
+            with lock:
+                state['loopbackRequests'].append({'phase': phase, 'family': family, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'upstreamStopped': state['stopped']})
+                save()
+            body = json.dumps({'alive': True}).encode()
+            self.send_response(200); self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(body)))
+            self.send_header('Connection', 'close'); self.end_headers(); self.wfile.write(body)
         elif url.path == '/health': self.reply({'alive': True})
         else: self.send_error(404)
     def do_POST(self):
@@ -113,9 +125,12 @@ class Origin(http.server.BaseHTTPRequestHandler):
 
 class Proxy(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
+    def allowed(self, url, ports):
+        hosts = ['10.0.2.2'] + (['127.0.0.1', '::1', 'localhost'] if engine_probe else [])
+        return url.hostname in hosts and url.port in ports
     def do_CONNECT(self):
         url = urlsplit('http://'+self.path)
-        if url.hostname != '10.0.2.2' or url.port not in [18080, 18082, *turn.ports.values()]: self.send_error(502); return
+        if not self.allowed(url, [18080, 18082, *turn.ports.values()]): self.send_error(502); return
         remote = socket.create_connection(('127.0.0.1', url.port), 5)
         source = remote.getsockname()[1]
         with lock:
@@ -140,7 +155,7 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             remote.close(); save()
     def relay(self):
         url = urlsplit(self.path)
-        if url.hostname != '10.0.2.2' or url.port not in (18080, 18082): self.send_error(502); return
+        if not self.allowed(url, (18080, 18082)): self.send_error(502); return
         connection = http.client.HTTPConnection('127.0.0.1', url.port, timeout=25)
         source = None
         try:
@@ -152,6 +167,7 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             response = connection.getresponse(); payload = response.read()
             self.send_response(response.status)
             self.send_header('Content-Type', response.getheader('Content-Type', 'text/plain'))
+            if response.getheader('Access-Control-Allow-Origin'): self.send_header('Access-Control-Allow-Origin', response.getheader('Access-Control-Allow-Origin'))
             self.send_header('Content-Length', str(len(payload))); self.end_headers(); self.wfile.write(payload)
         except OSError: self.close_connection = True
         finally:
