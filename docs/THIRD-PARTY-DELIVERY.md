@@ -14,6 +14,10 @@
 
 桌面新增的 Noto Sans SC 工作台字体保留完整、未修改的上游 TTF、原始 OFL 全文和固定来源清单，随包位于 `lyco/ui-font/`。字体和许可证均按固定长度及 SHA-256 核验。`fa40538` 的 Linux、macOS 成品已通过原件摘要、中文加载与字形观察；Linux 完整功能和原始截图复核通过。详见 [字体来源与运行证据](WORKBENCH-FONT.md)。这只覆盖此次新增工作台字体，不能替代浏览器内核所带其他字体和组件的清单。
 
+逐文件摘要和格式范围保存为 [e5ed180 字体资产盘点](audits/font-inventory-e5ed180.json)，记录的是该内部候选，不是许可通过清单。
+
+2026-10-28 只读盘点 `e5ed180` Linux 归档：`assets/font-subsets/` 下有 340 份文件（149 TTF、21 OTF、170 WOFF2），已逐文件记录路径、大小与 SHA-256，没有执行产品或字体渲染。170 份 SFNT 名称表未观察到版权/许可字段，压缩 WOFF2 的名称表本轮未解析；字段缺失不等于没有授权。170 份随包 WOFF2 路径和大小与[固定上游索引](https://github.com/sheying2013/OpenBrowser/blob/5fa3b9d0bd218a948da15820b35fe598c362eba0/Browserapp/assets/font-subsets/index.json) 全部匹配；[上游构建脚本](https://github.com/sheying2013/OpenBrowser/blob/5fa3b9d0bd218a948da15820b35fe598c362eba0/Browserapp/scripts/build-font-subsets.py) 指向内核或平台字体目录作为原件。平台字体名称和上游附带资产不能代替原始许可及分发条件的核对。该盘点只补充清单，完整字体商业分发审查仍未完成，不扩大 Noto UI 字体已有证明的范围。
+
 此 npm 清单只覆盖安装树。Go 核心另有固定源码和模块 ZIP 审阅包；Pods、Gradle、浏览器内核、其他字体、SDK 及其完整对应源码交付仍需各自检查。`review` 中的项目须在商业发行前逐项处理；清单生成成功不能证明所有第三方分发义务已完成。
 
 新增的 [原生平台 JS 来源观察](NATIVE-JS-INVENTORY.md) 在 `a7e7a6c` 的 [40635942712](https://github.com/lilyco-42/lyco-browser/actions/runs/40635942712) 两平台成功：Android 598、iOS 601 个来源记录，各观察到 28 个 npm 包，三项缺原文包均未出现在该次单独导出的来源映射中。该结果尚未关联保留的实际签名成品，不删除安装树缺失记录，不扩大为原生依赖或许可交付完整证明。
