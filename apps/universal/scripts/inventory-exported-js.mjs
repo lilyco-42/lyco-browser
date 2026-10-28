@@ -13,6 +13,9 @@ export function sourceFiles(map){
  function visit(value,depth){
   if(++nodes>10000||depth>32)throw Error('Source map exceeds analysis bounds');
   if(!value||value.version!==3)throw Error('Expected a version 3 source map');
+  // Current Metro exports contain complete source identifiers. Refuse a new
+  // root-relative shape until its resolution semantics are handled explicitly.
+  if(value.sourceRoot!==undefined&&value.sourceRoot!=='')throw Error('Unsupported non-empty sourceRoot');
   if(Array.isArray(value.sections)){
    if('sources' in value||!value.sections.length)throw Error('Ambiguous or empty indexed source map');
    for(const section of value.sections){

@@ -9,7 +9,7 @@ test('indexed Metro maps retain sources from every embedded section',()=>{
  assert.deepEqual(sourceFiles(value),['a','b','c']);
 });
 test('malformed and external maps fail rather than implying dependencies are absent',()=>{
- for(const value of [null,{version:2,sources:['a'],mappings:''},{version:3,sections:[]},{version:3,sections:[{offset:{line:0,column:0},url:'https://example.test/map'}]},flat([null]),{...flat(['a']),sourcesContent:[]}, {...flat(['a']),sections:[]}])assert.throws(()=>sourceFiles(value));
+ for(const value of [null,{version:2,sources:['a'],mappings:''},{version:3,sections:[]},{version:3,sections:[{offset:{line:0,column:0},url:'https://example.test/map'}]},flat([null]),{...flat(['a']),sourcesContent:[]}, {...flat(['a']),sections:[]}, {...flat(['index.js']),sourceRoot:'node_modules/tr46/'},{...flat(['index.js']),sourceRoot:null}])assert.throws(()=>sourceFiles(value));
 });
 test('recursive maps cannot exhaust the analyzer stack',()=>{
  let value=flat(['a']);for(let i=0;i<34;i++)value={version:3,sections:[{offset:{line:0,column:0},map:value}]};

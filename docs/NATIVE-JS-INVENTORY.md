@@ -4,7 +4,7 @@
 
 使用 Expo 官方提供的 `expo export --source-maps --no-bytecode --platform android/ios`，分别生成生产模式 JavaScript 与外部来源映射。方法参考 [Expo bundle 分析文档](https://docs.expo.dev/guides/analyzing-bundles/)。这是单独导出，不是已经保留的签名 APK 或设备 IPA，也不包含 Pods、Gradle、Go 核心、WebView 或平台 SDK 的完整依赖。
 
-`inventory-exported-js.mjs` 在 Actions 读取原始来源映射，支持有界嵌套的 indexed maps，拒绝外部映射引用、损坏结构、超限输入、目录软链接及缺失关联 bundle。包名按真实来源路径中的最近 `node_modules` 边界识别；不通过 bundle 内的包名字符串判断，因此许可清单中的文字不会被误当成运行时代码。原生核心包 react/react-native/expo 必须出现，依赖清单的锁文件摘要必须一致。Metro 的 NUL 前缀虚拟 polyfill 标签仅作为合成来源保留，不用作文件路径。
+`inventory-exported-js.mjs` 在 Actions 读取原始来源映射，支持有界嵌套的 indexed maps，拒绝外部映射引用、损坏结构、超限输入、目录软链接及缺失关联 bundle。包名按真实来源路径中的最近 `node_modules` 边界识别；不通过 bundle 内的包名字符串判断，因此许可清单中的文字不会被误当成运行时代码。原生核心包 react/react-native/expo 必须出现，依赖清单的锁文件摘要必须一致。Metro 的 NUL 前缀虚拟 polyfill 标签仅作为合成来源保留，不用作文件路径。当前原件没有 `sourceRoot`；非空或非字符串的 root 形态会被明确拒绝，避免未来格式变化时静默漏算包名。
 
 第一次 [40635766788](https://github.com/lilyco-42/lyco-browser/actions/runs/40635766788) 完成两平台导出，但解析器拒绝了三条真实的 Metro 虚拟来源，因此该轮失败，没有给出包缺失结论。`a7e7a6c` 增加格式处理和回归用例后，[40635942712](https://github.com/lilyco-42/lyco-browser/actions/runs/40635942712) 两平台全部成功，七项来源解析用例通过。
 
