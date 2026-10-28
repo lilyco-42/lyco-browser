@@ -1,0 +1,39 @@
+name: Observe native JavaScript export dependency graph
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-js-export:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [android, ios]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify bounded source-map interpretation
+        run: node --test tests/exported-js-inventory.test.mjs
+      - run: npm ci --no-audit --no-fund
+        working-directory: apps/universal
+      - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - name: Export real native-platform JavaScript with source maps
+        working-directory: apps/universal
+        run: npx expo export --platform ${{ matrix.platform }} --source-maps --no-bytecode --output-dir bundle-inventory/${{ matrix.platform }}
+      - name: Record original mapped packages and unresolved notice targets
+        run: node apps/universal/scripts/inventory-exported-js.mjs --platform ${{ matrix.platform }} --directory apps/universal/bundle-inventory/${{ matrix.platform }}
+      - name: Preserve original exports and inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-js-inventory-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            apps/universal/bundle-inventory/${{ matrix.platform }}
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          if-no-files-found: warn
+          retention-days: 7
