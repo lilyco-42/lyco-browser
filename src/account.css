@@ -1,6 +1,6 @@
 /* Scoped primitives reuse the existing renderer's semantic theme tokens. */
 html[data-ui-theme] .sidebar .nav[data-view="lyco"]>.lyco-nav-label{color:inherit!important;min-width:0;white-space:nowrap}
-#view-lyco{--lyco-panel-accent:#8e1b24;--lyco-panel-danger:#ae2842;--lyco-panel-muted:color-mix(in srgb,var(--ui-text,#18232c) 68%,transparent);color:var(--ui-text,#18232c);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+#view-lyco{--lyco-panel-accent:#8e1b24;--lyco-panel-danger:#ae2842;--lyco-panel-muted:color-mix(in srgb,var(--ui-text,#18232c) 68%,transparent);color:var(--ui-text,#18232c);font-family:"LYCO UI CJK",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 html[data-color-mode="dark"] #view-lyco{--lyco-panel-accent:#c02832;--lyco-panel-danger:#ffb0ba}
 #view-lyco .lyco-panel-shell{max-width:1160px;margin:0 auto;padding:28px 24px;min-width:0;box-sizing:border-box}
 #view-lyco .lyco-panel-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}

@@ -17,6 +17,7 @@ import {createIndependentAuditFixture} from './independent-fingerprint-audits.mj
 import {protectConnectHandler} from './connect-handler.mjs';
 import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
 import {verifyNativeEgressLocale} from './native-egress-locale-contract.mjs';
+import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -157,6 +158,7 @@ try {
  report.checks.push('real-native-group-create-and-current-group-dialog-defaults');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
+ await verifyWorkbenchUiFont({page,appRoot,report,evidence});
  // Use the actual upstream translator in both languages; its fallback must
  // not split our complete localized strings into Chinese/English fragments.
  for (const locale of ['zh-CN','en']) {

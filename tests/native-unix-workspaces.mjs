@@ -9,6 +9,7 @@ import {randomUUID} from 'node:crypto';
 import {protectConnectHandler} from './connect-handler.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
+import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
 import {_electron as electron,chromium} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
@@ -120,6 +121,7 @@ try{
   };
  },proxyPort);
  await page.locator('[data-view="lyco"]').click();
+ await verifyWorkbenchUiFont({page,appRoot,report,evidence});
  await page.locator('#lyco-username').fill('ci-unix-owner');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);

@@ -1,0 +1,10 @@
+/* Local workbench face only; no system-font registration or webpage injection. */
+@font-face{
+ font-family:"LYCO UI CJK";
+ src:url("ui-font/NotoSansSC-VF.ttf") format("truetype");
+ font-weight:100 900;
+ font-style:normal;
+ font-display:block;
+}
+body{font-family:"LYCO UI CJK",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+button,input,select,textarea{font-family:inherit}
