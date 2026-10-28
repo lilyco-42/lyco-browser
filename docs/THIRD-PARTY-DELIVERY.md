@@ -12,4 +12,6 @@
 
 `5a55b17` 的 [Actions40553867714](https://github.com/lilyco-42/lyco-browser/actions/runs/40553867714) 已通过六项生成器测试、TypeScript、Expo 导出和离线浏览。501 个已安装 npm 包中，35 项使用精确版本的上游原件；缺少文本的条目从 41 项降到 3 项：`jimp-compact`、`structured-headers`、`tr46`。这三项仍需处理。新增原生 Maestro 流程在保留原有存储/导航/断代理用例的同时，实际打开、搜索、展开版权文本及关闭许可页；Android 签名候选 `75b0d55` 的 [40554474153](https://github.com/lilyco-42/lyco-browser/actions/runs/40554474153) 已通过此流程并保留原始截图。iOS 的该新增流程尚无成功证明，原有路由失败仍阻止其发行。
 
-此清单只覆盖 npm 安装树。Go 核心另有固定源码和模块 ZIP 审阅包；Pods、Gradle、浏览器内核、字体、SDK 及其完整对应源码交付仍需各自检查。`review` 中的项目须在商业发行前逐项处理；清单生成成功不能证明所有第三方分发义务已完成。
+桌面新增的 Noto Sans SC 工作台字体保留完整、未修改的上游 TTF、原始 OFL 全文和固定来源清单，随包位于 `lyco/ui-font/`。字体和许可证均按固定长度及 SHA-256 核验。`fa40538` 的 Linux、macOS 成品已通过原件摘要、中文加载与字形观察；Linux 完整功能和原始截图复核通过。详见 [字体来源与运行证据](WORKBENCH-FONT.md)。这只覆盖此次新增工作台字体，不能替代浏览器内核所带其他字体和组件的清单。
+
+此 npm 清单只覆盖安装树。Go 核心另有固定源码和模块 ZIP 审阅包；Pods、Gradle、浏览器内核、其他字体、SDK 及其完整对应源码交付仍需各自检查。`review` 中的项目须在商业发行前逐项处理；清单生成成功不能证明所有第三方分发义务已完成。
