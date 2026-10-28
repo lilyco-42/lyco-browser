@@ -15,6 +15,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
   private var index = 0
   private var generation = 0
   private var finishedGeneration = -1
+  private var caseStartedUptime: TimeInterval = 0
   private var row: [String: Any] = [:]
   private var results: [[String: Any]] = []
   private let modes = ["direct-control", "direct-http", "direct-http-v6", "core-http", "core-socks", "core-socks-empty", "core-socks-explicit", "core-socks-wildcard"]
@@ -37,6 +38,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     let (mode,phase) = cases[index]
     let caseId = mode+"-"+phase
     row = ["case":caseId,"mode":mode,"phase":phase]
+    caseStartedUptime = ProcessInfo.processInfo.systemUptime
     let store = WKWebsiteDataStore(forIdentifier: UUID())
     if mode != "direct-control" {
       var port = UInt16(phase == "stopped-local" ? 1 : 18081)
@@ -65,15 +67,22 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     view.autoresizingMask = [.flexibleWidth,.flexibleHeight];view.navigationDelegate = self
     window!.rootViewController!.view.addSubview(view);web = view
     let host = phase == "domain" ? "lyco-fixture.invalid" : "127.0.0.1"
+    // The first WKWebView also starts WebKit's processes. Its direct positive
+    // control must actually complete before its absence can mean anything.
+    // Proxy and stopped-proxy cases retain their original budget/assertions.
+    let budget: TimeInterval = mode == "direct-control" ? 30 : 6
+    row["navigationBudgetSeconds"] = budget
     let timer = DispatchWorkItem {if self.generation == current {self.finish("timeout")}}
-    timeout = timer;DispatchQueue.main.asyncAfter(deadline: .now()+6,execute: timer)
+    timeout = timer;DispatchQueue.main.asyncAfter(deadline: .now()+budget,execute: timer)
     view.load(URLRequest(url: URL(string: "http://"+host+":18080/probe?case="+caseId)!))
   }
   private func finish(_ status: String) {
     guard finishedGeneration != generation else {return}
     finishedGeneration = generation
     timeout?.cancel();timeout = nil
-    row["result"] = status;results.append(row);index += 1
+    row["result"] = status
+    row["elapsedSeconds"] = ProcessInfo.processInfo.systemUptime-caseStartedUptime
+    results.append(row);index += 1
     web?.stopLoading();web?.navigationDelegate = nil;web?.removeFromSuperview();web = nil
     try? core?.close();core = nil
     DispatchQueue.main.asyncAfter(deadline: .now()+0.15) {self.next()}

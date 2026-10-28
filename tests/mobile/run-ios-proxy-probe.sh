@@ -50,6 +50,12 @@ echo "$device" > "$evidence/simulator-udid.txt"
 python3 "$root/proxy-probe-fixture.py" "$evidence" > "$evidence/fixture.log" 2>&1 &
 fixture_pid=$!
 trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+for attempt in $(seq 1 100); do
+  kill -0 "$fixture_pid" || { echo 'Owned proxy fixture stopped before readiness' >&2; exit 1; }
+  [[ -s "$evidence/network.json" ]] && break
+  sleep .1
+done
+test -s "$evidence/network.json"
 stage 'Boot simulator' | tee -a "$evidence/stages.txt"
 xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
@@ -71,6 +77,8 @@ root=Path(sys.argv[1]);rows=json.loads((root/'results.json').read_text());events
 assert len(rows)==22, 'All proxy modes and their independent phases must finish'
 baseline=[e for e in events if e['case']=='direct-control-local']
 assert baseline and all(not e['viaProxy'] for e in baseline), 'Direct positive control did not reach the same live origin'
+control=[row for row in rows if row['case']=='direct-control-local']
+assert len(control)==1 and control[0]['result']=='loaded' and control[0].get('originContent'), 'Direct positive control did not finish loading original content'
 safe=[];modes=sorted({row['mode'] for row in rows if row['mode']!='direct-control'})
 for mode in modes:
     probes=[row for row in rows if row['mode']==mode]
