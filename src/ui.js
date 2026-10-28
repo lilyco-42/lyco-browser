@@ -1,6 +1,6 @@
 'use strict';
 (() => {
- let busy=false,routeOwner='',routeNodes=[],routeRowsKey='';
+ let busy=false,routeOwner='',routeNodes=[],routeRowsKey='',routeRenderGeneration=0;
  const e = id => document.getElementById(id);
  const message = (value, err=false) => { e('lyco-feedback').textContent=String(value||'');e('lyco-feedback').dataset.tone=err?'error':'status'; };
  const option=(value,text)=>{const node=document.createElement('option');node.value=value;node.textContent=text;return node};
@@ -10,10 +10,12 @@
   select.value=value;
  }
  async function renderRoutes(s){
+  const generation=++routeRenderGeneration;
   if(routeOwner!==s.username||!s.logged_in){routeOwner=s.logged_in?s.username:'';routeNodes=[];routeRowsKey='';routeOptions(e('lyco-create-route'))}
   e('lyco-load-routes').disabled=!s.entitled||!s.has_core||busy;
   e('lyco-create-route').disabled=!s.entitled||busy;
   const result=s.logged_in?await window.ops.lycoListProfileRoutes():{owner:'',profiles:[]};
+  if(generation!==routeRenderGeneration)return;
   const rows=result.owner===s.username?result.profiles:[];
   const key=JSON.stringify([routeOwner,routeNodes,rows]);
   e('lyco-route-card').hidden=!rows.length;

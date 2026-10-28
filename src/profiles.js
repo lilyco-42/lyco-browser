@@ -104,18 +104,28 @@ class LycoProfiles {
     } catch(error){if(id)await this.routes.stop(id);throw error}finally {this.busy=false;}
   }
   async beforeStart(profile) {
-    let binding=Object.hasOwn(this.bindings,profile?.id)?this.bindings[profile.id]:null;
+    const ownsBinding=Object.hasOwn(this.bindings,profile?.id);
+    let binding=ownsBinding?this.bindings[profile.id]:null;
     if(!binding) binding=Object.values(this.bindings).find(item=>item.proxyId===profile?.proxyId);
     if(!binding) return {profile};
-    const state=await this.authorized(binding.owner);
-    const route=binding.routeId?await this.routes.acquire(profile.id,binding.routeId,state):null;
-    const record=await this.proxy(route?{...state,port:route.port}:state,binding.proxyId,route?.label);
-    this.assertCurrent(state);
+    const bindingCurrent=()=>{if(ownsBinding?this.bindings[profile.id]!==binding:
+      Object.hasOwn(this.bindings,profile.id)||!Object.values(this.bindings).includes(binding))throw Error('环境线路绑定已变化，请重新启动')};
     const stored=this.engine.profiles.get(profile.id);
     if(!stored) throw Error('专属环境已不存在');
-    if(!Object.hasOwn(this.bindings,profile.id)) {
+    const state=await this.authorized(binding.owner);
+    bindingCurrent();
+    const route=binding.routeId?await this.routes.acquire(profile.id,binding.routeId,state):null;
+    // Old cloned workspaces may share a proxy record. Give each workspace its
+    // own record before native start can resolve it, otherwise simultaneous
+    // launches could overwrite each other's selected local port.
+    const shared=Object.entries(this.bindings).some(([id,item])=>id!==profile.id&&item.proxyId===binding.proxyId);
+    const record=await this.proxy(route?{...state,port:route.port}:state,ownsBinding&&!shared?binding.proxyId:undefined,route?.label);
+    this.assertCurrent(state);
+    bindingCurrent();
+    if(!ownsBinding||record.id!==binding.proxyId) {
       if(!/^[A-Za-z0-9_-]{1,120}$/.test(profile.id) || ['__proto__','prototype','constructor'].includes(profile.id)) throw Error('环境标识无效');
-      this.bindings[profile.id]={...binding};this.save();
+      this.bindings[profile.id]={...binding,proxyId:record.id};
+      try{this.save()}catch(error){if(ownsBinding)this.bindings[profile.id]=binding;else delete this.bindings[profile.id];throw error}
     }
     return {profile:{...stored,...profile,networkMode:'proxy',proxy:record.raw,proxyId:record.id,
       proxyMeta:{...(stored.proxyMeta||{}),proxyId:record.id,lycoManaged:true,directBypass:false,bypassList:''}},authorization:state,route};
@@ -134,7 +144,9 @@ class LycoProfiles {
     if(typeof routeId!=='string'||(routeId&&!validRoute(routeId)))throw Error('官网线路标识无效');
     const binding=this.bindings[id],state=await this.authorized(binding.owner);
     const selected=routeId?await this.routes.resolve(state,routeId):null;
+    if(this.bindings[id]!==binding)throw Error('环境线路绑定已变化，请重新操作');
     await this.engine.stop(id);this.assertCurrent(state);
+    if(this.bindings[id]!==binding)throw Error('环境线路绑定已变化，请重新操作');
     const next={owner:binding.owner,proxyId:binding.proxyId,...(selected?{routeId,routeName:selected.node.label}:{})};
     this.bindings[id]=next;
     try{this.save()}catch(error){this.bindings[id]=binding;throw error}

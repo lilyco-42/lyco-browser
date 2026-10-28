@@ -257,3 +257,14 @@ test('a late outage result cannot invalidate a replacement core',async t=>{
  release();await rejection;
  assert.equal(app.status().connected,true);assert.equal(app.status().entitled,true);
 });
+test('private workspace subscription fetch cannot survive a session change or expose itself in status',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ const authorization={...app.status(),connectionEpoch:app.connectionEpoch};
+ const source=await app.workspaceSubscription(authorization);assert.ok(JSON.parse(source).proxies.length);
+ assert.doesNotMatch(JSON.stringify(app.status()),/CI_ONLY|proxy-groups|server|sub_url/);
+ const original=app.fetchFn;let release,requested;
+ const started=new Promise(resolve=>{requested=resolve});
+ app.fetchFn=async(url,options)=>url.endsWith('/clash')?(requested(),new Promise(resolve=>{release=()=>resolve(new Response(source))})):original(url,options);
+ const pending=app.workspaceSubscription(authorization),rejected=assert.rejects(pending,/账号或连接/);
+ await started;await app.disconnect();release();await rejected;
+});

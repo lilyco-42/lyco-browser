@@ -35,7 +35,7 @@ test('catalog exposes only opaque identities and labels; duplicate names cannot 
  assert.equal(catalog.owner,'owner-a');assert.equal(catalog.nodes.length,2);
  assert.ok(catalog.nodes.every(node=>/^[a-f0-9]{64}$/.test(node.id)&&Object.keys(node).sort().join() === 'id,label'));
  assert.doesNotMatch(JSON.stringify(catalog),/PRIVATE_NODE|127\.0\.0\.1|19001|Bearer|password/);
- const bad=subscription();bad.proxies[1].name=bad.proxies[0].name;
+ const bad=subscription();bad.proxies[1].name=bad.proxies[0].name;bad['proxy-groups'][0].proxies=['CI route A'];
  assert.throws(()=>routesFromSubscription(bad),/重复/);
 });
 test('fixed selection contains one named outbound and preserves the no-direct policy',()=>{
@@ -127,4 +127,24 @@ test('invalid route types and attempted old-format downgrade are rejected withou
  fs.writeFileSync(path.join(dir,'lyco-workspaces.json'),JSON.stringify({version:1,bindings:{sample:{owner:'owner-a',proxyId:'p',routeId:'a'.repeat(64)}}}));
  assert.throws(()=>new LycoProfiles({...args,engine:{...args.engine}}),/绑定记录无效/);
  assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'lyco-workspaces.json'))).bindings.sample.routeId,'a'.repeat(64));
+});
+test('concurrent cloned bindings cannot share a mutable proxy record or overwrite the other selected port',async t=>{
+ const {service,engine,args,proxies}=profileFixture(t),catalog=await service.routeCatalog();
+ const {profile}=await service.create({routeId:catalog.nodes[0].id});
+ const clone={...profile,id:'cloned-workspace'};engine.profiles.set(clone.id,clone);
+ service.bindings[clone.id]={...service.bindings[profile.id],routeId:catalog.nodes[1].id,routeName:'CI route B'};
+ const [a,b]=await Promise.all([service.beforeStart(profile),service.beforeStart(clone)]);
+ assert.notEqual(a.profile.proxyId,b.profile.proxyId);
+ for(const value of [a,b])assert.equal(proxies.get(value.profile.proxyId).raw,'http://127.0.0.1:'+value.route.port);
+ assert.equal(service.bindings[profile.id].routeId,catalog.nodes[0].id);assert.equal(service.bindings[clone.id].routeId,catalog.nodes[1].id);
+ assert.equal(args.engine.profiles.size,2);
+});
+test('changing a default binding during a pending launch cannot start it on the old shared route',async t=>{
+ const {service,engine,args,starts}=profileFixture(t),catalog=await service.routeCatalog();
+ const {profile}=await service.create();const original=args.proxyStore.update;let release,requested;
+ const saved=new Promise(resolve=>{requested=resolve});
+ args.proxyStore.update=async(...values)=>{const result=await original(...values);requested();await new Promise(resolve=>{release=resolve});return result};
+ const pending=engine.start(profile),rejected=assert.rejects(pending,/绑定已变化/);
+ await saved;await service.setRoute({id:profile.id,routeId:catalog.nodes[1].id});release();await rejected;
+ assert.equal(starts.length,0);assert.equal(service.bindings[profile.id].routeId,catalog.nodes[1].id);
 });
