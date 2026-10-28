@@ -24,7 +24,9 @@ export function sourceFiles(map){
    if(!Array.isArray(value.sources)||!value.sources.length||typeof value.mappings!=='string')throw Error('Source map lacks original source records');
    if(value.sourcesContent!==undefined&&(!Array.isArray(value.sourcesContent)||value.sourcesContent.length!==value.sources.length))throw Error('Source content count differs');
    for(const source of value.sources){
-    if(++entries>200000||typeof source!=='string'||source.length>8192||source.includes('\0'))throw Error('Invalid or excessive source records');
+    // Metro emits NUL-prefixed virtual polyfill labels. These are source-map
+    // identities, never filesystem paths; retain them as synthetic sources.
+    if(++entries>200000||typeof source!=='string'||source.length>8192||(source.includes('\0')&&!/^\0polyfill:[a-zA-Z0-9._-]+$/.test(source)))throw Error('Invalid or excessive source records');
     files.add(source);
    }
   }
@@ -33,6 +35,7 @@ export function sourceFiles(map){
 }
 
 export function packageFromSource(source){
+ if(source.startsWith('\0'))return null;
  const normalized=source.replaceAll('\\','/');
  const pieces=normalized.split(/(?:^|\/)node_modules\//);
  if(pieces.length<2)return null;
@@ -54,7 +57,7 @@ export function classifySources(sources,notices){
   installed: [...new Set(notices.packages.filter(row=>row.name===name).map(row=>row.version))].sort(),
   noticeReview: notices.review.filter(row=>notices.packages.some(p=>p.name===name&&p.id===row.id)),
  }));
- return {projectOrSynthetic,packages:observed,
+ return {projectOrSynthetic,syntheticSources:sources.filter(source=>source.startsWith('\0')),packages:observed,
   reviewTargets:reviewTargets.map(name=>({name,observedInExport:packages.has(name),sources:packages.get(name)||[]})),
   unmappedPackages:observed.filter(row=>!row.installed.length).map(row=>row.name)};
 }

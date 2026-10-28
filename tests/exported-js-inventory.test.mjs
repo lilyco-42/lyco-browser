@@ -15,6 +15,15 @@ test('recursive maps cannot exhaust the analyzer stack',()=>{
  let value=flat(['a']);for(let i=0;i<34;i++)value={version:3,sections:[{offset:{line:0,column:0},map:value}]};
  assert.throws(()=>sourceFiles(value),/bounds/);
 });
+test('real Metro virtual polyfill labels are retained without becoming file paths',()=>{
+ const labels=['\0polyfill:external-require','\0polyfill:environment-variables','\0polyfill:assets-registry'];
+ assert.deepEqual(sourceFiles(flat(labels)),[...labels].sort());
+ const classified=classifySources(labels,{packages:[],review:[]});
+ assert.deepEqual(classified.syntheticSources,labels);
+ assert.equal(classified.packages.length,0);
+ assert.throws(()=>sourceFiles(flat(['src/invalid\0path.js'])));
+ assert.throws(()=>sourceFiles(flat(['\0polyfill:node_modules/react/index.js'])));
+});
 test('native paths identify the nearest installed scoped or nested package',()=>{
  assert.equal(packageFromSource('C:\\ci\\node_modules\\outer\\node_modules\\@expo\\cli\\src\\x.js'),'@expo/cli');
  assert.equal(packageFromSource('node_modules/react/cjs/react.production.js'),'react');

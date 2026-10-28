@@ -2,7 +2,7 @@ name: Verify offline mobile dependency notices
 on:
   pull_request:
     branches: [main]
-    paths: ['apps/universal/src/**', 'apps/universal/third-party/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/package-lock.json', 'tests/npm-notices*', '.github/workflows/mobile-notices.yml']
+    paths: ['apps/universal/src/**', 'apps/universal/third-party/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/scripts/inventory-exported-js.mjs', 'apps/universal/package-lock.json', 'tests/npm-notices*', 'tests/exported-js-inventory.test.mjs', '.github/workflows/mobile-notices.yml']
   workflow_dispatch:
     inputs:
       native_js_inventory:
@@ -25,6 +25,7 @@ jobs:
         working-directory: apps/universal
       - run: node apps/universal/scripts/collect-npm-notices.mjs
       - run: node --test tests/npm-notices.test.mjs
+      - run: node --test tests/exported-js-inventory.test.mjs
       - run: node --experimental-strip-types --test tests/mobile-billing.test.mjs
       - run: node --test tests/network.test.js tests/profiles.test.js
       - run: npx tsc --noEmit
