@@ -5,13 +5,14 @@
 import {mobileNodes,type MobileNode} from './subscription.mjs';
 
 export const API = 'https://lain42.top/studio/api';
-export const SHOP = 'https://lain42.top/shop/#proxy_1m';
+export const SHOP = 'https://lain42.top/vpn/#plans';
 export const ACCOUNT = 'https://lain42.top/account/';
 export interface Entitlement {
  product: string;
  status: string;
  expires_at?: string | null;
- meta?: {sub_url?: string};
+ purchase_product?: string;
+ meta?: {sub_url?: string;purchase_product?: string};
 }
 export interface Account {
  username?: string;
@@ -45,6 +46,16 @@ export function proxyEntitlement(a:Account, now=Date.now()):Entitlement|null{
  return (Array.isArray(a?.entitlements)?a.entitlements:[]).find(e=>e.product==='proxy_1m'&&e.status==='active'&&
    (!e.expires_at||Date.parse(e.expires_at)>now))||null;
 }
+export function proxyPlanName(entitlement:Entitlement|null):string{
+ const code=entitlement?.purchase_product||entitlement?.meta?.purchase_product||entitlement?.product;
+ switch(code){
+  case 'proxy_1m':return '代理月卡';
+  case 'proxy_3m':return '代理季卡';
+  case 'proxy_4m':return '代理120天套餐';
+  case 'proxy_1y':return '代理年卡';
+  default:return '代理订阅';
+ }
+}
 
 export type MobileSubscription={owner:string;expiresAt:number|null;verifiedAt:number;nodes:MobileNode[];unavailable:number};
 export async function mobileSubscription(token:string,owner:string):Promise<MobileSubscription>{
@@ -52,7 +63,7 @@ export async function mobileSubscription(token:string,owner:string):Promise<Mobi
  const verifiedAt=Date.now();
  if(!owner||me.username!==owner)throw Error('登录账号已变化，请重新登录');
  const entitlement=proxyEntitlement(me,verifiedAt);
- if(!entitlement)throw Error('请先开通有效代理月卡');
+ if(!entitlement)throw Error('请先开通有效代理订阅');
  const match=/^https:\/\/lain42\.top\/panel\/api\/sub\/([A-Za-z0-9_-]{6,128})$/.exec(entitlement.meta?.sub_url||'');
  if(!match)throw Error('官网订阅地址无效');
  const source=await request<string>('/sub/'+encodeURIComponent(match[1])+'/clash',undefined,token,true);

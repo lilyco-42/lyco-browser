@@ -3,7 +3,7 @@ import {ActivityIndicator,Alert,BackHandler,Keyboard,KeyboardAvoidingView,Linkin
 import Browser from './Browser';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
-import {ACCOUNT,SHOP,login,account,proxyEntitlement,type Account} from './billing';
+import {ACCOUNT,SHOP,login,account,proxyEntitlement,proxyPlanName,type Account} from './billing';
 import {createProfile,readProfiles,saveProfiles,type Profile} from './profiles';
 import coreNotices from './core-notices.json';
 import product from './product.json';
@@ -157,20 +157,20 @@ export default function App(){
       <Text style={styles.value}>✓ {me?.username||user}</Text>
       <Text style={styles.hint}>积分余额：{typeof me?.points?.balance==='number'?me.points.balance+' 分':'请在官网账户中心查看'}</Text>
       <Text style={[styles.value,{color:entitlement?'#8be4b3':COLOR.gold}]}>
-       {entitlement?'代理月卡有效':'暂无有效代理月卡'}</Text>
+       {entitlement?proxyPlanName(entitlement)+'有效':'暂无有效代理订阅'}</Text>
       {entitlement?.expires_at&&<Text style={styles.hint}>到期：{new Date(entitlement.expires_at).toLocaleString()}</Text>}
       <View style={styles.actions}><Action title="刷新权益" disabled={busy} onPress={refresh}/>
        <Action title="退出" secondary disabled={busy} onPress={logout}/></View>
      </>}
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>浏览环境代理</Text>
-     <Text style={styles.hint}>登录并核实官网月卡后，可在环境内加载和选择官网线路。移动端也可使用自备 HTTP(S) 代理；每个环境保留自己的网页登录数据。</Text>
-     <View style={styles.pill}><Text style={styles.pillText}>{Platform.OS==='android'?'Android':Platform.OS==='ios'?'iOS':'Web'} · {entitlement?'权益已验证':'尚无有效月卡'} · 在环境内启动代理</Text></View>
+     <Text style={styles.hint}>登录并核实官网代理订阅后，可在环境内加载和选择官网线路。支持月卡、90天季卡、120天套餐和年卡；每个环境保留自己的网页登录数据。</Text>
+     <View style={styles.pill}><Text style={styles.pillText}>{Platform.OS==='android'?'Android':Platform.OS==='ios'?'iOS':'Web'} · {entitlement?'权益已验证':'尚无有效订阅'} · 在环境内启动代理</Text></View>
      <Action title="进入官网代理教程" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
     </View>
     <View style={styles.card}><Text style={styles.cardTitle}>支付 / 续费</Text>
      <Text style={styles.hint}>价格、支付确认、开通和积分兑换由官网 Billing 处理；当前内部测试版直接打开官网。应用商店正式发布前需评估 Apple/Google 数字内容购买规则。</Text>
-     <Action title="官方商城购买或续费" onPress={()=>openSite(SHOP)}/>
+     <Action title="官方套餐购买或续费" onPress={()=>openSite(SHOP)}/>
      <View style={{height:9}}/><Action title="官网账户中心" secondary onPress={()=>openSite(ACCOUNT)}/>
     </View>
    </>}

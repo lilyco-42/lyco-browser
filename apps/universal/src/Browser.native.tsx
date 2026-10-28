@@ -42,7 +42,7 @@ export default function Browser({profile,onClose,session}:BrowserProps){
   <Text style={s.title}>{profile.name}</Text>
   <Text style={s.copy}>该环境有自己的持久网站数据。关闭当前环境后可打开另一个。</Text>
   {session&&<>
-   <Text style={s.title}>官网月卡线路</Text>
+   <Text style={s.title}>官网订阅线路</Text>
    <Pressable accessibilityRole="button" disabled={busy} onPress={loadRoutes} style={s.button}><Text>加载 / 刷新官网线路</Text></Pressable>
    {subscription?.nodes.map(node=><Pressable key={node.name} accessibilityRole="radio" accessibilityLabel={'选择线路 '+node.name}
     accessibilityState={{checked:selected===node.name,disabled:busy}} disabled={busy} onPress={()=>setSelected(node.name)} style={[s.route,selected===node.name&&s.selected]}>
