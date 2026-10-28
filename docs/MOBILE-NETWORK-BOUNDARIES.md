@@ -30,4 +30,4 @@
 
 **初始 about:blank 与 srcdoc 内新建空帧仍为 `iceTransportPolicy=all`。** 健康及断线上游时各收到两次实际 STUN，两个上下文均在原生事件、SDP 和统计暴露实际 IPv4/IPv6 host 与 NAT srflx 地址。断线阶段的原始 UI、上游停止快照及恢复后上传的原观察均保留；没有重复健康条件下的停止探测，也没有改写 native 读数。全部 PeerConnection 均真实创建，因此不能归为不支持 RTC 或对照无效。
 
-下一步决策：document-start 策略不能作为完整新上下文的安全边界。不能用只拦 `contentWindow` 的 getter 来覆盖现有两个测试后宣称修复，因为同源窗口还可经 `window.frames`、`contentDocument.defaultView`、文档同步写入等路径取得。继续评估能在原生引擎层统一生效的公开策略；GeckoView 的 WebExtension `privacy.network.webRTCIPHandlingPolicy` 有原生候选，但尚无本产品原生证据，且引擎更换必须处理并保留现有 Chromium Cookie/IndexedDB 数据，不能静默丢弃。当前未更换产品引擎、未增加 VPN、未批准商业发行。
+下一步决策：所测 provider 的 document-start 策略不能作为完整新上下文的安全边界。不能用只拦 `contentWindow` 的 getter 来覆盖现有两个测试后宣称修复，因为同源窗口还可经 `window.frames`、`contentDocument.defaultView`、文档同步写入等路径取得。继续评估能在原生引擎层统一生效的公开策略；GeckoView 的 WebExtension [`privacy.network.webRTCIPHandlingPolicy`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/privacy/network) 有原生候选，但尚无本产品原生证据，且引擎更换必须处理并保留现有 Chromium Cookie/IndexedDB 数据，不能静默丢弃。当前未更换产品引擎、未增加 VPN、未批准商业发行。下一轮的最小验证与迁移约束见[引擎预研](MOBILE-ENGINE-PREFLIGHT.md)。

@@ -20,5 +20,6 @@
 - 新增验收使用 API35 一次性模拟器与隔离 Billing，不修改 APK、生产 API 或应用 TLS 配置。先验证默认 TLS 拒绝未信任的 CI 证书，再仅向模拟器添加临时 CI 根；原生浏览流量通过两个认证上游，同源服务器按实际 TCP 连接归属记录 Cookie/localStorage/IndexedDB。上游停止时保持直连及系统代理对照可达，以发现任何错误回退。原始数据库和 CI 私钥不进入工件。
 - 原生场景覆盖：旧版建立数据再升级，保存/打开 A 与 B，强制停止并重新登录恢复 A，目录移除 A 后保留绑定并禁用启动，停止 A 后无回退且 B 可用，A 明确换 B 后三类网站数据仍属于 A，另一账号隐藏两个绑定环境，实际旧版拒绝新版记录且保存禁用，恢复新版仍使用 B 并保留 A 数据，原生守卫读取撤权响应后销毁 WebView。四份实际环境元数据证明保留 UUID；绑定完成、降级后、恢复后摘要完全一致。
 - 共享夹具 [40680509690](https://github.com/lilyco-42/lyco-browser/actions/runs/40680509690) 回归成功：Windows/macOS/Linux 各 54 个单元门禁、5 个普通与 8 个链式真实 Mihomo 检查。此项不是三平台原生成品新增通过证明。
+- 加入 Android RTC 配置策略后的 `ced08fe` 原签名包，原有原生 [40721798567](https://github.com/lilyco-42/lyco-browser/actions/runs/40721798567) 和官网绑定 [40724969665](https://github.com/lilyco-42/lyco-browser/actions/runs/40724969665) 回归均成功，后者仍为整组12项、7份实际观察。APK SHA-256 `3b8ba20629c1f8d9d0661318740938c31ab7225f4624fde5b91e1be6c9995038`；同包扩展 RTC [40724556782](https://github.com/lilyco-42/lyco-browser/actions/runs/40724556782) 明确失败，初始/嵌套空帧仍绕过策略，不能作为完整网络保护通过。
 
 以上不涵盖客户公网出口、真实付款、全设备 VPN、完整 DNS/IPv6/RTC 或商店发行。全部产品构建、测试与运行只在真实 GitHub Actions 执行。
