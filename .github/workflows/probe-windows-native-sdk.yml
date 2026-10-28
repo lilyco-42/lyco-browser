@@ -4,13 +4,60 @@ on:
     branches: [main]
     paths: ['tests/native-sdk-order-probe.mjs', '.github/workflows/probe-windows-native-sdk.yml']
   workflow_dispatch:
+    inputs:
+      metadata_only:
+        description: Inspect the official public kernel feed without downloading or running another browser
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  current-public-metadata:
+    if: inputs.metadata_only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Read official public version metadata without credentials
+        run: |
+          python3 - <<'PY'
+          import json,os,re,urllib.request,urllib.error
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          result={'source':'https://donutbrowser.com/wayfern.json','scope':'Public metadata only; no binary, license token, or product acceptance'}
+          try:
+              with urllib.request.urlopen(result['source'],timeout=30) as response:
+                  raw=response.read(2*1024*1024+1)
+                  result['http_status']=response.status
+              if len(raw)>2*1024*1024:raise ValueError('metadata too large')
+              data=json.loads(raw)
+              version=data.get('version','')
+              if not isinstance(version,str) or not re.fullmatch(r'[0-9]+(?:\.[0-9]+){0,3}',version):raise ValueError('invalid version')
+              result['version']=version;result['downloads']={}
+              for platform in ['windows-x86_64','windows-x64','linux-x86_64','linux-x64','macos-aarch64','macos-arm64','macos-x86_64','macos-x64']:
+                  value=data.get('downloads',{}).get(platform)
+                  if not isinstance(value,str):continue
+                  url=urlsplit(value)
+                  if url.scheme!='https' or url.hostname not in ['download.wayfern.com','donutbrowser.com'] or url.username or url.password or url.query or url.fragment:
+                      result['downloads'][platform]={'available':True,'url_retained':False}
+                  else:result['downloads'][platform]={'available':True,'url':value}
+          except urllib.error.HTTPError as error:
+              result['http_status']=error.code
+          except Exception as error:
+              result['error_type']=type(error).__name__
+          target=Path(os.environ['RUNNER_TEMP'])/'official-wayfern-metadata.json'
+          target.write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lyco-official-kernel-metadata-${{ github.run_id }}
+          path: ${{ runner.temp }}/official-wayfern-metadata.json
+          retention-days: 7
   native-sdk:
+    if: ${{ !inputs.metadata_only }}
     runs-on: windows-2022
     timeout-minutes: 15
     steps:
