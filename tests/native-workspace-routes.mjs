@@ -29,6 +29,10 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   for(const owner of ['A','B']){
    await page.locator('[data-view="lyco"]').click();
    await page.locator('#lyco-create-route').selectOption({label:'CI route '+owner});
+   const selected=await page.locator('#lyco-create-route').inputValue();
+   await page.locator('#lyco-load-routes').click();
+   await page.waitForFunction(()=>document.getElementById('view-lyco').getAttribute('aria-busy')==='false'&&document.getElementById('lyco-feedback').textContent.includes('官网线路已加载'));
+   assert.equal(await page.locator('#lyco-create-route').inputValue(),selected,'Refreshing a catalog must not silently change the chosen route to default');
    await page.evaluate(()=>{delete window.__lycoRouteCreated});await page.locator('#lyco-create-profile').click();
    await page.waitForFunction(()=>Boolean(window.__lycoRouteCreated));created.push(await page.evaluate(()=>window.__lycoRouteCreated));
   }
@@ -83,7 +87,7 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   for(const connection of connections)await connection.close().catch(()=>{});
   await page.evaluate(()=>{if(window.__lycoRouteOriginalAdopt)window.adoptLycoProfile=window.__lycoRouteOriginalAdopt;delete window.__lycoRouteOriginalAdopt;delete window.__lycoRouteCreated}).catch(()=>{});
   await app.evaluate(()=>{delete globalThis.__lycoUnixRouteNodes}).catch(()=>{});
-  result.observations=fixture.observations;result.pageRequests=fixture.pageRequests;result.directChecks=fixture.checks;
+  result.observations=fixture.observations;result.pageRequests=fixture.pageRequests;result.directChecks=fixture.checks;result.proxyProbes=fixture.proxyProbes;
   await fixture.close();
  }
 }

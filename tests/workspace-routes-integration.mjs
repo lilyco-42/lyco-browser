@@ -55,6 +55,7 @@ try{
 }catch(error){report.failure=error.stack;throw error}
 finally{
  report.routeChecks=fixture.checks;
+ report.proxyProbes=fixture.proxyProbes;
  await service.disconnect({logout:true});await fixture.close();await fs.rm(directory,{recursive:true,force:true});
  await fs.writeFile(path.join(evidence,'real-mihomo-routes.json'),JSON.stringify(report,null,2));
 }

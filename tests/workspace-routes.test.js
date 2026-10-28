@@ -25,9 +25,10 @@ function fixture(t){
    children.push(child);return child;
   }};
  const pool=new LycoWorkspaceRoutes({network,dataDir:dir,onRouteLost:id=>lost.push(id)});
+ const pools=new Set([pool]);
  const authorization=()=>({...state,connectionEpoch:network.connectionEpoch});
- t.after(async()=>{await pool.stopAll();for(const child of children)if(child.server.listening)await new Promise(resolve=>child.server.close(resolve));fs.rmSync(dir,{recursive:true,force:true})});
- return {dir,state,network,pool,children,lost,authorization,setSource:next=>{source=next}};
+ t.after(async()=>{for(const current of pools)await current.stopAll();for(const child of children)if(child.server.listening)await new Promise(resolve=>child.server.close(resolve));fs.rmSync(dir,{recursive:true,force:true})});
+ return {dir,state,network,pool,pools,children,lost,authorization,setSource:next=>{source=next}};
 }
 test('catalog exposes only opaque identities and labels; duplicate names cannot silently select a different node',async t=>{
  const {pool,authorization}=fixture(t);
@@ -88,7 +89,7 @@ function profileFixture(t){
  const proxyStore={create:async source=>{const record={...source,id:'proxy-'+proxies.size};proxies.set(record.id,record);return record},
   update:async(id,source)=>{const record={...source,id};proxies.set(id,record);return record}};
  const args={network:base.network,dataDir:base.dir,engine,proxyStore};const service=new LycoProfiles(args);
- t.after(()=>service.routes.stopAll());
+ base.pools.add(service.routes);
  return {...base,engine,starts,stops,proxies,args,service};
 }
 test('chosen routes persist in version 2, rebind at launch and release when the actual environment stops',async t=>{
@@ -147,4 +148,14 @@ test('changing a default binding during a pending launch cannot start it on the 
  const pending=engine.start(profile),rejected=assert.rejects(pending,/绑定已变化/);
  await saved;await service.setRoute({id:profile.id,routeId:catalog.nodes[1].id});release();await rejected;
  assert.equal(starts.length,0);assert.equal(service.bindings[profile.id].routeId,catalog.nodes[1].id);
+});
+test('a fresh controller restores a version 2 selected-node binding without trusting the stale stored port',async t=>{
+ const {service,engine,args,pools}=profileFixture(t),catalog=await service.routeCatalog();
+ const {profile}=await service.create({routeId:catalog.nodes[1].id});await service.routes.stopAll();
+ const restartedEngine={profiles:new Map(engine.profiles),start:async row=>row,stop:async()=>{},syncProfiles:async()=>{}};
+ const restored=new LycoProfiles({...args,engine:restartedEngine});pools.add(restored.routes);
+ const started=await restartedEngine.start({...profile,proxy:'DIRECT',proxyId:null});
+ assert.equal(restored.formatVersion,2);assert.equal(restored.bindings[profile.id].routeId,catalog.nodes[1].id);
+ const current=restored.routes.entries.get(profile.id);assert.ok(current);assert.equal(started.proxy,'http://127.0.0.1:'+current.port);
+ assert.deepEqual(current.child.config['proxy-groups'][0].proxies,['CI route B']);
 });

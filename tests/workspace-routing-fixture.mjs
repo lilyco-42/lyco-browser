@@ -5,7 +5,8 @@ import net from 'node:net';
 import {protectConnectHandler} from './connect-handler.mjs';
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 export async function createWorkspaceRoutingFixture(){
- const connections=new Map(),observations=[],checks=[],pageRequests=[],nodes=[];
+ const connections=new Map(),observations=[],checks=[],pageRequests=[],proxyProbes=[],nodes=[];
+ const geoReply=res=>{res.writeHead(200,{'Content-Type':'application/json','Connection':'close'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}))};
  const origin=http.createServer(async(req,res)=>{
   const route=connections.get(req.socket.remotePort)||'direct',url=new URL(req.url,'http://fixture');
   if(url.pathname==='/report'){
@@ -28,15 +29,19 @@ export async function createWorkspaceRoutingFixture(){
   })();</script>`);
  });
  const originPort=await listen(origin),originUrl=`http://127.0.0.1:${originPort}`;
- const geo=http.createServer((_req,res)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({status:'success',query:'198.51.100.20',countryCode:'US',timezone:'Etc/UTC',lat:0,lon:0}))});
+ const geo=http.createServer((_req,res)=>geoReply(res));
  const geoPort=await listen(geo);
  for(const route of ['A','B']){
   const sockets=new Set(),password='CI_PRIVATE_ROUTE_'+route,username='CI_ROUTE_'+route;
   const expected='Basic '+Buffer.from(username+':'+password).toString('base64');
   const mark=socket=>{const port=socket.localPort;connections.set(port,route);socket.once('close',()=>connections.delete(port))};
   const proxy=http.createServer((req,res)=>{
-   if(req.headers['proxy-authorization']!==expected){res.writeHead(407).end();return;}
    const url=new URL(req.url);
+   if(proxyProbes.length<100)proxyProbes.push({route,transport:'http',host:url.hostname,authorized:req.headers['proxy-authorization']===expected});
+   if(req.headers['proxy-authorization']!==expected){res.writeHead(407).end();return;}
+   // Match the existing native fixture's explicit CI geo response for both
+   // HTTP absolute-form and CONNECT probe transports. This is not real egress.
+   if(url.hostname==='ip-api.com'&&url.pathname==='/json/'){geoReply(res);return;}
    if(url.hostname!=='127.0.0.1'||Number(url.port)!==originPort){res.writeHead(502).end();return;}
    const upstream=http.request({host:'127.0.0.1',port:originPort,path:url.pathname+url.search,method:req.method,headers:{...req.headers,host:`127.0.0.1:${originPort}`}},response=>{res.writeHead(response.statusCode,response.headers);response.pipe(res)});
    upstream.on('socket',socket=>{sockets.add(socket);socket.once('connect',()=>mark(socket));socket.once('close',()=>sockets.delete(socket))});
@@ -44,6 +49,7 @@ export async function createWorkspaceRoutingFixture(){
   });
   proxy.on('connection',socket=>{sockets.add(socket);socket.once('close',()=>sockets.delete(socket))});
   proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+   if(proxyProbes.length<100)proxyProbes.push({route,transport:'connect',target:req.url,authorized:req.headers['proxy-authorization']===expected});
    if(req.headers['proxy-authorization']!==expected){socket.end('HTTP/1.1 407 Authentication required\r\n\r\n');return;}
    const port=req.url===`127.0.0.1:${originPort}`?originPort:req.url==='ip-api.com:80'?geoPort:null;
    if(!port){socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;}
@@ -57,7 +63,7 @@ export async function createWorkspaceRoutingFixture(){
   const node=nodes.find(row=>row.route===route);if(!node||node.stopped)return;
   node.stopped=true;for(const socket of node.sockets)socket.destroy();await new Promise(resolve=>node.proxy.close(resolve));
  }
- return {originUrl,observations,checks,pageRequests,
+ return {originUrl,observations,checks,pageRequests,proxyProbes,
   subscription:{proxies:nodes.map(node=>({name:'CI route '+node.route,type:'http',server:'127.0.0.1',port:node.port,username:node.username,password:node.password})),
    'proxy-groups':[{name:'PROXY',type:'select',proxies:['CI route A','CI route B']}]},stopNode,
   async close(){await Promise.all(nodes.map(node=>stopNode(node.route)));origin.closeAllConnections();geo.closeAllConnections();await Promise.all([new Promise(resolve=>origin.close(resolve)),new Promise(resolve=>geo.close(resolve))])},
