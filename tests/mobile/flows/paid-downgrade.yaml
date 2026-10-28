@@ -1,0 +1,9 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible: "无法读取本地环境列表，请重新打开应用后再修改环境"
+    timeout: 30000
+- tapOn: "环境管理"
+- takeScreenshot: paid-downgrade-refused

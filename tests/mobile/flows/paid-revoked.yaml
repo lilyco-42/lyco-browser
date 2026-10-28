@@ -1,0 +1,8 @@
+appId: top.lain42.lycobrowser
+---
+- extendedWaitUntil:
+    visible: "官网权益已失效或长时间无法核实，环境已停止"
+    timeout: 90000
+- assertNotVisible: "LYCO route B owner A"
+- takeScreenshot: paid-native-revocation-stopped
+- runFlow: close.yaml

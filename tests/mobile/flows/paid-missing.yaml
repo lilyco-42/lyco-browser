@@ -1,0 +1,17 @@
+appId: top.lain42.lycobrowser
+---
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- extendedWaitUntil:
+    visible: "已选线路不在当前目录，请重新选择；不会自动换线"
+    timeout: 30000
+- assertVisible: "已保存线路 CI route A"
+- assertVisible: "选择线路 CI route B"
+- assertNotVisible: "选择线路 CI route A"
+- takeScreenshot: paid-missing-no-fallback
+- scrollUntilVisible:
+    element: "返回环境列表"
+    direction: DOWN
+- tapOn: "返回环境列表"

@@ -26,9 +26,13 @@ on:
         description: 'Compile an unsigned iPhone device archive for signing and device review (not installable as-is)'
         type: boolean
         default: false
+      paid_routes_candidate:
+        description: 'Verify an already-built signed Android candidate run with CI Billing and actual saved node routing'
+        type: string
+        default: ''
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.paid_routes_candidate && 'paid-routes' || 'platform-build' }}
   # Preserve the active native runtime evidence; newer pushes replace only the
   # pending run. A long iOS/Android acceptance must not be erased by a docs fix.
   cancel-in-progress: false
@@ -42,7 +46,7 @@ defaults:
 
 jobs:
   web:
-    if: ${{ !inputs.signed_android && !inputs.ios_device }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate }}
     name: React Native Web / Windows macOS Linux shared UI
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -82,7 +86,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-RN-Web.tar.gz"
 
   android:
-    if: ${{ !inputs.ios_device }}
+    if: ${{ !inputs.ios_device && !inputs.paid_routes_candidate }}
     name: Android standalone preview / signed candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 70
@@ -214,7 +218,7 @@ jobs:
           bash ../../scripts/ci-publish-release.sh "$RUNNER_TEMP/LYCO-Browser-Android-preview.apk"
 
   ios-simulator:
-    if: ${{ !inputs.signed_android && !inputs.ios_device }}
+    if: ${{ !inputs.signed_android && !inputs.ios_device && !inputs.paid_routes_candidate }}
     name: iOS 26 simulator unsigned app · no signing
     runs-on: macos-26
     timeout-minutes: 90
@@ -318,7 +322,7 @@ jobs:
           retention-days: 7
 
   ios-device:
-    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android
+    if: github.event_name == 'workflow_dispatch' && inputs.ios_device && !inputs.signed_android && !inputs.paid_routes_candidate
     name: iPhone ARM64 unsigned device archive · signing and runtime review required
     runs-on: macos-26
     timeout-minutes: 60
@@ -379,3 +383,89 @@ jobs:
             ${{ runner.temp }}/ios-device-platform.txt
           if-no-files-found: error
           retention-days: 7
+
+  android-paid-routes:
+    if: ${{ inputs.paid_routes_candidate != '' }}
+    name: Actual signed Android saved-node acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LYCO_PAID_CANDIDATE_RUN: ${{ inputs.paid_routes_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 1, persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Download only a successful signed candidate with unchanged runtime sources
+        run: |
+          set -euo pipefail
+          [[ "$LYCO_PAID_CANDIDATE_RUN" =~ ^[0-9]{5,20}$ ]]
+          gh run watch "$LYCO_PAID_CANDIDATE_RUN" -R "$GITHUB_REPOSITORY" --interval 30 --exit-status
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LYCO_PAID_CANDIDATE_RUN" > "$RUNNER_TEMP/lyco-paid-source-run.json"
+          candidate_sha=$(python3 -c 'import json,sys;x=json.load(open(sys.argv[1]));assert x["conclusion"]=="success";print(x["head_sha"])' "$RUNNER_TEMP/lyco-paid-source-run.json")
+          git fetch --no-tags origin "$candidate_sha"
+          git diff --exit-code "$candidate_sha" HEAD -- apps/universal/src apps/universal/modules apps/universal/plugins apps/universal/app.json apps/universal/package.json apps/universal/package-lock.json apps/universal/third-party mobile/core src/product-version.js
+          mkdir -p "$RUNNER_TEMP/lyco-paid-candidate" "$RUNNER_TEMP/lyco-paid-legacy" "$RUNNER_TEMP/lyco-mobile-paid"
+          gh run download "$LYCO_PAID_CANDIDATE_RUN" -R "$GITHUB_REPOSITORY" -n "lyco-android-candidate-$LYCO_PAID_CANDIDATE_RUN" -D "$RUNNER_TEMP/lyco-paid-candidate"
+          gh run download 40630265066 -R "$GITHUB_REPOSITORY" -n lyco-android-candidate-40630265066 -D "$RUNNER_TEMP/lyco-paid-legacy"
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          for label in candidate legacy; do
+            directory="$RUNNER_TEMP/lyco-paid-$label"
+            (cd "$directory" && sha256sum -c ANDROID-SHA256SUMS.txt)
+            "$signer" verify --verbose --print-certs "$directory/LYCO-Browser-Android-preview.apk" > "$RUNNER_TEMP/lyco-mobile-paid/$label-signature.txt"
+            LYCO_REQUIRE_RELEASE_SIGNATURE=true python3 apps/universal/scripts/verify-android-signature.py "$RUNNER_TEMP/lyco-mobile-paid/$label-signature.txt" resources/signing/android-release-certificate.pem
+          done
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP']);candidate=root/'lyco-paid-candidate/LYCO-Browser-Android-preview.apk'
+          run=json.loads((root/'lyco-paid-source-run.json').read_text())
+          provenance=json.loads((root/'lyco-paid-candidate/ANDROID-VERSION-PROVENANCE.json').read_text())
+          assert provenance['commit']==run['head_sha'] and provenance['run']==str(run['id'])
+          with candidate.open('rb') as f: digest=hashlib.file_digest(f,'sha256').hexdigest()
+          (root/'lyco-mobile-paid/candidate.json').write_text(json.dumps({'run':run['id'],'source':run['head_sha'],'sha256':digest,'runtime_source_diff':'empty','signed_certificate':'retained-owner-certificate','apk_modified':False},indent=2))
+          PY
+          echo "LYCO_CANDIDATE_APK=$RUNNER_TEMP/lyco-paid-candidate/LYCO-Browser-Android-preview.apk" >> "$GITHUB_ENV"
+          echo "LYCO_LEGACY_APK=$RUNNER_TEMP/lyco-paid-legacy/LYCO-Browser-Android-preview.apk" >> "$GITHUB_ENV"
+      - name: Install isolated CI device network tools and pinned UI driver
+        run: |
+          python3 -m venv "$RUNNER_TEMP/lyco-paid-mitm"
+          "$RUNNER_TEMP/lyco-paid-mitm/bin/pip" install mitmproxy==12.2.1
+          bash tests/mobile/install-maestro.sh
+      - name: Enable KVM for disposable native device acceptance
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Verify default TLS, actual old-APK upgrade, persisted nodes, negative routing and native revocation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot -writable-system
+          script: bash tests/mobile/paid/run-paid.sh
+      - name: Retain actual paid-routing observations without private CA or storage databases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-mobile-paid-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-mobile-paid
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Clean private disposable certificate and storage copies
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/lyco-paid-private-ca" "$RUNNER_TEMP/lyco-paid-private-storage"
