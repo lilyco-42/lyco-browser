@@ -8,6 +8,7 @@ for row,(owner,route,previous) in zip(rows,expected):
     assert row['after']=={'cookie':owner,'local':owner,'indexedDB':owner}
 assert len(data['pageRequests'])==7,'Missing/stopped selection reached the origin or another route'
 assert any(row['key']=='device-direct-control' and row['route']=='direct' for row in data['checks']),'Device direct positive control missing'
+assert any(row['key']=='system-proxy-control' and row['route']=='direct' for row in data['checks']),'Healthy system proxy alternate-path control missing'
 assert {row['owner'] for row in data['requests'] if row['path']=='/studio/api/login'}=={'ci-owner-a','ci-owner-b'}
 assert data['revoked'] and sum(row['path']=='/studio/api/me' for row in data['requests'])>=8
 assert any(row['path']=='/studio/api/me' and row['nativeGuard'] and row['revoked'] for row in data['requests']),'Native Billing guard did not consume the fixture revocation'
