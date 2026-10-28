@@ -4,7 +4,9 @@
 
 ## 已有证据
 
-2026-10-28 补查：`72c6753` 的 Windows [40496745914](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745914) 和 macOS [40496746024](https://github.com/lilyco-42/lyco-browser/actions/runs/40496746024) 在实际启动时拒绝不符的硬件/显卡回执；同一 Unix 运行的 Linux 任务通过。拒绝是保护行为，不是配置组合已修复。移动 [40496745927](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745927) 的 Android 第一次尝试在模拟器下载损坏（`Error on ZipFile unknown archive`）阶段停止，未执行原生用例；正在单独重跑 Android。iOS 的原生负向仍失败，不能将 Android 基础设施错误解释为应用回归，亦不能把旧候选成功扩展到当前全部平台。
+`5a55b17` 的离线 JavaScript 许可页已通过 [40553867714](https://github.com/lilyco-42/lyco-browser/actions/runs/40553867714)：六项生成器测试、TypeScript、Expo Web 导出和真实浏览器断网搜索/展开原文/关闭。实际安装包 501 项，35 项补入精确版本上游原件，缺少文本从 41 项降为 3 项；见 [版权交付记录](THIRD-PARTY-DELIVERY.md)。`75b0d55` 的新签名 Android 候选 [40554474153](https://github.com/lilyco-42/lyco-browser/actions/runs/40554474153) 已启动，并增加原生许可页流程；待实际结果，不能当作已通过。
+
+2026-10-28 补查：`72c6753` 的 Windows [40496745914](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745914) 和 macOS [40496746024](https://github.com/lilyco-42/lyco-browser/actions/runs/40496746024) 在实际启动时拒绝不符的硬件/显卡回执；同一 Unix 运行的 Linux 任务通过。拒绝是保护行为，不是配置组合已修复。移动 [40496745927](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745927) 的 Android 第一次尝试在模拟器下载损坏（`Error on ZipFile unknown archive`）阶段停止，未执行原生用例；第二次尝试已通过完整 Android 原生验收，6 份预期存储报告、5 次导航，停代理后 C 源站请求为 0。该 PR 预览未断言保留发行签名，不能替代已签名候选。iOS 的原生负向仍失败，不能将 Android 基础设施错误解释为应用回归，亦不能把旧候选成功扩展到当前全部平台。
 
 `92ddbd7` 的核心 [40550598220](https://github.com/lilyco-42/lyco-browser/actions/runs/40550598220) 已通过整个 `go test -race -tags with_quic,with_utls -count=1 ./...`。新增用例通过认证 HTTP 和 SOCKS5 两种入站，实际连接 IPv6 HTTP、验证 CI CA 的 HTTPS、远端域名 HTTPS/WSS；共 8 次源站访问均经过指定上游。停止上游后相同 8 次请求全部失败，源站访问数保持不变；随后 3 次独立直连成功证明源站仍可达。此结果只证明 Go 核心的边界，不能替代 WebView/WKWebView、设备 DNS/RTC、客户线路或全设备 VPN 验收。该次仅重跑核心测试，未重编未变更的原生绑定。
 
