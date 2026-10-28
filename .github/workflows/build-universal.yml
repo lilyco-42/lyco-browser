@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       signed_android:
-        description: 'Build a signed Android candidate in an owner-only draft (not a commercial release)'
+        description: 'Build a signed Android internal candidate artifact (not a commercial release)'
         type: boolean
         default: false
       ios_device:

@@ -4,7 +4,7 @@
 
 ## 已有证据
 
-`5a55b17` 的离线 JavaScript 许可页已通过 [40553867714](https://github.com/lilyco-42/lyco-browser/actions/runs/40553867714)：六项生成器测试、TypeScript、Expo Web 导出和真实浏览器断网搜索/展开原文/关闭。实际安装包 501 项，35 项补入精确版本上游原件，缺少文本从 41 项降为 3 项；见 [版权交付记录](THIRD-PARTY-DELIVERY.md)。`75b0d55` 的新签名 Android 候选 [40554474153](https://github.com/lilyco-42/lyco-browser/actions/runs/40554474153) 已启动，并增加原生许可页流程；待实际结果，不能当作已通过。
+`5a55b17` 的离线 JavaScript 许可页已通过 [40553867714](https://github.com/lilyco-42/lyco-browser/actions/runs/40553867714)：六项生成器测试、TypeScript、Expo Web 导出和真实浏览器断网搜索/展开原文/关闭。实际安装包 501 项，35 项补入精确版本上游原件，缺少文本从 41 项降为 3 项；见 [版权交付记录](THIRD-PARTY-DELIVERY.md)。`75b0d55` 的新签名 Android 内部候选 [40554474153](https://github.com/lilyco-42/lyco-browser/actions/runs/40554474153) 已全部成功：保留证书匹配、成品版本、完整 A/B 存储/导航/清除/删除/重启/进程退出/代理正负向，以及新增许可页实际打开/搜索/展开原文/关闭均通过。6 份预期存储报告，5 次导航，停代理后 C 源站请求为 0。APK SHA-256 `cf42a2d4a193ddd31ccc5763da3c06666440442e4b38cc02ffa434c7d4732398`，签名证书仍为 `1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae`。这不是商店、真机客户线路或五平台正式发行证明。
 
 2026-10-28 补查：`72c6753` 的 Windows [40496745914](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745914) 和 macOS [40496746024](https://github.com/lilyco-42/lyco-browser/actions/runs/40496746024) 在实际启动时拒绝不符的硬件/显卡回执；同一 Unix 运行的 Linux 任务通过。拒绝是保护行为，不是配置组合已修复。移动 [40496745927](https://github.com/lilyco-42/lyco-browser/actions/runs/40496745927) 的 Android 第一次尝试在模拟器下载损坏（`Error on ZipFile unknown archive`）阶段停止，未执行原生用例；第二次尝试已通过完整 Android 原生验收，6 份预期存储报告、5 次导航，停代理后 C 源站请求为 0。该 PR 预览未断言保留发行签名，不能替代已签名候选。iOS 的原生负向仍失败，不能将 Android 基础设施错误解释为应用回归，亦不能把旧候选成功扩展到当前全部平台。
 
