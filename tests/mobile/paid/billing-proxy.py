@@ -13,12 +13,16 @@ def http_connect(flow: http.HTTPFlow):
     if host=='lain42.top' and port==443:
         # Never establish a production connection, even if the proxy later
         # needs an upstream socket while detecting the tunneled protocol.
-        flow.server_conn.address=('127.0.0.1',fixture['apiPort'])
+        flow.metadata['ci_target']=('127.0.0.1',fixture['apiPort'])
     elif host in ('10.0.2.2','127.0.0.1') and port==fixture['originPort']:
         # 10.0.2.2 is the emulator's host alias, not a runner-side address.
         # The mobile core uses CONNECT even for a plaintext HTTP destination.
-        flow.server_conn.address=('127.0.0.1',fixture['originPort'])
+        flow.metadata['ci_target']=('127.0.0.1',fixture['originPort'])
     else:flow.response=http.Response.make(502,b'CI tunnel blocks external traffic')
+def http_connected(flow: http.HTTPFlow):
+    # mitmproxy 12.2.1 initializes server.address after http_connect; apply the
+    # approved target here, before its lazy child protocol opens any socket.
+    flow.server_conn.address=flow.metadata['ci_target']
 def request(flow: http.HTTPFlow):
     host=flow.request.pretty_host
     record('request',host=host,port=flow.request.port,path=flow.request.path)
