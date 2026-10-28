@@ -131,6 +131,7 @@ class LycoNetwork {
     this.authGeneration = 0;
     this.onCoreExit = null;
     this.onAuthorizationLost = null;
+    this.onDisconnect = null;
     this.validationTimer = null;
     this.lastVerifiedAt = 0;
   }
@@ -244,6 +245,22 @@ class LycoNetwork {
       this.entitlement?.expires_at ? Date.parse(this.entitlement.expires_at) : Infinity);
     return {kind:'lyco-loopback-proxy',version:1,scheme:'http',host:'127.0.0.1',port:state.port,issuedAt,expiresAt};
   }
+  // Main-process only. The subscription body must never be an IPC result.
+  async workspaceSubscription(authorization) {
+    const token=this.token,subToken=this.entitlement?.token;
+    const current=()=>{
+      const state=this.status();
+      if(!token||token!==this.token||subToken!==this.entitlement?.token||
+        !TOKEN_REGEX.test(subToken||'')||!state.logged_in||!state.entitled||!state.connected||
+        state.username!==authorization.username||state.port!==authorization.port||
+        this.connectionEpoch!==authorization.connectionEpoch||
+        (state.expires_at&&Date.parse(state.expires_at)<=Date.now()))
+        throw Error('账号或连接已变化，请重新操作');
+    };
+    current();
+    const raw=await this.request('/sub/'+encodeURIComponent(subToken)+'/clash',{raw:true});
+    current();return raw;
+  }
   findCore() {
     const opts = [this.customCore, this.bundledCore,
       process.env.LYCO_MIHOMO_PATH].filter(Boolean);
@@ -325,6 +342,7 @@ class LycoNetwork {
       if (child.exitCode === null) child.kill();
     }
     await this.cleanupConfig();
+    await this.onDisconnect?.();
     return this.status();
   }
   async logout() {
@@ -334,4 +352,4 @@ class LycoNetwork {
     return this.status();
   }
 }
-module.exports = { LycoNetwork, extractEntitlement, makeConfig, SHOP, ACCOUNT, API };
+module.exports = { LycoNetwork, extractEntitlement, makeConfig, freePort, waitForPort, SHOP, ACCOUNT, API };

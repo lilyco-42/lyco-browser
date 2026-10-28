@@ -23,6 +23,11 @@ on:
     branches: [main]
     paths: ['src/**', 'scripts/**', 'resources/ui-font/**', '.gitattributes', 'tests/ui-font.test.mjs', 'tests/workbench-ui-font.mjs', 'apps/universal/src/product.json', 'tests/product-version.test.js', 'tests/upstream-product-version.test.js', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
+    inputs:
+      routes_only:
+        description: Verify selected workspace routes without repackaging native browsers
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
@@ -32,7 +37,37 @@ permissions:
   contents: write
 
 jobs:
+  workspace-routes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify ownership, cancellation, fixed selection and core lifecycle
+        run: node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js
+      - name: Prepare the same pinned official Mihomo used by desktop packages
+        run: |
+          mkdir -p "$RUNNER_TEMP/lyco-route-test"
+          gh release download v1.19.32 -R MetaCubeX/mihomo -p 'mihomo-linux-amd64-v1.19.32.gz' -D "$RUNNER_TEMP/lyco-route-test"
+          gzip -dc "$RUNNER_TEMP/lyco-route-test/mihomo-linux-amd64-v1.19.32.gz" > "$RUNNER_TEMP/lyco-route-test/mihomo"
+          chmod +x "$RUNNER_TEMP/lyco-route-test/mihomo"
+      - name: Observe real per-workspace authenticated upstreams and stopped-route behavior
+        run: LYCO_MIHOMO_PATH="$RUNNER_TEMP/lyco-route-test/mihomo" node tests/workspace-routes-integration.mjs
+      - name: Retain route observations without subscription credentials
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-workspace-routes-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-workspace-route-evidence
+          if-no-files-found: warn
+          retention-days: 7
   desktop:
+    needs: workspace-routes
+    if: ${{ inputs.routes_only != true }}
     name: ${{ matrix.target }}
     strategy:
       fail-fast: false
@@ -84,6 +119,7 @@ jobs:
           done
           node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/third-party-notices.test.js
           node --test lyco/tests/ui-font.test.mjs
+          node --test lyco/tests/workspace-routes.test.js
           node --test lyco/tests/update-policy.test.js lyco/tests/update-download.test.js lyco/tests/product-version.test.js
 
       - uses: actions/setup-python@v5

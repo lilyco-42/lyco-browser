@@ -26,12 +26,15 @@
     <header class="lyco-panel-card-header"><div><p class="lyco-panel-eyebrow">网络与环境</p><h2 id="lyco-network-heading">准备你的独立环境</h2></div><span id="lyco-network-chip" class="lyco-panel-state">未连接</span></header>
     <p class="lyco-panel-copy">一键创建会连接本站网络并绑定环境；已有自有代理也可以在代理库中配置。</p>
     <p id="lyco-network-status" class="lyco-panel-status" role="status">未连接</p>
+    <div class="lyco-route-tools"><label for="lyco-create-route">新环境使用的线路<select id="lyco-create-route"><option value="">默认订阅线路</option></select></label><button type="button" id="lyco-load-routes" class="outline">加载官网线路</button></div>
+    <p class="lyco-panel-hint">可为不同环境选择固定节点；所选节点不可用时，不会自动改用其他节点。</p>
     <div class="lyco-panel-primary-actions"><button type="button" id="lyco-create-profile" class="primary">一键创建专属代理环境</button><button type="button" id="lyco-go-profiles" class="outline">查看环境列表</button></div>
     <p class="lyco-panel-hint">创建后，在环境列表点击启动。每次启动会核对所属账号及订阅；退出账号会关闭本站受管环境。</p>
     <div class="lyco-panel-actions"><button type="button" id="lyco-connect" class="outline">连接代理</button><button type="button" id="lyco-disconnect" class="outline">断开代理</button></div>
     <button type="button" id="lyco-copy-extension" class="outline lyco-panel-wide">复制浏览器插件连接码</button>
     <details class="lyco-panel-advanced" id="lyco-network-advanced"><summary>高级网络设置</summary><p class="lyco-panel-hint">仅为选定的浏览器环境提供连接，不修改系统网络设置。使用自有代理时，先打开代理库。</p><div class="lyco-panel-actions"><button type="button" id="lyco-pick-core" class="outline">导入 mihomo.exe</button><button type="button" id="lyco-import" class="outline" disabled>导入当前代理到代理库</button><button type="button" id="lyco-go-proxies" class="outline">打开代理库</button></div></details>
    </article>
+   <article class="card lyco-panel-card lyco-panel-route-card" id="lyco-route-card" hidden aria-labelledby="lyco-routes-heading"><h2 id="lyco-routes-heading">环境线路绑定</h2><p class="lyco-panel-hint">更换线路会先关闭该环境，下次启动时使用新线路。其他环境保持各自的连接。</p><div id="lyco-profile-routes"></div></article>
    <article class="card lyco-panel-card lyco-panel-purchase" aria-labelledby="lyco-purchase-heading">
     <div><p class="lyco-panel-eyebrow">购买与续费</p><h2 id="lyco-purchase-heading">在官网完成结算，回到这里刷新权益</h2><p class="lyco-panel-copy">月卡、90天季卡、120天套餐和年卡均在官网选择，充值和订单也在官网管理。已购买但状态未更新时，点击上方「刷新权益」。</p></div>
     <div class="lyco-panel-actions"><button type="button" id="lyco-buy" class="primary">购买 / 续费代理订阅</button><button type="button" id="lyco-account" class="outline">官网账户 / 订单</button></div>

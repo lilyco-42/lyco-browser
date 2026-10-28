@@ -85,7 +85,7 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','update-policy.js','update-download.js','view.html','ui.js','workbench.js','workbench.css','account.css','ui-font.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
+for(const file of ['network.js','profiles.js','workspace-routes.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','update-policy.js','update-download.js','view.html','ui.js','workbench.js','workbench.css','account.css','ui-font.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
@@ -179,7 +179,10 @@ one('renderer.js','function viewMetaFor(view) {',join(
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
  "  lycoDesktopAppearance: () => ipcRenderer.invoke('lyco:desktop-appearance'),",
- "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
+ "  lycoCreateProfile: (params) => ipcRenderer.invoke('lyco:create-profile', params),",
+ "  lycoRouteCatalog: () => ipcRenderer.invoke('lyco:route-catalog'),",
+ "  lycoListProfileRoutes: () => ipcRenderer.invoke('lyco:profile-routes'),",
+ "  lycoSetProfileRoute: (params) => ipcRenderer.invoke('lyco:set-profile-route', params),",
  "  lycoCopyExtension: () => ipcRenderer.invoke('lyco:copy-extension'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
  "  lycoLogin: (params) => ipcRenderer.invoke('lyco:login', params),",
@@ -212,7 +215,10 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:logout', () => lycoProfiles.disconnect({logout:true}));",
  "  registerTrustedIpc('lyco:connect', () => lycoNetwork.connect());",
  "  registerTrustedIpc('lyco:disconnect', () => lycoProfiles.disconnect());",
- "  registerTrustedIpc('lyco:create-profile', () => lycoProfiles.create());",
+ "  registerTrustedIpc('lyco:create-profile', (_event, params) => lycoProfiles.create(params || {}));",
+ "  registerTrustedIpc('lyco:route-catalog', () => lycoProfiles.routeCatalog());",
+ "  registerTrustedIpc('lyco:profile-routes', () => lycoProfiles.listRoutes());",
+ "  registerTrustedIpc('lyco:set-profile-route', (_event, params) => lycoProfiles.setRoute(params || {}));",
  "  registerTrustedIpc('lyco:copy-extension', async () => {",
  "    const connection = await lycoNetwork.extensionConnection();",
  "    require('electron').clipboard.writeText(JSON.stringify(connection));",
@@ -232,7 +238,7 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('app:open-github', async () => {"));
 one('main.js','.then(() => localSettingsWriter.flushNow())',join(
  '.then(() => localSettingsWriter.flushNow())',
- '    .then(() => lycoNetwork?.disconnect())'));
+ '    .then(() => lycoProfiles ? lycoProfiles.disconnect() : lycoNetwork?.disconnect())'));
 console.log('LYCO overlay applied to pinned upstream');
 
 // Protect only LYCO owned proxy windows from the upstream local-host bypass.

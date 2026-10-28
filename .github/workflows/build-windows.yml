@@ -36,6 +36,7 @@ jobs:
           node --test tests/diagnostics-controller.test.js
           node --test tests/release-preview.test.js tests/third-party-notices.test.js
           node --test tests/ui-font.test.mjs
+          node --test tests/workspace-routes.test.js
           node --test tests/update-policy.test.js tests/update-download.test.js tests/product-version.test.js
           node --test tests/browser-webgl-identity.test.mjs
 
