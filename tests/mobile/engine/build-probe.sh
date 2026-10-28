@@ -12,7 +12,7 @@ keytool -genkeypair -noprompt -keystore "$LYCO_ENGINE_SIGNING_KEY" -storetype PK
  --storepass CI_engine_probe_only --keypass CI_engine_probe_only -alias experiment \
  -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=LYCO disposable native engine experiment'
 if [[ ! -f "$ANDROID_HOME/platforms/android-37/android.jar" ]]; then
- sdkmanager_bin=$(rg --files "$ANDROID_HOME/cmdline-tools" | rg '/bin/sdkmanager$' | sort -V | tail -1)
+ sdkmanager_bin=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)
  test -n "$sdkmanager_bin"
  "$sdkmanager_bin" 'platforms;android-37' 'build-tools;36.0.0'
 fi

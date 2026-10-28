@@ -49,3 +49,5 @@ The experiment toolchain now follows those requirements; API35/target35 and the
 strict native behavior tests are unchanged. No runtime result came from that run.
 Run 40732467759 stopped before compilation because sdkmanager was absent from PATH;
 the build now locates the installed Android command-line tool explicitly.
+Run 40732958680 showed that the hosted runner also lacks ripgrep; tool discovery
+uses its available find command, with no new runtime dependency.
