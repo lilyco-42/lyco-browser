@@ -33,11 +33,14 @@ test('malformed authorities, UDP TLS, default UDP, bad ports and injection text 
 });
 test('page-edited primordials and iterable prototypes cannot smuggle UDP into a validated native sequence',()=>{
  const m=model();m.run(`
+ const cleanServers=new Set([{urls:new Set(['turn:real.example:3478?transport=tcp','turn:bad.example?transport=udp'])}]);
  Array.prototype[Symbol.iterator]=function*(){yield {urls:'turn:smuggled.example?transport=udp'}};
  String.prototype.trim=function(){return 'turn:smuggled.example?transport=tcp'};
  RegExp.prototype.exec=function(){return ['','turn','evil','','tcp']};
  Reflect.apply=function(){throw Error('page apply')};
  Object.prototype.iceTransportPolicy='all';
- new RTCPeerConnection({iceTransportPolicy:'all',iceServers:new Set([{urls:new Set(['turn:real.example:3478?transport=tcp','turn:bad.example?transport=udp'])}])});`);
- assert.equal(m.records[0].iceTransportPolicy,'relay');assert.deepEqual(m.records[0].iceServers[0].urls,['turn:real.example:3478?transport=tcp']);
+ new RTCPeerConnection({iceTransportPolicy:'all',iceServers:new Set([{urls:'turn:real.example:3478?transport=tcp'}])});
+ new RTCPeerConnection({iceTransportPolicy:'all',iceServers:cleanServers});`);
+ assert.equal(m.records[0].iceTransportPolicy,'relay');assert.deepEqual(m.records[0].iceServers,[]);
+ assert.equal(m.records[1].iceTransportPolicy,'relay');assert.deepEqual(m.records[1].iceServers[0].urls,['turn:real.example:3478?transport=tcp']);
 });
