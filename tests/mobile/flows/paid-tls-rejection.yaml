@@ -16,7 +16,7 @@ appId: top.lain42.lycobrowser
     direction: DOWN
 - tapOn: "登录并验证权益"
 - extendedWaitUntil:
-    visible: ".*Network request failed.*|.*网络.*失败.*|.*证书.*"
+    visible: ".*SSLHandshakeException.*"
     timeout: 30000
 - assertNotVisible: "代理年卡有效"
 - takeScreenshot: paid-untrusted-fixture-ca-rejected
