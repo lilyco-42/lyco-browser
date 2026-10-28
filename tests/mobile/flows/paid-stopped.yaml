@@ -10,7 +10,7 @@ appId: top.lain42.lycobrowser
     direction: DOWN
 - tapOn: "通过官网线路打开环境"
 - extendedWaitUntil:
-    visible: "页面网络请求失败.*|页面返回 HTTP.*"
+    visible: "(?s)页面网络请求失败.*|页面返回 HTTP.*|.*net::ERR_HTTP_RESPONSE_CODE_FAILURE.*"
     timeout: 30000
 - assertNotVisible: "LYCO route .* owner A"
 - takeScreenshot: paid-stopped-no-direct
