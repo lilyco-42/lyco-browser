@@ -6,7 +6,9 @@ import {createWorkspaceRoutingFixture} from '../../workspace-routing-fixture.mjs
 import {nodeIdentityInput} from '../../../apps/universal/src/mobile-route-policy.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Paid mobile fixtures run only in GitHub Actions');
 const directory=path.join(process.env.RUNNER_TEMP,'lyco-mobile-paid');await fs.mkdir(directory,{recursive:true});
-const routes=await createWorkspaceRoutingFixture({browserOriginHost:'10.0.2.2',indexedDB:true,visibleStatus:true});
+// Match the existing mobile acceptance's explicit one-hour persistent cookie;
+// multiple real APK installs/UI drivers may exceed the desktop's ten minutes.
+const routes=await createWorkspaceRoutingFixture({browserOriginHost:'10.0.2.2',indexedDB:true,visibleStatus:true,cookieMaxAge:3600});
 const requests=[];let hideA=false,revoked=false;
 const owners=new Map([['CI_OWNER_A_TOKEN','ci-owner-a'],['CI_OWNER_B_TOKEN','ci-owner-b']]);
 const subscription=()=>{

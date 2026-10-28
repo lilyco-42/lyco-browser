@@ -4,8 +4,9 @@ import http from 'node:http';
 import net from 'node:net';
 import {protectConnectHandler} from './connect-handler.mjs';
 const listen=(server,port=0)=>new Promise(resolve=>server.listen(port,'127.0.0.1',()=>resolve(server.address().port)));
-export async function createWorkspaceRoutingFixture({chainedA=false,browserOriginHost='127.0.0.1',indexedDB=false,visibleStatus=false}={}){
+export async function createWorkspaceRoutingFixture({chainedA=false,browserOriginHost='127.0.0.1',indexedDB=false,visibleStatus=false,cookieMaxAge=600}={}){
  if(!['127.0.0.1','10.0.2.2'].includes(browserOriginHost))throw Error('CI fixture origin host is not allowed');
+ if(!Number.isInteger(cookieMaxAge)||cookieMaxAge<60||cookieMaxAge>86400)throw Error('CI fixture cookie lifetime is invalid');
  const connections=new Map(),observations=[],checks=[],pageRequests=[],proxyProbes=[],nodes=[],entryConnections=new Set(),entryProbes=[];
  const geoReply=res=>{res.writeHead(200,{'Content-Type':'application/json','Connection':'close'});res.end(JSON.stringify({status:'success',query:'203.0.113.7',ip:'203.0.113.7',countryCode:'US',country:'CI',timezone:'Etc/UTC',lat:0,lon:0}))};
  const origin=http.createServer(async(req,res)=>{
@@ -34,7 +35,7 @@ export async function createWorkspaceRoutingFixture({chainedA=false,browserOrigi
     };
    });
    if(${indexedDB})before.indexedDB=await idb();
-   document.cookie='routeOwner='+owner+'; Path=/; Max-Age=600; SameSite=Lax';localStorage.setItem('routeOwner',owner);
+   document.cookie='routeOwner='+owner+'; Path=/; Max-Age=${cookieMaxAge}; SameSite=Lax';localStorage.setItem('routeOwner',owner);
    const after={cookie:readCookie(),local:localStorage.getItem('routeOwner')};
    if(${indexedDB}){await idb(owner);after.indexedDB=await idb()}
    const reported=await fetch('/report',{method:'POST',body:JSON.stringify({phase,before,after})});

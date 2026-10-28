@@ -1,5 +1,6 @@
 """CI device proxy: replace only test Billing traffic; never contact production."""
-import http.client,json,os
+import json,os
+from http.client import HTTPConnection
 from pathlib import Path
 from mitmproxy import http
 if os.environ.get('GITHUB_ACTIONS')!='true':raise RuntimeError('Actions only')
@@ -34,7 +35,7 @@ def request(flow: http.HTTPFlow):
         port=fixture['originPort'];target=flow.request.path
     else:
         flow.response=http.Response.make(502,b'CI proxy blocks external traffic');return
-    connection=http.client.HTTPConnection('127.0.0.1',port,timeout=15)
+    connection=HTTPConnection('127.0.0.1',port,timeout=15)
     try:
         headers={k:v for k,v in flow.request.headers.items() if k.lower() not in ('host','proxy-authorization','connection','content-length')}
         connection.request(flow.request.method,target,flow.request.raw_content,headers)
@@ -42,6 +43,9 @@ def request(flow: http.HTTPFlow):
         response_headers={k:v for k,v in result.getheaders() if k.lower() not in ('content-length','transfer-encoding','connection')}
         flow.response=http.Response.make(result.status,body,response_headers)
         record('response',status=result.status,bytes=len(body))
+    except Exception as error:
+        record('fixture-error',type=type(error).__name__)
+        raise
     finally:connection.close()
 def error(flow: http.HTTPFlow):
     record('error',message=str(flow.error))

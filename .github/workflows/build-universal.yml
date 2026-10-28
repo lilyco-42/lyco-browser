@@ -415,7 +415,7 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LYCO_PAID_CANDIDATE_RUN" > "$RUNNER_TEMP/lyco-paid-source-run.json"
           candidate_sha=$(python3 -c 'import json,sys;x=json.load(open(sys.argv[1]));assert x["conclusion"]=="success";print(x["head_sha"])' "$RUNNER_TEMP/lyco-paid-source-run.json")
           git fetch --no-tags origin "$candidate_sha"
-          git diff --exit-code "$candidate_sha" HEAD -- apps/universal/src apps/universal/modules apps/universal/plugins apps/universal/app.json apps/universal/package.json apps/universal/package-lock.json apps/universal/third-party mobile/core src/product-version.js
+          git diff --exit-code "$candidate_sha" HEAD -- apps/universal mobile/core src/product-version.js
           mkdir -p "$RUNNER_TEMP/lyco-paid-candidate" "$RUNNER_TEMP/lyco-paid-legacy" "$RUNNER_TEMP/lyco-mobile-paid"
           gh run download "$LYCO_PAID_CANDIDATE_RUN" -R "$GITHUB_REPOSITORY" -n "lyco-android-candidate-$LYCO_PAID_CANDIDATE_RUN" -D "$RUNNER_TEMP/lyco-paid-candidate"
           gh run download 40630265066 -R "$GITHUB_REPOSITORY" -n lyco-android-candidate-40630265066 -D "$RUNNER_TEMP/lyco-paid-legacy"
