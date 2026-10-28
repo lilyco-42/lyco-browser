@@ -5,7 +5,7 @@ not replace the product engine, add a product test entry point, or migrate any
 existing environment or website data. All builds/runtime are genuine Actions only.
 
 Dispatch the existing `build-universal.yml` with `native_engine_probe=true` and the
-other inputs left at their defaults. Gradle 8.13 / AGP 8.11.1 compile SDK36, while
+other inputs left at their defaults. Gradle 9.3.1 / AGP 9.1.1 compile SDK37, while
 target SDK35 and the API35 device match the current product probe. The official
 Mozilla Maven metadata selected stable GeckoView `159.0.20261022150525`; it is pinned
 here instead of taking a moving latest/nightly version. Actual resolved dependency
@@ -40,4 +40,9 @@ Primary sources:
 - https://mozilla.github.io/geckoview/javadoc/mozilla-central/org/mozilla/geckoview/GeckoRuntimeSettings.Builder.html
 - https://raw.githubusercontent.com/mozilla-firefox/firefox/main/mobile/android/geckoview/src/main/java/org/mozilla/geckoview/GeckoRuntime.java
 - https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/extensions/parent/ext-privacy.js
-- https://developer.android.com/build/releases/agp-8-11-0-release-notes
+- https://developer.android.com/build/releases/agp-9-1-0-release-notes
+
+Initial Actions run 40732014774 stopped at AAR metadata validation: current
+GeckoView and AndroidX Core require compile SDK37, with Core requiring AGP9.1+.
+The experiment toolchain now follows those requirements; API35/target35 and the
+strict native behavior tests are unchanged. No runtime result came from that run.
