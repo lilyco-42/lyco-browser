@@ -33,6 +33,9 @@ adb shell settings put global http_proxy :0
 # This exposes the same owned host fixture on the real device loopback. The
 # browser must proxy those URLs; direct controls must prove all three reachable.
 adb reverse tcp:18080 tcp:18080
+# Match the product architecture's loopback proxy endpoint, not only a proxy
+# reachable through the emulator's host alias.
+adb reverse tcp:18081 tcp:18081
 adb install -r "$evidence/engine-probe.apk"
 adb logcat -c
 wait_report(){

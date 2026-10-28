@@ -25,7 +25,8 @@ including initial about:blank, nested blank frames, `window.frames`, and
 native configurations are retained. Native policies can apply below the page API;
 their `getConfiguration` result is observed, not forced to match a JavaScript shim.
 The network/address and real TURN TCP PING/ACK positive and stopped-route negative
-gates remain mandatory. Three real device-loopback HTTP targets must also work in
+gates remain mandatory. The proxy endpoint itself is device loopback, matching
+the product's native-core architecture. Three real loopback HTTP targets must also work in
 both direct controls and use the selected upstream when policy is enabled. Missing
 IPv6 or a broken control invalidates that proof; it is not skipped.
 
@@ -46,3 +47,5 @@ Initial Actions run 40732014774 stopped at AAR metadata validation: current
 GeckoView and AndroidX Core require compile SDK37, with Core requiring AGP9.1+.
 The experiment toolchain now follows those requirements; API35/target35 and the
 strict native behavior tests are unchanged. No runtime result came from that run.
+Run 40732467759 stopped before compilation because sdkmanager was absent from PATH;
+the build now locates the installed Android command-line tool explicitly.

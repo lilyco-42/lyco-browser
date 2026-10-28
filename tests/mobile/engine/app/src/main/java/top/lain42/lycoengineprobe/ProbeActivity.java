@@ -41,9 +41,9 @@ public final class ProbeActivity extends Activity {
             boolean policy = "policy".equals(mode);
             JSONObject prefs = new JSONObject();
             prefs.put("network.proxy.type", policy ? 1 : 0);
-            prefs.put("network.proxy.http", "10.0.2.2");
+            prefs.put("network.proxy.http", "127.0.0.1");
             prefs.put("network.proxy.http_port", 18081);
-            prefs.put("network.proxy.ssl", "10.0.2.2");
+            prefs.put("network.proxy.ssl", "127.0.0.1");
             prefs.put("network.proxy.ssl_port", 18081);
             prefs.put("network.proxy.share_proxy_settings", true);
             prefs.put("network.proxy.no_proxies_on", "");
