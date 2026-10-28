@@ -3,10 +3,10 @@ name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.gitattributes', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   pull_request:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.gitattributes', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   workflow_dispatch:
 
 concurrency:

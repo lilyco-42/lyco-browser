@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'resources/ui-font/**'
+      - '.gitattributes'
+      - 'tests/ui-font.test.mjs'
+      - 'tests/workbench-ui-font.mjs'
       - 'apps/universal/src/product.json'
       - 'tests/product-version.test.js'
       - 'tests/upstream-product-version.test.js'
@@ -17,7 +21,7 @@ on:
       - '.github/workflows/build-desktop-unix.yml'
   pull_request:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'apps/universal/src/product.json', 'tests/product-version.test.js', 'tests/upstream-product-version.test.js', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
+    paths: ['src/**', 'scripts/**', 'resources/ui-font/**', '.gitattributes', 'tests/ui-font.test.mjs', 'tests/workbench-ui-font.mjs', 'apps/universal/src/product.json', 'tests/product-version.test.js', 'tests/upstream-product-version.test.js', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
 
 concurrency:
