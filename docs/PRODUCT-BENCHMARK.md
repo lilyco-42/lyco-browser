@@ -14,6 +14,6 @@
 
 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 官方定位为 Windows/macOS/Linux 的 Rust/Tauri 代理客户端；其界面与后台使用自己的宿主接口。Tauri [官方文档](https://v2.tauri.app/reference/webview-versions/)明确使用各平台系统 WebView；管理界面的 WebView 不等于另行启动、按环境隔离的 Chromium 浏览器。
 
-已有候选核对：Clash Verge Rev（GPL-3.0，2026-10-28 读取约 154445 stars）与 Clash Nyanpasu（GPL-3.0，约 13250 stars）均是活跃的代理管理参考；它们不直接提供完整的多店铺浏览器产品层。采用其代码须遵守各自许可和保留来源。当前选择继续复用现有浏览器环境能力及 Mihomo，评估移植订阅/节点/规则管理的收益；不因界面参考而整体替换正在验收的宿主，也不把普通 Chromium 多开当作指纹隔离通过证明。
+已有候选核对：Clash Verge Rev（GPL-3.0，2026-10-28 读取约 154445 stars）与 [Clash Nyanpasu](https://github.com/libnyanpasu/clash-nyanpasu)（GPL-3.0，约 13250 stars）均是活跃的代理管理参考；它们不直接提供完整的多店铺浏览器产品层。采用其代码须遵守各自许可和保留来源。调研建议继续复用现有浏览器环境能力及 Mihomo，评估移植订阅/节点/规则管理的收益；不因界面参考而整体替换正在验收的宿主，也不把普通 Chromium 多开当作指纹隔离通过证明。
 
 后续最小验证应先在真实 Actions 中证明两个环境各用指定代理、数据互不共享、重开保留身份及断代理无直连，再扩大界面改造。现有长期套餐 P0 保持优先；本评估不等于已完成紫鸟/站斧全部功能。
