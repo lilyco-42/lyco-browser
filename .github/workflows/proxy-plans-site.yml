@@ -1,0 +1,39 @@
+name: Verify proxy plan website
+on:
+  pull_request:
+    branches: [main]
+    paths: ['site/proxy-plans/**', '.github/workflows/proxy-plans-site.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  website:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: site/proxy-plans
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --ignore-scripts --package-lock=false
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - name: Retain only the reviewed static source after its browser checks pass
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-proxy-plans-site-${{ github.run_id }}
+          path: |
+            site/proxy-plans/site
+            site/proxy-plans/deployment-baseline.json
+          retention-days: 7
+      - name: Preserve browser observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-proxy-plans-site-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-proxy-site-evidence
+          if-no-files-found: warn
+          retention-days: 7

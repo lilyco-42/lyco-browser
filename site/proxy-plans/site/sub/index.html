@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>订阅中心 · lain42.top</title>
+<meta name="description" content="lain42.top 代理订阅中心：复制 Clash 专用地址，导入 Clash Verge Rev；另提供通用订阅。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%234d6bfe'/%3E%3Cpath d='M9 21c3.5-14 9.5 4 14-10' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/studio.css">
+<link rel="stylesheet" href="/sub/assets/ui.css">
+</head>
+<body data-studio-shell>
+
+<nav class="page-nav" aria-label="订阅中心导航">
+  <div class="nav">
+    <a class="logo" href="/"><span class="mk"></span>lain42.top</a>
+    <div class="nav-links">
+      <a href="/sub/" class="on keep">订阅中心</a>
+      <a href="/sub/buy.html" class="keep">购买套餐</a>
+      <a href="/routes.html" class="keep">路线社区</a>
+      <a href="/panel/">代理面板</a>
+      <a href="/proxy-guide/">导入教程</a>
+      <a href="/vpn/quality.html">网络质量测速</a>
+      <a href="/">返回主页</a>
+    </div>
+    <div class="nav-right">
+      <span class="who" id="who"></span>
+      <button class="icon-btn" id="logout" title="退出登录" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+      <button class="icon-btn" id="theme" title="切换主题"></button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="eyebrow">Subscription</div>
+  <h1>订阅中心</h1>
+  <p class="lead">购买「不限量代理月卡」后，在此获取 Clash 与通用订阅格式。请复制对应地址到客户端导入，不要用文本编辑器打开。订阅链接内含你的专属 Token，请勿公开分享。</p>
+
+  <!-- 未登录：登录卡 -->
+  <section class="card" id="loginCard">
+    <h2>登录账号</h2>
+    <p class="muted">与主页、代理面板使用同一账号；还没有账号请先到主页注册（创始窗口注册领四重礼）。</p>
+    <div style="height:14px"></div>
+    <div id="loginBox"></div>
+    <div class="note">没有账号？<a href="/shop/#register">去商城注册账号 →</a></div>
+  </section>
+
+  <!-- 已登录：订阅 -->
+  <section class="card hidden" id="subCard" style="display:none">
+    <h2>我的订阅 <span class="n" id="exp"></span></h2>
+    <div id="subs"></div>
+    <div class="divider"></div>
+    <div class="row">
+      <a class="btn btn-line" href="/sub/buy.html">续费 / 购买套餐</a>
+      <a class="btn btn-line" href="/panel/" target="_blank">打开代理面板</a>
+    </div>
+  </section>
+
+  <!-- 已登录但无权益 -->
+  <section class="card hidden" id="noSubCard" style="display:none">
+    <h2>暂无生效的代理月卡</h2>
+    <p class="muted">购买后订阅链接会自动出现在这里，使用商城积分购买，也可用卡密兑换。</p>
+    <div style="height:14px"></div>
+    <div class="row">
+      <a class="btn btn-solid" href="/sub/buy.html">购买月卡 · 299 积分</a>
+      <a class="btn btn-line" href="/shop/#proxy_1m">查看代理月卡</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>客户端导入步骤</h2>
+    <div class="steps">
+      <div class="step"><b>Clash Meta / Clash Verge / Mihomo</b>：复制「Clash」链接，在客户端「配置文件 → 从 URL 导入」粘贴即可，支持自动更新。</div>
+      <div class="step"><b>Karing（iOS） / v2rayN / Shadowrocket / Nekoray</b>：复制「v2ray」明文节点链接直接导入，或用「base64」作为订阅 URL 导入。</div>
+      <div class="step"><b>菲律宾等地区手动选择</b>：更新 Clash 专用订阅，在「代理 / PROXY」中选择「🇵🇭 菲律宾 · 手动选择」；也可选择「🇦🇺 澳大利亚」「🇭🇰 香港」「🇰🇷 韩国」的手动分组。地区手动组提供近期 HTTPS 检查通过的线路，包括可能较慢的备用节点。默认自动组仍优先使用测速达标线路；部分 TCP 故障备用线路可能低速。若分组消失，可能是该地区线路未通过近期健康检查。</div>
+      <div class="step"><b>韩国游戏固定出口</b>：更新 Clash 专用订阅后，在「代理 / PROXY」里选择「🇰🇷 韩国游戏 · 固定韩国出口（共享）」，通过合格的韩国节点连接，不会在游戏中自动跳到香港或澳大利亚。游戏客户端请开启 Clash Verge Rev 的 TUN 模式；如游戏未进入代理，可临时切到全局模式再测试。<strong>当前韩国线路为共享数据中心出口，并非独享家宽。</strong></div>
+      <div class="step"><b>无需手动选节点</b>：在 Clash Verge Rev / Mihomo 中导入或更新 Clash 专用订阅并使用「规则模式」。默认由「♻️ 自动选择」处理普通网站，按域名自动接管 YouTube 和 ChatGPT，无需切换代理模式或反复测速。</div>
+      <div class="step"><b>YouTube 自动容错</b>：网页与视频 CDN 都走「📺 YouTube · 自动容错」，定时检测 YouTube 官方 204 端点；首选线路连不上时自动启用备用线路。<strong>此检测不能证明 1080p 视频不会缓冲。</strong></div>
+      <div class="step"><b>ChatGPT 自动容错</b>：登录、会话和 OpenAI 相关域名统一使用「🤖 ChatGPT · 自动容错」。通过未授权 API 的 401 响应验证线路可达；自动保持同一出口，仅在检测失败时故障切换，减少登录中途换 IP。<strong>401 不等于已验证登录或对话成功。</strong></div>
+      <div class="step"><b>异常才需要人工操作</b>：正常使用不用调整；如果校园网等网络限制 UDP，客户端会自动尝试备用节点。极少数自动探测与真实网站体验不一致时，可临时手动切换。<a href="/vpn/quality.html">查看检测报告</a>。</div>
+      <div class="step"><b>普通节点类型</b>：普通节点完整目录保留全部收录协议和地区；已验证订阅单独列出通过检测的节点。两种入口均在本页提供。其他导出格式 sing-box / Surge 的完整配置验收仍在进行。</div>
+      <div class="step"><b>第一次用、看不懂步骤？</b> 直接看 <a href="/proxy-guide/">Mac 三步图文教程 →</a>（每步配界面示意图，按你看到的现象排查）</div>
+      <div class="step"><b>ghboost 客户端</b>：在客户端订阅页粘贴任意一条链接即可，推荐使用 Clash 格式。</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  © 云枢智创工作室 · <a href="/">lain42.top</a> · 订阅由 Token 动态签发，到期自动失效
+</footer>
+
+<script src="/assets/studio.js?v=gptnav-20261015" defer></script>
+<script src="/sub/assets/ui.js"></script>
+<script>
+initThemeBtn('theme');
+var renderWho=navWho('who','logout',load);
+var lo=document.getElementById('logout');
+
+function subItem(letter,name,desc,url){
+  var d=document.createElement('div');d.className='sub-item';
+  d.innerHTML='<div class="ic">'+letter+'</div>'+
+    '<div class="tx"><b></b><p></p></div>'+
+    '<div class="acts"><button class="btn btn-line btn-sm cp">复制</button>'+
+    '<a class="btn btn-solid btn-sm" target="_blank" rel="noopener">打开</a></div>';
+  d.querySelector('b').textContent=name;
+  d.querySelector('p').textContent=desc;
+  var address=document.createElement('small');address.textContent=url;address.style.overflowWrap='anywhere';d.querySelector('.tx').appendChild(address);
+  if(url.endsWith('/clashall'))d.id='ordinary';
+  var cpBtn=d.querySelector('.cp'),op=d.querySelector('a');
+  cpBtn.onclick=function(){cp(url,'复制',cpBtn)};
+  if(letter==='C'){op.href='clash://install-config?url='+encodeURIComponent(url);op.textContent='导入 Clash Verge'}else{op.remove();var hint=document.createElement('small');hint.textContent='复制到客户端订阅管理中，不要下载 txt 打开';d.querySelector('.tx').appendChild(hint)}
+  return d;
+}
+
+function showSub(token,expAt){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('noSubCard').style.display='none';
+  var card=document.getElementById('subCard');card.classList.remove('hidden');card.style.display='';
+  document.getElementById('exp').textContent=expAt?('到期 '+fmtDate(expAt)):'';
+  var box=document.getElementById('subs');box.innerHTML='';
+  var base=location.origin+'/studio/api/sub/'+encodeURIComponent(token);
+  var rows=[
+    ['C','Clash Meta / Verge / Mihomo','支持菲律宾、澳大利亚、香港、韩国等健康线路的手动地区分组',base+'/clash'],
+    ['B','通用 base64 订阅','格式：base64；支持此格式的客户端中粘贴地址更新',base+'/base64'],
+    ['C','普通节点 · 已验证','类型：普通节点；格式：Clash；范围：当前通过深度检测的节点',base+'/clashcommunity'],
+    ['C','普通节点 · 完整目录','类型：普通节点；格式：Clash；范围：全部收录协议和地区，保留不同检测状态',base+'/clashall']
+  ];
+  rows.forEach(function(r){box.appendChild(subItem(r[0],r[1],r[2],r[3]))});
+}
+function showNoSub(){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('subCard').style.display='none';
+  document.getElementById('noSubCard').classList.remove('hidden');
+  document.getElementById('noSubCard').style.display='';
+}
+function showLogin(){
+  document.getElementById('loginCard').classList.remove('hidden');
+  document.getElementById('loginCard').style.display='';
+  document.getElementById('subCard').style.display='none';
+  document.getElementById('noSubCard').style.display='none';
+  mountLogin({id:'loginBox',onDone:load});
+}
+
+function load(){
+  renderWho();
+  lo.style.display=tok()?'':'none';
+  if(!tok()){showLogin();return}
+  api('/me').then(function(o){
+    if(o.code!==200||!o.j.username){clearTok();showLogin();return}
+    var sub=null,exp=null;
+    (o.j.entitlements||[]).forEach(function(e){
+      if(e.product==='proxy_1m'&&e.status==='active'&&e.meta&&e.meta.sub_url){
+        var parts=String(e.meta.sub_url).split('/sub/');
+        sub=parts[1]?parts[1].split('?')[0]:'';
+        exp=e.meta.expires_at||e.expires_at||null;
+      }
+    });
+    if(sub)showSub(sub,exp);else showNoSub();
+  }).catch(function(){showNoSub()});
+}
+load();
+</script>
+</body>
+</html>

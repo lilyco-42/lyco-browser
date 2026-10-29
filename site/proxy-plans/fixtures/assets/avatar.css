@@ -1,0 +1,18 @@
+
+/* ---------- 账户头像 ---------- */
+.avatar-card{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.avatar-view{display:grid;place-items:center;width:96px;height:96px;flex:none;border-radius:50%;
+  border:1px solid var(--line-strong);background:var(--bg-soft);color:var(--fg-soft);
+  font-size:34px;font-weight:650;overflow:hidden;transition:border-color .16s,box-shadow .16s}
+.avatar-view.has-image{background:var(--bg-elev)}
+.avatar-view.drop{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.avatar-view img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-side{flex:1;min-width:220px}
+.avatar-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.avatar-actions .button{min-height:40px;font-size:13.5px}
+.avatar-hint{margin:10px 0 0;color:var(--fg-mute);font-size:12.5px;line-height:1.6}
+.avatar-msg{margin:10px 0 0;font-size:13px;min-height:1.2em}
+.avatar-msg.ok{color:var(--ok)}
+.avatar-msg.err{color:var(--err)}
+.avatar-drop-hint{margin:0;color:var(--fg-mute);font-size:12.5px}
+@media(max-width:520px){.avatar-card{gap:14px}.avatar-view{width:76px;height:76px;font-size:26px}}
