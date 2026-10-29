@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """One guarded backend policy deployment, invoked only by the SSH CI command."""
-import hashlib,importlib.util,json,os,pathlib,shutil,subprocess,tempfile,time,urllib.request,datetime
+import functools,hashlib,importlib.util,json,os,pathlib,shutil,subprocess,tempfile,time,urllib.request,datetime
 os.umask(0o077)
 assert os.environ.get('SSH_ORIGINAL_COMMAND')=='gateway-policy'
 BASE=pathlib.Path('/opt/studio-billing');STAGE=BASE/'.gateway-policy-plan';plan=json.loads((STAGE/'plan.json').read_text())
@@ -32,6 +32,9 @@ for site,url,status in (('youtube','https://www.youtube.com/generate_204',b'204'
 proof={'schema_version':1,'enabled':True,'routing_sha256':module.routing_digest(network),'verification_run':'40865149238',
        'minimum_complete_sample_bytes':4194304,'minimum_kib_s':minimum,'site_probes':{k:v['reachable'] for k,v in sites.items()}}
 (STAGE/'proxy-gateway-preference.json').write_text(json.dumps(proof,indent=2)+'\n')
+contract_path=pathlib.Path('/usr/local/sbin/lyco-proxy-subscription-contract.py')
+contract_spec=importlib.util.spec_from_file_location('owned_subscription_contract',contract_path);contract=importlib.util.module_from_spec(contract_spec);contract_spec.loader.exec_module(contract)
+contracts=contract.verify_subscription_contract(STAGE/'app.py',functools.partial(module.prefer_gateway,proof_file=STAGE/'proxy-gateway-preference.json'),proof['site_probes'])
 fixture=[{'name':'owned-ci-relay','type':'vmess','network':'ws','tls':True,'port':443,'ws-opts':{'path':'/panel-ws'}}]
 assert module.prefer_gateway(fixture,['owned-ci-backup'],STAGE/'proxy-gateway-preference.json')==['owned-ci-relay','owned-ci-backup']
 backup=pathlib.Path('/root/website-backups')/('proxy-gateway-policy-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S'));backup.mkdir(mode=0o700)
@@ -62,7 +65,7 @@ try:
             if get('/api/health').get('ok') is True:break
         except Exception:time.sleep(.5)
     assert get('/api/health')['ok'] is True
-    products={n['code']:(n['points_price'],n['duration_days']) for n in get('/api/products')['products']}
+    products={n['code']:(n['points_price'],n['duration_days']) for n in get('/api/products')['products'] if n.get('code') in ('proxy_1m','proxy_3m','proxy_4m','proxy_1y')}
     assert all(products[k]==v for k,v in {'proxy_1m':(299,30),'proxy_3m':(852,90),'proxy_4m':(1136,120),'proxy_1y':(3050,365)}.items())
     assert module.prefer_gateway(fixture,['owned-ci-backup'],BASE/'proxy-gateway-preference.json')==['owned-ci-relay','owned-ci-backup']
 except Exception:
@@ -72,7 +75,7 @@ except Exception:
     subprocess.run(['systemctl','restart','studio-billing.service'],capture_output=True,timeout=20)
     raise
 report={'phase':'gateway-policy','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
-        'policySourceSha256':hashlib.sha256(policy_source).hexdigest(),'backendSource':plan['backendSource'],
+        'policySourceSha256':hashlib.sha256(policy_source).hexdigest(),'subscriptionContractSourceSha256':hashlib.sha256(contract_path.read_bytes()).hexdigest(),'generatedSubscriptionContracts':contracts,'backendSource':plan['backendSource'],
         'backup':str(backup),'backendAppSha256':hashlib.sha256(app.read_bytes()).hexdigest(),
         'existingNamesCredentialsAndFallbacksPreserved':True,'productsUnchanged':True,'serviceHealthy':True,
         'siteProbes':sites,'scope':'Client fallback preference and site-specific unauthenticated reachability only; no real customer token, video playback or ChatGPT login.'}

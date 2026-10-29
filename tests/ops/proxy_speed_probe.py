@@ -11,7 +11,11 @@ BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
 if PHASE == 'gateway-policy':
     import runpy
-    runpy.run_path('/usr/local/sbin/lyco-proxy-gateway-deploy.py',run_name='__main__')
+    try:
+        runpy.run_path('/usr/local/sbin/lyco-proxy-gateway-deploy.py',run_name='__main__')
+    except Exception as error:
+        print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
+        raise
     raise SystemExit(0)
 CONFIG = pathlib.Path('/etc/sing-box/config.json')
 PLAN = pathlib.Path('/etc/sing-box/.lyco-speed-p0-plan.json')
