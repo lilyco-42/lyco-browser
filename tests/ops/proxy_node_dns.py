@@ -64,7 +64,7 @@ def probe(config,downloads):
 
 raw=CONFIG.read_bytes();old=json.loads(raw);new=copy.deepcopy(old)
 assert not old.get('dns'),'Existing custom DNS must be merged explicitly'
-new['dns']={'servers':[{'type':'https','tag':'lyco-egress-dns','server':'1.1.1.1','detour':'direct'}],'strategy':'prefer_ipv4'}
+new['dns']={'servers':[{'type':'https','tag':'lyco-egress-dns','server':'1.1.1.1'}],'strategy':'prefer_ipv4'}
 rules=new['route']['rules'];i=1 if rules and rules[0].get('action')=='sniff' else 0
 rules.insert(i,{'action':'resolve','server':'lyco-egress-dns','strategy':'prefer_ipv4'})
 assert new['inbounds']==old['inbounds'] and new['outbounds']==old['outbounds']
