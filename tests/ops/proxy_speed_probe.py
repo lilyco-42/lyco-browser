@@ -4,7 +4,7 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after'):
+if PHASE not in ('before', 'after', 'ssh-candidate'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
@@ -79,7 +79,7 @@ def candidate():
             'tls': {'enabled': True, 'server_name': node['sni'], 'alpn': ['h3'],
                     'certificate_path': '/etc/sing-box/lyco-kr2-trusted-certificate.pem'}}
 
-def probe(label, outbound, *, resolve_remote=False, live_config=None):
+def probe(label, outbound, *, resolve_remote=False, live_config=None, download_bytes=SAMPLE_BYTES):
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0)); port = s.getsockname()[1]
     with tempfile.TemporaryDirectory(prefix='lyco-speed-probe-') as folder:
@@ -106,12 +106,12 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None):
             for name, url, amount in (
                 ('cloudflare-page', 'https://cp.cloudflare.com/generate_204', 0),
                 ('google-page', 'https://www.gstatic.com/generate_204', 0),
-                ('download-1', 'https://speed.cloudflare.com/__down?bytes=1500000', SAMPLE_BYTES),
-                ('download-2', 'https://speed.cloudflare.com/__down?bytes=1500000', SAMPLE_BYTES)):
+                ('download-1', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes),
+                ('download-2', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes)):
                 body = pathlib.Path(folder) / 'body'
                 start = time.monotonic()
                 result = subprocess.run(['curl', '--silent', '--show-error', '--proxy', f'http://127.0.0.1:{port}',
-                    '--noproxy', '', '--connect-timeout', '6', '--max-time', '18', '--max-filesize', '1600000',
+                    '--noproxy', '', '--connect-timeout', '6', '--max-time', '18', '--max-filesize', str(max(SAMPLE_BYTES, amount)+100000),
                     '--output', str(body), '--write-out', '%{http_code}', url],
                     capture_output=True, timeout=22, env={**os.environ, 'ALL_PROXY': '', 'HTTPS_PROXY': '', 'HTTP_PROXY': ''})
                 elapsed = time.monotonic() - start
@@ -128,6 +128,38 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None):
             process.terminate()
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
+
+if PHASE == 'ssh-candidate':
+    live=json.loads(CONFIG.read_text())
+    current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
+    result={'phase':PHASE,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+            'baseline':probe('current-paid-route',current,live_config=live,download_bytes=4194304)}
+    with tempfile.TemporaryDirectory(prefix='lyco-ssh-candidate-') as folder:
+        with (pathlib.Path(folder)/'ssh.log').open('wb') as log:
+            tunnel=subprocess.Popen(['/usr/bin/ssh','-F','/dev/null','-NT','-D','127.0.0.1:1085',
+                '-i','/etc/lyco-proxy-egress/au-ssh','-o','BatchMode=yes','-o','IdentitiesOnly=yes',
+                '-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts',
+                '-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15',
+                '-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
+            try:
+                for attempt in range(30):
+                    if tunnel.poll() is not None:break
+                    try:
+                        with socket.create_connection(('127.0.0.1',1085),timeout=.2):break
+                    except OSError:time.sleep(.3)
+                ob={'type':'socks','tag':'ssh-egress','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
+                result['candidate']=probe('australia-over-authenticated-ssh',ob,resolve_remote=True,download_bytes=4194304)
+            finally:
+                tunnel.terminate()
+                try:tunnel.wait(timeout=4)
+                except subprocess.TimeoutExpired:tunnel.kill();tunnel.wait(timeout=3)
+            log.flush()
+            result['sshDiagnostic']=(pathlib.Path(folder)/'ssh.log').read_text(errors='replace')[-1800:]
+        result['stopped']=probe('stopped-ssh-no-direct-fallback',ob,resolve_remote=True)
+    result['stoppedTunnelBlocked']=not result['stopped'].get('allPassed') and all(
+        not s['ok'] and s['bytes']==0 for s in result['stopped'].get('samples',[])) and bool(result['stopped'].get('samples'))
+    print(json.dumps(result,indent=2),flush=True)
+    raise SystemExit(0 if result['candidate'].get('allPassed') and result['stoppedTunnelBlocked'] else 1)
 
 deployment = apply_plan() if PHASE == 'after' and PLAN.exists() else None
 try:
