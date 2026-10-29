@@ -2,7 +2,7 @@
 """Fixed DNS-only repair on the owned Korean proxy; credentials stay on node."""
 import copy,datetime,hashlib,json,os,pathlib,shutil,socket,subprocess,tempfile,time
 os.umask(0o077)
-assert os.environ.get('SSH_ORIGINAL_COMMAND') == 'node-dns'
+PHASE=os.environ.get('SSH_ORIGINAL_COMMAND');assert PHASE in ('node-dns','node-throughput')
 CONFIG=pathlib.Path('/etc/s-box/sb.json')
 BIN='/etc/s-box/sing-box'
 
@@ -63,6 +63,13 @@ def probe(config,downloads):
             log_stream.close()
 
 raw=CONFIG.read_bytes();old=json.loads(raw);new=copy.deepcopy(old)
+if PHASE=='node-throughput':
+    result=probe(old,True)
+    print(json.dumps({'phase':PHASE,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+        'tcpCongestionControl':subprocess.check_output(['sysctl','-n','net.ipv4.tcp_congestion_control']).decode().strip(),
+        'scope':'Actual deployed node routing/DNS with two exact 4MiB HTTPS downloads; server-side only.',
+        'liveConfigSha256':hashlib.sha256(raw).hexdigest(),'result':result},indent=2))
+    raise SystemExit(0 if result['allPassed'] else 1)
 assert not old.get('dns'),'Existing custom DNS must be merged explicitly'
 new['dns']={'servers':[{'type':'https','tag':'lyco-egress-dns','server':'1.1.1.1'}],'strategy':'prefer_ipv4'}
 rules=new['route']['rules'];i=1 if rules and rules[0].get('action')=='sniff' else 0

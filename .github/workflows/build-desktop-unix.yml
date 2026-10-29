@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, node-dns]
+        options: [none, before, after, node-dns, node-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -337,7 +337,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     env:
-      PROBE_HOST: ${{ inputs.speed_probe == 'node-dns' && '43.108.85.230' || '8.153.102.122' }}
+      PROBE_HOST: ${{ startsWith(inputs.speed_probe, 'node-') && '43.108.85.230' || '8.153.102.122' }}
     permissions:
       contents: read
     steps:
@@ -346,7 +346,7 @@ jobs:
       - name: Generate one-use probe identity
         run: |
           umask 077
-          if [ '${{ inputs.speed_probe }}' = node-dns ]; then
+          if [[ '${{ inputs.speed_probe }}' == node-* ]]; then
             ssh-keygen -q -t rsa -b 3072 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
           else
             ssh-keygen -q -t ed25519 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
@@ -364,7 +364,7 @@ jobs:
           for attempt in $(seq 1 60); do
             if ssh -i "$RUNNER_TEMP/probe-key" -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/probe-hosts" root@"$PROBE_HOST" '${{ inputs.speed_probe }}' > "$RUNNER_TEMP/proxy-speed-result.json" 2> "$RUNNER_TEMP/proxy-speed-ssh.log"; then
               cat "$RUNNER_TEMP/proxy-speed-result.json"
-              python3 -c 'import json,hashlib,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"proxy-speed-result.json").read_text()); assert d["probeSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_node_dns.py" if d["phase"]=="node-dns" else "tests/ops/proxy_speed_probe.py").read_bytes()).hexdigest()'
+              python3 -c 'import json,hashlib,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"proxy-speed-result.json").read_text()); assert d["probeSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_node_dns.py" if d["phase"].startswith("node-") else "tests/ops/proxy_speed_probe.py").read_bytes()).hexdigest()'
               exit 0
             fi
             if test -s "$RUNNER_TEMP/proxy-speed-result.json"; then
