@@ -4,7 +4,7 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
+if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
@@ -123,17 +123,24 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
                 start = time.monotonic()
                 result = subprocess.run(['curl', '--silent', '--show-error', '--proxy', f'http://127.0.0.1:{port}',
                     '--noproxy', '', '--connect-timeout', '6', '--max-time', '18', '--max-filesize', str(max(SAMPLE_BYTES, amount)+100000),
-                    '--output', str(body), '--write-out', '%{http_code}'] +
+                    '--output', str(body), '--write-out', '%{http_code} %{time_connect} %{time_appconnect} %{time_starttransfer} %{time_total}'] +
                     (['--location','--max-redirs','3','--range','0-4194303'] if name=='github-release-range' else []) + [url],
                     capture_output=True, timeout=22, env={**os.environ, 'ALL_PROXY': '', 'HTTPS_PROXY': '', 'HTTP_PROXY': ''})
                 elapsed = time.monotonic() - start
                 size = body.stat().st_size if body.exists() else 0
-                status = result.stdout.decode().strip()
+                fields = result.stdout.decode().split()
+                status = fields[0] if fields else '000'
+                timing = {}
+                if len(fields) == 5:
+                    for key, value in zip(('connectMs','tlsMs','firstByteMs','transferTotalMs'),fields[1:]):
+                        try: timing[key] = round(float(value)*1000)
+                        except ValueError: pass
                 ok = result.returncode == 0 and status in (('206',) if name=='github-release-range' else ('200','204')) and size == amount
                 if name=='github-release-range' and ok:
                     with body.open('rb') as stream: ok=stream.read(2)==b'\x1f\x8b'
                 samples.append({'name': name, 'ok': ok, 'httpStatus': status, 'bytes': size,
                                 'elapsedMs': round(elapsed * 1000),
+                                **timing,
                                 'kibPerSecond': round(size / elapsed / 1024, 1) if ok and amount else None})
                 body.unlink(missing_ok=True)
             return {'label': label, 'configurationAccepted': True, 'samples': samples,
@@ -142,6 +149,58 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
             process.terminate()
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
+
+if PHASE in ('observe', 'pool-observe'):
+    live = json.loads(CONFIG.read_text())
+    current = next(n for n in live['outbounds'] if n['tag'] == 'yt-proxy')
+    report = {'phase':PHASE,'observationOnly':True,
+        'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+        'liveConfigSha256':hashlib.sha256(CONFIG.read_bytes()).hexdigest(),
+        'sampleBytes':4194304,
+        'baseline':probe('current-paid-tcp-route',current,live_config=live,download_bytes=4194304,github=True)}
+    if PHASE == 'observe':
+        report['comparison'] = probe('korean-tuic-strict-tls',candidate(),download_bytes=4194304,github=True)
+    else:
+        import ast, ipaddress
+        source = pathlib.Path('/opt/freeproxy-pool/cache/community-verified.json')
+        raw = source.read_bytes(); document = json.loads(raw)
+        expire = datetime.datetime.fromisoformat(document['expires_at_utc'])
+        assert document['schema_version']==2 and document['scope']=='paid-verified-all'
+        assert expire.tzinfo is not None and expire > datetime.datetime.now(datetime.timezone.utc)
+        entries = document['nodes']; assert len(entries)==document['verified_count'] and len(entries)<=60
+        converter = pathlib.Path('/opt/freeproxy-pool/verify_community.py')
+        converter_raw = converter.read_bytes()
+        expected_converter = 'c2bc34310711acb43718ca02aa1aff2ec1f19db1e8fd0682e6e68d7c2eae5c28'
+        assert hashlib.sha256(converter_raw).hexdigest()==expected_converter
+        tree = ast.parse(converter_raw)
+        definitions = [n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ('valid','outbound','public_ipv4')]
+        assert len(definitions)==3
+        namespace = {'ipaddress':ipaddress,'SS_METHODS':{'aes-128-gcm','aes-256-gcm','chacha20-ietf-poly1305'}}
+        exec(compile(ast.Module(body=definitions,type_ignores=[]),str(converter),'exec'),namespace)
+        quality = json.loads(pathlib.Path('/opt/freeproxy-pool/cache/community-quality.json').read_text())
+        scores = {x['name']:min(x['samples_kib_s']) for x in quality.get('results',[])
+            if isinstance(x,dict) and x.get('samples_kib_s')}
+        if quality.get('source_verified_at_utc') != document['verified_at_utc']: scores = {}
+        selected=[]; seen=set()
+        for item in sorted(entries,key=lambda x:(-scores.get(x['node']['name'],0),x.get('https_204_ms',999999))):
+            node=item['node']
+            assert namespace['valid'](node), 'Verified public snapshot contains invalid configuration'
+            if node['server']=='43.108.97.29' or node['server'] in seen: continue
+            selected.append(node);seen.add(node['server'])
+            if len(selected)==4:break
+        report.update(sourceSnapshotSha256=hashlib.sha256(raw).hexdigest(),
+            sourceVerifiedAt=document['verified_at_utc'],converterSha256=expected_converter,
+            availableOrdinary=len(entries),ordinaryBatchSize=len(selected),ordinary=[])
+        for node in selected:
+            label='ordinary-'+node['type']+'-'+hashlib.sha256(node['name'].encode()).hexdigest()[:8]
+            outbound=namespace['outbound'](node)
+            small=probe(label+'-256k',outbound,download_bytes=262144)
+            large=probe(label+'-4MiB',outbound,download_bytes=4194304,github=True)
+            report['ordinary'].append({'label':label,'protocol':node['type'],'smallSample':small,'largeSample':large})
+    report['validBaseline']=report['baseline'].get('allPassed') is True
+    print(json.dumps(report,indent=2),flush=True)
+    raise SystemExit(0 if report['validBaseline'] else 1)
 
 if PHASE == 'ssh-deploy':
     plan_file=pathlib.Path('/etc/sing-box/.lyco-ssh-speed-plan.json')

@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, observe, pool-observe, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -338,7 +338,7 @@ jobs:
   speed-probe:
     if: github.event_name == 'workflow_dispatch' && inputs.speed_probe != 'none'
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: ${{ inputs.speed_probe == 'pool-observe' && 20 || 10 }}
     env:
       PROBE_HOST: ${{ inputs.speed_probe == 'node-au-throughput' && '13.236.116.49' || startsWith(inputs.speed_probe, 'node-') && '43.108.85.230' || '8.153.102.122' }}
       PROBE_USER: ${{ inputs.speed_probe == 'node-au-throughput' && 'ec2-user' || 'root' }}
