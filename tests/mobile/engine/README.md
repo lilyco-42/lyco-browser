@@ -5,8 +5,9 @@ not replace the product engine, add a product test entry point, or migrate any
 existing environment or website data. All builds/runtime are genuine Actions only.
 
 Dispatch the existing `build-universal.yml` with `native_engine_probe=true` and the
-other inputs left at their defaults. Gradle 9.3.1 / AGP 9.1.1 compile SDK37, while
-target SDK35 and the API35 device match the current product probe. The official
+other inputs left at their defaults. Gradle 9.3.1 / AGP 9.1.1 compile SDK37.0;
+target SDK36/min SDK28 match the retained ced08fe product badging, with the same
+API35 device as its native probe. The official
 Mozilla Maven metadata selected stable GeckoView `159.0.20261022150525`; it is pinned
 here instead of taking a moving latest/nightly version. Actual resolved dependency
 hashes, original badging, source/run, and disposable experiment signature scope are
@@ -48,7 +49,7 @@ Primary sources:
 
 Initial Actions run 40732014774 stopped at AAR metadata validation: current
 GeckoView and AndroidX Core require compile SDK37, with Core requiring AGP9.1+.
-The experiment toolchain now follows those requirements; API35/target35 and the
+The experiment toolchain now follows those requirements; API35 and the
 strict native behavior tests are unchanged. No runtime result came from that run.
 Run 40732467759 stopped before compilation because sdkmanager was absent from PATH;
 the build now locates the installed Android command-line tool explicitly.
@@ -57,3 +58,6 @@ uses its available find command, with no new runtime dependency.
 Run 40733512037 identified the published SDK package name mismatch. Google's
 repository lists `platforms;android-37.0`, so the build uses that package and the
 public compileSdk minor-level DSL instead of requesting nonexistent android-37.
+The initial experiment scaffold used target35. Inspection of the actual retained
+product badging identified target36/min28, and these are now required in the
+compiled experiment badging instead of assuming a match from the device API.

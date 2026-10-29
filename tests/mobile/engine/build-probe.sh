@@ -26,9 +26,10 @@ from pathlib import Path
 p=Path(os.environ['RUNNER_TEMP'])/'lyco-mobile-network'
 badging=(p/'engine-badging.txt').read_text()
 assert "package: name='top.lain42.lycoengineprobe'" in badging and 'application-debuggable' not in badging
+assert "targetSdkVersion:'36'" in badging and "sdkVersion:'28'" in badging
 digest=hashlib.sha256((p/'engine-probe.apk').read_bytes()).hexdigest()
 meta={'source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'sha256':digest,'notProductAPK':True,
-      'engine':'GeckoView 159.0.20261022150525','debuggable':False,'pagePolicyScript':False,'nativePolicy':'public configFilePath / media.peerconnection.ice.proxy_only',
+      'engine':'GeckoView 159.0.20261022150525','targetSdk':36,'minSdk':28,'debuggable':False,'pagePolicyScript':False,'nativePolicy':'public configFilePath / media.peerconnection.ice.proxy_only',
       'signing':'disposable CI experiment key, not the owner product certificate','scope':'Native capability experiment only, no environment migration or product adoption'}
 (p/'candidate.json').write_text(json.dumps(meta,indent=2)+'\n')
 PY
