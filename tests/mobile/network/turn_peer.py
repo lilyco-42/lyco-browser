@@ -19,6 +19,7 @@ class TurnPeer:
     def __init__(self, phases, state, lock, save, sources, active):
         self.state, self.lock, self.save = state, lock, save
         self.sources, self.active = sources, active
+        self.host = os.environ.get('LYCO_RTC_INTERFACE_IP', '127.0.0.1')
         self.ports, self.peers = {}, set()
         self.loop = asyncio.new_event_loop()
         state['turnConnections'], state['peerMessages'], state['peerOffers'] = [], [], []
@@ -26,7 +27,7 @@ class TurnPeer:
         for phase in phases:
             listener = socket.socket()
             listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            listener.bind(('127.0.0.1', 0)); listener.listen()
+            listener.bind((self.host, 0)); listener.listen()
             self.ports[phase] = listener.getsockname()[1]
             threading.Thread(target=self.accept, args=(listener, phase), daemon=True).start()
 
@@ -43,10 +44,11 @@ class TurnPeer:
             if not first:
                 return
             with self.lock:
-                record = {'phase': phase, 'route': 'selected' if address[1] in self.sources else 'direct',
+                key = (*address, *client.getsockname())
+                record = {'phase': phase, 'route': 'selected' if key in self.sources else 'direct',
                           'upstreamStopped': self.state['stopped'], 'clientBytes': len(first), 'serverBytes': 0}
                 self.state['turnConnections'].append(record); self.save()
-            remote = socket.create_connection(('127.0.0.1', 13478), 5)
+            remote = socket.create_connection((self.host, 13478), 5)
             remote.sendall(first)
             readers = [client, remote]
             while readers:

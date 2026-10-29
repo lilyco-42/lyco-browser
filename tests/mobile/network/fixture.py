@@ -10,6 +10,7 @@ import socket
 import struct
 import threading
 import time
+import zlib
 from urllib.parse import parse_qs, urlsplit
 from turn_peer import TurnPeer
 
@@ -22,6 +23,8 @@ sources, active, ports = set(), set(), {}
 phases = ['control', 'lyco', 'stopped', 'control-after']
 cases = json.loads((Path(__file__).parent/'rtc-cases.json').read_text())
 engine_probe = os.environ.get('LYCO_NATIVE_ENGINE_PROBE') == 'true'
+rtc_bind_host = os.environ.get('LYCO_RTC_INTERFACE_IP', '127.0.0.1')
+rtc_client_host = rtc_bind_host if engine_probe else '10.0.2.2'
 state = {'pageRequests': [], 'reports': [], 'udp': [], 'proxyConnections': 0, 'stopped': False, 'stopEvents': [], 'loopbackRequests': []}
 def save():
     with lock:
@@ -29,24 +32,37 @@ def save():
         temporary.write_text(json.dumps(state, indent=2))
         temporary.replace(root / 'network.json')
 
+def route_for(connection):
+    # Compare the entire live TCP tuple. Ports can be reused across different
+    # destinations; an unrelated live connection is not selected-route proof.
+    key = (*connection.getpeername(), *connection.getsockname())
+    with lock: return 'selected' if key in sources else 'direct'
+
 def stun(phase, case):
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp.bind(('127.0.0.1', 0)); ports[phase][case] = udp.getsockname()[1]
+    udp.bind((rtc_bind_host, 0)); ports[phase][case] = udp.getsockname()[1]
     while True:
         data, peer = udp.recvfrom(65535)
         valid = len(data) >= 20 and data[:2] == b'\x00\x01' and data[4:8] == b'\x21\x12\xa4\x42'
         with lock:
-            state['udp'].append({'phase': phase, 'case': case, 'peer': peer[0], 'port': peer[1], 'validStun': valid, 'upstreamStopped': state['stopped']})
+            record = {'phase': phase, 'case': case, 'peer': peer[0], 'port': peer[1], 'validStun': valid, 'upstreamStopped': state['stopped'], 'requestHex': data[:2048].hex(), 'requestTruncated': len(data)>2048}
+            state['udp'].append(record)
             save()
         if valid:
             # XOR-MAPPED-ADDRESS reflects the real received endpoint. No fake
             # public IP/candidate is supplied to make the observation pass.
             address = int(ipaddress.IPv4Address(peer[0])) ^ 0x2112a442
             value = struct.pack('!BBHI', 0, 1, peer[1] ^ 0x2112, address)
-            udp.sendto(b'\x01\x01\x00\x0c' + data[4:20] + b'\x00\x20\x00\x08' + value, peer)
+            attributes = b'\x00\x20\x00\x08' + value
+            message = b'\x01\x01' + struct.pack('!H', len(attributes)+8) + data[4:20] + attributes
+            fingerprint = (zlib.crc32(message) & 0xffffffff) ^ 0x5354554e
+            response = message + struct.pack('!HHI', 0x8028, 4, fingerprint)
+            sent = udp.sendto(response, peer)
+            with lock:
+                record.update({'responseHex': response.hex(), 'responseBytes': sent}); save()
 
 def page(phase, case=None, script=False):
-    config = json.dumps({'phase': phase, 'case': case, 'cases': cases, 'ports': ports, 'turnPorts': turn.ports,
+    config = json.dumps({'phase': phase, 'case': case, 'cases': cases, 'ports': ports, 'turnPorts': turn.ports, 'rtcHost': rtc_client_host,
                          'loopbacks': ['127.0.0.1', '[::1]', 'localhost'] if engine_probe else []})
     source = (Path(__file__).parent/'rtc-page.js').read_text().replace('LYCO_FIXTURE_CONFIGURATION', config)
     if script: return source.encode()
@@ -73,14 +89,14 @@ class Origin(http.server.BaseHTTPRequestHandler):
             script = parse_qs(url.query).get('script', [''])[0]=='1'
             if url.path=='/frame' and case not in cases: self.send_error(400); return
             with lock:
-                state['pageRequests'].append({'phase': phase, 'case': case, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'upstreamStopped': state['stopped']})
+                state['pageRequests'].append({'phase': phase, 'case': case, 'route': route_for(self.connection), 'upstreamStopped': state['stopped']})
                 save()
             self.reply(page(phase, case, script), 'application/javascript' if script else 'text/html; charset=utf-8')
         elif url.path == '/loopback':
             phase = parse_qs(url.query).get('phase', [''])[0]
             family = parse_qs(url.query).get('family', [''])[0]
             with lock:
-                state['loopbackRequests'].append({'phase': phase, 'family': family, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'upstreamStopped': state['stopped']})
+                state['loopbackRequests'].append({'phase': phase, 'family': family, 'route': route_for(self.connection), 'upstreamStopped': state['stopped']})
                 save()
             body = json.dumps({'alive': True}).encode()
             self.send_response(200); self.send_header('Access-Control-Allow-Origin', '*')
@@ -117,24 +133,24 @@ class Origin(http.server.BaseHTTPRequestHandler):
             context = parse_qs(url.query).get('case', [''])[0]
             if phase not in ports: self.send_error(400); return
             if context not in cases: self.send_error(400); return
-            self.reply(turn.answer(phase, json.loads(body), 'selected' if self.client_address[1] in sources else 'direct', context)); return
+            self.reply(turn.answer(phase, json.loads(body), route_for(self.connection), context)); return
         if url.path != '/report': self.send_error(404); return
         phase = parse_qs(url.query).get('phase', [''])[0]
         with lock:
-            state['reports'].append({'phase': phase, 'route': 'selected' if self.client_address[1] in sources else 'direct', 'observation': json.loads(body)})
+            state['reports'].append({'phase': phase, 'route': route_for(self.connection), 'observation': json.loads(body)})
             save()
         self.reply({'ok': True})
 
 class Proxy(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
     def allowed(self, url, ports):
-        hosts = ['10.0.2.2'] + (['127.0.0.1', '::1', 'localhost'] if engine_probe else [])
+        hosts = ['10.0.2.2'] + ([rtc_bind_host, '127.0.0.1', '::1', 'localhost'] if engine_probe else [])
         return url.hostname in hosts and url.port in ports
     def do_CONNECT(self):
         url = urlsplit('http://'+self.path)
         if not self.allowed(url, [18080, 18082, *turn.ports.values()]): self.send_error(502); return
-        remote = socket.create_connection(('127.0.0.1', url.port), 5)
-        source = remote.getsockname()[1]
+        remote = socket.create_connection((rtc_bind_host if url.port in turn.ports.values() else '127.0.0.1', url.port), 5)
+        source = (*remote.getsockname(), *remote.getpeername())
         with lock:
             sources.add(source); active.update([self.connection, remote]); state['proxyConnections'] += 1
         try:
@@ -159,10 +175,11 @@ class Proxy(http.server.BaseHTTPRequestHandler):
         url = urlsplit(self.path)
         if not self.allowed(url, (18080, 18082)): self.send_error(502); return
         connection = http.client.HTTPConnection('127.0.0.1', url.port, timeout=25)
-        source = None
+        source, remote_socket = None, None
         try:
-            connection.connect(); source = connection.sock.getsockname()[1]
-            with lock: sources.add(source); active.add(connection.sock); state['proxyConnections'] += 1
+            connection.connect(); remote_socket = connection.sock
+            source = (*remote_socket.getsockname(), *remote_socket.getpeername())
+            with lock: sources.add(source); active.add(remote_socket); state['proxyConnections'] += 1
             body = self.rfile.read(int(self.headers.get('Content-Length', '0')))
             headers = {k: v for k, v in self.headers.items() if k.lower() not in ('host', 'proxy-connection', 'connection')}
             connection.request(self.command, url.path + ('?' + url.query if url.query else ''), body, headers)
@@ -175,7 +192,7 @@ class Proxy(http.server.BaseHTTPRequestHandler):
         finally:
             with lock:
                 sources.discard(source)
-                if connection.sock: active.discard(connection.sock)
+                if remote_socket: active.discard(remote_socket)
             connection.close(); save()
     do_GET = relay
     do_POST = relay
@@ -189,5 +206,5 @@ origin = http.server.ThreadingHTTPServer(('127.0.0.1', 18080), Origin)
 frames = http.server.ThreadingHTTPServer(('127.0.0.1', 18082), Origin)
 proxy = http.server.ThreadingHTTPServer(('127.0.0.1', 18081), Proxy)
 for server in [origin, frames, proxy]: threading.Thread(target=server.serve_forever, daemon=True).start()
-(root / 'fixture.json').write_text(json.dumps({'ports': ports, 'turnPorts': turn.ports}))
+(root / 'fixture.json').write_text(json.dumps({'ports': ports, 'turnPorts': turn.ports, 'rtcHost': rtc_client_host, 'rtcBindHost': rtc_bind_host}))
 while True: save(); time.sleep(.25)

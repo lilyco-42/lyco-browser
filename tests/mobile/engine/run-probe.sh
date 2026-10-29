@@ -4,9 +4,21 @@ set -euo pipefail
 export LYCO_NATIVE_ENGINE_PROBE=true
 root=$(cd "$(dirname "$0")" && pwd)
 evidence="$RUNNER_TEMP/lyco-mobile-network"
-turnserver -n --listening-ip=127.0.0.1 --listening-port=13478 --relay-ip=127.0.0.1 \
+LYCO_RTC_INTERFACE_IP=$(python3 - <<'PY'
+import ipaddress,json,os,socket
+from pathlib import Path
+with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sock:
+ # UDP connect selects the kernel route/source address; no datagram is sent.
+ sock.connect(('192.0.2.1',9)); address=sock.getsockname()[0]
+assert not ipaddress.ip_address(address).is_loopback and not ipaddress.ip_address(address).is_unspecified
+(Path(os.environ['RUNNER_TEMP'])/'lyco-mobile-network/rtc-interface.json').write_text(json.dumps({'address':address,'source':'actual kernel-selected interface, no datagram emitted','notFabricatedPublicAddress':True},indent=2))
+print(address)
+PY
+)
+export LYCO_RTC_INTERFACE_IP
+turnserver -n --listening-ip="$LYCO_RTC_INTERFACE_IP" --listening-port=13478 --relay-ip="$LYCO_RTC_INTERFACE_IP" \
  --min-port=40000 --max-port=40100 --no-udp --no-tls --no-dtls --no-tcp-relay --no-cli \
- --allow-loopback-peers --cli-password=lyco-ci-local-only --realm=lyco-fixture.invalid \
+ --cli-password=lyco-ci-local-only --realm=lyco-fixture.invalid \
  --lt-cred-mech --user=lyco-ci:lyco-ci-owned-turn-only --verbose --log-file=stdout \
  --pidfile="$RUNNER_TEMP/lyco-engine-turn.pid" > "$evidence/coturn.log" 2>&1 &
 turn_pid=$!
@@ -21,10 +33,10 @@ trap cleanup EXIT
 for attempt in $(seq 1 100); do [[ -f "$evidence/fixture.json" ]] && break; sleep .1; done
 test -s "$evidence/fixture.json"
 python3 - <<'PY'
-import socket,time
+import os,socket,time
 for _ in range(100):
  try:
-  with socket.create_connection(('127.0.0.1',13478),.2): pass
+  with socket.create_connection((os.environ['LYCO_RTC_INTERFACE_IP'],13478),.2): pass
   break
  except OSError: time.sleep(.1)
 else: raise SystemExit('Owned coturn listener did not start')

@@ -27,3 +27,11 @@
 5. 只有能力试验成立后，才设计新引擎环境版本和显式迁移。先证明 A/B Cookie/localStorage/IndexedDB 隔离与关闭重开；保留原 UUID、旧 Chromium 数据和降级保护。不能靠通用导出假定能迁移不可导出的 IndexedDB CryptoKey。
 
 投入决策：当前先验证原生能力的最小试验，避免在没有底层证据时重写整个客户端或扩充脆弱的页面拦截。应用引擎、依赖和用户数据结构本轮均未更换；商业发行仍未通过。
+
+## 首轮独立原生结果
+
+`286c33e` 的 [40814586112](https://github.com/lilyco-42/lyco-browser/actions/runs/40814586112) 已构建并运行独立 GeckoView159 试验包，实际 `debuggable=false`、target36/min28，与保留的产品 badging 一致；API35 设备未更换。源码使用公开启动前配置，没有网页构造器或原生观测伪装。试验包不是 LYCO 产品，现有环境没有迁移。
+
+真实 IPv4/IPv6/localhost HTTP 正向均成立：前后对照为直连，开启策略时三者实际经所选回环代理，停止代理时没有直接源站访问。RTC 整体 `validProbe=false / passed=false`：前后普通同引擎虽各实际发出54个 STUN，候选为原生 mDNS host，TURN 分配在 coturn 成功但未产生可用 relay 或实际 ACK；不能把策略下零包作为保护通过。此轮不能作为换引擎的依据。
+
+下一轮先让自有 RTC 服务绑定 runner 的真实网络接口，保留真实接收端点与实际 relay 地址，并补齐标准 FINGERPRINT 和原始 ICE 错误观测。没有放宽产品地址/数据包、真实 TURN 通信、回环或断线门禁。当前产品依赖实际为 Expo56/React Native0.85.2；若底层能力成立，还需验证 SDK37.0/AGP9.1+ 与现有产品构建的兼容性，再处理数据迁移，不能依据独立试验直接替换。

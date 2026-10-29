@@ -574,7 +574,7 @@ jobs:
         run: |
           python3 -m py_compile tests/mobile/network/fixture.py tests/mobile/network/turn_peer.py tests/mobile/network/assert-evidence.py
           node --check tests/mobile/network/rtc-page.js
-          bash -n tests/mobile/engine/build-probe.sh tests/mobile/engine/run-probe.sh tests/mobile/network/prepare-peer.sh
+          for script in tests/mobile/engine/build-probe.sh tests/mobile/engine/run-probe.sh tests/mobile/network/prepare-peer.sh; do bash -n "$script"; done
       - name: Build the standalone release-mode engine experiment
         run: bash tests/mobile/engine/build-probe.sh
       - name: Prepare owned TURN and peer

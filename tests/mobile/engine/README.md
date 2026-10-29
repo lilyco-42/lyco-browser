@@ -65,3 +65,17 @@ Run 40814213975 reached Java compilation and release lint. Lint requires the
 debuggable manifest attribute to be assigned by the release build type, so the
 redundant manifest attribute was removed. Release debuggable=false, compiled
 badging verification and the runtime FLAG_DEBUGGABLE refusal remain enforced.
+
+The first full native run 40814586112 is retained as validProbe=false/passed=false:
+all three loopback HTTP controls/routes/stopped negatives worked, but direct RTC
+controls exposed mDNS hosts and no usable reflexive/relay candidates. coturn
+accepted allocations returning real loopback relay addresses, without a data
+channel ACK. This is not a complete native RTC protection result.
+
+The next fixture binds RTC services to the runner's actual kernel-selected
+interface. Both STUN mapped addresses and coturn relay/mapped addresses remain
+real bound/received endpoints, never invented public addresses. STUN replies now
+include their RFC5389 FINGERPRINT, original packet bytes and native ICE error
+events are retained, and selected-route provenance compares complete live TCP
+tuples. These refine the owned positive control; the engine policy, privacy,
+functional TURN, loopback and stopped-route gates are not relaxed.

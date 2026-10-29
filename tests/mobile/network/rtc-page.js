@@ -10,7 +10,7 @@
  };
  async function observe(scope,name,phase,turn=false){
   const audit={case:name,phase,apiPresent:typeof scope.RTCPeerConnection==='function',applicable:true,
-   offerCreated:false,blocked:false,completed:false,candidates:[],localStats:[],statsCollected:false,sdp:'',literalIP:false,dataAck:false};
+   offerCreated:false,blocked:false,completed:false,candidates:[],iceErrors:[],localStats:[],statsCollected:false,sdp:'',literalIP:false,dataAck:false};
   let pc;
   try{
    let Constructor=scope.RTCPeerConnection;
@@ -21,8 +21,8 @@
    if(name==='prototype-constructor'){
     const seed=new Constructor();Constructor=seed.constructor;seed.close();
    }
-   const servers=turn?[{urls:'turn:10.0.2.2:'+config.turnPorts[phase]+'?transport=tcp',username:'lyco-ci',credential:'lyco-ci-owned-turn-only'}]:
-    [{urls:'stun:10.0.2.2:'+config.ports[phase][name]}];
+   const servers=turn?[{urls:'turn:'+config.rtcHost+':'+config.turnPorts[phase]+'?transport=tcp',username:'lyco-ci',credential:'lyco-ci-owned-turn-only'}]:
+    [{urls:'stun:'+config.rtcHost+':'+config.ports[phase][name]}];
    const settings={iceServers:servers,iceTransportPolicy:turn?'relay':'all'};
    if(name==='set-configuration'){
     pc=new Constructor();pc.setConfiguration(settings);
@@ -43,6 +43,7 @@
    pc.addEventListener('icecandidate',event=>{
     if(event.candidate&&audit.candidates.length<64)audit.candidates.push(candidate(event.candidate.candidate));
    });
+   pc.addEventListener('icecandidateerror',event=>audit.iceErrors.push({address:event.address,port:event.port,url:event.url,errorCode:event.errorCode,errorText:event.errorText}));
    const channel=pc.createDataChannel('lyco-owned-probe');
    const ack=new Promise(resolve=>{
     channel.onopen=()=>channel.send('LYCO_OWNED_TURN_PING');
