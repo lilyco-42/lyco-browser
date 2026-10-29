@@ -77,7 +77,7 @@ jobs:
           node --check src/diagnostics-ui.js
           node --check tests/native-diagnostics-panel.mjs
           node --check tests/native-workspace-routes.mjs
-          node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js tests/diagnostics-controller.test.js
+          node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js tests/diagnostics-controller.test.js tests/core-startup-observer.test.js
       - name: Prepare the same pinned official Mihomo used by desktop packages
         if: matrix.target != 'windows-x64'
         shell: bash

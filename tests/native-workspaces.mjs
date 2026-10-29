@@ -124,7 +124,8 @@ try {
  await application.evaluate((_electron,{appRoot,observer})=>{
   const require=process.mainModule.require.bind(process.mainModule);
   const {LycoNetwork}=require(appRoot+'/lyco/network.js');
-  globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork);
+  globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork,
+   require(appRoot+'/lyco/workspace-routes.js').LycoWorkspaceRoutes);
   globalThis.__lycoTargetEvidence=require(observer.replace('core-startup-observer.cjs','browser-target-observer.cjs'))
    .installBrowserTargetObserver({BrowserEngine:require(appRoot+'/engine.js').BrowserEngine,cdp:require(appRoot+'/cdp.js')});
   globalThis.__lycoNativeIdentityEvidence=globalThis.__lycoTargetEvidence.nativeCalls;

@@ -17,6 +17,9 @@ export async function verifyNativeDiagnosticsPanel({page, report, evidence}) {
       const panel = page.locator('#lyco-diagnostics-dialog');
       await panel.waitFor({state: 'visible'});
       assert.equal(await panel.locator('[data-diagnostics-target]').count(), 4);
+      const heading = await panel.locator('h2').evaluate(node => ({height: node.getBoundingClientRect().height,
+        line: parseFloat(getComputedStyle(node).lineHeight)}));
+      assert.ok(heading.height <= heading.line + 1, 'The title must fit one line without an orphaned character at desktop widths');
       for(const button of await panel.locator('[data-diagnostics-target]').all()) assert.equal(await button.isDisabled(), true);
       assert.ok((await panel.locator('#lyco-diagnostics-feedback').textContent()).trim());
       const help = panel.locator('#lyco-subscription-help');

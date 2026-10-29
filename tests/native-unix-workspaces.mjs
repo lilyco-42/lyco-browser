@@ -109,7 +109,8 @@ try{
  report.checks.push('packaged-and-running-product-version-matches-shared-manifest');
  await app.evaluate((_electron,{appRoot,observer})=>{
   const require=process.mainModule.require.bind(process.mainModule);
-  globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork);
+  globalThis.__lycoUnixCoreEvidence=require(observer).installCoreStartupObserver(require(appRoot+'/lyco/network.js').LycoNetwork,
+   require(appRoot+'/lyco/workspace-routes.js').LycoWorkspaceRoutes);
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await app.evaluate((_electron,port)=>{
   globalThis.__lycoUnixPlan='proxy_1m';
