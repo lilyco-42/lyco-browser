@@ -63,3 +63,11 @@ compilation: the minimal patch had no following context line. The patch now
 includes the unchanged window-id assignment as following context; the six-line
 native change and the full original-file/revision guards are unchanged. This
 failed setup run produced no engine binary or runtime proof.
+
+Replacement 40822075594 completed bootstrap and patch application, then stopped
+at the diff whitespace guard before native compilation. Unscoped `mach format`
+selected unrelated upstream files (the original formatter log reports 84 fixes).
+The builder now passes only the affected C++ path, as documented in the official
+GeckoView contributor guide, and preserves the changed-file list and patched
+source before checking the exact single-file and whitespace guards. Neither
+guard is relaxed. This failure produced no compiled dependency or runtime proof.

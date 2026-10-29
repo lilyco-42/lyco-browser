@@ -31,14 +31,15 @@ if ! ./mach --no-interactive bootstrap --application-choice='GeckoView/Firefox f
  tail -n 100 "$evidence/bootstrap.log"
  exit 1
 fi
-if ! ./mach format > "$evidence/format.log" 2>&1; then
+if ! ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp > "$evidence/format.log" 2>&1; then
  tail -n 100 "$evidence/format.log"
  exit 1
 fi
-git diff --check
-test "$(git diff --name-only)" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
+git diff --name-only > "$evidence/changed-files.txt"
 git diff -- dom/media/webrtc/jsapi/PeerConnectionImpl.cpp > "$evidence/applied.patch"
 cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp "$evidence/PeerConnectionImpl.cpp"
+git diff --check
+test "$(git diff --name-only)" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
 if ! ./mach build > "$evidence/compile.log" 2>&1; then
  tail -n 120 "$evidence/compile.log"
  exit 1
