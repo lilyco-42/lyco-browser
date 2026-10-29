@@ -96,3 +96,19 @@ this remains failed capability evidence. Public startup MOZ_LOG environment
 settings add original signaling/transport/proxy diagnostics for the next run;
 no runtime policy is weakened, no page API is wrapped, and no product engine
 change follows from the fixture corrections.
+
+Run 40819289946 at 8421188 now has validProbe=true/passed=false. Both same-engine
+direct controls genuinely complete TURN TCP PING/ACK in all nine applicable
+contexts, including the cross-origin frame. Policy/stopped emit zero direct STUN
+and expose no literal device address in the retained candidate/SDP/localStats;
+all three loopback HTTP routes/negatives pass. Policy still has zero TURN
+connections and ACKs. Native mtransport logs show immediate gathering failure
+with error=10, before a TURN handshake. This is a valid functionality failure,
+not a failed TURN server control or successful complete protection.
+
+The next diagnostic enables the actual `nicer` and `WebrtcTCPSocket` log modules.
+Mozilla's `rlogconnector.cpp` names its nICEr log module `nicer`, distinct from
+`mtransport`; the initial logging configuration did not include it. Candidate
+collection, proxy preferences and all acceptance gates remain identical. Source
+inspection suggests default-address selection is a possible cause, but that is
+an inference to verify against the original native logs, not a confirmed fix.

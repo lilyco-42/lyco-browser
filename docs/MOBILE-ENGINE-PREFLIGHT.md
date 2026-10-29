@@ -41,3 +41,5 @@
 [40817257877](https://github.com/lilyco-42/lyco-browser/actions/runs/40817257877) 的 STUN 前后对照各九个适用上下文均为正向，策略下仍零直接 UDP。进一步阅读原始 network.json，直接对照的八个上下文实际已收到 TURN 数据通道 PING/ACK；先前校验器把 Gecko 合法的空候选结束事件误判为非 relay，跨域帧还缺少信令端点的 CORS。修正仅涉及测试端点与事件分类，原始事件完整保留，跨域场景仍要求真实通信。
 
 保护策略下该轮没有实际 TURN TCP 连接和 ACK，因此不能换引擎或宣称网络隔离成立。下一轮保留相同策略、同引擎前后对照、原始候选/SDP/统计及断线负向，增加公开启动环境配置的原生传输日志，以确定没有建立代理通道的原因。
+
+修正后的 [40819289946](https://github.com/lilyco-42/lyco-browser/actions/runs/40819289946) 已获得 `validProbe=true / passed=false`：前后对照全部九个适用上下文（包含跨域帧）真实 TURN TCP PING/ACK 成立，策略及断线均无直接 STUN，三类回环 HTTP 门禁通过；唯一未满足的功能项是策略下真实 TURN TCP 没有连接和 ACK。原生 mtransport 日志记录候选收集立即 `error=10`，尚不能将原因归为 TURN 握手。下一次增加实际命名为 `nicer`、`WebrtcTCPSocket` 的原生日志模块；不改策略或放宽地址、数据包、功能条件。

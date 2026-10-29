@@ -55,7 +55,7 @@ public final class ProbeActivity extends Activity {
             File configuration = new File(getFilesDir(), "owned-" + mode + ".json");
             // Public startup environment: original native transport diagnostics
             // go to logcat. No page output or transport behavior is modified.
-            JSONObject environment = new JSONObject().put("MOZ_LOG", "timestamp,signaling:4,mtransport:5,proxy:5");
+            JSONObject environment = new JSONObject().put("MOZ_LOG", "timestamp,signaling:4,mtransport:5,nicer:5,WebrtcTCPSocket:5,proxy:5");
             Files.write(configuration.toPath(), new JSONObject().put("prefs", prefs).put("env", environment)
                 .toString().getBytes(StandardCharsets.UTF_8));
             GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder()
