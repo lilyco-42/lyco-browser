@@ -25,9 +25,24 @@ def probe(config,downloads):
         path=pathlib.Path(folder)/'config.json';path.write_text(json.dumps(candidate))
         checked=subprocess.run([BIN,'check','-c',str(path)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=8)
         if checked.returncode:return {'configurationAccepted':False,'allPassed':False}
-        process=subprocess.Popen([BIN,'run','-c',str(path)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        log=pathlib.Path(folder)/'startup.log'
+        log_stream=log.open('wb')
+        process=subprocess.Popen([BIN,'run','-c',str(path)],stdout=log_stream,stderr=log_stream)
         try:
             time.sleep(.5);samples=[]
+            if process.poll() is not None:
+                log_stream.flush()
+                message=log.read_text(errors='replace')[-2400:]
+                def scrub(value):
+                    nonlocal message
+                    if isinstance(value,dict):
+                        for key,item in value.items():
+                            if key in ('uuid','password','private_key') and isinstance(item,str):message=message.replace(item,'[redacted]')
+                            else:scrub(item)
+                    elif isinstance(value,list):
+                        for item in value:scrub(item)
+                scrub(candidate)
+                return {'configurationAccepted':True,'allPassed':False,'startupError':message}
             jobs=[('google-page','https://www.gstatic.com/generate_204',0),('cloudflare-page','https://cp.cloudflare.com/generate_204',0)]
             if downloads:jobs += [('download-'+str(i),'https://speed.cloudflare.com/__down?bytes=4194304',4194304) for i in (1,2)]
             for name,url,amount in jobs:
@@ -45,6 +60,7 @@ def probe(config,downloads):
             process.terminate()
             try:process.wait(timeout=3)
             except subprocess.TimeoutExpired:process.kill();process.wait(timeout=3)
+            log_stream.close()
 
 raw=CONFIG.read_bytes();old=json.loads(raw);new=copy.deepcopy(old)
 assert not old.get('dns'),'Existing custom DNS must be merged explicitly'
