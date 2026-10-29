@@ -11,6 +11,7 @@ import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
 import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
 import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
 import {verifyNativeWorkspaceRoutes} from './native-workspace-routes.mjs';
+import {verifyNativeDiagnosticsPanel} from './native-diagnostics-panel.mjs';
 import {_electron as electron,chromium} from 'playwright';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Actions only');
 const [binary,appRoot]=process.argv.slice(2).map(p=>path.resolve(p));
@@ -125,6 +126,7 @@ try{
   };
  },proxyPort);
  await page.locator('[data-view="lyco"]').click();
+ await verifyNativeDiagnosticsPanel({page,report,evidence});
  await verifyWorkbenchUiFont({page,appRoot,report,evidence});
  await page.locator('#lyco-username').fill('ci-unix-owner');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();

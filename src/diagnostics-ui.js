@@ -6,6 +6,12 @@
       claude: 'Claude IP 检测', gpt: 'GPT / Codex IP 检测', dns: 'DNS 泄露检测', webrtc: 'WebRTC 泄露检测',
       opening: '正在打开检测页…', opened: '已在所选环境打开检测页。请在该环境查看原始结果。',
       note: '检测由 Net.Coffee 提供，结果仅供诊断，不代表服务商的账号准入结论。',
+      support: 'Claude / Google Play 订阅帮助',
+      purchaseHint: 'Google Play 内购需在 Claude 官方 Android 应用完成。付款前核对 Claude 账号、Google Play 账号及已有订阅；已扣款未到账时，先核对原订单并联系官方支持。',
+      verificationHint: '网络检测无法确认账号审核或支付验证是否通过。设备认证和身份验证由平台决定，请按官方流程处理。选择运行环境后可打开以下官方帮助。',
+      subscribe: '官方 Android 订阅流程', payments: 'Google Play 付款问题',
+      certification: 'Google Play 设备认证', verification: 'Claude 身份验证说明',
+      supportOpening: '正在打开官方帮助…', supportOpened: '已在所选环境打开官方帮助。',
       NOT_RUNNING: '该环境尚未运行或已停止。请先启动环境，再重新打开检测。',
       NO_TARGET: '环境已变化，未打开页面。请重新选择正在运行的环境。', BUSY: '正在打开页面，请稍候。', error: '未能打开检测页，请检查环境状态。'},
     en: {entry: 'Environment checks', title: 'Inspect a running environment', hint: 'Pages open inside your selected environment, using its proxy, language and timezone.',
@@ -13,6 +19,12 @@
       claude: 'Claude IP', gpt: 'GPT / Codex IP', dns: 'DNS leaks', webrtc: 'WebRTC leaks',
       opening: 'Opening diagnostic page…', opened: 'Opened in the selected environment. View the original results there.',
       note: 'Diagnostics are provided by Net.Coffee. Results do not determine account eligibility.',
+      support: 'Claude / Google Play subscription help',
+      purchaseHint: 'Google Play purchases use the official Claude Android app. Check your Claude account, Google Play account and existing subscriptions before paying. If charged without access, check the original order and contact official support first.',
+      verificationHint: 'Network checks cannot confirm account approval or payment verification. Device certification and identity verification are determined by the platforms. Follow their official process. Select a running environment to open the help pages below.',
+      subscribe: 'Official Android subscription steps', payments: 'Google Play payment issues',
+      certification: 'Google Play device certification', verification: 'Claude identity verification',
+      supportOpening: 'Opening official help…', supportOpened: 'Opened official help in the selected environment.',
       NOT_RUNNING: 'This environment is not running. Start it and reopen these checks.',
       NO_TARGET: 'The environment changed. Select a running environment again.', BUSY: 'A page is already opening.', error: 'Could not open the page. Check the environment status.'},
   };
@@ -29,6 +41,9 @@
   dialog.innerHTML = '<header><h2 id="lyco-diagnostics-title"></h2><p id="lyco-diagnostics-hint" data-diagnostics-label="hint"></p></header>' +
     '<div class="lyco-diagnostics-body"><label for="lyco-diagnostics-profile" data-diagnostics-label="environment"></label>' +
     '<select id="lyco-diagnostics-profile"></select><div class="lyco-diagnostics-grid"></div>' +
+    '<details id="lyco-subscription-help"><summary data-diagnostics-label="support"></summary>' +
+    '<p data-diagnostics-label="purchaseHint"></p><p data-diagnostics-label="verificationHint"></p>' +
+    '<div class="lyco-support-grid"></div></details>' +
     '<p id="lyco-diagnostics-feedback" role="status" aria-live="polite"></p></div>' +
     '<footer><p data-diagnostics-label="note"></p><button type="button" id="lyco-diagnostics-close"></button></footer>';
   document.body.append(dialog);
@@ -37,19 +52,25 @@
   const buttons = [];
   let busy = false;
   const status = (key, error = false) => {feedback.textContent = t(key); feedback.dataset.error = String(error);};
-  for(const key of Object.keys(window.LycoDiagnostics.targets)) {
-    const button = document.createElement('button'); button.type = 'button'; button.dataset.diagnosticsTarget = key;
-    button.id = 'lyco-diagnostics-' + key; button.className = 'outline'; buttons.push(button);
+  function addButton(key, support) {
+    const button = document.createElement('button'); button.type = 'button';
+    button.dataset[support ? 'supportTarget' : 'diagnosticsTarget'] = key;
+    button.id = (support ? 'lyco-support-' : 'lyco-diagnostics-') + key; button.className = 'outline'; buttons.push(button);
     button.onclick = async () => {
       if(busy) return;
       busy = true; buttons.forEach(item => item.disabled = true); select.disabled = true; syncSelect();
-      status('opening'); feedback.dataset.opened = '';
-      try {await controller.open(select.value, key); status('opened'); feedback.dataset.opened = key;}
+      status(support ? 'supportOpening' : 'opening'); feedback.dataset.opened = '';
+      try {
+        await (support ? controller.openSupport : controller.open)(select.value, key);
+        status(support ? 'supportOpened' : 'opened'); feedback.dataset.opened = (support ? 'support:' : '') + key;
+      }
       catch(error) {status(Object.hasOwn(labels.en, error?.code) ? error.code : 'error', true);}
       finally {busy = false; select.disabled = false; syncSelect(); buttons.forEach(item => item.disabled = !select.value);}
     };
-    dialog.querySelector('.lyco-diagnostics-grid').append(button);
+    dialog.querySelector(support ? '.lyco-support-grid' : '.lyco-diagnostics-grid').append(button);
   }
+  for(const key of Object.keys(window.LycoDiagnostics.targets)) addButton(key, false);
+  for(const key of Object.keys(window.LycoDiagnostics.supportTargets)) addButton(key, true);
   select.onchange = () => {buttons.forEach(button => button.disabled = busy || !select.value);};
   const close = dialog.querySelector('#lyco-diagnostics-close'); close.onclick = () => dialog.close();
   entry.onclick = async () => {
@@ -72,7 +93,7 @@
     entry.textContent = t('entry'); close.textContent = t('close');
     dialog.querySelector('h2').textContent = t('title');
     dialog.querySelectorAll('[data-diagnostics-label]').forEach(node => node.textContent = t(node.dataset.diagnosticsLabel));
-    buttons.forEach(button => button.textContent = t(button.dataset.diagnosticsTarget));
+    buttons.forEach(button => button.textContent = t(button.dataset.diagnosticsTarget || button.dataset.supportTarget));
     const placeholder = select.querySelector('option[value=""]'); if(placeholder) placeholder.textContent = t('choose');
     select.setAttribute('aria-label', t('environment'));
     syncSelect();

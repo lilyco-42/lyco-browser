@@ -74,8 +74,10 @@ jobs:
         run: |
           set -euo pipefail
           node --check src/ui.js
+          node --check src/diagnostics-ui.js
+          node --check tests/native-diagnostics-panel.mjs
           node --check tests/native-workspace-routes.mjs
-          node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js
+          node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js tests/diagnostics-controller.test.js
       - name: Prepare the same pinned official Mihomo used by desktop packages
         if: matrix.target != 'windows-x64'
         shell: bash
@@ -284,6 +286,7 @@ jobs:
             ${{ runner.temp }}/lyco-unix-*/account-proxy_*.png
             ${{ runner.temp }}/lyco-unix-*/ui-cjk-workbench.png
             ${{ runner.temp }}/lyco-unix-*/workspace-*.png
+            ${{ runner.temp }}/lyco-unix-*/*-diagnostics-*.png
           retention-days: 7
 
       - name: Upload macOS DMG to GitHub prerelease

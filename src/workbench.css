@@ -8,6 +8,12 @@
 .lyco-diagnostics-body .themed-select{min-width:0;width:100%}
 .lyco-diagnostics-body .themed-select-button{width:100%;text-align:left}
 .lyco-diagnostics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:6px}
+#lyco-subscription-help{border-top:1px solid var(--ui-border,#dfe3e8);padding-top:12px;overflow-wrap:anywhere}
+#lyco-subscription-help summary{cursor:pointer;font-weight:600}
+#lyco-subscription-help p{font-size:12px;line-height:1.8}
+.lyco-support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lyco-support-grid button{min-width:0}
+#lyco-subscription-help summary:focus-visible{outline:2px solid var(--ui-accent,#be3047);outline-offset:2px}
 .lyco-diagnostics-dialog button{min-height:40px;white-space:normal;border:1px solid var(--ui-border,#dfe3e8);border-radius:8px;background:var(--ui-surface,#fff);color:inherit;font:inherit;padding:8px 12px;cursor:pointer}
 .lyco-diagnostics-dialog button:disabled{opacity:.5;cursor:not-allowed}
 .lyco-diagnostics-dialog :is(button,select):focus-visible{outline:2px solid var(--ui-accent,#be3047);outline-offset:2px}
