@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="LYCO VPN 实时节点连通性与我的网络质量测试：网关→节点TCP延迟、浏览器→官网延迟、基础下载吞吐。">
+<title>代理与网络质量 · LYCO</title>
+<link rel="stylesheet" href="/assets/studio.css">
+<style>
+:root{--nq-bg:#f5f8fc;--nq-ink:#142238;--nq-muted:#62748d;--nq-border:#d9e3ee;--nq-blue:#2563eb;--nq-teal:#0b8f72;--nq-bad:#c23c46;--nq-card:#fff}
+body{background:var(--nq-bg);color:var(--nq-ink);font-family:Inter,"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.nq{width:min(1120px,calc(100% - 36px));margin:0 auto;padding:26px 0 90px}
+.nq-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+.nq-back{font-size:13px;font-weight:750;color:var(--nq-blue)}
+.nq-links{display:flex;gap:18px;flex-wrap:wrap}
+.nq-links a{color:var(--nq-muted);font-weight:650;font-size:13px;text-decoration:none}
+.nq-links a:hover{text-decoration:underline}
+.nq-hero{background:linear-gradient(116deg,#0f284a,#154b77 66%,#247887);color:#fff;padding:clamp(24px,5vw,54px);border-radius:26px;position:relative;overflow:hidden}
+.nq-hero:after{content:"";position:absolute;right:-140px;top:-140px;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.065)}
+.nq-tag{display:inline-flex;letter-spacing:.13em;font-size:11px;font-weight:700;border-radius:20px;background:#ffffff21;padding:8px 13px}
+.nq h1{font-size:clamp(31px,5vw,54px);letter-spacing:-.05em;line-height:1.13;margin:22px 0 16px}
+.nq-hero p{color:#d9e8f7;line-height:1.8;font-size:14px;max-width:720px}
+.nq-hero-actions{display:flex;gap:12px;margin-top:24px;align-items:center;flex-wrap:wrap}
+.nq-button{border:0;background:#e0f2ff;color:#102844;border-radius:11px;font-size:13px;font-weight:750;padding:12px 20px;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:41px}
+.nq-button.secondary{background:#eff5fb;border:1px solid var(--nq-border);color:#183752}
+.nq-button:disabled{cursor:wait;opacity:.6}
+.nq-label{font-size:12px;font-weight:700;color:var(--nq-muted);letter-spacing:.06em;margin:36px 0 15px}
+.nq-panel{background:var(--nq-card);border:1px solid var(--nq-border);box-shadow:0 8px 24px #15365009;border-radius:18px;padding:24px}
+.nq-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.nq-head h2{margin:0;font-size:21px;font-weight:780}
+.nq-head p,.nq-footnote{font-size:12px;color:var(--nq-muted);line-height:1.8;margin:9px 0 0}
+.nq-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0 10px}
+.nq-metric{padding:20px;background:#f3f7fd;border-radius:14px;border:1px solid #e4edf6}
+.nq-metric .v{font-size:clamp(23px,3.3vw,35px);font-weight:850;letter-spacing:-.05em;color:var(--nq-ink)}
+.nq-metric .k{margin-top:6px;font-size:12px;color:var(--nq-muted)}
+.nq-signal{border-radius:11px;background:#ebf2fb;color:#385476;padding:12px 14px;font-size:12px;line-height:1.7;margin:16px 0}
+.nq-table-wrap{overflow-x:auto;margin-top:18px}
+.nq-table{width:100%;border-collapse:collapse;min-width:640px}
+.nq-table th{color:var(--nq-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:11px 12px;background:#f7faff;border-bottom:1px solid var(--nq-border)}
+.nq-table td{padding:15px 12px;font-size:13px;border-bottom:1px solid #edf2f7;color:#213349}
+.nq-table tr:last-child td{border-bottom:0}
+.nq-node{font-weight:750}
+.nq-protocol{color:var(--nq-muted);font-size:11px;margin-top:4px}
+#ordinaryProtocols{display:flex;flex-wrap:wrap;gap:8px}
+#ordinaryProtocols span{border:1px solid var(--nq-border);border-radius:999px;padding:4px 9px;white-space:nowrap}
+.nq-pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-weight:750;font-size:11px}
+.nq-pill.reachable{background:#dff6ee;color:#08765a}
+.nq-pill.unreachable{background:#fce9ea;color:#bd3d48}
+.nq-pill.unverified{background:#fff2d7;color:#946319}
+.nq-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.nq-method{color:var(--nq-muted);font-size:12px}
+.nq-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}
+.nq-list{padding-left:17px;color:var(--nq-muted);font-size:13px;line-height:1.95}
+.nq-footer{border-top:1px solid var(--nq-border);padding:24px 0;color:var(--nq-muted);font-size:12px;margin-top:45px;line-height:1.8}
+a{color:var(--nq-blue)}a:hover{text-decoration:underline}
+@media(max-width:760px){.nq-grid{grid-template-columns:1fr}.nq-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.nq-panel{padding:17px}.nq-hero{border-radius:19px}.nq-top{margin-bottom:20px}.nq{width:min(100% - 24px,1120px)}}
+@media(prefers-color-scheme:dark){:root{--nq-bg:#0d1420;--nq-ink:#ecf3ff;--nq-muted:#aabbd0;--nq-border:#303f52;--nq-card:#162235}.nq-metric{background:#1c2d42;border-color:#304254}.nq-table th{background:#1b2c40}.nq-table td{color:#e3effc;border-color:#2b3d54}.nq-signal{background:#233c59;color:#d3e9ff}.nq-button.secondary{background:#243750;color:#f0f6ff}.nq-footer{border-color:#303f52}}
+</style>
+</head>
+<body data-studio-shell data-page-title="代理与网络质量">
+<main class="nq" id="main">
+<nav class="nq-top" aria-label="导航"><a class="nq-back" href="/vpn/">← 返回 LYCO Connect</a><div class="nq-links"><a href="/sub/">我的订阅</a><a href="/shop/">官方商城</a><a href="/account/">账户中心</a></div></nav>
+<header class="nq-hero">
+ <span class="nq-tag">LYCO CONNECT / NETWORK OBSERVABILITY</span>
+ <h1>网络质量，<br>每一跳都看得见。</h1>
+ <p>查看现有代理节点的 TCP 连通情况、线路延迟，以及你当前浏览器连接 lain42.top 的响应与基础下载速度。区分不同测量路径，避免误读。</p>
+ <div class="nq-hero-actions"><button type="button" id="runAll" class="nq-button">↗ 开始完整检测</button><a class="nq-button secondary" href="/sub/">查看订阅与节点</a></div>
+</header>
+<div class="nq-label">01 / 我的网络 · 浏览器 → lain42.top</div>
+<section class="nq-panel" aria-label="我的网络质量"><div class="nq-head"><div><h2>当前连接质量</h2><p>从你的浏览器发起 HTTP 请求，不使用代理管理密钥；若当前浏览器走 VPN，结果反映对应出口到官网的路径。</p></div><button id="runLocal" class="nq-button secondary" type="button">重测网络</button></div>
+<div class="nq-metrics">
+ <div class="nq-metric"><div id="metricLatency" class="v">—</div><div class="k">HTTP 响应延迟 (ms)</div></div>
+ <div class="nq-metric"><div id="metricJitter" class="v">—</div><div class="k">延迟波动 (ms)</div></div>
+ <div class="nq-metric"><div id="metricLoss" class="v">—</div><div class="k">请求失败率</div></div>
+ <div class="nq-metric"><div id="metricDownload" class="v">—</div><div class="k">小文件下载估算 (Mbps)</div></div>
+</div><div id="localStatus" class="nq-signal" role="status" aria-live="polite">点击「重测网络」：执行 5 次官网请求及一次 256 KiB 测试文件下载，不会使用大量流量。</div>
+<p class="nq-footnote">这不是 ICMP Ping 或全链路测速；小文件下载容易受到 TLS、浏览器缓存和 CDN 影响，数值仅作轻量参考。</p></section>
+<div class="nq-label">02 / 节点线路 · lain42 网关 → 代理节点</div>
+<section class="nq-panel" aria-label="代理节点质量"><div class="nq-head"><div><h2>代理节点连通状态</h2><p>固定节点列表，只检查 TCP 能否建立连接。UDP 节点标记为「未验证」，不把端口可连当作代理协议正常。</p></div><button id="refreshNodes" class="nq-button secondary" type="button">刷新检测数据</button></div>
+<div class="nq-metrics">
+ <div class="nq-metric"><div id="statTotal" class="v">—</div><div class="k">已配置线路</div></div>
+ <div class="nq-metric"><div id="statReach" class="v">—</div><div class="k">TCP 可达</div></div>
+ <div class="nq-metric"><div id="statFail" class="v">—</div><div class="k">TCP 异常</div></div>
+ <div class="nq-metric"><div id="statUnknown" class="v">—</div><div class="k">UDP 待验证</div></div>
+</div><div id="nodeStatus" class="nq-signal" role="status" aria-live="polite">正在获取网关检测结果…</div>
+<div class="nq-table-wrap"><table class="nq-table"><thead><tr><th>线路</th><th>地区</th><th>连通状态</th><th>TCP 延迟</th><th>波动</th></tr></thead><tbody id="nodeRows"><tr><td colspan="5">加载中…</td></tr></tbody></table></div>
+<p class="nq-footnote">为避免重复拨号影响代理服务，节点结果缓存至少 3 分钟。服务器→节点数据不代表用户→节点延迟，不显示服务器地址、端口或用户订阅令牌。</p>
+</section>
+<div class="nq-label">03 / 网站体验 · 节点 → YouTube / ChatGPT</div>
+<section class="nq-panel" aria-label="代理实际网站质量">
+  <div class="nq-head">
+    <div>
+      <h2>网站专项检测（视频与登录）</h2>
+      <p>通过各个代理出口分别测试 YouTube 网页与真实视频数据、ChatGPT 首页、登录域名及 OpenAI API；仅展示结果摘要，不使用你的账号。</p>
+    </div>
+    <button type="button" class="nq-button secondary" id="refreshSites">↻ 刷新检测结果</button>
+  </div>
+  <div class="nq-metrics">
+    <div class="nq-metric"><div class="v" id="siteProbed">—</div><div class="k">已测协议线路</div></div>
+    <div class="nq-metric"><div class="v" id="siteVideo">—</div><div class="k">YouTube 视频样本通过</div></div>
+    <div class="nq-metric"><div class="v" id="siteChatLogin">—</div><div class="k">ChatGPT 完整登录通过</div></div>
+    <div class="nq-metric"><div class="v" id="siteCoverage">—</div><div class="k">独立出口地区</div></div>
+  </div>
+  <div id="siteStatus" class="nq-signal" aria-live="polite">正在加载最新专项检测…</div>
+  <div class="nq-table-wrap">
+    <table class="nq-table">
+      <thead><tr><th>节点地区 / 协议</th><th>YouTube 网页</th><th>视频样本</th><th>ChatGPT 网页</th><th>登录域名</th><th>OpenAI API</th></tr></thead>
+      <tbody id="siteRows"><tr><td colspan="6">正在获取检测结果…</td></tr></tbody>
+    </table>
+  </div>
+  <p class="nq-footnote">重要：403 可能是网站针对自动化工具的挑战，也可能是访问限制；401 通常代表 API 可达但尚未认证。任何状态码都不能单独证明 ChatGPT 已登录、YouTube 能播放 1080p。此检测来自服务器→节点→网站，不能代替河南校园网等用户侧测试。</p>
+</section>
+<div class="nq-label">04 / 普通节点 · 第三方来源</div>
+<section class="nq-panel" aria-label="普通节点目录与检测状态" id="ordinaryNodes">
+  <div class="nq-head"><div><h2>普通节点</h2>
+  <p>完整目录、连通验证和深度检测分别显示。协议与地区选项均保留，可在订阅中心选择普通节点完整目录或已验证格式。</p></div>
+  <button type="button" class="nq-button secondary" id="refreshCommunity">↻ 刷新普通节点</button></div>
+  <p><strong>类型：普通节点</strong> · 完整目录 <b id="ordinaryTotal">—</b> 个 · <a href="/sub/#ordinary">打开普通节点订阅 →</a></p>
+  <div id="ordinaryProtocols" class="nq-signal" aria-label="普通节点协议类型">正在读取协议类型…</div>
+  <div class="nq-metrics">
+    <div class="nq-metric"><div class="v" id="communityEligible">—</div><div class="k">符合检测条件的候选</div></div>
+    <div class="nq-metric"><div class="v" id="communityTested">—</div><div class="k">完整检测条数</div></div>
+    <div class="nq-metric"><div class="v" id="communityVerified">—</div><div class="k">双重验证通过</div></div>
+    <div class="nq-metric"><div class="v" id="communityAvailable">—</div><div class="k">深度质量达标 · 可下发</div></div>
+  </div>
+  <div class="nq-signal" id="communityStatus" role="status" aria-live="polite">正在读取最新普通节点验证信息…</div>
+  <p class="nq-footnote">完整目录保留全部收录节点，不等于每个节点均已验证。连通验证、网页可达、下载速度及出口去重分别记录；深度达标数量用于已验证订阅，完整目录入口始终保留。HTTP 401 只表示 OpenAI API 未认证可达，网页检测不代表账号登录或视频播放验收。</p>
+</section>
+<div class="nq-label">05 / 排查指南</div>
+<div class="nq-grid">
+<section class="nq-panel"><h2>遇到卡顿时</h2><ol class="nq-list"><li>先执行「当前连接质量」测试，看官网访问是否稳定。</li><li>在代理客户端中选择可连通、延迟较低的线路，尽量避免显示异常的 TCP 节点。</li><li>若 UDP 线路未验证，请使用支持 Hysteria2/TUIC 的客户端自行检测。</li><li>如果已经订阅但节点仍不可用，请检查 <a href="/sub/">我的订阅</a> 是否有效。</li></ol></section>
+<section class="nq-panel"><h2>结果代表什么？</h2><ol class="nq-list"><li><b>TCP 可达：</b>只能证明服务器可建立 TCP 连接，不代表账号认证或代理完整可用。</li><li><b>连接超时：</b>网关当前无法连上，不代表所有运营商都无法连上。</li><li><b>UDP 待验证：</b>不是故障判定。</li><li><b>浏览器 HTTP 延迟：</b>网站访问质量，不是指定代理节点的真实出口 RTT。</li></ol></section>
+</div>
+<footer class="nq-footer">© LYCO / lain42.top · 只展示网络健康摘要，不公开任何节点凭据。<br>若怀疑付款或权益异常，请使用 <a href="/account/">账户中心</a> 核对订单。<a href="/vpn/">返回网络产品页</a></footer>
+</main>
+<script defer src="/assets/studio.js?v=gptnav-20261015"></script>
+<script>
+(()=>{
+ const $=id=>document.getElementById(id);
+ const f=(v,d=0)=>Number.isFinite(v)?v.toFixed(d):'—';
+ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ async function timed(url,timeout=6500){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout),t=performance.now();
+  try{const res=await fetch(url,{cache:'no-store',signal:controller.signal,credentials:'omit'});if(!res.ok)throw Error('HTTP '+res.status);await res.arrayBuffer();return performance.now()-t}
+  finally{clearTimeout(timer)}
+ }
+ async function localTest(){
+  const button=$('runLocal');button.disabled=true;$('localStatus').textContent='测试进行中：正在采集 5 次 HTTP 响应…';
+  const samples=[],count=5;let failed=0;
+  try{
+   for(let i=0;i<count;i++){
+    try{samples.push(await timed('/studio/api/health?network_probe='+Date.now()+'_'+i,6500))}
+    catch(_){failed++}
+    if(i<count-1)await sleep(120);
+   }
+   const sorted=samples.slice().sort((a,b)=>a-b);
+   const median=sorted.length?sorted[Math.floor(sorted.length/2)]:NaN;
+   const jitter=samples.length>1?Math.sqrt(samples.reduce((s,v)=>s+(v-median)**2,0)/samples.length):NaN;
+   $('metricLatency').textContent=f(median)+' ms';
+   $('metricJitter').textContent=f(jitter)+' ms';
+   $('metricLoss').textContent=(failed/count*100).toFixed(0)+'%';
+   $('localStatus').textContent='HTTP 采样 '+samples.length+'/'+count+' 次成功。正在读取小文件估算下载吞吐…';
+   try{
+    const bytes=262144,start=performance.now();
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
+    try{
+     const response=await fetch('/vpn/quality-sample.bin?v='+Date.now(),{cache:'no-store',signal:controller.signal,credentials:'omit'});
+     if(!response.ok)throw Error('文件 HTTP '+response.status);
+     const blob=await response.arrayBuffer();
+     if(blob.byteLength!==bytes)throw Error('测试文件大小异常');
+     const seconds=(performance.now()-start)/1000;
+     $('metricDownload').textContent=f(blob.byteLength*8/seconds/1e6,2)+' Mbps';
+    }finally{clearTimeout(timer)}
+   }catch(err){$('metricDownload').textContent='不可测';}
+   $('localStatus').textContent='测试完成：成功 '+samples.length+'/'+count+' 次。结果仅代表当前浏览器到官网的链路，请与客户端代理测速交叉参考。';
+  }catch(e){$('localStatus').textContent='检测失败：'+e.message;}
+  finally{button.disabled=false}
+ }
+ async function nodes(){
+  const button=$('refreshNodes');button.disabled=true;
+  $('nodeStatus').textContent='获取中：如果缓存过期，网关将对固定节点执行 TCP 拨号（约 2–8 秒）…';
+  try{
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
+   let res;
+   try{res=await fetch('/studio/api/proxy/quality',{cache:'no-store',signal:controller.signal,credentials:'omit'})}finally{clearTimeout(timer)}
+   if(!res.ok)throw Error('HTTP '+res.status);
+   const data=await res.json();
+   if(!data.ok||!Array.isArray(data.nodes))throw Error('质量数据格式异常');
+   $('statTotal').textContent=data.nodes.length;
+   $('statReach').textContent=data.summary?.reachable??'—';
+   $('statFail').textContent=data.summary?.unreachable??'—';
+   $('statUnknown').textContent=data.summary?.unverified??'—';
+   const table=$('nodeRows');table.replaceChildren();
+   for(const item of data.nodes){
+    const tr=document.createElement('tr');
+    const name=document.createElement('td'),label=document.createElement('div'),protocol=document.createElement('div');
+    label.className='nq-node';label.textContent=item.name;
+    protocol.className='nq-protocol';protocol.textContent=String(item.protocol||'').toUpperCase();
+    name.append(label,protocol);
+    const region=document.createElement('td');region.textContent=item.region||'—';
+    const state=document.createElement('td'),pill=document.createElement('span');
+    const stateKey=['reachable','unreachable','unverified'].includes(item.state)?item.state:'unverified';
+    pill.className='nq-pill '+stateKey;
+    pill.textContent=stateKey==='reachable'?'TCP 可达':stateKey==='unreachable'?'TCP 异常':'UDP 待验证';
+    pill.title=item.detail||'';state.append(pill);
+    const latency=document.createElement('td');latency.textContent=Number.isFinite(item.latency_ms)?item.latency_ms+' ms':'—';
+    const jitter=document.createElement('td');jitter.textContent=Number.isFinite(item.jitter_ms)?item.jitter_ms+' ms':'—';
+    tr.append(name,region,state,latency,jitter);table.append(tr);
+   }
+   const at=data.tested_at?new Date(data.tested_at).toLocaleString('zh-CN'):'未知';
+   $('nodeStatus').textContent='数据采集时间：'+at+' · 缓存已使用 '+(data.sample_seconds||0)+' 秒 · 采集位置：网关服务器（非用户设备）';
+  }catch(e){$('nodeStatus').textContent='节点检测暂时不可用：'+e.message;
+   if(!$('nodeRows').children.length)$('nodeRows').textContent='暂无可用检测结果';
+  }finally{button.disabled=false}
+ }
+ async function siteQuality(){
+  const button=$('refreshSites');button.disabled=true;
+  try{
+   const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),9500);
+   let res;
+   try{res=await fetch('/studio/api/proxy/site-quality',{cache:'no-store',credentials:'omit',signal:ctrl.signal})}
+   finally{clearTimeout(timer)}
+   if(!res.ok)throw Error('HTTP '+res.status);
+   const data=await res.json();
+   if(!data.ok||!Array.isArray(data.rows))throw Error('专项检测数据异常');
+   $('siteProbed').textContent=String(data.summary?.tested??data.rows.length);
+   $('siteVideo').textContent=String(data.summary?.youtube_media_verified??0);
+   $('siteChatLogin').textContent=String(data.summary?.chatgpt_login_verified??0);
+   $('siteCoverage').textContent=String(new Set(data.rows.map(x=>x.region)).size);
+   const tbody=$('siteRows');tbody.replaceChildren();
+   const stamp=data.checked_at?new Date(data.checked_at).toLocaleString('zh-CN'):'尚未采集';
+   $('siteStatus').textContent=(data.stale?'⚠ 检测已过期':'最新采集')+' · '+stamp+
+     ' · 本服务不保存账号密码，ChatGPT 未执行真实账户登录。';
+   if(!data.rows.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.textContent='暂无专项检测数据';tr.append(td);tbody.append(tr)}
+   for(const item of data.rows){
+    const tr=document.createElement('tr');
+    const name=document.createElement('td');name.textContent=(item.region||'其他')+' · '+(item.protocol||'').toUpperCase();tr.append(name);
+    function add(value,state){
+     const td=document.createElement('td'),pill=document.createElement('span');
+     pill.className='nq-pill '+state;pill.textContent=value;td.append(pill);tr.append(td);
+    }
+    add(item.youtube_page_http===200?'网页可达':'未确认 · '+(item.youtube_page_http||'超时'),
+        item.youtube_page_http===200?'reachable':'unverified');
+    add(item.youtube_media_verified&&!data.stale?'样本通过':'未验证（可能受检测限制）',
+        item.youtube_media_verified&&!data.stale?'reachable':'unverified');
+    add(item.chatgpt_web_http===200?'页面可达':'待确认 · '+(item.chatgpt_web_http||'超时'),
+        item.chatgpt_web_http===200?'reachable':'unverified');
+    add(item.chatgpt_login_http===200?'域名可达':'待确认 · '+(item.chatgpt_login_http||'超时'),
+        item.chatgpt_login_http===200?'reachable':'unverified');
+    add(item.openai_api_http===401?'401 · 未授权':item.openai_api_http===403?'403 · 待人工确认':String(item.openai_api_http||'超时'),
+        'unverified');
+    tbody.append(tr);
+   }
+  }catch(err){$('siteStatus').textContent='专项报告暂时无法加载：'+err.message}
+  finally{button.disabled=false}
+ }
+ async function communityPool(){
+  const button=$('refreshCommunity');button.disabled=true;
+  try{
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
+   let res;
+   try{res=await fetch('/studio/api/proxy/community/summary',{cache:'no-store',credentials:'omit',signal:controller.signal})}
+   finally{clearTimeout(timer)}
+   if(!res.ok)throw Error('HTTP '+res.status);
+   const d=await res.json();
+   if(!d.ok)throw Error('普通节点数据异常');
+   $('ordinaryTotal').textContent=String(d.catalog_total??d.eligible??0);
+   const protocolNames={vless:'VLESS',vmess:'VMess',ss:'Shadowsocks',trojan:'Trojan',hysteria2:'Hysteria2',tuic:'TUIC',anytls:'AnyTLS'};
+   $('ordinaryProtocols').replaceChildren();
+   Object.keys(protocolNames).forEach(key=>{const tag=document.createElement('span');tag.dataset.ordinaryProtocol=key;tag.textContent=protocolNames[key]+' '+String((d.catalog_protocols||{})[key]??0);$('ordinaryProtocols').appendChild(tag)});
+   $('communityEligible').textContent=String(d.eligible??0);
+   $('communityTested').textContent=String(d.tested??0);
+   $('communityVerified').textContent=String(d.verified??0);
+   $('communityAvailable').textContent=String(d.quality_qualified??d.available??0);
+   const when=d.updated_at?new Date(d.updated_at).toLocaleString('zh-CN'):'尚未完成';
+   $('communityStatus').textContent=(d.stale?'⚠ 验证数据已过期':'已更新')+
+     ' · 最近完整扫描：'+when+' · 约每 3 小时全量初筛、每 45 分钟深度测试、每 20 分钟快速连通复检。完整目录与已验证订阅均可在订阅中心选择。';
+  }catch(err){$('communityStatus').textContent='暂时无法读取普通节点状态：'+err.message}
+  finally{button.disabled=false}
+ }
+ $('refreshCommunity').addEventListener('click',communityPool);
+ $('refreshSites').addEventListener('click',siteQuality);
+ $('runLocal').addEventListener('click',localTest);
+ $('refreshNodes').addEventListener('click',nodes);
+ void siteQuality();
+ void communityPool();
+ $('runAll').addEventListener('click',async()=>{const b=$('runAll');b.disabled=true;try{await Promise.all([nodes(),localTest(),siteQuality(),communityPool()]);}finally{b.disabled=false}});
+ nodes();
+ setInterval(()=>{if(!document.hidden)nodes()},180000);
+})();
+</script>
+</body></html>

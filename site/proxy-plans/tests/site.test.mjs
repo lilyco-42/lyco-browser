@@ -19,7 +19,7 @@ let browser;
 before(async()=>{await fs.mkdir(evidence,{recursive:true});browser=await chromium.launch();});
 after(async()=>{await browser?.close();});
 
-async function fixture({width=1280,loggedIn=false,missingYear=false,unavailable=false,entitlements=[]}={}){
+async function fixture({width=1280,loggedIn=false,missingYear=false,unavailable=false,entitlements=[],ordinaryQualified=0}={}){
  const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
  if(loggedIn)await context.addInitScript(()=>localStorage.setItem('wb-token','ci-fixture-only'));
  const state={posts:[],unexpected:[],balance:10000,entitlements:[...entitlements]};
@@ -35,6 +35,11 @@ async function fixture({width=1280,loggedIn=false,missingYear=false,unavailable=
    }else if(api==='/me')data={ok:true,username:'CI plan customer',account_id:1,founder:false,points:{balance:state.balance,entries:[]},entitlements:state.entitlements};
    else if(api.startsWith('/payments/'))data={ok:true,configured:false,products:[],packs:[],topup_tiers:[],topup_tiers_cny:[]};
    else if(api==='/account/orders')data={ok:true,items:[],next_before:null};
+   else if(api==='/proxy/quality')data={ok:true,nodes:[],summary:{tested:0}};
+   else if(api==='/proxy/site-quality')data={ok:true,available:true,rows:[],summary:{tested:0}};
+   else if(api==='/proxy/community/summary')data={ok:true,node_category:'ordinary',eligible:300,tested:300,verified:17,
+    available:ordinaryQualified,quality_qualified:ordinaryQualified,stale:false,updated_at:'2026-10-29T14:14:33Z',
+    catalog_total:639,catalog_protocols:{vless:289,ss:136,trojan:122,hysteria2:53,vmess:36,anytls:2,tuic:1}};
    else if(api==='/points/purchase'&&request.method()==='POST'){
     const body=request.postDataJSON();state.posts.push(body);
     const selected=products.find(p=>p.code===body.product);
@@ -135,5 +140,64 @@ test('legacy purchase page also explains the 120-day term and its account entitl
   await f.page.waitForFunction(()=>document.getElementById('plans')?.textContent.includes('120 天有效期'));
   await f.page.waitForFunction(()=>document.getElementById('myEnts')?.textContent.includes('120天套餐'));
   assert.deepEqual(f.state.posts,[]);
+ }finally{await f.context.close();}
+});
+
+for(const width of [390,1280])test(`ordinary catalogue and protocol types remain visible when no nodes meet deep checks at ${width}px`,async()=>{
+ const f=await fixture({width,ordinaryQualified:0});
+ try{
+  await f.page.goto(origin+'/vpn/quality.html');
+  await f.page.waitForFunction(()=>document.getElementById('ordinaryTotal')?.textContent==='639');
+  assert.equal(await f.page.locator('#communityAvailable').textContent(),'0');
+  assert.equal(await f.page.locator('#communityVerified').textContent(),'17');
+  const section=f.page.locator('#ordinaryNodes');
+  assert.equal(await section.getByRole('heading',{name:'普通节点',exact:true}).count(),1);
+  assert.equal(await section.locator('[data-ordinary-protocol]').count(),7);
+  for(const [type,label] of [['vless','VLESS 289'],['ss','Shadowsocks 136'],['hysteria2','Hysteria2 53'],['tuic','TUIC 1']])
+   assert.equal(await section.locator(`[data-ordinary-protocol="${type}"]`).textContent(),label);
+  assert.equal(await section.getByRole('link',{name:'打开普通节点订阅 →'}).getAttribute('href'),'/sub/#ordinary');
+  assert.equal(await f.page.locator('#runAll').count(),1);
+  assert.equal(await f.page.locator('#runLocal').count(),1);
+  assert.equal(await f.page.locator('#refreshNodes').count(),1);
+  assert.equal(await f.page.locator('#refreshSites').count(),1);
+  await f.page.locator('#refreshCommunity').click();
+  await f.page.waitForFunction(()=>!document.getElementById('refreshCommunity').disabled);
+  assert.equal(await f.page.locator('#ordinaryTotal').textContent(),'639');
+  const geometry=await section.evaluate(node=>({width:node.clientWidth,scroll:node.scrollWidth}));
+  assert.ok(geometry.scroll<=geometry.width+1);
+  assert.doesNotMatch(await section.textContent(),/免费节点|暂不推荐|仅作备用/);
+  await section.screenshot({path:path.join(evidence,`ordinary-catalogue-${width}.png`)});
+  assert.deepEqual(f.state.posts,[]);assert.deepEqual(f.state.unexpected,[]);
+ }finally{await f.context.close();}
+});
+
+test('ordinary formats are accessible alongside both original subscription formats',async()=>{
+ const entitlement={product:'proxy_1m',status:'active',expires_at:'2099-01-01T00:00:00Z',
+  meta:{sub_url:'https://lain42.top/panel/api/sub/CIordinaryowned'}};
+ const f=await fixture({loggedIn:true,entitlements:[entitlement]});
+ try{
+  await f.page.goto(origin+'/sub/');
+  await f.page.locator('#subs .sub-item').last().waitFor();
+  assert.equal(await f.page.locator('#subs .sub-item').count(),4);
+  const rows=await f.page.locator('#subs .sub-item').allTextContents();
+  assert.ok(rows[0].includes('Clash Meta / Verge / Mihomo'));
+  assert.ok(rows[1].includes('通用 base64 订阅'));
+  assert.ok(rows[2].includes('类型：普通节点；格式：Clash'));
+  assert.ok(rows[3].includes('普通节点 · 完整目录'));
+  assert.ok(rows[3].includes('/clashall'));
+  assert.equal(await f.page.locator('#subs .cp').count(),4);
+  await f.page.locator('#subCard').screenshot({path:path.join(evidence,'ordinary-subscription-formats.png')});
+  await f.page.goto(origin+'/account/');
+  const select=f.page.locator('#entitlements select');await select.waitFor();
+  assert.deepEqual(await select.locator('option').evaluateAll(options=>options.map(x=>x.value)),
+   ['clash','base64','clashjp','base64jp','clashcommunity','clashall']);
+  for(const format of ['clashcommunity','clashall']){
+   await select.selectOption(format);
+   assert.equal(await f.page.locator('#entitlements textarea').inputValue(),
+    'https://lain42.top/studio/api/sub/CIordinaryowned/'+format);
+   assert.equal(await f.page.getByRole('button',{name:'复制 Clash 订阅',exact:true}).count(),1);
+   assert.ok((await f.page.locator('#entitlements').textContent()).includes('类型：普通节点；格式：Clash'));
+  }
+  assert.deepEqual(f.state.posts,[]);assert.deepEqual(f.state.unexpected,[]);
  }finally{await f.context.close();}
 });

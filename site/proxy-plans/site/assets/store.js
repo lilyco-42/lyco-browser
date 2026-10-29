@@ -225,7 +225,7 @@ function musicSubUrl(e){if(!e||!e.product||e.product.indexOf('music_')!==0)retur
       if(sub){
         var label=document.createElement('label');label.textContent='选择代理客户端';
         var select=document.createElement('select');select.setAttribute('aria-label','代理客户端');
-        [['clash','🖥️ Windows / Mac · Clash Verge Rev'],['base64','📱 iPhone · Karing 通用订阅'],['clashjp','🇯🇵 日本节点 · Clash Verge'],['base64jp','🇯🇵 日本节点 · Karing']].forEach(function(item){var option=document.createElement('option');option.value=item[0];option.textContent=item[1];select.appendChild(option)});
+        [['clash','🖥️ Windows / Mac · Clash Verge Rev'],['base64','📱 iPhone · Karing 通用订阅'],['clashjp','🇯🇵 日本节点 · Clash Verge'],['base64jp','🇯🇵 日本节点 · Karing'],['clashcommunity','🌐 普通节点 · 已验证 · Clash'],['clashall','🌐 普通节点 · 完整目录 · Clash']].forEach(function(item){var option=document.createElement('option');option.value=item[0];option.textContent=item[1];select.appendChild(option)});
         label.appendChild(select);el.insertBefore(label,ta);
         var launch=document.createElement('a');launch.className='button';launch.textContent='导入 Clash Verge';launch.dataset.subscriptionImport='clash';launch.referrerPolicy='no-referrer';acts.appendChild(launch);
         var help=document.createElement('p');help.className='intro';el.appendChild(help);
@@ -243,9 +243,9 @@ function musicSubUrl(e){if(!e||!e.product||e.product.indexOf('music_')!==0)retur
           }
           var token=new URL(sub).pathname.split('/').pop(),format=select.value;
           value='https://lain42.top/studio/api/sub/'+encodeURIComponent(token)+'/'+format;ta.value=value;
-          copy.textContent=format==='clash'||format==='clashjp'?'复制 Clash 订阅':'复制 Karing / 通用订阅';
+          copy.textContent=format.startsWith('clash')?'复制 Clash 订阅':'复制 Karing / 通用订阅';
           launch.hidden=!format.startsWith('clash');launch.href='clash://install-config?url='+encodeURIComponent(value);
-          help.textContent=format.endsWith('jp')?'日本线路：可手动选择节点。建议使用自动选择获得更稳定体验。':format==='clash'?'在 Clash Verge Rev 导入 URL，选择 PROXY → 自动选择。':'iPhone 用 Karing：配置 → 添加远程配置 → 粘贴通用订阅链接 → 更新 → 选择具体节点。';
+          help.textContent=format==='clashall'?'类型：普通节点；格式：Clash。完整目录保留全部收录协议与地区，并保留各节点的检测状态。':format==='clashcommunity'?'类型：普通节点；格式：Clash。此格式列出当前深度检测通过的普通节点；完整目录格式始终可选。':format.endsWith('jp')?'日本线路：可手动选择节点。建议使用自动选择获得更稳定体验。':format==='clash'?'在 Clash Verge Rev 导入 URL，选择 PROXY → 自动选择。':'iPhone 用 Karing：配置 → 添加远程配置 → 粘贴通用订阅链接 → 更新 → 选择具体节点。';
         }
         select.onchange=chooseSubscription;chooseSubscription();
       }
