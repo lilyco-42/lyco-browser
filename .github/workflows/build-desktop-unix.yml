@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       speed_probe:
-        description: Fixed production egress read-only probe
+        description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
         options: [none, before, after]

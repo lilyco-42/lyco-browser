@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """Root-owned forced-command probe; only redacted results cross SSH."""
-import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time
+import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time, shutil
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
@@ -9,6 +9,67 @@ if PHASE not in ('before', 'after'):
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
+CONFIG = pathlib.Path('/etc/sing-box/config.json')
+PLAN = pathlib.Path('/etc/sing-box/.lyco-speed-p0-plan.json')
+
+def atomic_config(data, metadata):
+    fd, name = tempfile.mkstemp(prefix='.lyco-speed-', dir=CONFIG.parent)
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(data, stream, ensure_ascii=False, indent=2)
+            stream.write('\n'); stream.flush(); os.fsync(stream.fileno())
+        os.chown(name, metadata.st_uid, metadata.st_gid)
+        os.chmod(name, metadata.st_mode & 0o777)
+        os.replace(name, CONFIG)
+    finally:
+        pathlib.Path(name).unlink(missing_ok=True)
+
+def apply_plan():
+    plan = json.loads(PLAN.read_text())
+    original = CONFIG.read_bytes()
+    assert hashlib.sha256(original).hexdigest() == plan['previousSha256'], 'Live configuration changed'
+    before = json.loads(original)
+    updated = plan['configuration']
+    assert updated['inbounds'] == before['inbounds'], 'Inbound accounts must be preserved'
+    assert {k:v for k,v in updated.items() if k not in ('outbounds','dns','route')} == {
+        k:v for k,v in before.items() if k not in ('outbounds','dns','route')}
+    old = {n['tag']:n for n in before['outbounds']}
+    new = {n['tag']:n for n in updated['outbounds']}
+    assert old.keys() == new.keys()
+    for tag in old:
+        if tag in ('yt-proxy','node-vless','node-vmess'):
+            expected = candidate(); expected['tag'] = tag
+            assert old[tag]['server'] == '43.108.11.215' and new[tag] == expected
+        else:
+            assert old[tag] == new[tag]
+    assert plan['proof']['results'][-1]['allPassed'] is True
+    assert json.loads(PLAN.with_suffix('.config.json').read_text()) == updated
+    checked = subprocess.run([BIN,'check','-c',str(PLAN.with_suffix('.config.json'))],
+                             capture_output=True, timeout=8)
+    assert checked.returncode == 0, 'Prepared full service configuration rejected'
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
+    backup = pathlib.Path('/root/website-backups') / ('proxy-speed-'+stamp)
+    backup.mkdir(mode=0o700)
+    shutil.copy2(CONFIG, backup/'config.json')
+    metadata = CONFIG.stat()
+    assert CONFIG.read_bytes() == original, 'Concurrent configuration change'
+    atomic_config(updated, metadata)
+    try:
+        subprocess.run(['systemctl','restart','sing-box.service'],check=True,timeout=20,capture_output=True)
+        subprocess.run(['systemctl','is-active','--quiet','sing-box.service'],check=True,timeout=5)
+    except Exception:
+        atomic_config(before, metadata)
+        subprocess.run(['systemctl','restart','sing-box.service'],timeout=20,capture_output=True)
+        raise
+    return before, metadata, backup
+
+def rollback(before, metadata):
+    current = json.loads(CONFIG.read_text())
+    for key in ('outbounds','route','dns'):
+        if key in before: current[key] = before[key]
+        else: current.pop(key, None)
+    atomic_config(current, metadata)
+    subprocess.run(['systemctl','restart','sing-box.service'],check=True,timeout=20,capture_output=True)
 
 def candidate():
     nodes = json.loads((BASE / 'proxy-extras.json').read_text())
@@ -68,15 +129,39 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None):
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
 
-live = json.loads(pathlib.Path('/etc/sing-box/config.json').read_text())
-current = next(n for n in live['outbounds'] if n['tag'] == 'yt-proxy')
-results = [probe('live-configured-panel-egress', current, live_config=live)]
-if PHASE == 'before':
-    results.append(probe('candidate-korean-tls-verified-egress-with-remote-dns', candidate(), resolve_remote=True))
+deployment = apply_plan() if PHASE == 'after' and PLAN.exists() else None
+try:
+    live = json.loads(CONFIG.read_text())
+    current = next(n for n in live['outbounds'] if n['tag'] == 'yt-proxy')
+    results = [probe('live-configured-panel-egress', current, live_config=live)]
+    if PHASE == 'before':
+        results.append(probe('candidate-korean-tls-verified-egress-with-remote-dns', candidate(), resolve_remote=True))
+    if PHASE == 'after':
+        pages = []
+        for url in ('https://www.gstatic.com/generate_204', 'https://www.google.com/generate_204'):
+            test = subprocess.run(['curl','--silent','--proxy','http://127.0.0.1:1081',
+                '--noproxy','','--connect-timeout','6','--max-time','18','--output','/dev/null',
+                '--write-out','%{http_code}',url],capture_output=True,timeout=22)
+            pages.append({'url':url,'ok':test.returncode==0 and test.stdout.strip()==b'204'})
+        results[-1]['realServicePages'] = pages
+        results[-1]['allPassed'] = results[-1]['allPassed'] and all(p['ok'] for p in pages)
+except Exception:
+    if deployment: rollback(deployment[0], deployment[1])
+    raise
 report = {'probeSourceSha256': hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(), 'phase': PHASE, 'checkedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
           'liveConfigSha256': hashlib.sha256(pathlib.Path('/etc/sing-box/config.json').read_bytes()).hexdigest(),
           'scope': 'Actual HTTPS pages and two exact 1.5MB downloads via isolated copies of live panel egress and candidate. TLS verified. Not a customer device last-mile measurement.',
           'results': results}
+if deployment:
+    before, metadata, backup = deployment
+    report['deployment'] = {'backup': str(backup), 'accountsPreserved': True,
+                            'rolledBack': not results[-1].get('allPassed', False)}
+    if report['deployment']['rolledBack']:
+        rollback(before, metadata)
+    else:
+        PLAN.rename(backup/'deployment-plan.json')
+        PLAN.with_suffix('.config.json').unlink(missing_ok=True)
+        (backup/'RESULT.json').write_text(json.dumps(report, indent=2)+'\n')
 print(json.dumps(report, indent=2), flush=True)
 required = results[-1]
 raise SystemExit(0 if required.get('allPassed') else 1)
