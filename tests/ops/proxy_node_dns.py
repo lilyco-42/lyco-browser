@@ -2,7 +2,7 @@
 """Fixed DNS-only repair on the owned Korean proxy; credentials stay on node."""
 import copy,datetime,hashlib,json,os,pathlib,shutil,socket,subprocess,tempfile,time
 os.umask(0o077)
-PHASE=os.environ.get('SSH_ORIGINAL_COMMAND');assert PHASE in ('node-dns','node-throughput')
+PHASE=os.environ.get('SSH_ORIGINAL_COMMAND');assert PHASE in ('node-dns','node-throughput','node-au-throughput')
 CONFIG=pathlib.Path('/etc/s-box/sb.json')
 BIN='/etc/s-box/sing-box'
 
@@ -45,7 +45,7 @@ def probe(config,downloads):
                 return {'configurationAccepted':True,'allPassed':False,'startupError':message}
             jobs=[('google-page','https://www.gstatic.com/generate_204',0),('cloudflare-page','https://cp.cloudflare.com/generate_204',0)]
             if downloads:jobs += [('download-'+str(i),'https://speed.cloudflare.com/__down?bytes=4194304',4194304) for i in (1,2)]
-            if downloads and PHASE=='node-throughput':
+            if downloads and PHASE.endswith('throughput'):
                 jobs.append(('github-release-range','https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-amd64-v1.19.32.gz',4194304))
             for name,url,amount in jobs:
                 body=pathlib.Path(folder)/'body';start=time.monotonic()
@@ -67,7 +67,7 @@ def probe(config,downloads):
             log_stream.close()
 
 raw=CONFIG.read_bytes();old=json.loads(raw);new=copy.deepcopy(old)
-if PHASE=='node-throughput':
+if PHASE.endswith('throughput'):
     result=probe(old,True)
     print(json.dumps({'phase':PHASE,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
         'tcpCongestionControl':subprocess.check_output(['sysctl','-n','net.ipv4.tcp_congestion_control']).decode().strip(),
