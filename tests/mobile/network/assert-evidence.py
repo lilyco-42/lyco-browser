@@ -127,6 +127,14 @@ if engine_probe:
     checks['stopped-three-loopback-targets-no-direct-fallback'] = len(values)==3 and all(x.get('ok') is False for x in values) and not any(x['phase']=='stopped' for x in window['loopbackRequests'])
     meta=result['candidate']
     checks['standalone-release-engine-without-page-policy'] = meta.get('notProductAPK') is True and meta.get('debuggable') is False and meta.get('pagePolicyScript') is False and native_title_completed
+    if (root/'source-engine-build.json').exists():
+        source_meta=json.loads((root/'source-engine-build.json').read_text())
+        libraries=json.loads((root/'source-engine-packaged-libraries.json').read_text())
+        checks['source-built-engine-uses-verified-compiled-native-libraries'] = (
+            meta.get('sourceEngineBuild')==source_meta and meta.get('packagedNativeLibrariesMatchSourceAar') is True
+            and source_meta.get('compiledNativeCode') is True and source_meta.get('artifactBuild') is False
+            and bool(libraries) and any(row.get('file')=='lib/x86_64/libxul.so' for row in libraries))
+        valid = valid and checks['source-built-engine-uses-verified-compiled-native-libraries']
     result['checks']={k.replace('product','engine'):v for k,v in checks.items()}
     result['validProbe']=valid; result['passed']=valid and all(checks.values())
     result['probeHealthy']=result.pop('productHealthy'); result['probeStopped']=result.pop('productStopped')
