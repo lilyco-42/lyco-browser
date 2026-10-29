@@ -42,7 +42,9 @@ def originals_have_ip(value):
             if len(fields)>4 and literal(fields[4]): return True
     return any(literal(row.get('address') or row.get('ip')) for row in value.get('localStats', []))
 def real_relay(value):
-    records=value.get('candidates', [])
+    # A native non-null RTCIceCandidate with candidate="" marks completion.
+    # Retain that original event, but it is not an address-bearing candidate.
+    records=[row for row in value.get('candidates', []) if row.get('raw')!='']
     if not records or any(row.get('type')!='relay' for row in records): return False
     for line in value.get('sdp','').splitlines():
         if line.startswith('a=candidate:'):

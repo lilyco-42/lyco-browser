@@ -75,11 +75,27 @@ def page(phase, case=None, script=False):
 
 class Origin(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
+    def signaling_cors(self):
+        # Only the owned cross-origin frame may signal to the owned peer.
+        if urlsplit(self.path).path=='/offer' and self.headers.get('Origin')=='http://10.0.2.2:18082':
+            self.send_header('Access-Control-Allow-Origin', 'http://10.0.2.2:18082')
+            self.send_header('Vary', 'Origin')
     def reply(self, value, kind='application/json'):
         body = value if isinstance(value, bytes) else json.dumps(value).encode()
         self.send_response(200); self.send_header('Content-Type', kind)
         self.send_header('Content-Length', str(len(body))); self.send_header('Connection', 'close')
-        self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(body)
+        self.send_header('Cache-Control', 'no-store'); self.signaling_cors(); self.end_headers(); self.wfile.write(body)
+    def do_OPTIONS(self):
+        url=urlsplit(self.path); query=parse_qs(url.query)
+        if (url.path!='/offer' or query.get('phase',[''])[0] not in ports or query.get('case',[''])[0] not in cases
+                or self.headers.get('Origin')!='http://10.0.2.2:18082'
+                or self.headers.get('Access-Control-Request-Method')!='POST'
+                or self.headers.get('Access-Control-Request-Headers','').lower()!='content-type'):
+            self.send_error(403); return
+        self.send_response(204); self.signaling_cors()
+        self.send_header('Access-Control-Allow-Methods', 'POST')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Content-Length', '0'); self.end_headers()
     def do_GET(self):
         url = urlsplit(self.path)
         if url.path in ('/rtc', '/frame'):
@@ -186,7 +202,8 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             response = connection.getresponse(); payload = response.read()
             self.send_response(response.status)
             self.send_header('Content-Type', response.getheader('Content-Type', 'text/plain'))
-            if response.getheader('Access-Control-Allow-Origin'): self.send_header('Access-Control-Allow-Origin', response.getheader('Access-Control-Allow-Origin'))
+            for name in ['Access-Control-Allow-Origin','Access-Control-Allow-Methods','Access-Control-Allow-Headers','Vary']:
+                if response.getheader(name): self.send_header(name, response.getheader(name))
             self.send_header('Content-Length', str(len(payload))); self.end_headers(); self.wfile.write(payload)
         except OSError: self.close_connection = True
         finally:
@@ -196,6 +213,7 @@ class Proxy(http.server.BaseHTTPRequestHandler):
             connection.close(); save()
     do_GET = relay
     do_POST = relay
+    do_OPTIONS = relay
 
 for phase in phases:
     ports[phase] = {}

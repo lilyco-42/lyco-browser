@@ -53,7 +53,11 @@ public final class ProbeActivity extends Activity {
             // privacy.network.webRTCIPHandlingPolicy=proxy_only implementation.
             prefs.put("media.peerconnection.ice.proxy_only", policy);
             File configuration = new File(getFilesDir(), "owned-" + mode + ".json");
-            Files.write(configuration.toPath(), new JSONObject().put("prefs", prefs).toString().getBytes(StandardCharsets.UTF_8));
+            // Public startup environment: original native transport diagnostics
+            // go to logcat. No page output or transport behavior is modified.
+            JSONObject environment = new JSONObject().put("MOZ_LOG", "timestamp,signaling:4,mtransport:5,proxy:5");
+            Files.write(configuration.toPath(), new JSONObject().put("prefs", prefs).put("env", environment)
+                .toString().getBytes(StandardCharsets.UTF_8));
             GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder()
                 .configFilePath(configuration.getAbsolutePath())
                 .arguments(new String[] {"-profile", getDir("engine-" + mode, MODE_PRIVATE).getAbsolutePath()})

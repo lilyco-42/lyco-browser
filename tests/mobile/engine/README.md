@@ -79,3 +79,20 @@ include their RFC5389 FINGERPRINT, original packet bytes and native ICE error
 events are retained, and selected-route provenance compares complete live TCP
 tuples. These refine the owned positive control; the engine policy, privacy,
 functional TURN, loopback and stopped-route gates are not relaxed.
+
+Run 40817257877 made the real-interface STUN controls positive in all nine
+applicable contexts. Original data shows eight direct-control TURN data channels
+received genuine PING/ACK before and after policy; it is incorrect to describe
+all controls as lacking relay/ACK. Their candidate arrays also retain Gecko's
+legitimate empty-candidate completion event, which the initial validator wrongly
+classified as a non-relay candidate. The cross-origin frame's signaling POST was
+blocked because the owned fixture lacked CORS/preflight support. The fixture now
+allows only that owned frame origin to POST to its validated offer endpoint, and
+the validator requires actual nonempty relay candidates while retaining every
+original event. No candidate is removed from the observations.
+
+The protected engine still produced no TURN connection or ACK in that run, so
+this remains failed capability evidence. Public startup MOZ_LOG environment
+settings add original signaling/transport/proxy diagnostics for the next run;
+no runtime policy is weakened, no page API is wrapped, and no product engine
+change follows from the fixture corrections.
