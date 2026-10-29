@@ -22,8 +22,18 @@ android {
         release { debuggable false; minifyEnabled false; signingConfig signingConfigs.experiment }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    if (System.getenv('LYCO_ENGINE_AAR')) {
+        // Preserve the compiled release bytes for APK-to-AAR provenance checks.
+        packaging { jniLibs { keepDebugSymbols += ['**/*.so'] } }
+    }
 }
-dependencies { implementation 'org.mozilla.geckoview:geckoview:159.0.20261022150525' }
+dependencies {
+    if (System.getenv('LYCO_ENGINE_AAR')) {
+        implementation 'top.lain42.experimental:geckoview-source:159.0-route-experiment'
+    } else {
+        implementation 'org.mozilla.geckoview:geckoview:159.0.20261022150525'
+    }
+}
 
 tasks.register('nativeDependencyEvidence') {
     doLast {

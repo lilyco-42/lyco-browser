@@ -46,3 +46,20 @@ Primary sources:
 - https://firefox-source-docs.mozilla.org/mobile/android/
 - https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/geckoview-quick-start.html
 - https://firefox-source-docs.mozilla.org/mobile/android/focus-android/Development-Custom-GeckoView.html
+
+After a successful source build, dispatch build-universal with
+native_engine_probe=true and native_engine_source_run=<successful run id>.
+The consumer refuses incomplete/failed builds, different native source/patch or
+builder files, wrong provenance/ABI and archive/AAR hash mismatches. A local Maven
+module keeps the hash-pinned official 159.0 dependency POM graph while loading
+only the compiled experiment AAR. The actual APK's native libraries must match
+the AAR bytes, including libxul.so, before any runtime result is accepted. This
+runs the same native before/after controls, all frame cases, real TURN and stopped
+route negatives. No source-run input changes the product build or default engine.
+
+Initial full-source dispatch 40821252708 cloned the pinned official revision and
+matched the original file SHA-256, then stopped at git apply before bootstrap or
+compilation: the minimal patch had no following context line. The patch now
+includes the unchanged window-id assignment as following context; the six-line
+native change and the full original-file/revision guards are unchanged. This
+failed setup run produced no engine binary or runtime proof.

@@ -4,7 +4,15 @@ if (System.getenv('GITHUB_ACTIONS') != 'true') {
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories { google(); mavenCentral(); maven { url 'https://maven.mozilla.org/maven2' } }
+    repositories {
+        if (System.getenv('LYCO_ENGINE_MAVEN_ROOT')) {
+            maven {
+                url uri(System.getenv('LYCO_ENGINE_MAVEN_ROOT'))
+                content { includeModule 'top.lain42.experimental', 'geckoview-source' }
+            }
+        }
+        google(); mavenCentral(); maven { url 'https://maven.mozilla.org/maven2' }
+    }
 }
 rootProject.name = 'LycoNativeEngineExperiment'
 include ':app'
