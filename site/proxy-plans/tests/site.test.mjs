@@ -167,14 +167,16 @@ for(const width of [390,1280])test(`ordinary catalogue and protocol types remain
   assert.ok(geometry.scroll<=geometry.width+1);
   assert.doesNotMatch(await section.textContent(),/免费节点|暂不推荐|仅作备用/);
   await section.screenshot({path:path.join(evidence,`ordinary-catalogue-${width}.png`)});
+  await f.page.evaluate(()=>window.scrollBy(0,-72));
+  await f.page.screenshot({path:path.join(evidence,`ordinary-catalogue-${width}-viewport.png`)});
   assert.deepEqual(f.state.posts,[]);assert.deepEqual(f.state.unexpected,[]);
  }finally{await f.context.close();}
 });
 
-test('ordinary formats are accessible alongside both original subscription formats',async()=>{
+for(const width of [390,1280])test(`ordinary formats retain original options and fit the styled subscription page at ${width}px`,async()=>{
  const entitlement={product:'proxy_1m',status:'active',expires_at:'2099-01-01T00:00:00Z',
   meta:{sub_url:'https://lain42.top/panel/api/sub/CIordinaryowned'}};
- const f=await fixture({loggedIn:true,entitlements:[entitlement]});
+ const f=await fixture({width,loggedIn:true,entitlements:[entitlement]});
  try{
   await f.page.goto(origin+'/sub/');
   await f.page.locator('#subs .sub-item').last().waitFor();
@@ -186,7 +188,13 @@ test('ordinary formats are accessible alongside both original subscription forma
   assert.ok(rows[3].includes('普通节点 · 完整目录'));
   assert.ok(rows[3].includes('/clashall'));
   assert.equal(await f.page.locator('#subs .cp').count(),4);
-  await f.page.locator('#subCard').screenshot({path:path.join(evidence,'ordinary-subscription-formats.png')});
+  assert.notEqual(await f.page.locator('#subCard').evaluate(node=>getComputedStyle(node).borderRadius),'0px',
+   'Subscription visual acceptance must load its actual stylesheet');
+  for(const row of await f.page.locator('#subs .sub-item').all()){
+   const size=await row.evaluate(node=>({client:node.clientWidth,scroll:node.scrollWidth}));
+   assert.ok(size.scroll<=size.client+1,'Each format and its controls must fit without hidden horizontal content');
+  }
+  await f.page.locator('#subCard').screenshot({path:path.join(evidence,`ordinary-subscription-formats-${width}.png`)});
   await f.page.goto(origin+'/account/');
   const select=f.page.locator('#entitlements select');await select.waitFor();
   assert.deepEqual(await select.locator('option').evaluateAll(options=>options.map(x=>x.value)),
