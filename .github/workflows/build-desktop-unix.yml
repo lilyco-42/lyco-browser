@@ -336,6 +336,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.speed_probe != 'none'
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    env:
+      PROBE_HOST: ${{ inputs.speed_probe == 'node-dns' && '43.108.85.230' || '8.153.102.122' }}
     permissions:
       contents: read
     steps:
