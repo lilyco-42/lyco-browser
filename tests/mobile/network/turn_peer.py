@@ -71,16 +71,16 @@ class TurnPeer:
             client.close()
             if remote: remote.close()
 
-    def answer(self, phase, value, route):
-        return asyncio.run_coroutine_threadsafe(self.offer(phase, value, route), self.loop).result(20)
+    def answer(self, phase, value, route, context):
+        return asyncio.run_coroutine_threadsafe(self.offer(phase, value, route, context), self.loop).result(20)
 
-    async def offer(self, phase, value, route):
+    async def offer(self, phase, value, route, context):
         # No STUN / third-party service: this is the other real ICE peer on the
         # same isolated runner. coturn owns the actual advertised relay socket.
         peer = RTCPeerConnection(RTCConfiguration(iceServers=[]))
         self.peers.add(peer)
         with self.lock:
-            self.state['peerOffers'].append({'phase': phase, 'route': route, 'type': value['type'], 'sdp': value['sdp']})
+            self.state['peerOffers'].append({'phase': phase, 'case': context, 'route': route, 'type': value['type'], 'sdp': value['sdp']})
             self.save()
 
         @peer.on('datachannel')
@@ -88,7 +88,7 @@ class TurnPeer:
             @channel.on('message')
             def message(value):
                 with self.lock:
-                    self.state['peerMessages'].append({'phase': phase, 'message': value if isinstance(value, str) else '<binary>'})
+                    self.state['peerMessages'].append({'phase': phase, 'case': context, 'message': value if isinstance(value, str) else '<binary>'})
                     self.save()
                 if value == 'LYCO_OWNED_TURN_PING':
                     channel.send('LYCO_OWNED_TURN_ACK')

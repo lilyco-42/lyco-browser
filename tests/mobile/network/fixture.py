@@ -114,8 +114,10 @@ class Origin(http.server.BaseHTTPRequestHandler):
             save(); self.reply({'ok': True}); return
         if url.path == '/offer':
             phase = parse_qs(url.query).get('phase', [''])[0]
+            context = parse_qs(url.query).get('case', [''])[0]
             if phase not in ports: self.send_error(400); return
-            self.reply(turn.answer(phase, json.loads(body), 'selected' if self.client_address[1] in sources else 'direct')); return
+            if context not in cases: self.send_error(400); return
+            self.reply(turn.answer(phase, json.loads(body), 'selected' if self.client_address[1] in sources else 'direct', context)); return
         if url.path != '/report': self.send_error(404); return
         phase = parse_qs(url.query).get('phase', [''])[0]
         with lock:

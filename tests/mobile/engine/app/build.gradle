@@ -1,7 +1,7 @@
 plugins { id 'com.android.application' }
 android {
     namespace 'top.lain42.lycoengineprobe'
-    compileSdk 37
+    compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig {
         applicationId 'top.lain42.lycoengineprobe'
         minSdk 28

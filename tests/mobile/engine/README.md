@@ -25,7 +25,10 @@ including initial about:blank, nested blank frames, `window.frames`, and
 native configurations are retained. Native policies can apply below the page API;
 their `getConfiguration` result is observed, not forced to match a JavaScript shim.
 The network/address and real TURN TCP PING/ACK positive and stopped-route negative
-gates remain mandatory. The proxy endpoint itself is device loopback, matching
+gates remain mandatory in every applicable context, including blank frames and
+constructor/configuration variations. Successful original getStats and SDP reads
+are mandatory. Unprotected positive controls need real relay communication, while
+the protected run additionally rejects device/related addresses. The proxy endpoint itself is device loopback, matching
 the product's native-core architecture. Three real loopback HTTP targets must also work in
 both direct controls and use the selected upstream when policy is enabled. Missing
 IPv6 or a broken control invalidates that proof; it is not skipped.
@@ -51,3 +54,6 @@ Run 40732467759 stopped before compilation because sdkmanager was absent from PA
 the build now locates the installed Android command-line tool explicitly.
 Run 40732958680 showed that the hosted runner also lacks ripgrep; tool discovery
 uses its available find command, with no new runtime dependency.
+Run 40733512037 identified the published SDK package name mismatch. Google's
+repository lists `platforms;android-37.0`, so the build uses that package and the
+public compileSdk minor-level DSL instead of requesting nonexistent android-37.

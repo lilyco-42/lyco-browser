@@ -22,7 +22,10 @@ stopped = reports.get('stopped', {}).get('observation')
 
 checks = {}
 def peer(value):
-    return bool(value and value.get('completed') and value.get('apiPresent') and value.get('offerCreated') and not value.get('blocked'))
+    if not (value and value.get('completed') and value.get('apiPresent') and value.get('offerCreated') and not value.get('blocked')): return False
+    if 'cases' in value:
+        return isinstance(value['cases'],list) and bool(value['cases']) and all((x.get('case')=='legacy-constructor' and x.get('applicable') is False) or peer(x) for x in value['cases'])
+    return value.get('statsCollected') is True and not value.get('statsError') and value.get('sdp','').startswith('v=0')
 def cases(value):
     return {row['case']: row for row in (value or {}).get('cases', [])}
 def literal(value):
@@ -38,9 +41,16 @@ def originals_have_ip(value):
             fields=line.split()
             if len(fields)>4 and literal(fields[4]): return True
     return any(literal(row.get('address') or row.get('ip')) for row in value.get('localStats', []))
-def clean_relay(value):
+def real_relay(value):
     records=value.get('candidates', [])
     if not records or any(row.get('type')!='relay' for row in records): return False
+    for line in value.get('sdp','').splitlines():
+        if line.startswith('a=candidate:'):
+            fields=line.split()
+            if len(fields)<8 or fields[7]!='relay': return False
+    return True
+def clean_relay(value):
+    if not real_relay(value): return False
     # Real relay addresses are allowed in the TURN positive only. Host/srflx or
     # related device addresses remain prohibited; SDP/stats stay original.
     for line in value.get('sdp','').splitlines():
@@ -83,12 +93,25 @@ for phase,observation in [('lyco',row.get('observation')),('stopped',stopped)]:
         checks[phase+'-actual-relay-policy-on-every-applicable-peer'] = bool(observed) and all(value.get('applicable') is False or value.get('configuration',{}).get('iceTransportPolicy')=='relay' for value in observed.values())
 for phase in ['control','control-after']:
     observation=reports.get(phase,{}).get('observation',{}).get('turn',{})
-    checks[phase+'-real-turn-tcp-datachannel-positive'] = peer(observation) and observation.get('dataAck') is True and clean_relay(observation) and any(p['phase']==phase and p['route']=='direct' and p['clientBytes']>0 and p['serverBytes']>0 for p in data['turnConnections']) and any(p['phase']==phase and p['message']=='LYCO_OWNED_TURN_PING' for p in data['peerMessages'])
+    checks[phase+'-real-turn-tcp-datachannel-positive'] = peer(observation) and observation.get('dataAck') is True and real_relay(observation) and any(p['phase']==phase and p['route']=='direct' and p['clientBytes']>0 and p['serverBytes']>0 for p in data['turnConnections']) and any(p['phase']==phase and p['message']=='LYCO_OWNED_TURN_PING' for p in data['peerMessages'])
     valid = valid and checks[phase+'-real-turn-tcp-datachannel-positive']
 healthy=row.get('observation',{}).get('turn',{})
 checks['healthy-real-turn-tcp-datachannel-via-selected-upstream'] = peer(healthy) and healthy.get('dataAck') is True and clean_relay(healthy) and any(p['phase']=='lyco' and p['route']=='selected' and p['clientBytes']>0 and p['serverBytes']>0 for p in data['turnConnections']) and any(p['phase']=='lyco' and p['route']=='selected' for p in data['peerOffers']) and any(p['phase']=='lyco' and p['message']=='LYCO_OWNED_TURN_PING' for p in data['peerMessages'])
 checks['healthy-and-stopped-no-direct-turn-tcp'] = all(p['route']=='selected' for p in data['turnConnections'] if p['phase'] in ('lyco','stopped'))
 checks['stopped-real-turn-peer-complete-without-traffic-or-data-ack'] = bool(stopped) and stopped.get('turn',{}).get('completed') is True and stopped.get('turn',{}).get('offerCreated') is True and stopped.get('turn',{}).get('dataAck') is False and not any(p['phase']=='stopped' for p in window['turnConnections']) and not any(p['phase']=='stopped' for p in data['peerMessages'])
+for phase in ['control','control-after','lyco']:
+    observed=cases(reports.get(phase,{}).get('observation'))
+    def real_context_turn(name,value):
+        if value.get('applicable') is False: return name=='legacy-constructor'
+        rtc=value.get('turn',{})
+        return peer(rtc) and rtc.get('case')==name and rtc.get('phase')==phase and rtc.get('dataAck') is True and (clean_relay(rtc) if phase=='lyco' else real_relay(rtc)) and any(
+            item['phase']==phase and item.get('case')==name and item['route']==('selected' if phase=='lyco' else 'direct') for item in data['peerOffers']) and any(
+            item['phase']==phase and item.get('case')==name and item['message']=='LYCO_OWNED_TURN_PING' for item in data['peerMessages'])
+    checks[phase+'-actual-turn-datachannel-in-every-applicable-context'] = set(observed)==set(expected_cases) and all(real_context_turn(name,value) for name,value in observed.items())
+    if phase!='lyco': valid = valid and checks[phase+'-actual-turn-datachannel-in-every-applicable-context']
+stopped_contexts=cases(stopped)
+checks['stopped-real-turn-peer-completes-in-every-applicable-context'] = set(stopped_contexts)==set(expected_cases) and all(
+    (name=='legacy-constructor' and value.get('applicable') is False) or (value.get('turn',{}).get('completed') is True and value['turn'].get('offerCreated') is True and value['turn'].get('dataAck') is False) for name,value in stopped_contexts.items())
 result = {'validProbe':valid,'passed':valid and all(checks.values()),'checks':checks,'udpStunPackets':udp,
           'productHealthy':row.get('observation'),'productStopped':stopped,'candidate':json.loads((root/'candidate.json').read_text()),
           'scope':f'Actual signed APK on API35 with same-provider before/after plain WebView controls; {len(expected_cases)} first-script/frame/configuration cases, distinct STUN ports, unchanged native candidates/SDP/local-candidate stats, owned coturn TCP and real aiortc datachannel. 4500ms gathering and 18000ms datachannel windows. Original stopped observation retained before recovery-only HTTP upload. No RTC observation injection or product test API. Not all providers, HTTPS/WSS/IPv6/DNS, real customer egress, iOS or a release.'}

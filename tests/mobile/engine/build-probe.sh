@@ -11,10 +11,10 @@ export LYCO_ENGINE_SIGNING_KEY="$private/experiment.p12"
 keytool -genkeypair -noprompt -keystore "$LYCO_ENGINE_SIGNING_KEY" -storetype PKCS12 \
  --storepass CI_engine_probe_only --keypass CI_engine_probe_only -alias experiment \
  -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=LYCO disposable native engine experiment'
-if [[ ! -f "$ANDROID_HOME/platforms/android-37/android.jar" ]]; then
+if [[ ! -f "$ANDROID_HOME/platforms/android-37.0/android.jar" ]]; then
  sdkmanager_bin=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)
  test -n "$sdkmanager_bin"
- "$sdkmanager_bin" 'platforms;android-37' 'build-tools;36.0.0'
+ "$sdkmanager_bin" 'platforms;android-37.0' 'build-tools;36.0.0'
 fi
 gradle --no-daemon --console=plain -p "$root" :app:assembleRelease :app:nativeDependencyEvidence
 cp "$root/app/build/outputs/apk/release/app-release.apk" "$evidence/engine-probe.apk"
