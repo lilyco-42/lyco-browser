@@ -50,7 +50,7 @@ html[data-ui-theme] #view-profiles:not(.lyco-detailed-profiles) .table-card .col
 #view-profiles .profile-table-compact .actions{gap:4px}
 #view-profiles .profile-table-compact .actions button{min-width:30px;min-height:32px;border-radius:7px}
 #view-profiles .lyco-environment-meta{display:block;margin:5px 0 0 46px;opacity:.7;font-size:11px;font-weight:400}
-#view-profiles .lyco-bound-route{display:block;max-width:calc(100% - 46px);margin:5px 0 0 46px;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;border-bottom:1px dotted currentColor;border-radius:0;background:transparent;color:var(--ui-text,#18232c);font:inherit;font-size:11px;text-align:left;cursor:pointer}
+#view-profiles .lyco-bound-route{display:block;min-width:0;max-width:calc(100% - 46px);box-sizing:border-box;margin:5px 0 0 46px;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;border-bottom:1px dotted currentColor;border-radius:0;background:transparent;color:var(--ui-text,#18232c);font:inherit;font-size:11px;text-align:left;cursor:pointer}
 #view-profiles .lyco-bound-route:focus-visible{outline:2px solid var(--lyco-wb-accent);outline-offset:2px}
 #view-profiles .lyco-inline-exit{margin-top:4px;font-size:11px}
 #view-profiles.lyco-detailed-profiles :is(.lyco-inline-exit,.lyco-environment-meta){display:none}

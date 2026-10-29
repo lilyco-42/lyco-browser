@@ -278,7 +278,7 @@ jobs:
             ${{ runner.temp }}/lyco-unix-*/workbench.png
             ${{ runner.temp }}/lyco-unix-*/account-proxy_*.png
             ${{ runner.temp }}/lyco-unix-*/ui-cjk-workbench.png
-            ${{ runner.temp }}/lyco-unix-*/workspace-selected-routes.png
+            ${{ runner.temp }}/lyco-unix-*/workspace-*.png
           retention-days: 7
 
       - name: Upload macOS DMG to GitHub prerelease

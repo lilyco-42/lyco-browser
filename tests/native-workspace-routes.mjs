@@ -46,6 +46,11 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
    await badge.waitFor({state:'visible'});
    assert.ok((await badge.textContent()).includes('CI route '+owner));
    assert.doesNotMatch(await badge.textContent(),/CI_PRIVATE_ROUTE|password|127\.0\.0\.1/);
+   const fit=await badge.evaluate(button=>{
+    const b=button.getBoundingClientRect(),cell=button.closest('td').getBoundingClientRect();
+    return {left:b.left,right:b.right,width:b.width,cellLeft:cell.left,cellRight:cell.right};
+   });
+   assert.ok(fit.width>0&&fit.left>=fit.cellLeft-1&&fit.right<=fit.cellRight+1,'The actual route action must fit inside its environment name cell');
   }
   await page.screenshot({path:path.join(evidence,'workspace-route-list.png')});
   await page.locator(`#profile-table tr[data-profile-id="${created[0].id}"] .lyco-bound-route`).click();
