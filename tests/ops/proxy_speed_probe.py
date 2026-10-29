@@ -4,15 +4,15 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
+if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ordinary-quality', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
-if PHASE in ('gateway-policy', 'ordinary-labels'):
+if PHASE in ('gateway-policy', 'ordinary-labels', 'ordinary-quality'):
     import runpy
     try:
-        helper = 'lyco-ordinary-labels-deploy.py' if PHASE == 'ordinary-labels' else 'lyco-proxy-gateway-deploy.py'
+        helper = {'ordinary-labels':'lyco-ordinary-labels-deploy.py','ordinary-quality':'lyco-ordinary-quality-deploy.py'}.get(PHASE,'lyco-proxy-gateway-deploy.py')
         runpy.run_path('/usr/local/sbin/'+helper,run_name='__main__')
     except Exception as error:
         print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
