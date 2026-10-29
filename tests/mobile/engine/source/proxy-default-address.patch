@@ -1,0 +1,12 @@
+diff --git a/dom/media/webrtc/jsapi/PeerConnectionImpl.cpp b/dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
+--- a/dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
++++ b/dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
+@@ -4593,2 +4593,8 @@
+ bool PeerConnectionImpl::GetPrefDefaultAddressOnly() const {
+   MOZ_ASSERT(NS_IsMainThread());
++
++  // Forced proxy mode gathers TURN TCP only; default-route discovery needs a
++  // UDP socket that the same policy prohibits.
++  if (mForceProxy) {
++    return false;
++  }
