@@ -4,11 +4,15 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'ssh-candidate', 'ssh-deploy'):
+if PHASE not in ('before', 'after', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
+if PHASE == 'gateway-policy':
+    import runpy
+    runpy.run_path('/usr/local/sbin/lyco-proxy-gateway-deploy.py',run_name='__main__')
+    raise SystemExit(0)
 CONFIG = pathlib.Path('/etc/sing-box/config.json')
 PLAN = pathlib.Path('/etc/sing-box/.lyco-speed-p0-plan.json')
 

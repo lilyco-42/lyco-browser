@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, ssh-candidate, ssh-deploy, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -344,6 +344,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
+      - name: Verify automatic relay preference against owned fixtures
+        if: inputs.speed_probe == 'gateway-policy'
+        run: python3 -m unittest discover -s tests/ops -p test_proxy_gateway_policy.py -v
       - name: Generate one-use probe identity
         run: |
           umask 077
@@ -366,7 +369,7 @@ jobs:
           for attempt in $(seq 1 60); do
             if ssh -i "$RUNNER_TEMP/probe-key" -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/probe-hosts" "$PROBE_USER@$PROBE_HOST" '${{ inputs.speed_probe }}' > "$RUNNER_TEMP/proxy-speed-result.json" 2> "$RUNNER_TEMP/proxy-speed-ssh.log"; then
               cat "$RUNNER_TEMP/proxy-speed-result.json"
-              python3 -c 'import json,hashlib,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"proxy-speed-result.json").read_text()); assert d["probeSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_node_dns.py" if d["phase"].startswith("node-") else "tests/ops/proxy_speed_probe.py").read_bytes()).hexdigest()'
+              python3 -c 'import json,hashlib,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"proxy-speed-result.json").read_text()); assert d["probeSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_node_dns.py" if d["phase"].startswith("node-") else "tests/ops/proxy_gateway_deploy.py" if d["phase"]=="gateway-policy" else "tests/ops/proxy_speed_probe.py").read_bytes()).hexdigest(); assert "policySourceSha256" not in d or d["policySourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_gateway_policy.py").read_bytes()).hexdigest()'
               exit 0
             fi
             if test -s "$RUNNER_TEMP/proxy-speed-result.json"; then
