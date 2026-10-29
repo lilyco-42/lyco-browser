@@ -18,14 +18,23 @@ def candidate():
             'tls': {'enabled': True, 'server_name': node['sni'], 'alpn': ['h3'],
                     'certificate_path': '/etc/sing-box/lyco-kr2-trusted-certificate.pem'}}
 
-def probe(label, outbound):
+def probe(label, outbound, *, resolve_remote=False, live_config=None):
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0)); port = s.getsockname()[1]
     with tempfile.TemporaryDirectory(prefix='lyco-speed-probe-') as folder:
         config = pathlib.Path(folder) / 'config.json'
-        config.write_text(json.dumps({'log': {'level': 'error'},
-            'inbounds': [{'type': 'http', 'tag': 'ci', 'listen': '127.0.0.1', 'listen_port': port}],
-            'outbounds': [outbound], 'route': {'final': outbound['tag']}}))
+        cfg = {'log': {'level': 'error'},
+            'inbounds': [{'type': 'http', 'tag': 'panel-in', 'listen': '127.0.0.1', 'listen_port': port}],
+            'outbounds': [outbound], 'route': {'final': outbound['tag']}}
+        if resolve_remote:
+            cfg['dns'] = {'servers': [{'type': 'https', 'tag': 'lyco-egress-dns',
+                'server': '1.1.1.1', 'detour': outbound['tag']}], 'strategy': 'prefer_ipv4'}
+            cfg['route']['rules'] = [{'action': 'resolve', 'server': 'lyco-egress-dns', 'strategy': 'prefer_ipv4'}]
+        if live_config is not None:
+            cfg['outbounds'] = live_config['outbounds']
+            cfg['route'] = live_config['route']
+            if 'dns' in live_config: cfg['dns'] = live_config['dns']
+        config.write_text(json.dumps(cfg))
         check = subprocess.run([BIN, 'check', '-c', str(config)], capture_output=True, timeout=8)
         if check.returncode:
             return {'label': label, 'configurationAccepted': False}
@@ -61,9 +70,9 @@ def probe(label, outbound):
 
 live = json.loads(pathlib.Path('/etc/sing-box/config.json').read_text())
 current = next(n for n in live['outbounds'] if n['tag'] == 'yt-proxy')
-results = [probe('live-configured-panel-egress', current)]
+results = [probe('live-configured-panel-egress', current, live_config=live)]
 if PHASE == 'before':
-    results.append(probe('candidate-korean-tls-verified-egress', candidate()))
+    results.append(probe('candidate-korean-tls-verified-egress-with-remote-dns', candidate(), resolve_remote=True))
 report = {'probeSourceSha256': hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(), 'phase': PHASE, 'checkedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
           'liveConfigSha256': hashlib.sha256(pathlib.Path('/etc/sing-box/config.json').read_bytes()).hexdigest(),
           'scope': 'Actual HTTPS pages and two exact 1.5MB downloads via isolated copies of live panel egress and candidate. TLS verified. Not a customer device last-mile measurement.',
