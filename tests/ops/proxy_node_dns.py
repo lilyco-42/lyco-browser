@@ -45,13 +45,17 @@ def probe(config,downloads):
                 return {'configurationAccepted':True,'allPassed':False,'startupError':message}
             jobs=[('google-page','https://www.gstatic.com/generate_204',0),('cloudflare-page','https://cp.cloudflare.com/generate_204',0)]
             if downloads:jobs += [('download-'+str(i),'https://speed.cloudflare.com/__down?bytes=4194304',4194304) for i in (1,2)]
+            if downloads and PHASE=='node-throughput':
+                jobs.append(('github-release-range','https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-amd64-v1.19.32.gz',4194304))
             for name,url,amount in jobs:
                 body=pathlib.Path(folder)/'body';start=time.monotonic()
                 r=subprocess.run(['curl','--silent','--proxy','http://127.0.0.1:'+str(port),'--noproxy','',
-                    '--connect-timeout','6','--max-time','25','--max-filesize','4194400','--output',str(body),'--write-out','%{http_code}',url],
+                    '--connect-timeout','6','--max-time','25','--max-filesize','4194400','--output',str(body),'--write-out','%{http_code}']+(['--location','--max-redirs','3','--range','0-4194303'] if name=='github-release-range' else [])+[url],
                     stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=29)
                 elapsed=time.monotonic()-start;size=body.stat().st_size if body.exists() else 0;status=r.stdout.decode().strip()
-                ok=r.returncode==0 and status in ('200','204') and size==amount
+                ok=r.returncode==0 and status in (('206',) if name=='github-release-range' else ('200','204')) and size==amount
+                if name=='github-release-range' and ok:
+                    with body.open('rb') as stream:ok=stream.read(2)==b'\x1f\x8b'
                 samples.append({'name':name,'ok':ok,'httpStatus':status,'bytes':size,'elapsedMs':round(elapsed*1000),
                                 'kibPerSecond':round(size/elapsed/1024,1) if ok and amount else None})
                 if body.exists():body.unlink()
