@@ -4,7 +4,7 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'ssh-candidate'):
+if PHASE not in ('before', 'after', 'ssh-candidate', 'ssh-deploy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
@@ -79,7 +79,7 @@ def candidate():
             'tls': {'enabled': True, 'server_name': node['sni'], 'alpn': ['h3'],
                     'certificate_path': '/etc/sing-box/lyco-kr2-trusted-certificate.pem'}}
 
-def probe(label, outbound, *, resolve_remote=False, live_config=None, download_bytes=SAMPLE_BYTES):
+def probe(label, outbound, *, resolve_remote=False, live_config=None, download_bytes=SAMPLE_BYTES, github=False):
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0)); port = s.getsockname()[1]
     with tempfile.TemporaryDirectory(prefix='lyco-speed-probe-') as folder:
@@ -103,21 +103,27 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
         try:
             time.sleep(.5)
             samples = []
-            for name, url, amount in (
+            jobs = [
                 ('cloudflare-page', 'https://cp.cloudflare.com/generate_204', 0),
                 ('google-page', 'https://www.gstatic.com/generate_204', 0),
                 ('download-1', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes),
-                ('download-2', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes)):
+                ('download-2', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes)]
+            if github:
+                jobs.append(('github-release-range','https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-amd64-v1.19.32.gz',4194304))
+            for name, url, amount in jobs:
                 body = pathlib.Path(folder) / 'body'
                 start = time.monotonic()
                 result = subprocess.run(['curl', '--silent', '--show-error', '--proxy', f'http://127.0.0.1:{port}',
                     '--noproxy', '', '--connect-timeout', '6', '--max-time', '18', '--max-filesize', str(max(SAMPLE_BYTES, amount)+100000),
-                    '--output', str(body), '--write-out', '%{http_code}', url],
+                    '--output', str(body), '--write-out', '%{http_code}'] +
+                    (['--location','--max-redirs','3','--range','0-4194303'] if name=='github-release-range' else []) + [url],
                     capture_output=True, timeout=22, env={**os.environ, 'ALL_PROXY': '', 'HTTPS_PROXY': '', 'HTTP_PROXY': ''})
                 elapsed = time.monotonic() - start
                 size = body.stat().st_size if body.exists() else 0
                 status = result.stdout.decode().strip()
-                ok = result.returncode == 0 and status in ('200', '204') and size == amount
+                ok = result.returncode == 0 and status in (('206',) if name=='github-release-range' else ('200','204')) and size == amount
+                if name=='github-release-range' and ok:
+                    with body.open('rb') as stream: ok=stream.read(2)==b'\x1f\x8b'
                 samples.append({'name': name, 'ok': ok, 'httpStatus': status, 'bytes': size,
                                 'elapsedMs': round(elapsed * 1000),
                                 'kibPerSecond': round(size / elapsed / 1024, 1) if ok and amount else None})
@@ -128,6 +134,63 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
             process.terminate()
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
+
+if PHASE == 'ssh-deploy':
+    plan_file=pathlib.Path('/etc/sing-box/.lyco-ssh-speed-plan.json')
+    plan=json.loads(plan_file.read_text())
+    raw=CONFIG.read_bytes();before=json.loads(raw);updated=plan['configuration'];metadata=CONFIG.stat()
+    assert hashlib.sha256(raw).hexdigest()==plan['previousSha256']
+    assert updated['inbounds']==before['inbounds'] and updated.get('dns')==before.get('dns')
+    assert updated['outbounds'][:-1]==before['outbounds']
+    assert updated['outbounds'][-1]=={'type':'socks','tag':'ssh-fast','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
+    assert updated['route']['rules'][:2]==before['route']['rules'][:2]
+    assert updated['route']['rules'][4:]==before['route']['rules'][2:]
+    added=updated['route']['rules'][2:4]
+    assert added[0]=={'inbound':['panel-in'],'network':'tcp','outbound':'ssh-fast'}
+    domains=sorted({'gstatic.com'}|{domain for rule in before['route']['rules']
+        if rule.get('outbound') in ('yt-proxy','node-vless','node-vmess') for domain in rule.get('domain_suffix',[])})
+    assert added[1]=={'domain_suffix':domains,'network':'tcp','outbound':'ssh-fast'}
+    assert {k:v for k,v in updated.items() if k not in ('outbounds','route')}=={k:v for k,v in before.items() if k not in ('outbounds','route')}
+    assert {k:v for k,v in updated['route'].items() if k!='rules'}=={k:v for k,v in before['route'].items() if k!='rules'}
+    proof=plan['proof'];assert proof['candidate']['allPassed'] and proof['stoppedTunnelBlocked']
+    speeds=[s['kibPerSecond'] for s in proof['candidate']['samples'] if s['name'].startswith('download')]
+    assert len(speeds)==2 and min(speeds)>=1000
+    with tempfile.TemporaryDirectory(prefix='lyco-ssh-apply-') as folder:
+        path=pathlib.Path(folder)/'config.json';path.write_text(json.dumps(updated))
+        assert subprocess.run([BIN,'check','-c',str(path)],capture_output=True,timeout=8).returncode==0
+    unit=pathlib.Path('/etc/systemd/system/lyco-au-ssh-egress.service')
+    assert hashlib.sha256(unit.read_bytes()).hexdigest()==plan['unitSha256']
+    assert subprocess.run(['systemd-analyze','verify',str(unit)],capture_output=True,timeout=10).returncode==0
+    backup=pathlib.Path('/root/website-backups')/('ssh-proxy-speed-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S'))
+    backup.mkdir(mode=0o700);shutil.copy2(CONFIG,backup/'config.json')
+    subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,timeout=15)
+    report={'phase':PHASE,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'backup':str(backup)}
+    changed=False
+    try:
+        subprocess.run(['systemctl','enable','--now','lyco-au-ssh-egress.service'],check=True,capture_output=True,timeout=20)
+        for attempt in range(30):
+            try:
+                with socket.create_connection(('127.0.0.1',1085),timeout=.2):break
+            except OSError:time.sleep(.3)
+        assert CONFIG.read_bytes()==raw,'Concurrent account/configuration change'
+        atomic_config(updated,metadata);changed=True
+        subprocess.run(['systemctl','restart','sing-box.service'],check=True,capture_output=True,timeout=20)
+        subprocess.run(['systemctl','is-active','--quiet','sing-box.service'],check=True,timeout=5)
+        actual=json.loads(CONFIG.read_text())
+        report['result']=probe('deployed-paid-tcp-over-ssh',actual['outbounds'][-1],live_config=actual,download_bytes=4194304,github=True)
+        assert report['result']['allPassed'],'Deployed real file verification failed'
+        report['accountsPreserved']=actual['inbounds']==before['inbounds']
+        report['udpRulesPreserved']=True
+        report['rolledBack']=False
+        report['liveConfigSha256']=hashlib.sha256(CONFIG.read_bytes()).hexdigest()
+        plan_file.rename(backup/'deployment-plan.json')
+        (backup/'RESULT.json').write_text(json.dumps(report,indent=2)+'\n')
+    except Exception:
+        if changed:rollback(before,metadata)
+        subprocess.run(['systemctl','disable','--now','lyco-au-ssh-egress.service'],capture_output=True,timeout=15)
+        report['rolledBack']=True;print(json.dumps(report,indent=2),flush=True);raise
+    print(json.dumps(report,indent=2),flush=True)
+    raise SystemExit(0)
 
 if PHASE == 'ssh-candidate':
     live=json.loads(CONFIG.read_text())

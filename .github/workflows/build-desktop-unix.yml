@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, ssh-candidate, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, ssh-candidate, ssh-deploy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
