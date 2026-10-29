@@ -346,9 +346,14 @@ jobs:
       - name: Generate one-use probe identity
         run: |
           umask 077
-          ssh-keygen -q -t ed25519 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
+          if [ '${{ inputs.speed_probe }}' = node-dns ]; then
+            ssh-keygen -q -t rsa -b 3072 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
+          else
+            ssh-keygen -q -t ed25519 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
+          fi
           printf '%s\n' '8.153.102.122 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFdaqiP/PZx1RyCI/pfrLGgpJwX/EXRSFaWvVs3xrfsd' > "$RUNNER_TEMP/probe-hosts"
           printf '%s\n' '43.108.85.230 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOP9gGY5OMAuqBm0YWojftBF/SdwZP5dEWJYL0mqCGpT' >> "$RUNNER_TEMP/probe-hosts"
+          printf '%s\n' '43.108.85.230 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAABBBBVs0rMUkG8swe6GbMp6GYeLmmHf/cFrWO91lN+X5QBnFxABKB4oSZOysIirfiBfA5FLDNxoDdnLF8koYiVnVNI=' >> "$RUNNER_TEMP/probe-hosts"
       - uses: actions/upload-artifact@v4
         with:
           name: proxy-speed-public-key-${{ github.run_id }}
