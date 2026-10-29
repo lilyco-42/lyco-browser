@@ -145,6 +145,7 @@ try:
             pages.append({'url':url,'ok':test.returncode==0 and test.stdout.strip()==b'204'})
         results[-1]['realServicePages'] = pages
         results[-1]['allPassed'] = results[-1]['allPassed'] and all(p['ok'] for p in pages)
+        results.append(probe('korean-tuic-with-node-native-dns', candidate()))
 except Exception:
     if deployment: rollback(deployment[0], deployment[1])
     raise
@@ -155,7 +156,7 @@ report = {'probeSourceSha256': hashlib.sha256(pathlib.Path(__file__).read_bytes(
 if deployment:
     before, metadata, backup = deployment
     report['deployment'] = {'backup': str(backup), 'accountsPreserved': True,
-                            'rolledBack': not results[-1].get('allPassed', False)}
+                            'rolledBack': not all(r.get('allPassed', False) for r in results)}
     if report['deployment']['rolledBack']:
         rollback(before, metadata)
     else:
@@ -163,5 +164,5 @@ if deployment:
         PLAN.with_suffix('.config.json').unlink(missing_ok=True)
         (backup/'RESULT.json').write_text(json.dumps(report, indent=2)+'\n')
 print(json.dumps(report, indent=2), flush=True)
-required = results[-1]
-raise SystemExit(0 if required.get('allPassed') else 1)
+passed = results[-1].get('allPassed') if PHASE == 'before' else all(r.get('allPassed') for r in results)
+raise SystemExit(0 if passed else 1)
