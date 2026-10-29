@@ -61,3 +61,7 @@ public compileSdk minor-level DSL instead of requesting nonexistent android-37.
 The initial experiment scaffold used target35. Inspection of the actual retained
 product badging identified target36/min28, and these are now required in the
 compiled experiment badging instead of assuming a match from the device API.
+Run 40814213975 reached Java compilation and release lint. Lint requires the
+debuggable manifest attribute to be assigned by the release build type, so the
+redundant manifest attribute was removed. Release debuggable=false, compiled
+badging verification and the runtime FLAG_DEBUGGABLE refusal remain enforced.

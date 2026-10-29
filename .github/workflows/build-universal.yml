@@ -570,14 +570,15 @@ jobs:
         with: {node-version: '22'}
       - uses: gradle/actions/setup-gradle@v4
         with: {gradle-version: '9.3.1', cache-disabled: true}
-      - name: Build the standalone release-mode engine experiment
-        run: bash tests/mobile/engine/build-probe.sh
-      - name: Prepare owned TURN and peer, then check fixture syntax
+      - name: Check standalone experiment and fixture source syntax
         run: |
-          bash tests/mobile/network/prepare-peer.sh
           python3 -m py_compile tests/mobile/network/fixture.py tests/mobile/network/turn_peer.py tests/mobile/network/assert-evidence.py
           node --check tests/mobile/network/rtc-page.js
-          bash -n tests/mobile/engine/run-probe.sh
+          bash -n tests/mobile/engine/build-probe.sh tests/mobile/engine/run-probe.sh tests/mobile/network/prepare-peer.sh
+      - name: Build the standalone release-mode engine experiment
+        run: bash tests/mobile/engine/build-probe.sh
+      - name: Prepare owned TURN and peer
+        run: bash tests/mobile/network/prepare-peer.sh
       - name: Enable KVM for native engine observations
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
