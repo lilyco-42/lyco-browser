@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, observe, pool-observe, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -373,7 +373,15 @@ jobs:
         run: |
           export LYCO_PROBE_PHASE='${{ inputs.speed_probe }}'
           bash scripts/run-scoped-ssh-probe.sh
-          python3 -c 'import json,hashlib,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"proxy-speed-result.json").read_text()); assert d["probeSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_node_dns.py" if d["phase"].startswith("node-") else "tests/ops/proxy_gateway_deploy.py" if d["phase"]=="gateway-policy" else "tests/ops/proxy_speed_probe.py").read_bytes()).hexdigest(); assert "policySourceSha256" not in d or d["policySourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_gateway_policy.py").read_bytes()).hexdigest(); assert "subscriptionContractSourceSha256" not in d or d["subscriptionContractSourceSha256"]==hashlib.sha256(pathlib.Path("tests/ops/proxy_subscription_contract.py").read_bytes()).hexdigest()'
+          python3 - <<'PY'
+          import json,hashlib,os,pathlib
+          d=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'proxy-speed-result.json').read_text())
+          source=('proxy_node_dns.py' if d['phase'].startswith('node-') else
+              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py'}.get(d['phase'],'proxy_speed_probe.py'))
+          assert d['probeSourceSha256']==hashlib.sha256((pathlib.Path('tests/ops')/source).read_bytes()).hexdigest()
+          for field,file in [('policySourceSha256','proxy_gateway_policy.py'),('subscriptionContractSourceSha256','proxy_subscription_contract.py')]:
+              assert field not in d or d[field]==hashlib.sha256((pathlib.Path('tests/ops')/file).read_bytes()).hexdigest()
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

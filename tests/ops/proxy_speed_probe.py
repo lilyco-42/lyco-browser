@@ -4,15 +4,16 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
+if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
-if PHASE == 'gateway-policy':
+if PHASE in ('gateway-policy', 'ordinary-labels'):
     import runpy
     try:
-        runpy.run_path('/usr/local/sbin/lyco-proxy-gateway-deploy.py',run_name='__main__')
+        helper = 'lyco-ordinary-labels-deploy.py' if PHASE == 'ordinary-labels' else 'lyco-proxy-gateway-deploy.py'
+        runpy.run_path('/usr/local/sbin/'+helper,run_name='__main__')
     except Exception as error:
         print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
         raise
@@ -149,6 +150,52 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
             process.terminate()
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
+
+if PHASE == 'nearby-ssh':
+    key = pathlib.Path('/etc/lyco-proxy-egress/.nearby-speed-id')
+    hosts = pathlib.Path('/etc/lyco-proxy-egress/.nearby-known-hosts')
+    assert key.stat().st_uid==0 and key.stat().st_mode & 0o777 == 0o600
+    known_hash=hashlib.sha256(hosts.read_bytes()).hexdigest()
+    assert known_hash=='0482b690c66e2b4cbea40c4b5cc0cf10e65b64418a4b767205de3d6f0c8ce158'
+    live=json.loads(CONFIG.read_text());current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
+    report={'phase':PHASE,'observationOnly':True,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+        'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'knownHostsSha256':known_hash,
+        'baseline':probe('current-paid-route',current,live_config=live,download_bytes=4194304,github=True),'candidates':[]}
+    for label,host in [('hong-kong','119.12.174.132'),('korea','43.108.85.230')]:
+        with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+        with tempfile.TemporaryFile() as log:
+            tunnel=subprocess.Popen(['/usr/bin/ssh','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),
+                '-i',str(key),'-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes',
+                '-o','UserKnownHostsFile='+str(hosts),'-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8',
+                '-o','ServerAliveInterval=10','-o','ServerAliveCountMax=2','root@'+host],stdout=subprocess.DEVNULL,stderr=log)
+            row={'region':label}
+            try:
+                ready=False
+                for attempt in range(40):
+                    if tunnel.poll() is not None:break
+                    try:
+                        with socket.create_connection(('127.0.0.1',port),timeout=.2):ready=True;break
+                    except OSError:time.sleep(.2)
+                row['sshConnected']=ready and tunnel.poll() is None
+                if row['sshConnected']:
+                    outbound={'type':'socks','tag':'nearby-ssh','server':'127.0.0.1','server_port':port,'version':'5','network':'tcp'}
+                    row['result']=probe(label+'-strict-ssh',outbound,download_bytes=4194304,github=True)
+            finally:
+                tunnel.terminate()
+                try:tunnel.wait(timeout=4)
+                except subprocess.TimeoutExpired:tunnel.kill();tunnel.wait(timeout=3)
+            log.seek(0);diagnostic=log.read(8192).decode(errors='replace')
+            row['sshExitCode']=tunnel.returncode
+            row['sshFailure']=('host-key' if 'Host key verification failed' in diagnostic else
+                'authentication' if 'Permission denied' in diagnostic else 'connectivity' if not row.get('sshConnected') else None)
+            stopped=subprocess.run(['curl','--silent','--proxy','http://127.0.0.1:'+str(port),'--noproxy','',
+                '--connect-timeout','1','--max-time','3','--output','/dev/null','--write-out','%{http_code}',
+                'https://cp.cloudflare.com/generate_204'],capture_output=True,timeout=5)
+            row['stoppedBlocked']=stopped.returncode!=0 and stopped.stdout.strip()==b'000'
+            report['candidates'].append(row)
+    report['workingCandidate']=any(x.get('result',{}).get('allPassed') and x['stoppedBlocked'] for x in report['candidates'])
+    print(json.dumps(report,indent=2),flush=True)
+    raise SystemExit(0 if report['workingCandidate'] else 1)
 
 if PHASE in ('observe', 'pool-observe'):
     live = json.loads(CONFIG.read_text())
