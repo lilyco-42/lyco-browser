@@ -41,12 +41,20 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
    await page.waitForFunction(()=>Boolean(window.__lycoRouteCreated));created.push(await page.evaluate(()=>window.__lycoRouteCreated));
   }
   assert.notEqual(created[0].proxy,created[1].proxy);
-  await page.locator('[data-view="lyco"]').click();
+  for(const [index,owner] of ['A','B'].entries()){
+   const badge=page.locator(`#profile-table tr[data-profile-id="${created[index].id}"] .lyco-bound-route`);
+   await badge.waitFor({state:'visible'});
+   assert.ok((await badge.textContent()).includes('CI route '+owner));
+   assert.doesNotMatch(await badge.textContent(),/CI_PRIVATE_ROUTE|password|127\.0\.0\.1/);
+  }
+  await page.screenshot({path:path.join(evidence,'workspace-route-list.png')});
+  await page.locator(`#profile-table tr[data-profile-id="${created[0].id}"] .lyco-bound-route`).click();
   await page.locator(`[data-profile-route="${created[0].id}"]`).waitFor();
   const geometry=await page.locator('#lyco-route-card').evaluate(card=>({client:card.clientWidth,scroll:card.scrollWidth}));
   assert.ok(geometry.scroll<=geometry.client+1,'Selected route controls must fit the actual workbench');
   await page.screenshot({path:path.join(evidence,'workspace-selected-routes.png')});
   result.checks.push('actual-workbench-selected-node-controls-and-safe-catalog');
+  result.checks.push('owned-route-bindings-visible-in-environment-list-with-direct-management-entry');
   for(const [index,owner] of ['A','B'].entries()){
    const configured=await configure(created[index],'selected-'+owner+'-first',owner);
    await page.evaluate(profile=>window.ops.startProfile(profile),configured);await waitPhase('selected-'+owner+'-first',owner,null);
@@ -83,10 +91,13 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   const direct=await new Promise((resolve,reject)=>{http.get(fixture.originUrl+'/check?key=native-direct-control',res=>{let body='';res.on('data',part=>body+=part);res.on('end',()=>resolve(JSON.parse(body)))}).on('error',reject)});
   assert.equal(direct.route,'direct');
   result.checks.push('selected-A-loss-no-fallback-or-direct-while-native-B-remains-usable');
-  await page.locator('[data-view="lyco"]').click();
+  await page.locator('[data-view="profiles"]').click();
+  await page.locator(`#profile-table tr[data-profile-id="${created[0].id}"] .lyco-bound-route`).click();
   const row=page.locator(`[data-profile-route="${created[0].id}"]`);
   await choose('lyco-route-'+created[0].id,'CI route B');await row.getByRole('button',{name:'停止并更换线路',exact:true}).click();
   await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('线路已保存'));
+  await page.locator('[data-view="profiles"]').click();
+  await page.waitForFunction(id=>document.querySelector(`#profile-table tr[data-profile-id="${id}"] .lyco-bound-route`)?.textContent.includes('CI route B'),created[0].id);
   sessions=await page.evaluate(()=>window.ops.syncSessions());
   assert.equal(sessions.some(item=>item.id===created[0].id),false);assert.ok(sessions.some(item=>item.id===created[1].id));
   const switched=await configure(created[0],'selected-A-changed-to-B','A');

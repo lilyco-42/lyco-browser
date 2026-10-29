@@ -4,6 +4,10 @@
  const e = id => document.getElementById(id);
  const message = (value, err=false) => { e('lyco-feedback').textContent=String(value||'');e('lyco-feedback').dataset.tone=err?'error':'status'; };
  const option=(value,text)=>{const node=document.createElement('option');node.value=value;node.textContent=text;return node};
+ const publishRoutes=(owner,profiles)=>{
+  window.lycoProfileRouteView={owner,profiles:profiles.map(row=>({...row}))};
+  window.dispatchEvent(new Event('lyco-profile-routes-changed'));
+ };
  function routeOptions(select,value='',savedLabel='已保存线路（请加载官网线路核对）'){
   select.replaceChildren(option('','默认订阅线路'),...routeNodes.map(node=>option(node.id,node.label)));
   if(value&&!routeNodes.some(node=>node.id===value))select.append(option(value,routeNodes.length?savedLabel+'（当前目录未找到）':savedLabel));
@@ -11,7 +15,7 @@
  }
  async function renderRoutes(s){
   const generation=++routeRenderGeneration;
-  if(routeOwner!==s.username||!s.logged_in){routeOwner=s.logged_in?s.username:'';routeNodes=[];routeRowsKey='';routeOptions(e('lyco-create-route'))}
+  if(routeOwner!==s.username||!s.logged_in){routeOwner=s.logged_in?s.username:'';routeNodes=[];routeRowsKey='';routeOptions(e('lyco-create-route'));publishRoutes(routeOwner,[])}
   e('lyco-load-routes').disabled=!s.entitled||!s.has_core||busy;
   e('lyco-create-route').disabled=!s.entitled||busy;
   const result=s.logged_in?await window.ops.lycoListProfileRoutes():{owner:'',profiles:[]};
@@ -33,6 +37,7 @@
    }
   }
   e('lyco-profile-routes').querySelectorAll('select,button').forEach(node=>node.disabled=busy||!s.entitled);
+  publishRoutes(s.logged_in?s.username:'',rows);
  }
  async function render(x) {
   const s=x||await window.ops.lycoStatus();
@@ -62,6 +67,18 @@
   catch(ex){message(ex.message||'请求失败',true);return null}
   finally{busy=false;await render().catch(()=>{});e('view-lyco').setAttribute('aria-busy',String(busy));}
  }
+ window.lycoManageProfileRoute=async id=>{
+  if(typeof switchView==='function')switchView('lyco');
+  try{
+   const state=await render(),view=window.lycoProfileRouteView;
+   if(!state.logged_in||view?.owner!==state.username||!view.profiles.some(row=>row.id===id))throw Error('当前账号没有可管理的环境线路');
+   const row=[...e('lyco-profile-routes').children].find(node=>node.dataset.profileRoute===id);
+   if(!row)throw Error('环境线路尚未加载，请重试');
+   row.scrollIntoView({block:'center'});
+   (row.querySelector('.themed-select-button')||row.querySelector('select'))?.focus({preventScroll:true});
+   message('请选择目标线路；保存时会先停止此环境，其他环境不受影响');
+  }catch(error){message(error.message||'环境线路暂不可用',true)}
+ };
  e('lyco-login').addEventListener('submit',ev=>{
   ev.preventDefault();
   run(async()=>{const username=e('lyco-username').value.trim();const password=e('lyco-password').value;

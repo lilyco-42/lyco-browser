@@ -9,6 +9,33 @@
  const text=key=>(labels[window.OpenBrowserI18n?.getLocale()]||labels.en)[key];
  const table=document.getElementById('profile-table');
  const view=document.getElementById('view-profiles');
+ let routeRenderPending=false;
+ function renderBoundRoutes(){
+  routeRenderPending=false;
+  const owned=new Map((window.lycoProfileRouteView?.profiles||[]).map(row=>[row.id,row]));
+  const chinese=window.OpenBrowserI18n?.getLocale()==='zh-CN';
+  for(const row of table.querySelectorAll('tr[data-profile-id]')){
+   const binding=owned.get(row.dataset.profileId),existing=row.querySelector('.lyco-bound-route');
+   if(!binding){existing?.remove();continue}
+   const cell=row.querySelector('td.col-name');if(!cell)continue;
+   const button=existing||document.createElement('button');
+   if(!existing){
+    button.type='button';button.className='lyco-bound-route';button.translate=false;
+    button.onclick=()=>void window.lycoManageProfileRoute(row.dataset.profileId);
+    cell.append(button);
+   }
+   const route=binding.routeId?binding.routeName:(chinese?'默认订阅线路':'Default subscription route');
+   const label=(chinese?'绑定线路：':'Bound route: ')+route;
+   if(button.textContent!==label)button.textContent=label;
+   button.title=(chinese?'管理环境线路：':'Manage environment route: ')+route;
+   button.setAttribute('aria-label',button.title);
+  }
+ }
+ function scheduleRoutes(){if(!routeRenderPending){routeRenderPending=true;requestAnimationFrame(renderBoundRoutes)}}
+ new MutationObserver(scheduleRoutes).observe(table,{childList:true,subtree:true});
+ window.addEventListener('lyco-profile-routes-changed',scheduleRoutes);
+ window.OpenBrowserI18n?.onChange(scheduleRoutes);
+ scheduleRoutes();
  const toolbar=view.querySelector('.toolbar-left');
  const extra=document.createElement('details');extra.className='lyco-list-extras';
  const summary=document.createElement('summary');summary.dataset.lycoLabel='more';summary.translate=false;
