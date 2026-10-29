@@ -43,3 +43,11 @@
 保护策略下该轮没有实际 TURN TCP 连接和 ACK，因此不能换引擎或宣称网络隔离成立。下一轮保留相同策略、同引擎前后对照、原始候选/SDP/统计及断线负向，增加公开启动环境配置的原生传输日志，以确定没有建立代理通道的原因。
 
 修正后的 [40819289946](https://github.com/lilyco-42/lyco-browser/actions/runs/40819289946) 已获得 `validProbe=true / passed=false`：前后对照全部九个适用上下文（包含跨域帧）真实 TURN TCP PING/ACK 成立，策略及断线均无直接 STUN，三类回环 HTTP 门禁通过；唯一未满足的功能项是策略下真实 TURN TCP 没有连接和 ACK。原生 mtransport 日志记录候选收集立即 `error=10`，尚不能将原因归为 TURN 握手。下一次增加实际命名为 `nicer`、`WebrtcTCPSocket` 的原生日志模块；不改策略或放宽地址、数据包、功能条件。
+
+## 原生默认地址选择与独立修复构建
+
+[40820087794](https://github.com/lilyco-42/lyco-browser/actions/runs/40820087794) 的新增原始 `nicer` 日志已显示 `use only default local addresses: yes`，随后 `failed to find default addresses`，再由 mtransport 返回 error=10；TURN 尚未连接。前后全部九个适用场景的真实 TURN 通信对照有效，不能继续归因于测试 TURN 服务不可用。
+
+已按官方 Gecko159 源码准备受限修复：在强制代理模式使用预取的真实接口来初始化 TURN TCP，避免默认地址查询创建一个被同一策略禁止的 UDP socket。UDP 禁止和代理强制、原始候选/SDP/统计地址检查保持不变；没有媒体权限绕过、假地址或关闭 RTC。确切源码、Maven POM 对应版本与构建限制见[源码试验](../tests/mobile/engine/source/README.md)。
+
+首次完整源构建 [40821252708](https://github.com/lilyco-42/lyco-browser/actions/runs/40821252708) 在原文件摘要匹配后因补丁缺少后续上下文停止，未进入编译。已修正补丁格式并在 [40822075594](https://github.com/lilyco-42/lyco-browser/actions/runs/40822075594) 重新构建。后续独立原生验收会验证成功构建来源、原生源码无差异、原始 archive/AAR 摘要，以及 APK 每份原生库与 AAR 完全一致，再执行相同通信/泄漏/断线门禁。构建尚未完成，接入验证也尚未执行；产品依赖、既有用户环境和下载候选未替换。

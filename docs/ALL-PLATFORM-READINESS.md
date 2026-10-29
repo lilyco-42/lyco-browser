@@ -75,3 +75,5 @@ PR 工作流的 `GITHUB_SHA` 是 GitHub 测试合并提交；报告记录该 SHA
 - Mihomo 的既有随包文件误写为 MIT；已按官方 v1.19.32 替换为 GPLv3 原文，Git blob SHA 为 `f288702d2fa16d3cdf0035b15a9fcbc552cd88e7`，随包携带来源记录并增加回归检查。这不等于其他依赖或整个应用已完成分发许可审查。
 
 功能和运行门禁通过前不合并发行，不把模拟器 App 称作 iPhone 安装包，不用源码检查替代五平台成品验收。所有产品测试与构建只在 GitHub Actions 执行。
+
+Android 后续原生引擎试验尚不改变上面的产品状态：Gecko159 独立实验 [40820087794](https://github.com/lilyco-42/lyco-browser/actions/runs/40820087794) 已取得有效前后对照，九个适用上下文真实 TURN TCP 通信均成立；强制代理时因默认地址选择失败而没有实际 TURN 连接，因此仍未满足功能要求。受限原生源码修复正单独构建，完成后仍需验证最终 APK 确实装入该库并通过原有全部原生门禁。详见[移动引擎决策及实际失败](MOBILE-ENGINE-PREFLIGHT.md)。
