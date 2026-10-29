@@ -34,6 +34,6 @@
 2. 完善逐环境路由正确性，再整合列表操作。A/B 并发线路、数据隔离、重开、A 断线及更换线路后 B 不受影响，均须由真实 GitHub Actions 的核心与原生成品场景证明。
 3. 再扩展模板、批量管理、团队和自动化；逐项复核底座已有能力，避免重复实现或虚报覆盖范围。
 
-当前桌面逐环境线路证据见 [WORKSPACE-ROUTES.md](WORKSPACE-ROUTES.md)：Linux 已通过含链式中转的完整成品验收；本轮 Windows/macOS 仍被原生硬件配置门禁阻止。移动 `655e071` 已实现保存官网节点、账号归属及安全迁移，Android 原签名包 [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 的整组 12 项与 7 份实际路由/存储观察通过；iOS 只有未签名设备编译成功，不能扩大为运行通过。详见 [移动环境线路](MOBILE-WORKSPACE-ROUTES.md)。五平台商业发行仍未完成。
+当前桌面逐环境线路证据见 [WORKSPACE-ROUTES.md](WORKSPACE-ROUTES.md)：新增列表线路标签、直达管理和退出清除，`1bd475a` 的 [40824878548](https://github.com/lilyco-42/lyco-browser/actions/runs/40824878548) Linux/macOS 完整成品各 14 项、线路 6 项及 7 个网页观察通过；Windows 原生仍失败。macOS 前轮配置拒绝仍保留，未修底层身份逻辑，不能把最新通过称作兼容问题已解决。移动 `655e071` 已实现保存官网节点、账号归属及安全迁移，Android 原签名包 [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 的整组 12 项与 7 份实际路由/存储观察通过；iOS 只有未签名设备编译成功，不能扩大为运行通过。详见 [移动环境线路](MOBILE-WORKSPACE-ROUTES.md)。五平台商业发行仍未完成。
 
 RoxyBrowser 的[公开下载页](https://roxybrowser.com/download)列出 Windows、macOS、Linux；本次未在该页发现 Android/iOS 下载入口，不能推断其具备 LYCO 要求的五平台同等能力。官网内核版本、认证、检测通过等宣传未在本次独立核验，不纳入已验证结论。

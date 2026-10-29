@@ -50,4 +50,4 @@
 
 已按官方 Gecko159 源码准备受限修复：在强制代理模式使用预取的真实接口来初始化 TURN TCP，避免默认地址查询创建一个被同一策略禁止的 UDP socket。UDP 禁止和代理强制、原始候选/SDP/统计地址检查保持不变；没有媒体权限绕过、假地址或关闭 RTC。确切源码、Maven POM 对应版本与构建限制见[源码试验](../tests/mobile/engine/source/README.md)。
 
-首次完整源构建 [40821252708](https://github.com/lilyco-42/lyco-browser/actions/runs/40821252708) 在原文件摘要匹配后因补丁缺少后续上下文停止，未进入编译。已修正补丁格式并在 [40822075594](https://github.com/lilyco-42/lyco-browser/actions/runs/40822075594) 重新构建。后续独立原生验收会验证成功构建来源、原生源码无差异、原始 archive/AAR 摘要，以及 APK 每份原生库与 AAR 完全一致，再执行相同通信/泄漏/断线门禁。构建尚未完成，接入验证也尚未执行；产品依赖、既有用户环境和下载候选未替换。
+首次完整源构建 [40821252708](https://github.com/lilyco-42/lyco-browser/actions/runs/40821252708) 在原文件摘要匹配后因补丁缺少后续上下文停止，未进入编译。修正后 [40822075594](https://github.com/lilyco-42/lyco-browser/actions/runs/40822075594) 已完成补丁应用和 bootstrap，但未限定路径的格式化修改了无关上游文件，被 diff 空白门禁阻止，仍未进入原生编译。现按官方 `mach format <path/to/file.cpp>` 限定到目标文件，并提前保存改动列表与补丁；原文件/单文件/空白门禁均保持，`53e81b0` 的 [40853280935](https://github.com/lilyco-42/lyco-browser/actions/runs/40853280935) 已启动独立完整构建，尚无通过结论。后续独立原生验收会验证成功构建来源、原生源码无差异、原始 archive/AAR 摘要，以及 APK 每份原生库与 AAR 完全一致，再执行相同通信/泄漏/断线门禁。尚无成功编译产物，接入验证也尚未执行；产品依赖、既有用户环境和下载候选未替换。
