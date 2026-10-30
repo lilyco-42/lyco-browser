@@ -173,6 +173,21 @@ def interactive_config(live, ssh_port=1085):
     return optimized
 
 
+
+if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-ph-egress-plan.json').exists():
+    import runpy
+    helper=pathlib.Path('/usr/local/sbin/lyco-proxy-ph-egress-deploy.py')
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='fea952482b1e1717c03908c379472cee893950d6b543a52dbbb4e35a97ac9a1b'
+    try:
+        result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
+    except Exception as error:
+        print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
+        raise
+    result['probeSourceSha256']=hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+    print(json.dumps(result,indent=2),flush=True)
+    raise SystemExit(0)
+
+
 if PHASE == 'nearby-ssh':
     key = pathlib.Path('/etc/lyco-proxy-egress/.nearby-speed-id')
     hosts = pathlib.Path('/etc/lyco-proxy-egress/.nearby-known-hosts')
