@@ -156,12 +156,12 @@ if PHASE == 'nearby-ssh':
     hosts = pathlib.Path('/etc/lyco-proxy-egress/.nearby-known-hosts')
     assert key.stat().st_uid==0 and key.stat().st_mode & 0o777 == 0o600
     known_hash=hashlib.sha256(hosts.read_bytes()).hexdigest()
-    assert known_hash=='0482b690c66e2b4cbea40c4b5cc0cf10e65b64418a4b767205de3d6f0c8ce158'
+    assert known_hash=='a05eb37fb77f71c90a3b2658ef670f06cc817c458ae4ed634853ed6e7efd2adc'
     live=json.loads(CONFIG.read_text());current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
     report={'phase':PHASE,'observationOnly':True,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
         'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'knownHostsSha256':known_hash,
         'baseline':probe('current-paid-route',current,live_config=live,download_bytes=4194304,github=True),'candidates':[]}
-    for label,host in [('hong-kong','119.12.174.132'),('korea','43.108.85.230')]:
+    for label,host in [('philippines','8.212.147.126'),('hong-kong','119.12.174.132'),('korea','43.108.85.230')]:
         with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
         with tempfile.TemporaryFile() as log:
             tunnel=subprocess.Popen(['/usr/bin/ssh','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),
@@ -186,8 +186,13 @@ if PHASE == 'nearby-ssh':
                 except subprocess.TimeoutExpired:tunnel.kill();tunnel.wait(timeout=3)
             log.seek(0);diagnostic=log.read(8192).decode(errors='replace')
             row['sshExitCode']=tunnel.returncode
-            row['sshFailure']=('host-key' if 'Host key verification failed' in diagnostic else
-                'authentication' if 'Permission denied' in diagnostic else 'connectivity' if not row.get('sshConnected') else None)
+            reasons=[('host-key','Host key verification failed'),('authentication','Permission denied'),
+                ('timeout','Connection timed out'),('refused','Connection refused'),('unreachable','No route to host'),
+                ('key-exchange','no matching key exchange'),('host-key-algorithm','no matching host key type'),
+                ('signature-algorithm','no mutual signature algorithm'),('banner','banner exchange'),
+                ('key-exchange-closed','kex_exchange_identification')]
+            row['sshFailure']=next((name for name,text in reasons if text in diagnostic),
+                'connectivity' if not row.get('sshConnected') else None)
             stopped=subprocess.run(['curl','--silent','--proxy','http://127.0.0.1:'+str(port),'--noproxy','',
                 '--connect-timeout','1','--max-time','3','--output','/dev/null','--write-out','%{http_code}',
                 'https://cp.cloudflare.com/generate_204'],capture_output=True,timeout=5)
