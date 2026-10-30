@@ -9,7 +9,7 @@ current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
 def config(bulk,interactive):
     cfg=copy.deepcopy(live);out=next(n for n in cfg['outbounds'] if n['tag']=='ssh-fast');assert out['server_port']==1085;out['server_port']=bulk
     cfg['outbounds'].append({'type':'socks','tag':'ssh-interactive','server':'127.0.0.1','server_port':interactive,'version':'5','network':'tcp'})
-    dns=next(n for n in cfg['dns']['servers'] if n['tag']=='lyco-egress-dns');assert dns['detour']=='ssh-fast';dns['detour']='ssh-interactive'
+    dns=next(n for n in cfg['dns']['servers'] if n['tag']=='lyco-egress-dns');assert dns=={'detour':'ssh-fast','server':'1.1.1.1','tag':'lyco-egress-dns','type':'https'};dns.update(type='tls',server_port=853,tls={'enabled':True,'server_name':'one.one.one.one'},detour='ssh-interactive')
     original=copy.deepcopy(cfg['route']['rules'][:2]);tcp=[];udp=[]
     for rule in original:
         assert rule['action']=='resolve' and rule['strategy']=='prefer_ipv4' and 'network' not in rule
@@ -25,7 +25,7 @@ def passes(value):
     files=[n for n in value.get('samples',[]) if n['name'].startswith('download') or n['name']=='github-release-range']
     pages=[n for n in value.get('samples',[]) if n['name'] in ('cloudflare-page','google-page')]
     return value.get('allPassed') is True and len(files)==3 and all(n['ok'] and n['bytes']==4194304 and n['kibPerSecond']>=900 for n in files) and len(pages)==2 and all(n['firstByteMs']<=2000 for n in pages)
-report={'phase':'au-ipv4-isolation','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'observationOnly':True,'udpDualFamilyDnsPreserved':True,'baseline':test('shared-australian-ssh-baseline',live),'candidates':[]}
+report={'phase':'au-ipv4-isolation','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'observationOnly':True,'udpDualFamilyDnsPreserved':True,'dnsTransport':'tls','baseline':test('shared-australian-ssh-baseline',live),'candidates':[]}
 ports=[];tunnels=[]
 with tempfile.TemporaryFile() as log:
     try:
