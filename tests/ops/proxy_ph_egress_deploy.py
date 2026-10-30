@@ -138,7 +138,7 @@ try:
         assert reply.returncode==0 and reply.stdout.strip()==status
         live_sites[label]=reply.stdout.decode().strip()
     proof={'schema_version':1,'enabled':True,'routing_sha256':policy.routing_digest(candidate),
-        'verification_run':plan['observationRun'],'minimum_complete_sample_bytes':4194304,
+        'verification_run':plan['observationRun'],'egress_country':'PH','minimum_complete_sample_bytes':4194304,
         'minimum_kib_s':minimum,'site_probes':{'youtube':True,'chatgpt':True}}
     atomic(proof_path,(json.dumps(proof,indent=2)+'\n').encode())
     contracts=contract.verify_subscription_contract(base/'app.py',policy.prefer_gateway,proof['site_probes'])

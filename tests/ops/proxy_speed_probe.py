@@ -4,15 +4,15 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ordinary-quality', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
+if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ordinary-quality', 'subscription-regions', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
 SAMPLE_BYTES = 1500000
-if PHASE in ('gateway-policy', 'ordinary-labels', 'ordinary-quality'):
+if PHASE in ('gateway-policy', 'ordinary-labels', 'ordinary-quality', 'subscription-regions'):
     import runpy
     try:
-        helper = {'ordinary-labels':'lyco-ordinary-labels-deploy.py','ordinary-quality':'lyco-ordinary-quality-deploy.py'}.get(PHASE,'lyco-proxy-gateway-deploy.py')
+        helper = {'ordinary-labels':'lyco-ordinary-labels-deploy.py','ordinary-quality':'lyco-ordinary-quality-deploy.py','subscription-regions':'lyco-proxy-region-labels-deploy.py'}.get(PHASE,'lyco-proxy-gateway-deploy.py')
         runpy.run_path('/usr/local/sbin/'+helper,run_name='__main__')
     except Exception as error:
         print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
@@ -182,7 +182,7 @@ def interactive_config(live, ssh_port=1085):
 if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json').exists():
     import runpy
     helper=pathlib.Path('/usr/local/sbin/lyco-proxy-dns-recovery-deploy.py')
-    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='334f5fcc2364b3c6c18bea4baf9b707bca706e5261e52f7217ed2eb03212c589'
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='97f6d6a77ee98d55f5a5f864859042e175c91efa7115f34b344d4b8764e1ccae'
     try:
         result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
     except Exception as error:
@@ -195,7 +195,7 @@ if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.j
 if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-ph-egress-plan.json').exists():
     import runpy
     helper=pathlib.Path('/usr/local/sbin/lyco-proxy-ph-egress-deploy.py')
-    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='fea952482b1e1717c03908c379472cee893950d6b543a52dbbb4e35a97ac9a1b'
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='53bd248b591aa8503662fbefd6d38981b02724ec9179c62f4c573c31e402ab8a'
     try:
         result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
     except Exception as error:

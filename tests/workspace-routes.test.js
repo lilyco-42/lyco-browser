@@ -213,3 +213,17 @@ test('a fresh controller restores a version 2 selected-node binding without trus
  const current=restored.routes.entries.get(profile.id);assert.ok(current);assert.equal(started.proxy,'http://127.0.0.1:'+current.port);
  assert.deepEqual(current.child.config['proxy-groups'][0].proxies,['CI route B']);
 });
+
+
+test('region display labels preserve legacy saved route ids and selected endpoint',()=>{
+ const original=subscription(),old=routesFromSubscription(original);
+ const named=structuredClone(original);
+ const rename=new Map();
+ for(const node of named.proxies){const name=node.name;node['x-lyco-original-name']=name;node.name='🇯🇵 日本（来源标注） · '+name;rename.set(name,node.name)}
+ for(const group of named['proxy-groups'])group.proxies=group.proxies.map(name=>rename.get(name)||name);
+ const current=routesFromSubscription(named);assert.deepEqual(current.nodes.map(n=>n.id),old.nodes.map(n=>n.id));
+ assert.match(current.nodes[0].label,/日本/);
+ const selected=fixedConfig(current.config,current.nodes[1],18002);assert.equal(selected.proxies.length,1);
+ assert.equal(selected.proxies[0].port,19002);assert.match(selected['proxy-groups'].at(-1).proxies[0],/日本/);
+ named.proxies[0]['x-lyco-original-name']='bad\nidentity';assert.throws(()=>routesFromSubscription(named),/原始标识/);
+});

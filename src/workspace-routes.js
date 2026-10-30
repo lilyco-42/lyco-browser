@@ -28,7 +28,13 @@ function routesFromSubscription(input){
  const config=makeConfig(input,18001);
  const names=[...config.proxies,...config['proxy-groups']].map(row=>row.name);
  if(new Set(names).size!==names.length)throw Error('订阅存在重复节点或分组名称，无法固定线路');
- const nodes=config.proxies.map(node=>({id:hash(JSON.stringify([node.name,node.type,node.server??null,node.port??null])),label:label(node.name),name:node.name}));
+ const nodes=config.proxies.map(node=>{
+  const supplied=Object.prototype.hasOwnProperty.call(node,'x-lyco-original-name');
+  const original=supplied?node['x-lyco-original-name']:node.name;
+  if(supplied&&(typeof original!=='string'||!original||original.length>200||/[\u0000-\u001f\u007f]/.test(original)))throw Error('订阅线路原始标识无效');
+  return {id:hash(JSON.stringify([original,node.type,node.server??null,node.port??null])),label:label(node.name),name:node.name};
+ });
+ if(new Set(nodes.map(node=>node.id)).size!==nodes.length)throw Error('订阅线路存在重复原始标识');
  return {config,nodes};
 }
 function fixedConfig(source,node,port){

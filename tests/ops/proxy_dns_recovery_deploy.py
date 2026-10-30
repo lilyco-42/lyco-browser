@@ -70,7 +70,7 @@ try:
     actual=json.loads(config.read_bytes());current=next(n for n in actual['outbounds'] if n['tag']=='yt-proxy')
     after=probe('deployed-ph-ssh-https-dns-recovery',current,live_config=actual,download_bytes=4194304,github=True,site_checks=True)
     minimum=verify(after)
-    proof={'schema_version':1,'enabled':True,'routing_sha256':policy.routing_digest(actual),'verification_run':plan['observationRun'],
+    proof={'schema_version':1,'enabled':True,'routing_sha256':policy.routing_digest(actual),'verification_run':plan['observationRun'],'egress_country':{'australia':'AU','philippines':'PH'}[plan['egress']],
         'minimum_complete_sample_bytes':4194304,'minimum_kib_s':minimum,'site_probes':{'youtube':True,'chatgpt':True}}
     atomic(proof_path,(json.dumps(proof,indent=2)+'\n').encode())
     contracts=contract.verify_subscription_contract(base/'app.py',policy.prefer_gateway,proof['site_probes'])
