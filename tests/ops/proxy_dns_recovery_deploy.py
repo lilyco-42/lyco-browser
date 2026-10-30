@@ -8,6 +8,7 @@ config=pathlib.Path('/etc/sing-box/config.json');raw=config.read_bytes();before=
 plan_path=pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json');plan=json.loads(plan_path.read_text())
 assert hashlib.sha256(raw).hexdigest()==plan['previousSha256']=='469c98de3070acb3b15f8273c1cdd5f2e1fc12e2a7ab8e416892fb620d2895a4'
 assert plan['observationRun'].isdigit()
+assert plan['egress'] in ('philippines','australia')
 assert 0<=(datetime.datetime.now(datetime.timezone.utc)-datetime.datetime.fromisoformat(plan['checkedAt'])).total_seconds()<1800
 expected=json.loads(raw)
 rule={'domain_suffix':['google.com','gstatic.com','chatgpt.com','openai.com','oaistatic.com','oaiusercontent.com','cp.cloudflare.com'],'network':'tcp','outbound':'yt-proxy'}
@@ -55,6 +56,9 @@ with tempfile.TemporaryDirectory(prefix='lyco-recovery-') as folder:
     subprocess.run(['/usr/local/bin/sing-box','check','-c',str(p)],check=True,capture_output=True,timeout=8)
 try:
     assert config.read_bytes()==raw and proof_path.read_bytes()==old_proof
+    if plan['egress']=='australia':
+        subprocess.run(['systemctl','disable','--now','lyco-ph-ssh-egress.service'],check=True,capture_output=True,timeout=25)
+        subprocess.run(['systemctl','enable','--now','lyco-au-ssh-egress.service'],check=True,capture_output=True,timeout=25)
     atomic(config,encoded)
     subprocess.run(['systemctl','restart','sing-box.service'],check=True,capture_output=True,timeout=25)
     actual=json.loads(config.read_bytes());current=next(n for n in actual['outbounds'] if n['tag']=='yt-proxy')
@@ -69,12 +73,15 @@ try:
     assert values=={'proxy_1m':(299,30),'proxy_3m':(852,90),'proxy_4m':(1136,120),'proxy_1y':(3050,365)}
 except Exception:
     atomic(config,raw);atomic(proof_path,old_proof)
+    if plan['egress']=='australia':
+        subprocess.run(['systemctl','disable','--now','lyco-au-ssh-egress.service'],capture_output=True,timeout=25)
+        subprocess.run(['systemctl','enable','--now','lyco-ph-ssh-egress.service'],capture_output=True,timeout=25)
     subprocess.run(['systemctl','restart','sing-box.service'],capture_output=True,timeout=25)
     (backup/'FAILURE.json').write_text('{"rolledBack":true}\n')
     raise
 result={'phase':'ssh-deploy','deploySourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
     'observationRun':plan['observationRun'],'result':after,'backup':str(backup),'rolledBack':False,
-    'subscriptionContracts':contracts,'accountsNodesAndProductsPreserved':True,'dnsEgress':'existing-ph-ssh-strict-https',
+    'subscriptionContracts':contracts,'accountsNodesAndProductsPreserved':True,'dnsEgress':plan['egress']+'-ssh-strict-https',
     'configurationSha256':hashlib.sha256(config.read_bytes()).hexdigest(),'preferenceSha256':hashlib.sha256(proof_path.read_bytes()).hexdigest()}
 (backup/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n')
 shutil.move(str(plan_path),str(backup/'consumed-plan.json'))

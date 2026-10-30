@@ -182,7 +182,7 @@ def interactive_config(live, ssh_port=1085):
 if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json').exists():
     import runpy
     helper=pathlib.Path('/usr/local/sbin/lyco-proxy-dns-recovery-deploy.py')
-    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='6fa29c476bc1a59de3076f73218f843f5fc7e89fcbfa838c3f3c9b49e85e1b0c'
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='715934a00f2da63d4c4513b6f5354b16ed0e6b50f920a9b6a5f576a2c5606fc2'
     try:
         result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
     except Exception as error:
@@ -309,11 +309,41 @@ if PHASE in ('observe', 'pool-observe'):
                 download_bytes=4194304,github=True,site_checks=True)
             files=[n for n in result.get('samples',[]) if n['name'].startswith('download') or n['name']=='github-release-range']
             qualified=result.get('allPassed') is True and len(files)==3 and all(n['ok'] and n['bytes']==4194304 and n['kibPerSecond']>=900 for n in files)
-            report['recoveryComparison']=result;report['recoveryQualified']=qualified
+            report['philippinesRecoveryComparison']=result
+            egress='philippines'
+            if not qualified:
+                with socket.socket() as sock:sock.bind(('127.0.0.1',0));au_port=sock.getsockname()[1]
+                with tempfile.TemporaryFile() as diagnostic:
+                    tunnel=subprocess.Popen(['/usr/bin/ssh','-F','/dev/null','-NT','-D','127.0.0.1:'+str(au_port),
+                        '-i','/etc/lyco-proxy-egress/au-ssh','-o','BatchMode=yes','-o','IdentitiesOnly=yes',
+                        '-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts',
+                        '-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15',
+                        '-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=diagnostic)
+                    au=json.loads(json.dumps(recovery))
+                    next(n for n in au['outbounds'] if n['tag']=='ssh-fast')['server_port']=au_port
+                    try:
+                        for attempt in range(60):
+                            if tunnel.poll() is not None:break
+                            try:
+                                with socket.create_connection(('127.0.0.1',au_port),timeout=.2):break
+                            except OSError:time.sleep(.2)
+                        alternative=probe('australian-ssh-with-independent-https-dns',current,live_config=au,
+                            download_bytes=4194304,github=True,site_checks=True)
+                    finally:
+                        tunnel.terminate()
+                        try:tunnel.wait(timeout=4)
+                        except subprocess.TimeoutExpired:tunnel.kill();tunnel.wait(timeout=3)
+                stopped=probe('stopped-australian-forwarding',current,live_config=au,download_bytes=262144)
+                blocked=bool(stopped.get('samples')) and all(not n['ok'] and n['bytes']==0 for n in stopped['samples'])
+                report['australiaRecoveryComparison']=alternative;report['australiaStoppedBlocked']=blocked
+                files=[n for n in alternative.get('samples',[]) if n['name'].startswith('download') or n['name']=='github-release-range']
+                if alternative.get('allPassed') is True and blocked and len(files)==3 and all(n['ok'] and n['bytes']==4194304 and n['kibPerSecond']>=900 for n in files):
+                    result=alternative;qualified=True;egress='australia'
+            report['recoveryComparison']=result;report['recoveryQualified']=qualified;report['recoveryEgress']=egress
             if qualified:
                 path=pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json');assert not path.exists()
                 plan={'previousSha256':report['liveConfigSha256'],'configuration':recovery,
-                    'proof':result,'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    'proof':result,'egress':egress,'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     'observationSourceSha256':report['probeSourceSha256']}
                 path.write_text(json.dumps(plan,indent=2)+'\n');path.chmod(0o600)
         else:
