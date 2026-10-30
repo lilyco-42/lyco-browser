@@ -179,6 +179,19 @@ def interactive_config(live, ssh_port=1085):
 
 
 
+if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json').exists():
+    import runpy
+    helper=pathlib.Path('/usr/local/sbin/lyco-proxy-dns-recovery-deploy.py')
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='6fa29c476bc1a59de3076f73218f843f5fc7e89fcbfa838c3f3c9b49e85e1b0c'
+    try:
+        result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
+    except Exception as error:
+        print(json.dumps({'phase':PHASE,'operationFailed':True,'failureType':type(error).__name__}),flush=True)
+        raise
+    result['probeSourceSha256']=hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+    print(json.dumps(result,indent=2),flush=True)
+    raise SystemExit(0)
+
 if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-ph-egress-plan.json').exists():
     import runpy
     helper=pathlib.Path('/usr/local/sbin/lyco-proxy-ph-egress-deploy.py')
@@ -285,10 +298,29 @@ if PHASE in ('observe', 'pool-observe'):
         'sampleBytes':4194304,
         'baseline':probe('current-paid-tcp-route',current,live_config=live,download_bytes=4194304,github=True)}
     if PHASE == 'observe':
-        optimized=interactive_config(live)
-        report['interactiveDomains']=INTERACTIVE_DOMAINS
-        report['interactiveComparison'] = probe('interactive-tuic-bulk-ssh',current,
-            live_config=optimized,download_bytes=4194304,github=True,site_checks=True)
+        resolver=next(n for n in live['dns']['servers'] if n['tag']=='lyco-egress-dns')
+        if not report['baseline']['allPassed'] and resolver.get('detour')=='yt-proxy':
+            recovery=json.loads(json.dumps(live));rules=recovery['route']['rules']
+            interactive={'domain_suffix':INTERACTIVE_DOMAINS,'network':'tcp','outbound':'yt-proxy'}
+            assert rules.count(interactive)==1 and rules[2]==interactive
+            rules.remove(interactive)
+            next(n for n in recovery['dns']['servers'] if n['tag']=='lyco-egress-dns')['detour']='ssh-fast'
+            result=probe('ph-ssh-with-independent-https-dns',current,live_config=recovery,
+                download_bytes=4194304,github=True,site_checks=True)
+            files=[n for n in result.get('samples',[]) if n['name'].startswith('download') or n['name']=='github-release-range']
+            qualified=result.get('allPassed') is True and len(files)==3 and all(n['ok'] and n['bytes']==4194304 and n['kibPerSecond']>=900 for n in files)
+            report['recoveryComparison']=result;report['recoveryQualified']=qualified
+            if qualified:
+                path=pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json');assert not path.exists()
+                plan={'previousSha256':report['liveConfigSha256'],'configuration':recovery,
+                    'proof':result,'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    'observationSourceSha256':report['probeSourceSha256']}
+                path.write_text(json.dumps(plan,indent=2)+'\n');path.chmod(0o600)
+        else:
+            optimized=json.loads(json.dumps(live)) if resolver.get('detour')=='ssh-fast' else interactive_config(live)
+            report['interactiveDomains']=INTERACTIVE_DOMAINS if resolver.get('detour')=='yt-proxy' else []
+            report['interactiveComparison'] = probe('current-member-route-with-site-checks',current,
+                live_config=optimized,download_bytes=4194304,github=True,site_checks=True)
         report['liveConfigurationUnchanged'] = report['liveConfigSha256']==hashlib.sha256(CONFIG.read_bytes()).hexdigest()
         assert report['liveConfigurationUnchanged']
     else:
@@ -330,7 +362,7 @@ if PHASE in ('observe', 'pool-observe'):
             report['ordinary'].append({'label':label,'protocol':node['type'],'smallSample':small,'largeSample':large})
     report['validBaseline']=report['baseline'].get('allPassed') is True
     print(json.dumps(report,indent=2),flush=True)
-    raise SystemExit(0 if report['validBaseline'] else 1)
+    raise SystemExit(0 if report['validBaseline'] or report.get('recoveryQualified') else 1)
 
 if PHASE == 'ssh-deploy':
     plan_file=pathlib.Path('/etc/sing-box/.lyco-ssh-speed-plan.json')
