@@ -231,14 +231,24 @@ if PHASE == 'nearby-ssh':
     full=ph.get('fullRoute',{});pages=[x for x in full.get('samples',[]) if x['name'] in ('cloudflare-page','google-page')]
     qualified=(report['baseline'].get('allPassed') is True and ph.get('stoppedBlocked') is True
         and ph.get('result',{}).get('allPassed') is True and full.get('allPassed') is True
-        and fast_files(ph['result']) and fast_files(full) and len(pages)==2
+        and fast_files(full) and len(pages)==2
         and all(x['ok'] and x['elapsedMs']<=700 for x in pages))
-    report['philippinesQualifiedForDeployment']=qualified
+    # The full production candidate retains KR DoH. Bare SSH controls use
+    # remote-default DNS and do not represent this candidate's CDN routing.
+    prior_path=pathlib.Path('/etc/sing-box/.lyco-ph-full-route-proof.json')
+    assert hashlib.sha256(prior_path.read_bytes()).hexdigest()=='cc65a2d86d120c34f7c5239957141f35fc906de59f274d1343172da74b73935c'
+    prior=json.loads(prior_path.read_text())
+    assert prior['probeSourceSha256']=='c706445e4c24bb36a18bd1a43a080f26e03b2bbec627aafb26d9c772cfb37e3c'
+    assert prior['previousSha256']==hashlib.sha256(config_raw).hexdigest() and prior['stoppedBlocked']
+    prior_pages=[x for x in prior['fullRoute']['samples'] if x['name'] in ('cloudflare-page','google-page')]
+    qualified=qualified and prior['fullRoute']['allPassed'] and fast_files(prior['fullRoute']) and len(prior_pages)==2 and all(x['elapsedMs']<=700 for x in prior_pages)
+    report['fullRouteQualifiedForDeployment']=qualified
+    report['previousFullRouteRun']=prior['run']
     assert CONFIG.read_bytes()==config_raw,'Concurrent production configuration change'
     if qualified:
         plan={'schemaVersion':1,'previousSha256':hashlib.sha256(config_raw).hexdigest(),
             'probeSourceSha256':report['probeSourceSha256'],'checkedAt':report['checkedAt'],
-            'configuration':interactive_config(live),'proof':{'baseline':report['baseline'],'philippines':ph}}
+            'configuration':interactive_config(live),'proof':{'baseline':report['baseline'],'philippines':ph},'previousFullProof':prior}
         prepared=pathlib.Path('/etc/sing-box/.lyco-ph-egress-plan.json')
         assert not prepared.exists(),'Do not overwrite a pending plan'
         prepared.write_text(json.dumps(plan,indent=2)+'\n');prepared.chmod(0o600)
