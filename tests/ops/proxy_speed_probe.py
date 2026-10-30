@@ -165,8 +165,13 @@ INTERACTIVE_DOMAINS=['google.com','gstatic.com','chatgpt.com','openai.com',
 def interactive_config(live, ssh_port=1085):
     optimized=json.loads(json.dumps(live));rules=optimized['route']['rules']
     assert rules[0]['action']=='resolve' and rules[1]['action']=='resolve'
-    assert rules[2]=={'inbound':['panel-in'],'network':'tcp','outbound':'ssh-fast'}
-    rules.insert(2,{'domain_suffix':INTERACTIVE_DOMAINS,'network':'tcp','outbound':'yt-proxy'})
+    interactive={'domain_suffix':INTERACTIVE_DOMAINS,'network':'tcp','outbound':'yt-proxy'}
+    bulk={'inbound':['panel-in'],'network':'tcp','outbound':'ssh-fast'}
+    if rules[2]==interactive:
+        assert rules.count(interactive)==1 and rules[3]==bulk
+    else:
+        assert rules[2]==bulk
+        rules.insert(2,interactive)
     ssh_out=next(n for n in optimized['outbounds'] if n['tag']=='ssh-fast')
     assert ssh_out=={'type':'socks','tag':'ssh-fast','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
     ssh_out['server_port']=ssh_port
