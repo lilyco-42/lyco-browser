@@ -1,17 +1,19 @@
 #!/usr/bin/python3
 """Measure independent authenticated AU SSH flows before altering shared production."""
-import copy,datetime,hashlib,json,os,pathlib,socket,subprocess,tempfile,time
+import copy,datetime,hashlib,ipaddress,json,os,pathlib,re,socket,subprocess,tempfile,time
 assert os.environ.get('SSH_ORIGINAL_COMMAND')=='au-isolation'
 os.umask(0o077);probe=globals()['LYCO_PROBE'];p=pathlib.Path('/etc/sing-box/config.json');raw=p.read_bytes();live=json.loads(raw)
 assert hashlib.sha256(raw).hexdigest()=='3f7ee6cc4af701cb22bacb09fe8b1494b73a57181e29882f51e4dfb443d70206'
 DOMAINS=['google.com','gstatic.com','chatgpt.com','openai.com','oaistatic.com','oaiusercontent.com','cp.cloudflare.com','youtube.com']
 current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
-def config(bulk,interactive):
+def config(bulk,interactive,domain_forward=False):
     cfg=copy.deepcopy(live);out=next(n for n in cfg['outbounds'] if n['tag']=='ssh-fast');assert out['server_port']==1085;out['server_port']=bulk
     cfg['outbounds'].append({'type':'socks','tag':'ssh-interactive','server':'127.0.0.1','server_port':interactive,'version':'5','network':'tcp'})
     dns=next(n for n in cfg['dns']['servers'] if n['tag']=='lyco-egress-dns');assert dns['detour']=='ssh-fast';dns['detour']='ssh-interactive'
     assert cfg['route']['rules'][2]=={'inbound':['panel-in'],'network':'tcp','outbound':'ssh-fast'}
     cfg['route']['rules'].insert(2,{'domain_suffix':DOMAINS,'network':'tcp','outbound':'ssh-interactive'})
+    if domain_forward:
+        for i in (0,1):cfg['route']['rules'][i]['network']='udp'
     assert cfg['inbounds']==live['inbounds']
     return cfg
 def test(label,cfg):return probe(label,current,live_config=cfg,download_bytes=4194304,github=True,site_checks=True)
@@ -25,7 +27,7 @@ with tempfile.TemporaryFile() as log:
     try:
         for _ in range(2):
             with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
-            tunnel=subprocess.Popen(['/usr/bin/ssh','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-ssh','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
+            tunnel=subprocess.Popen(['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-ssh','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
             tunnels.append(tunnel);ports.append(port)
             for attempt in range(60):
                 assert tunnel.poll() is None,'AU tunnel exited'
@@ -34,11 +36,20 @@ with tempfile.TemporaryFile() as log:
                 except OSError:time.sleep(.2)
             else:raise RuntimeError('AU tunnel not ready')
         selected=None
-        for mode,bulk in (('dedicated-interactive',1085),('independent-bulk-and-interactive',ports[0])):
-            cfg=config(bulk,ports[1]);first=test(mode+'-first',cfg);row={'mode':mode,'first':first};report['candidates'].append(row)
+        for mode,bulk,forward in (('dedicated-interactive',1085,False),('independent-bulk-and-interactive',ports[0],False),('independent-domain-forwarding',ports[0],True)):
+            start=log.seek(0,2)
+            cfg=config(bulk,ports[1],forward);first=test(mode+'-first',cfg);row={'mode':mode,'first':first};report['candidates'].append(row)
             if passes(first):
                 row['repeat']=test(mode+'-repeat',cfg)
-                if passes(row['repeat']):selected=mode;break
+                if passes(row['repeat']):
+                    log.seek(start);hosts=re.findall(r'dynamic request: socks5 host ([^ ]+) port [0-9]+',log.read().decode(errors='replace'))
+                    def domain(host):
+                        try:ipaddress.ip_address(host);return False
+                        except ValueError:return True
+                    row['domainRequests']=sorted(set(hosts))
+                    row['allRequestsForwardedAsDomain']=bool(hosts) and all(domain(h) for h in hosts)
+                    if not forward or (row['allRequestsForwardedAsDomain'] and {'cp.cloudflare.com','www.gstatic.com','speed.cloudflare.com','github.com','www.youtube.com','api.openai.com'}<=set(hosts)):
+                        selected=mode;break
         report['qualified']=selected is not None;report['selectedMode']=selected
     finally:
         for tunnel in tunnels:
@@ -48,5 +59,5 @@ with tempfile.TemporaryFile() as log:
 report['liveConfigurationUnchanged']=p.read_bytes()==raw;assert report['liveConfigurationUnchanged']
 if report['qualified']:
     path=p.parent/'.lyco-au-isolation-plan.json';assert not path.exists()
-    path.write_text(json.dumps({'configuration':config(1085,1086),'previousSha256':hashlib.sha256(raw).hexdigest(),'proof':report},indent=2)+'\n');path.chmod(0o600)
+    path.write_text(json.dumps({'configuration':config(1085,1086,selected=='independent-domain-forwarding'),'previousSha256':hashlib.sha256(raw).hexdigest(),'proof':report},indent=2)+'\n');path.chmod(0o600)
 print(json.dumps(report,indent=2),flush=True)
