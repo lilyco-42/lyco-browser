@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """Remove a failed DNS/interactive dependency after an actual replacement probe."""
-import datetime, hashlib, importlib.util, json, os, pathlib, shutil, subprocess, tempfile, urllib.request
+import datetime, hashlib, importlib.util, json, os, pathlib, shutil, socket, subprocess, tempfile, time, urllib.request
 os.umask(0o077)
 assert os.environ.get('SSH_ORIGINAL_COMMAND')=='ssh-deploy'
 probe=globals()['LYCO_PROBE']
@@ -57,8 +57,14 @@ with tempfile.TemporaryDirectory(prefix='lyco-recovery-') as folder:
 try:
     assert config.read_bytes()==raw and proof_path.read_bytes()==old_proof
     if plan['egress']=='australia':
+        assert hashlib.sha256(pathlib.Path('/etc/systemd/system/lyco-au-ssh-egress.service').read_bytes()).hexdigest()=='68e673495f80c8e69de284c36eb6262ce0883e1f80a89a296887e6923157ffde'
         subprocess.run(['systemctl','disable','--now','lyco-ph-ssh-egress.service'],check=True,capture_output=True,timeout=25)
         subprocess.run(['systemctl','enable','--now','lyco-au-ssh-egress.service'],check=True,capture_output=True,timeout=25)
+        for attempt in range(60):
+            try:
+                with socket.create_connection(('127.0.0.1',1085),timeout=.2):break
+            except OSError:time.sleep(.2)
+        else:raise RuntimeError('Verified Australian forwarding did not become ready')
     atomic(config,encoded)
     subprocess.run(['systemctl','restart','sing-box.service'],check=True,capture_output=True,timeout=25)
     actual=json.loads(config.read_bytes());current=next(n for n in actual['outbounds'] if n['tag']=='yt-proxy')

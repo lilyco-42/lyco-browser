@@ -182,7 +182,7 @@ def interactive_config(live, ssh_port=1085):
 if PHASE=='ssh-deploy' and pathlib.Path('/etc/sing-box/.lyco-dns-recovery-plan.json').exists():
     import runpy
     helper=pathlib.Path('/usr/local/sbin/lyco-proxy-dns-recovery-deploy.py')
-    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='715934a00f2da63d4c4513b6f5354b16ed0e6b50f920a9b6a5f576a2c5606fc2'
+    assert hashlib.sha256(helper.read_bytes()).hexdigest()=='334f5fcc2364b3c6c18bea4baf9b707bca706e5261e52f7217ed2eb03212c589'
     try:
         result=runpy.run_path(str(helper),init_globals={'LYCO_PROBE':probe},run_name='__main__')['LYCO_DEPLOY_RESULT']
     except Exception as error:
