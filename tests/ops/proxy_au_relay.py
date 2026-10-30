@@ -26,9 +26,13 @@ report={'phase':'au-relay','probeSourceSha256':hashlib.sha256(pathlib.Path(__fil
 ports=[];tunnels=[]
 with tempfile.TemporaryFile() as log:
     try:
-        for _ in range(2):
+        for index in range(2):
             with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
-            tunnel=subprocess.Popen(['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-hk-exit','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
+            command=['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-hk-exit','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49']
+            if index==0:
+                i=next(i for i,arg in enumerate(command) if arg.startswith('ProxyCommand='));del command[i-1:i+1]
+                command[command.index('/etc/lyco-proxy-egress/au-hk-exit')]='/etc/lyco-proxy-egress/au-ssh'
+            tunnel=subprocess.Popen(command,stdout=subprocess.DEVNULL,stderr=log)
             tunnels.append(tunnel);ports.append(port)
             for attempt in range(60):
                 assert tunnel.poll() is None,'AU tunnel exited'
@@ -37,7 +41,7 @@ with tempfile.TemporaryFile() as log:
                 except OSError:time.sleep(.2)
             else:raise RuntimeError('AU tunnel not ready')
         selected=None
-        for mode,bulk,forward in (('au-via-hk-domain-forwarding',ports[0],True),):
+        for mode,bulk,forward in (('direct-bulk-hk-interactive',ports[0],True),):
             start=log.seek(0,2)
             cfg=config(bulk,ports[1],forward);first=test(mode+'-first',cfg);row={'mode':mode,'first':first};report['candidates'].append(row)
             if passes(first):
@@ -66,5 +70,5 @@ with tempfile.TemporaryFile() as log:
 report['liveConfigurationUnchanged']=p.read_bytes()==raw;assert report['liveConfigurationUnchanged']
 if report['qualified']:
     path=p.parent/'.lyco-au-relay-plan.json';assert not path.exists()
-    path.write_text(json.dumps({'configuration':config(1085,1086,selected=='au-via-hk-domain-forwarding'),'previousSha256':hashlib.sha256(raw).hexdigest(),'proof':report},indent=2)+'\n');path.chmod(0o600)
+    path.write_text(json.dumps({'configuration':config(1085,1086,selected=='direct-bulk-hk-interactive'),'previousSha256':hashlib.sha256(raw).hexdigest(),'proof':report},indent=2)+'\n');path.chmod(0o600)
 print(json.dumps(report,indent=2),flush=True)
