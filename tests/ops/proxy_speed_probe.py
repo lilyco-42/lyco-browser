@@ -171,7 +171,7 @@ if PHASE == 'nearby-ssh':
             row={'region':label}
             try:
                 ready=False
-                for attempt in range(40):
+                for attempt in range(60):
                     if tunnel.poll() is not None:break
                     try:
                         with socket.create_connection(('127.0.0.1',port),timeout=.2):ready=True;break
