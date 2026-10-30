@@ -36,7 +36,7 @@ with tempfile.TemporaryFile() as log:
                 except OSError:time.sleep(.2)
             else:raise RuntimeError('AU tunnel not ready')
         selected=None
-        for mode,bulk,forward in (('dedicated-interactive',1085,False),('independent-bulk-and-interactive',ports[0],False),('independent-domain-forwarding',ports[0],True)):
+        for mode,bulk,forward in (('independent-domain-forwarding',ports[0],True),):
             start=log.seek(0,2)
             cfg=config(bulk,ports[1],forward);first=test(mode+'-first',cfg);row={'mode':mode,'first':first};report['candidates'].append(row)
             if passes(first):

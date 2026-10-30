@@ -94,7 +94,8 @@ except Exception:
         assert unit.read_bytes()==unit_data
         subprocess.run(['systemctl','disable','--now','lyco-au-interactive-egress.service'],capture_output=True,timeout=25);unit.unlink()
         subprocess.run(['systemctl','daemon-reload'],capture_output=True,timeout=20)
-    (backup/'FAILURE.json').write_text('{"rolledBack":true}\n');raise
+    failure={'phase':'au-isolation-deploy','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'rolledBack':True,'result':locals().get('after'),'backup':str(backup)}
+    (backup/'FAILURE.json').write_text(json.dumps(failure,indent=2)+'\n');print(json.dumps(failure,indent=2),flush=True);raise
 result={'phase':'au-isolation-deploy','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
     'observationRun':plan['observationRun'],'selectedMode':mode,'result':after,'backup':str(backup),'rolledBack':False,'subscriptionContracts':contracts,
     'configurationSha256':hashlib.sha256(encoded).hexdigest(),'preferenceSha256':hashlib.sha256(new_proof).hexdigest(),'interactiveUnitSha256':hashlib.sha256(unit_data).hexdigest(),
