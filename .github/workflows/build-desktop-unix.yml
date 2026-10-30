@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ordinary-quality, subscription-regions, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ordinary-quality, subscription-regions, subscription-catalogue, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -353,18 +353,20 @@ jobs:
       - name: Prevent retrying an operation that may have changed production
         run: python3 -m unittest discover -s tests/ops -p test_scoped_ssh_retry.py -v
       - uses: actions/setup-node@v4
-        if: inputs.speed_probe == 'subscription-regions'
+        if: inputs.speed_probe == 'subscription-regions' || inputs.speed_probe == 'subscription-catalogue'
         with: {node-version: '22'}
       - name: Verify display regions, identity compatibility and actual core parsing
-        if: inputs.speed_probe == 'subscription-regions'
+        if: inputs.speed_probe == 'subscription-regions' || inputs.speed_probe == 'subscription-catalogue'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 -m unittest discover -s tests/ops -p test_proxy_region_labels.py -v
+          python3 -m unittest discover -s tests/ops -p test_proxy_catalogue_visibility.py -v
           node --test tests/workspace-routes.test.js
           mkdir -p "$RUNNER_TEMP/region-core"
           gh release download v1.19.32 -R MetaCubeX/mihomo -p mihomo-linux-amd64-v1.19.32.gz -D "$RUNNER_TEMP/region-core"
+          test "$(sha256sum "$RUNNER_TEMP/region-core/mihomo-linux-amd64-v1.19.32.gz" | cut -d ' ' -f 1)" = 8451100836c9eda194331c2babfad490b2faf30cebc1a04b0e76fd8ac2d35d10
           gzip -dc "$RUNNER_TEMP/region-core/mihomo-linux-amd64-v1.19.32.gz" > "$RUNNER_TEMP/region-core/mihomo"
           chmod +x "$RUNNER_TEMP/region-core/mihomo"
           python3 tests/ops/check_region_formats.py "$RUNNER_TEMP/region-core/mihomo"
@@ -394,9 +396,9 @@ jobs:
           import json,hashlib,os,pathlib
           d=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'proxy-speed-result.json').read_text())
           source=('proxy_node_dns.py' if d['phase'].startswith('node-') else
-              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py','ordinary-quality':'ordinary_quality_deploy.py','subscription-regions':'proxy_region_labels_deploy.py'}.get(d['phase'],'proxy_speed_probe.py'))
+              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py','ordinary-quality':'ordinary_quality_deploy.py','subscription-regions':'proxy_region_labels_deploy.py','subscription-catalogue':'proxy_catalogue_deploy.py'}.get(d['phase'],'proxy_speed_probe.py'))
           assert d['probeSourceSha256']==hashlib.sha256((pathlib.Path('tests/ops')/source).read_bytes()).hexdigest()
-          for field,file in [('policySourceSha256','proxy_gateway_policy.py'),('subscriptionContractSourceSha256','proxy_subscription_contract.py'),('qualitySourceSha256','ordinary_quality.py'),('regionLabelsSourceSha256','proxy_region_labels.py')]:
+          for field,file in [('policySourceSha256','proxy_gateway_policy.py'),('subscriptionContractSourceSha256','proxy_subscription_contract.py'),('qualitySourceSha256','ordinary_quality.py'),('regionLabelsSourceSha256','proxy_region_labels.py'),('catalogueSourceSha256','proxy_catalogue_visibility.py')]:
               assert field not in d or d[field]==hashlib.sha256((pathlib.Path('tests/ops')/file).read_bytes()).hexdigest()
           PY
       - uses: actions/upload-artifact@v4

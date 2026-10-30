@@ -3,7 +3,7 @@ import ast,base64,copy,json,time
 from pathlib import Path
 
 
-def verify_subscription_contract(app_path,prefer,site_flags,*,decorate=None,link_decorate=None):
+def fixture_generator(app_path,prefer,site_flags,*,decorate=None,link_decorate=None,complete=None,complete_links=None):
     source=Path(app_path).read_text();tree=ast.parse(source)
     functions=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ('sub_formats','_parse_vmess')]
     assert {n.name for n in functions}=={'sub_formats','_parse_vmess'}
@@ -17,6 +17,7 @@ def verify_subscription_contract(app_path,prefer,site_flags,*,decorate=None,link
         'JSONResponse':lambda content,**kwargs:{'config':content,'headers':kwargs.get('headers',{})},
         'Response':lambda content,**kwargs:{'content':content},
         '_label_proxy_config':decorate or (lambda cfg:cfg),'_label_proxy_links':link_decorate or (lambda links:links),
+        '_complete_proxy_catalogue':complete or (lambda cfg,*args:cfg),'_complete_proxy_links':complete_links or (lambda links,*args:links),
         '_lyco_japan_links':lambda:[],'_lyco_extra_share_links':lambda **kwargs:[],
         '_lyco_verified_public_links':lambda:[],'_lyco_full_public_links':lambda:[],
         '_panel_sub':lambda token:copy.deepcopy(data),'_fix_vless':lambda value:value,
@@ -27,6 +28,11 @@ def verify_subscription_contract(app_path,prefer,site_flags,*,decorate=None,link
         '_lyco_public_candidates_cached':lambda epoch:[], '_lyco_site_youtube_labels':lambda extras:[],
         '_lyco_site_candidates':lambda extras,site:['owned-ci-backup'],'prefer_proxy_gateway':prefer}
     exec(compile(ast.Module(body=functions,type_ignores=[]),'owned-subscription-generator','exec'),ns)
+    return ns,payload,owner_uuid
+
+
+def verify_subscription_contract(app_path,prefer,site_flags,*,decorate=None,link_decorate=None,complete=None,complete_links=None):
+    ns,payload,owner_uuid=fixture_generator(app_path,prefer,site_flags,decorate=decorate,link_decorate=link_decorate,complete=complete,complete_links=complete_links)
     result=[]
     for fmt in ('clash','clashjp','clashcommunity','clashall'):
         response=ns['sub_formats']('owned-ci-token-never-sent',fmt);cfg=response['config']
