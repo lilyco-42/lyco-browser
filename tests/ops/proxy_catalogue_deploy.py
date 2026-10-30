@@ -62,6 +62,15 @@ def checked_complete(cfg,*args):
         elif group['name'] not in {g['name'] for g in cfg['proxy-groups']}:assert group['type']=='select'
     return out
 ns['_complete_proxy_catalogue']=checked_complete
+# Fetch the real rule databases explicitly through the existing proxy. The
+# core's automatic first-run downloader does not honor HTTP_PROXY here.
+data=stage/'core-data';data.mkdir(exist_ok=True)
+geosite=data/'GeoSite.dat'
+if not geosite.exists() or hashlib.sha256(geosite.read_bytes()).hexdigest()!='b4d3807aa45b4f5532ae236672f244a562452622483c0b489c63dd2aadaa821f':
+    subprocess.run(['curl','--fail','--silent','--show-error','--location','--max-time','60',
+        '--proxy','http://127.0.0.1:1081','--noproxy','','--output',str(geosite),
+        'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat'],check=True,capture_output=True,timeout=65)
+assert hashlib.sha256(geosite.read_bytes()).hexdigest()=='b4d3807aa45b4f5532ae236672f244a562452622483c0b489c63dd2aadaa821f'
 def canonical(link):
     if link.startswith('vmess://'):
         b=link[8:];d=json.loads(base64.urlsafe_b64decode(b+'='*(-len(b)%4)));d.pop('ps',None);return 'vmess:'+json.dumps(d,sort_keys=True)
