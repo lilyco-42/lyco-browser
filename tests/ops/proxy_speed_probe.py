@@ -4,7 +4,7 @@ import datetime, hashlib, json, os, pathlib, socket, subprocess, tempfile, time,
 
 os.umask(0o077)
 PHASE = os.environ.get('SSH_ORIGINAL_COMMAND', '')
-if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ordinary-quality', 'subscription-regions', 'subscription-catalogue', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
+if PHASE not in ('before', 'after', 'observe', 'pool-observe', 'nearby-ssh', 'ordinary-labels', 'ordinary-quality', 'subscription-regions', 'subscription-catalogue', 'dns-forward', 'ssh-candidate', 'ssh-deploy', 'gateway-policy'):
     raise SystemExit('Only the fixed before/after probes are allowed')
 BASE = pathlib.Path('/opt/studio-billing')
 BIN = '/usr/local/bin/sing-box'
@@ -158,6 +158,11 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
 
+
+if PHASE=='dns-forward':
+    import runpy
+    runpy.run_path('/usr/local/sbin/lyco-proxy-dns-forward.py',init_globals={'LYCO_PROBE':probe},run_name='__main__')
+    raise SystemExit(0)
 
 INTERACTIVE_DOMAINS=['google.com','gstatic.com','chatgpt.com','openai.com',
     'oaistatic.com','oaiusercontent.com','cp.cloudflare.com']
