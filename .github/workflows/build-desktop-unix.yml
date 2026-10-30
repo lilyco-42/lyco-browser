@@ -30,7 +30,7 @@ on:
         description: Fixed production egress diagnosis or guarded repair verification
         type: choice
         default: none
-        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ordinary-quality, subscription-regions, subscription-catalogue, dns-forward, au-isolation, au-isolation-deploy, au-relay, au-relay-deploy, dns-ipv4, au-ipv4-isolation, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
+        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ordinary-quality, subscription-regions, subscription-catalogue, dns-forward, au-isolation, au-isolation-deploy, au-relay, au-relay-deploy, dns-ipv4, au-ipv4-isolation, au-ipv4-deploy, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
       routes_only:
         description: Verify selected workspace routes without repackaging native browsers
         type: boolean
@@ -396,7 +396,7 @@ jobs:
           import json,hashlib,os,pathlib
           d=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'proxy-speed-result.json').read_text())
           source=('proxy_node_dns.py' if d['phase'].startswith('node-') else
-              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py','ordinary-quality':'ordinary_quality_deploy.py','subscription-regions':'proxy_region_labels_deploy.py','subscription-catalogue':'proxy_catalogue_deploy.py','dns-forward':'proxy_dns_forward.py','au-isolation':'proxy_au_isolation.py','au-isolation-deploy':'proxy_au_isolation_deploy.py','au-relay':'proxy_au_relay.py','au-relay-deploy':'proxy_au_relay_deploy.py','dns-ipv4':'proxy_dns_ipv4.py','au-ipv4-isolation':'proxy_au_ipv4_isolation.py'}.get(d['phase'],'proxy_speed_probe.py'))
+              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py','ordinary-quality':'ordinary_quality_deploy.py','subscription-regions':'proxy_region_labels_deploy.py','subscription-catalogue':'proxy_catalogue_deploy.py','dns-forward':'proxy_dns_forward.py','au-isolation':'proxy_au_isolation.py','au-isolation-deploy':'proxy_au_isolation_deploy.py','au-relay':'proxy_au_relay.py','au-relay-deploy':'proxy_au_relay_deploy.py','dns-ipv4':'proxy_dns_ipv4.py','au-ipv4-isolation':'proxy_au_ipv4_isolation.py','au-ipv4-deploy':'proxy_au_ipv4_deploy.py'}.get(d['phase'],'proxy_speed_probe.py'))
           assert d['probeSourceSha256']==hashlib.sha256((pathlib.Path('tests/ops')/source).read_bytes()).hexdigest()
           for field,file in [('policySourceSha256','proxy_gateway_policy.py'),('subscriptionContractSourceSha256','proxy_subscription_contract.py'),('qualitySourceSha256','ordinary_quality.py'),('regionLabelsSourceSha256','proxy_region_labels.py'),('catalogueSourceSha256','proxy_catalogue_visibility.py')]:
               assert field not in d or d[field]==hashlib.sha256((pathlib.Path('tests/ops')/file).read_bytes()).hexdigest()
