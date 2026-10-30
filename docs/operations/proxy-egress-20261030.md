@@ -1,5 +1,17 @@
 # 2026-10-30 proxy latency and download repair
 
+## Current state after 10:03 CST recovery
+
+The earlier Korean interactive/DNS path stopped responding. [40988152219](https://github.com/lilyco-42/lyco-browser/actions/runs/40988152219) confirmed all current member requests timed out although services remained active. Philippine-only HTTPS DNS restored pages but failed the unchanged download minimum, so it was not deployed. The retained Australian SSH route with independent HTTPS DNS passed [40989140434](https://github.com/lilyco-42/lyco-browser/actions/runs/40989140434).
+
+[40989396868](https://github.com/lilyco-42/lyco-browser/actions/runs/40989396868) then restored service: **Australian SSH is active/enabled; Philippine SSH is inactive/disabled as backup.** Both member TCP and HTTPS DNS now use SSH. Only the seven-domain Korean override was removed and the HTTPS DNS detour changed; original nodes, inbound credentials, protocols, UDP fallback configuration and all ordinary-node functions remain. Preserved UDP configuration is not evidence that the failed Korean UDP path is healthy.
+
+Post-deployment samples: pages 2214/1663 ms, exact 4 MiB downloads 1157/2270 KiB/s, GitHub 976.5 KiB/s. The original 900 KiB/s minimum, site checks, four actual-generator owned fixtures and four plan checks passed. Availability recovered; earlier 0.3-second interactive performance has not recovered. All original artifacts were fully verified.
+
+Current configuration SHA-256: `3f7ee6cc4af701cb22bacb09fe8b1494b73a57181e29882f51e4dfb443d70206`. Preference proof: `575e703135f0c927fda963b69e631ca1d03573886556b3dec1ea13603952747f`. Recovery source: `fba1e46fedac91da9edcf6b5211fb68bda955a58`. Private backup: `/root/website-backups/proxy-dns-recovery-20261030-020318`. **That backup contains the failed split configuration; do not blindly restore it.** Hourly monitoring instructions were updated to the new primary/backup roles. Temporary probe access and three helpers were revoked after validation.
+
+The remainder records the earlier 08:28 deployment and its validation history; its primary-service and rollback assumptions are superseded by this section.
+
 The member gateway previously sent TCP traffic through the Australian SSH egress. Pages took about 1.3 seconds to respond and first-download throughput varied. The deployed configuration now sends seven interactive domain suffixes through the existing, strictly verified Korean TUIC outbound, and retains the existing TCP routing structure with Philippine SSH as its local SOCKS egress:
 
 - `google.com`, `gstatic.com`, `chatgpt.com`, `openai.com`
