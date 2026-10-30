@@ -4,6 +4,7 @@ import copy,datetime,hashlib,importlib.util,json,os,pathlib,shutil,socket,subpro
 assert os.environ.get('SSH_ORIGINAL_COMMAND')=='au-relay-deploy'
 os.umask(0o077);probe=globals()['LYCO_PROBE'];base=pathlib.Path('/opt/studio-billing');config=pathlib.Path('/etc/sing-box/config.json')
 plan_path=config.parent/'.lyco-au-relay-plan.json';plan=json.loads(plan_path.read_text());proof=plan['proof'];mode=proof['selectedMode']
+assert proof.get('ipQos')=='none'
 assert proof['qualified'] is True and proof['liveConfigurationUnchanged'] is True and plan['observationRun'].isdigit()
 assert 0<=(datetime.datetime.now(datetime.timezone.utc)-datetime.datetime.fromisoformat(proof['checkedAt'])).total_seconds()<1800
 assert mode=='direct-bulk-hk-interactive'
@@ -33,9 +34,11 @@ preference=base/'proxy-gateway-preference.json';old_proof=preference.read_bytes(
 app=base/'app.py';app_raw=app.read_bytes();assert hashlib.sha256(app_raw).hexdigest()=='5f80b1a7e86385f96a25bacc771ef1b4a75dd1ff4743285082a9199f12a1eb1a'
 unit=pathlib.Path('/etc/systemd/system/lyco-au-interactive-egress.service');assert not unit.exists()
 original_unit=pathlib.Path('/etc/systemd/system/lyco-au-ssh-egress.service').read_bytes();assert hashlib.sha256(original_unit).hexdigest()=='68e673495f80c8e69de284c36eb6262ce0883e1f80a89a296887e6923157ffde'
-unit_data=original_unit.replace(b'Description=LYCO authenticated Australian SSH TCP egress',b'Description=LYCO independent Australian SSH interactive and DNS egress').replace(b'-D 127.0.0.1:1085',b'-D 127.0.0.1:1086')
+qos_unit=original_unit.replace(b'-NT -D',b'-NT -o IPQoS=none -D')
+assert qos_unit!=original_unit
+unit_data=qos_unit.replace(b'Description=LYCO authenticated Australian SSH TCP egress',b'Description=LYCO independent Australian SSH interactive and DNS egress').replace(b'-D 127.0.0.1:1085',b'-D 127.0.0.1:1086')
 assert unit_data!=original_unit and unit_data.count(b'-D 127.0.0.1:1086')==1
-unit_data=unit_data.replace(b'-i /etc/lyco-proxy-egress/au-ssh',b'-i /etc/lyco-proxy-egress/au-hk-exit -o "ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132"')
+unit_data=unit_data.replace(b'-i /etc/lyco-proxy-egress/au-ssh',b'-i /etc/lyco-proxy-egress/au-hk-exit -o "ProxyCommand=/usr/bin/ssh -o IPQoS=none -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132"')
 for name in ('au-hk-relay','au-hk-exit','au-hk-relay-known-hosts'):
     st=(pathlib.Path('/etc/lyco-proxy-egress')/name).stat();assert st.st_uid==0 and st.st_mode&0o777==0o600
 
@@ -64,11 +67,14 @@ def atomic(path,data):
         with os.fdopen(fd,'wb') as f:f.write(data);f.flush();os.fsync(f.fileno())
         os.chmod(tmp,st.st_mode&0o777);os.chown(tmp,st.st_uid,st.st_gid);os.replace(tmp,path)
     finally:pathlib.Path(tmp).unlink(missing_ok=True)
-changed=False;new_proof=None;unit_created=False
+changed=False;new_proof=None;unit_created=False;bulk_changed=False
+bulk_unit=pathlib.Path('/etc/systemd/system/lyco-au-ssh-egress.service')
+(backup/'bulk.service').write_bytes(original_unit)
 try:
     assert config.read_bytes()==raw and preference.read_bytes()==old_proof and app.read_bytes()==app_raw
     with socket.socket() as s:s.bind(('127.0.0.1',1086))
     unit.write_bytes(unit_data);unit.chmod(0o644);unit_created=True
+    assert bulk_unit.read_bytes()==original_unit;atomic(bulk_unit,qos_unit);bulk_changed=True
     subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,timeout=20)
     subprocess.run(['systemctl','enable','--now','lyco-au-interactive-egress.service'],check=True,capture_output=True,timeout=25)
     if mode!='dedicated-interactive':subprocess.run(['systemctl','restart','lyco-au-ssh-egress.service'],check=True,capture_output=True,timeout=25)
@@ -98,11 +104,16 @@ except Exception:
         assert unit.read_bytes()==unit_data
         subprocess.run(['systemctl','disable','--now','lyco-au-interactive-egress.service'],capture_output=True,timeout=25);unit.unlink()
         subprocess.run(['systemctl','daemon-reload'],capture_output=True,timeout=20)
+    if bulk_changed:
+        assert bulk_unit.read_bytes()==qos_unit
+        atomic(bulk_unit,original_unit)
+        subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True,timeout=20)
+        subprocess.run(['systemctl','restart','lyco-au-ssh-egress.service'],check=True,capture_output=True,timeout=25)
     failure={'phase':'au-relay-deploy','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'rolledBack':True,'result':locals().get('after'),'backup':str(backup)}
     (backup/'FAILURE.json').write_text(json.dumps(failure,indent=2)+'\n');print(json.dumps(failure,indent=2),flush=True);raise
 result={'phase':'au-relay-deploy','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
     'observationRun':plan['observationRun'],'selectedMode':mode,'result':after,'backup':str(backup),'rolledBack':False,'subscriptionContracts':contracts,
-    'configurationSha256':hashlib.sha256(encoded).hexdigest(),'preferenceSha256':hashlib.sha256(new_proof).hexdigest(),'interactiveUnitSha256':hashlib.sha256(unit_data).hexdigest(),
+    'configurationSha256':hashlib.sha256(encoded).hexdigest(),'preferenceSha256':hashlib.sha256(new_proof).hexdigest(),'interactiveUnitSha256':hashlib.sha256(unit_data).hexdigest(),'bulkUnitSha256':hashlib.sha256(qos_unit).hexdigest(),'ipQos':'none',
     'closedTunnelBlocked':True,'appAndAccountsUnchanged':True,'interactiveSshPath':'main-hk-au','bulkSshPath':'main-au','egressCountry':'AU','tcpDns':'exit-resolver-through-ssh' if mode=='direct-bulk-hk-interactive' else 'https-through-dedicated-ssh','udpDns':'https-through-dedicated-ssh'}
 (backup/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n');shutil.move(str(plan_path),str(backup/'consumed-plan.json'))
 print(json.dumps(result,indent=2),flush=True)

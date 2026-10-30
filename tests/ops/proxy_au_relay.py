@@ -22,13 +22,13 @@ def passes(value):
     files=[n for n in value.get('samples',[]) if n['name'].startswith('download') or n['name']=='github-release-range']
     pages=[n for n in value.get('samples',[]) if n['name'] in ('cloudflare-page','google-page')]
     return value.get('allPassed') is True and len(files)==3 and all(n['ok'] and n['bytes']==4194304 and n['kibPerSecond']>=900 for n in files) and len(pages)==2 and all(n['firstByteMs']<=2000 for n in pages)
-report={'phase':'au-relay','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'observationOnly':True,'baseline':test('shared-australian-ssh-baseline',live),'candidates':[]}
+report={'phase':'au-relay','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'observationOnly':True,'ipQos':'none','baseline':test('shared-australian-ssh-baseline',live),'candidates':[]}
 ports=[];tunnels=[]
 with tempfile.TemporaryFile() as log:
     try:
         for index in range(2):
             with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
-            command=['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-hk-exit','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49']
+            command=['/usr/bin/ssh','-vv','-o','IPQoS=none','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-hk-exit','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -o IPQoS=none -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49']
             if index==0:
                 i=next(i for i,arg in enumerate(command) if arg.startswith('ProxyCommand='));del command[i-1:i+1]
                 command[command.index('/etc/lyco-proxy-egress/au-hk-exit')]='/etc/lyco-proxy-egress/au-ssh'
