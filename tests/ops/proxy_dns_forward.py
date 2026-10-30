@@ -74,7 +74,9 @@ report['latencyImproved']=bool(len(base_pages)==len(new_pages)==4 and statistics
 base_speeds=[n['kibPerSecond'] for v in report['baseline'] for n in files(v) if n['ok']]
 new_speeds=[n['kibPerSecond'] for v in report['candidate'] for n in files(v) if n['ok']]
 report['downloadNoRegression']=bool(len(base_speeds)==len(new_speeds)==6 and statistics.median(new_speeds)>=.9*statistics.median(base_speeds))
-report['qualified']=all(report[n] for n in ('speedGatePassed','latencyImproved','downloadNoRegression','allRequestsForwardedAsDomain','expectedDomainsObserved'))
+stopped=probe('closed-forwarder-no-direct-fallback',current,live_config=instrumented,download_bytes=262144)
+report['stoppedBlocked']=bool(stopped.get('samples')) and all(not n['ok'] and n['bytes']==0 for n in stopped['samples'])
+report['qualified']=all(report[n] for n in ('speedGatePassed','latencyImproved','downloadNoRegression','allRequestsForwardedAsDomain','expectedDomainsObserved','stoppedBlocked'))
 report['liveConfigurationUnchanged']=path.read_bytes()==raw;assert report['liveConfigurationUnchanged']
 if report['qualified']:
     plan=pathlib.Path('/etc/sing-box/.lyco-dns-forward-plan.json');assert not plan.exists()
