@@ -47,6 +47,9 @@ assert {n.name for n in defs}==names
 for n in defs:n.decorator_list=[]
 ns.update(BASE=base,Path=pathlib.Path)
 exec(compile(ast.Module(body=defs,type_ignores=[]),'actual-owned-catalogue-readers','exec'),ns)
+# The fixture-only backup is replaced by actual catalogue readers above.
+# Do not retain that nonexistent fixture name in site-specific groups.
+ns['_lyco_site_candidates']=lambda extras,site:[]
 managed,healthy=ns['_lyco_managed_extras'](include_unverified=True);full,regions=ns['_lyco_public_full_catalog']()
 assert managed and full
 assert not any(n.get('server')=='43.108.97.29' for n in managed+list(full))
