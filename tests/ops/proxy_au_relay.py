@@ -28,7 +28,7 @@ with tempfile.TemporaryFile() as log:
     try:
         for _ in range(2):
             with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
-            tunnel=subprocess.Popen(['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-ssh','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
+            tunnel=subprocess.Popen(['/usr/bin/ssh','-vv','-F','/dev/null','-NT','-D','127.0.0.1:'+str(port),'-i','/etc/lyco-proxy-egress/au-hk-exit','-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile=/etc/lyco-proxy-egress/known_hosts','-o','ProxyCommand=/usr/bin/ssh -F /dev/null -i /etc/lyco-proxy-egress/au-hk-relay -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/lyco-proxy-egress/au-hk-relay-known-hosts -o ConnectTimeout=8 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -W 13.236.116.49:22 root@119.12.174.132','-o','ExitOnForwardFailure=yes','-o','ConnectTimeout=8','-o','ServerAliveInterval=15','-o','ServerAliveCountMax=2','ec2-user@13.236.116.49'],stdout=subprocess.DEVNULL,stderr=log)
             tunnels.append(tunnel);ports.append(port)
             for attempt in range(60):
                 assert tunnel.poll() is None,'AU tunnel exited'
@@ -52,6 +52,12 @@ with tempfile.TemporaryFile() as log:
                     if not forward or (row['allRequestsForwardedAsDomain'] and {'cp.cloudflare.com','www.gstatic.com','speed.cloudflare.com','github.com','www.youtube.com','api.openai.com'}<=set(hosts)):
                         selected=mode;break
         report['qualified']=selected is not None;report['selectedMode']=selected
+    except Exception:
+        log.flush();log.seek(0);raw_log=log.read()
+        diagnostic=pathlib.Path('/root/website-backups')/('au-relay-probe-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S'));diagnostic.mkdir(mode=0o700)
+        (diagnostic/'ssh.log').write_bytes(raw_log);(diagnostic/'ssh.log').chmod(0o600)
+        print(json.dumps({'phase':'au-relay','probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'tunnelFailed':True,'privateDiagnostic':str(diagnostic)}),flush=True)
+        raise
     finally:
         for tunnel in tunnels:
             tunnel.terminate()
