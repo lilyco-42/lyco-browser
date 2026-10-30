@@ -88,7 +88,7 @@ def candidate():
             'tls': {'enabled': True, 'server_name': node['sni'], 'alpn': ['h3'],
                     'certificate_path': '/etc/sing-box/lyco-kr2-trusted-certificate.pem'}}
 
-def probe(label, outbound, *, resolve_remote=False, live_config=None, download_bytes=SAMPLE_BYTES, github=False):
+def probe(label, outbound, *, resolve_remote=False, live_config=None, download_bytes=SAMPLE_BYTES, github=False, site_checks=False):
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0)); port = s.getsockname()[1]
     with tempfile.TemporaryDirectory(prefix='lyco-speed-probe-') as folder:
@@ -119,6 +119,9 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
                 ('download-2', 'https://speed.cloudflare.com/__down?bytes='+str(download_bytes), download_bytes)]
             if github:
                 jobs.append(('github-release-range','https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-amd64-v1.19.32.gz',4194304))
+            if site_checks:
+                jobs.extend([('youtube-page','https://www.youtube.com/generate_204',0),
+                             ('openai-api','https://api.openai.com/v1/models',0)])
             for name, url, amount in jobs:
                 body = pathlib.Path(folder) / 'body'
                 start = time.monotonic()
@@ -136,7 +139,11 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
                     for key, value in zip(('connectMs','tlsMs','firstByteMs','transferTotalMs'),fields[1:]):
                         try: timing[key] = round(float(value)*1000)
                         except ValueError: pass
-                ok = result.returncode == 0 and status in (('206',) if name=='github-release-range' else ('200','204')) and size == amount
+                expected_status = ('401',) if name=='openai-api' else ('206',) if name=='github-release-range' else ('200','204')
+                ok = result.returncode == 0 and status in expected_status and (size<=4096 if name=='openai-api' else size==amount)
+                if name=='openai-api' and ok:
+                    try: ok=isinstance(json.loads(body.read_bytes()).get('error'),dict)
+                    except (ValueError,AttributeError): ok=False
                 if name=='github-release-range' and ok:
                     with body.open('rb') as stream: ok=stream.read(2)==b'\x1f\x8b'
                 samples.append({'name': name, 'ok': ok, 'httpStatus': status, 'bytes': size,
@@ -151,13 +158,28 @@ def probe(label, outbound, *, resolve_remote=False, live_config=None, download_b
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=3)
 
+
+INTERACTIVE_DOMAINS=['google.com','gstatic.com','chatgpt.com','openai.com',
+    'oaistatic.com','oaiusercontent.com','cp.cloudflare.com']
+
+def interactive_config(live, ssh_port=1085):
+    optimized=json.loads(json.dumps(live));rules=optimized['route']['rules']
+    assert rules[0]['action']=='resolve' and rules[1]['action']=='resolve'
+    assert rules[2]=={'inbound':['panel-in'],'network':'tcp','outbound':'ssh-fast'}
+    rules.insert(2,{'domain_suffix':INTERACTIVE_DOMAINS,'network':'tcp','outbound':'yt-proxy'})
+    ssh_out=next(n for n in optimized['outbounds'] if n['tag']=='ssh-fast')
+    assert ssh_out=={'type':'socks','tag':'ssh-fast','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
+    ssh_out['server_port']=ssh_port
+    return optimized
+
+
 if PHASE == 'nearby-ssh':
     key = pathlib.Path('/etc/lyco-proxy-egress/.nearby-speed-id')
     hosts = pathlib.Path('/etc/lyco-proxy-egress/.nearby-known-hosts')
     assert key.stat().st_uid==0 and key.stat().st_mode & 0o777 == 0o600
     known_hash=hashlib.sha256(hosts.read_bytes()).hexdigest()
     assert known_hash=='a05eb37fb77f71c90a3b2658ef670f06cc817c458ae4ed634853ed6e7efd2adc'
-    live=json.loads(CONFIG.read_text());current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
+    config_raw=CONFIG.read_bytes();live=json.loads(config_raw);current=next(n for n in live['outbounds'] if n['tag']=='yt-proxy')
     report={'phase':PHASE,'observationOnly':True,'probeSourceSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
         'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'knownHostsSha256':known_hash,
         'baseline':probe('current-paid-route',current,live_config=live,download_bytes=4194304,github=True),'candidates':[]}
@@ -180,6 +202,9 @@ if PHASE == 'nearby-ssh':
                 if row['sshConnected']:
                     outbound={'type':'socks','tag':'nearby-ssh','server':'127.0.0.1','server_port':port,'version':'5','network':'tcp'}
                     row['result']=probe(label+'-strict-ssh',outbound,download_bytes=4194304,github=True)
+                    if label=='philippines':
+                        row['fullRoute']=probe('interactive-korea-bulk-philippines',current,
+                            live_config=interactive_config(live,port),download_bytes=4194304,github=True,site_checks=True)
             finally:
                 tunnel.terminate()
                 try:tunnel.wait(timeout=4)
@@ -199,6 +224,24 @@ if PHASE == 'nearby-ssh':
             row['stoppedBlocked']=stopped.returncode!=0 and stopped.stdout.strip()==b'000'
             report['candidates'].append(row)
     report['workingCandidate']=any(x.get('result',{}).get('allPassed') and x['stoppedBlocked'] for x in report['candidates'])
+    ph=next(x for x in report['candidates'] if x['region']=='philippines')
+    def fast_files(row):
+        samples=[x for x in row.get('samples',[]) if x['name'].startswith('download') or x['name']=='github-release-range']
+        return len(samples)==3 and all(x['ok'] and x['bytes']==4194304 and x['kibPerSecond']>=900 for x in samples)
+    full=ph.get('fullRoute',{});pages=[x for x in full.get('samples',[]) if x['name'] in ('cloudflare-page','google-page')]
+    qualified=(report['baseline'].get('allPassed') is True and ph.get('stoppedBlocked') is True
+        and ph.get('result',{}).get('allPassed') is True and full.get('allPassed') is True
+        and fast_files(ph['result']) and fast_files(full) and len(pages)==2
+        and all(x['ok'] and x['elapsedMs']<=700 for x in pages))
+    report['philippinesQualifiedForDeployment']=qualified
+    assert CONFIG.read_bytes()==config_raw,'Concurrent production configuration change'
+    if qualified:
+        plan={'schemaVersion':1,'previousSha256':hashlib.sha256(config_raw).hexdigest(),
+            'probeSourceSha256':report['probeSourceSha256'],'checkedAt':report['checkedAt'],
+            'configuration':interactive_config(live),'proof':{'baseline':report['baseline'],'philippines':ph}}
+        prepared=pathlib.Path('/etc/sing-box/.lyco-ph-egress-plan.json')
+        assert not prepared.exists(),'Do not overwrite a pending plan'
+        prepared.write_text(json.dumps(plan,indent=2)+'\n');prepared.chmod(0o600)
     print(json.dumps(report,indent=2),flush=True)
     raise SystemExit(0 if report['workingCandidate'] else 1)
 
@@ -212,16 +255,10 @@ if PHASE in ('observe', 'pool-observe'):
         'sampleBytes':4194304,
         'baseline':probe('current-paid-tcp-route',current,live_config=live,download_bytes=4194304,github=True)}
     if PHASE == 'observe':
-        report['comparison'] = probe('korean-tuic-strict-tls',candidate(),download_bytes=4194304,github=True)
-        # Exercise the existing paid route with DNS using that same SSH egress.
-        # This is an isolated process: the live configuration remains untouched.
-        optimized = json.loads(json.dumps(live))
-        resolver = next(n for n in optimized['dns']['servers'] if n['tag']=='lyco-egress-dns')
-        assert resolver['type']=='https' and resolver['server']=='1.1.1.1' and resolver['detour']=='yt-proxy'
-        assert next(n for n in live['outbounds'] if n['tag']=='ssh-fast') == {
-            'type':'socks','tag':'ssh-fast','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
-        resolver['detour']='ssh-fast'
-        report['dnsComparison'] = probe('paid-ssh-with-ssh-doh',current,live_config=optimized,download_bytes=4194304,github=True)
+        optimized=interactive_config(live)
+        report['interactiveDomains']=INTERACTIVE_DOMAINS
+        report['interactiveComparison'] = probe('interactive-tuic-bulk-ssh',current,
+            live_config=optimized,download_bytes=4194304,github=True,site_checks=True)
         report['liveConfigurationUnchanged'] = report['liveConfigSha256']==hashlib.sha256(CONFIG.read_bytes()).hexdigest()
         assert report['liveConfigurationUnchanged']
     else:
