@@ -208,6 +208,17 @@ if PHASE in ('observe', 'pool-observe'):
         'baseline':probe('current-paid-tcp-route',current,live_config=live,download_bytes=4194304,github=True)}
     if PHASE == 'observe':
         report['comparison'] = probe('korean-tuic-strict-tls',candidate(),download_bytes=4194304,github=True)
+        # Exercise the existing paid route with DNS using that same SSH egress.
+        # This is an isolated process: the live configuration remains untouched.
+        optimized = json.loads(json.dumps(live))
+        resolver = next(n for n in optimized['dns']['servers'] if n['tag']=='lyco-egress-dns')
+        assert resolver['type']=='https' and resolver['server']=='1.1.1.1' and resolver['detour']=='yt-proxy'
+        assert next(n for n in live['outbounds'] if n['tag']=='ssh-fast') == {
+            'type':'socks','tag':'ssh-fast','server':'127.0.0.1','server_port':1085,'version':'5','network':'tcp'}
+        resolver['detour']='ssh-fast'
+        report['dnsComparison'] = probe('paid-ssh-with-ssh-doh',current,live_config=optimized,download_bytes=4194304,github=True)
+        report['liveConfigurationUnchanged'] = report['liveConfigSha256']==hashlib.sha256(CONFIG.read_bytes()).hexdigest()
+        assert report['liveConfigurationUnchanged']
     else:
         import ast, ipaddress
         source = pathlib.Path('/opt/freeproxy-pool/cache/community-verified.json')
