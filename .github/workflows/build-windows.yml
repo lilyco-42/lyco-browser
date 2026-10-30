@@ -3,11 +3,17 @@ name: Build LYCO Browser (Windows x64, GitHub Actions ONLY)
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.gitattributes', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   pull_request:
     branches: [main]
-    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.github/workflows/build-windows.yml']
+    paths: ['src/**', 'native/**', 'scripts/**', 'tests/**', 'resources/**', '.gitattributes', 'apps/universal/src/product.json', '.github/workflows/build-windows.yml']
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  # Mobile-only PR iterations must not continually interrupt a long native
+  # Windows acceptance run. Keep the active run; GitHub coalesces pending runs.
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -28,7 +34,10 @@ jobs:
         run: |
           node --check src/diagnostics-ui.js
           node --test tests/diagnostics-controller.test.js
-          node --test tests/release-preview.test.js
+          node --test tests/release-preview.test.js tests/third-party-notices.test.js
+          node --test tests/ui-font.test.mjs
+          node --test tests/workspace-routes.test.js
+          node --test tests/update-policy.test.js tests/update-download.test.js tests/product-version.test.js
           node --test tests/browser-webgl-identity.test.mjs
 
   windows-x64:
@@ -39,7 +48,7 @@ jobs:
       OPENBROWSER_PACKAGE_ARCH: x86_64
       OPENBROWSER_PACKAGE_VARIANT: with-kernel
       OPENBROWSER_BUNDLE_KERNEL: 'true'
-      LYCO_DESKTOP_PUBLIC_RELEASE: 'true'
+      LYCO_DESKTOP_PUBLIC_RELEASE: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Enable long paths before checkout
@@ -214,7 +223,7 @@ jobs:
             npm run $suite
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
-          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-native-layout.test.js ../../lyco/tests/upstream-update-download.test.js ../../lyco/tests/upstream-product-version.test.js
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Download pinned official Mihomo for LYCO local proxy

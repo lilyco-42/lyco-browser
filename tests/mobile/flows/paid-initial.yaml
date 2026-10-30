@@ -1,0 +1,46 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- runFlow:
+    file: paid-login.yaml
+    env:
+      OWNER: ci-owner-a
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- tapOn: "选择线路 CI route A"
+- scrollUntilVisible:
+    element: "保存所选线路"
+    direction: DOWN
+- tapOn: "保存所选线路"
+- scrollUntilVisible:
+    element: "已保存环境线路：CI route A"
+    direction: DOWN
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: UP
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "LYCO route A owner A"
+    timeout: 30000
+- runFlow: close.yaml
+- runFlow:
+    file: create.yaml
+    env:
+      NAME: paid-B
+      URL: ${ORIGIN}/page?owner=B&phase=paid-B
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-B
+- tapOn: "选择线路 CI route B"
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: DOWN
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "LYCO route B owner B"
+    timeout: 30000
+- runFlow: close.yaml

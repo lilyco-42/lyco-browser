@@ -1,0 +1,18 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: create.yaml
+    env:
+      NAME: paid-A
+      URL: ${ORIGIN}/page?owner=A&phase=paid-A
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: paid-A
+      PROXY: http://10.0.2.2:18082
+- extendedWaitUntil:
+    visible: "LYCO route direct owner A"
+    timeout: 30000
+- runFlow: close.yaml

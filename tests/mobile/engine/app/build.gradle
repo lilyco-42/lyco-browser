@@ -1,0 +1,48 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'top.lain42.lycoengineprobe'
+    compileSdk { version = release(37) { minorApiLevel = 0 } }
+    defaultConfig {
+        applicationId 'top.lain42.lycoengineprobe'
+        minSdk 28
+        targetSdk 36
+        versionCode 1
+        versionName '0.0.1-native-experiment'
+        ndk { abiFilters 'x86_64' }
+    }
+    signingConfigs {
+        experiment {
+            storeFile file(System.getenv('LYCO_ENGINE_SIGNING_KEY'))
+            storePassword 'CI_engine_probe_only'
+            keyAlias 'experiment'
+            keyPassword 'CI_engine_probe_only'
+        }
+    }
+    buildTypes {
+        release { debuggable false; minifyEnabled false; signingConfig signingConfigs.experiment }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    if (System.getenv('LYCO_ENGINE_AAR')) {
+        // Preserve the compiled release bytes for APK-to-AAR provenance checks.
+        packaging { jniLibs { keepDebugSymbols += ['**/*.so'] } }
+    }
+}
+dependencies {
+    if (System.getenv('LYCO_ENGINE_AAR')) {
+        implementation 'top.lain42.experimental:geckoview-source:159.0-route-experiment'
+    } else {
+        implementation 'org.mozilla.geckoview:geckoview:159.0.20261022150525'
+    }
+}
+
+tasks.register('nativeDependencyEvidence') {
+    doLast {
+        def rows = configurations.releaseRuntimeClasspath.incoming.artifacts.artifacts.collect {
+            [module: it.id.componentIdentifier.displayName, file: it.file.name,
+             sha256: java.security.MessageDigest.getInstance('SHA-256').digest(it.file.bytes).encodeHex().toString()]
+        }.sort { it.module }
+        def output = new File(System.getenv('RUNNER_TEMP'), 'lyco-mobile-network/engine-dependencies.json')
+        output.parentFile.mkdirs()
+        output.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(rows))
+    }
+}

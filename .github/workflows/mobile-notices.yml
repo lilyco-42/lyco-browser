@@ -1,0 +1,86 @@
+name: Verify offline mobile dependency notices
+on:
+  pull_request:
+    branches: [main]
+    paths: ['apps/universal/src/**', 'apps/universal/third-party/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/scripts/inventory-exported-js.mjs', 'apps/universal/package-lock.json', 'tests/npm-notices*', 'tests/exported-js-inventory.test.mjs', '.github/workflows/mobile-notices.yml']
+  workflow_dispatch:
+    inputs:
+      native_js_inventory:
+        description: Observe Android/iOS export source graphs without changing native candidates
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  offline-notices:
+    if: ${{ inputs.native_js_inventory != true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm ci --no-audit --no-fund
+        working-directory: apps/universal
+      - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - run: node --test tests/npm-notices.test.mjs
+      - run: node --test tests/exported-js-inventory.test.mjs
+      - run: node --experimental-strip-types --test tests/mobile-billing.test.mjs tests/mobile-route-policy.test.mjs tests/mobile-rtc-policy.test.mjs
+      - run: node --test tests/network.test.js tests/profiles.test.js
+      - run: npx tsc --noEmit
+        working-directory: apps/universal
+      - run: npx expo export --platform web --output-dir dist-web
+        working-directory: apps/universal
+      - name: Install isolated browser verifier
+        run: |
+          npm install --prefix "$RUNNER_TEMP/lyco-notice-browser" --ignore-scripts --package-lock=false playwright@1.55.0
+          "$RUNNER_TEMP/lyco-notice-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - run: node tests/npm-notices-browser.mjs
+      - name: Retain original notice bundle and rendered observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
+            ${{ runner.temp }}/lyco-npm-notice-evidence
+          if-no-files-found: error
+          retention-days: 7
+
+  native-js-export:
+    if: ${{ inputs.native_js_inventory == true }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [android, ios]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify bounded source-map interpretation
+        run: node --test tests/exported-js-inventory.test.mjs
+      - run: npm ci --no-audit --no-fund
+        working-directory: apps/universal
+      - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - name: Export real native-platform JavaScript with source maps
+        working-directory: apps/universal
+        run: npx expo export --platform ${{ matrix.platform }} --source-maps --no-bytecode --output-dir bundle-inventory/${{ matrix.platform }}
+      - name: Record original mapped packages and unresolved notice targets
+        run: node apps/universal/scripts/inventory-exported-js.mjs --platform ${{ matrix.platform }} --directory apps/universal/bundle-inventory/${{ matrix.platform }}
+      - name: Preserve original exports and inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-js-inventory-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            apps/universal/bundle-inventory/${{ matrix.platform }}
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -5,15 +5,116 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'resources/ui-font/**'
+      - '.gitattributes'
+      - 'tests/ui-font.test.mjs'
+      - 'tests/workbench-ui-font.mjs'
+      - 'tests/workspace-*'
+      - 'tests/native-workspace-routes.mjs'
+      - 'apps/universal/src/product.json'
+      - 'tests/product-version.test.js'
+      - 'tests/upstream-product-version.test.js'
       - 'scripts/**'
+      - 'tests/native-unix-workspaces.mjs'
+      - 'tests/proxy-failure-probe.mjs'
+      - 'tests/browser-privacy-fixture.mjs'
+      - 'tests/connect-handler.mjs'
+      - 'tests/core-startup-observer.cjs'
       - '.github/workflows/build-desktop-unix.yml'
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', 'resources/ui-font/**', '.gitattributes', 'tests/ui-font.test.mjs', 'tests/workbench-ui-font.mjs', 'tests/workspace-*', 'tests/native-workspace-routes.mjs', 'apps/universal/src/product.json', 'tests/product-version.test.js', 'tests/upstream-product-version.test.js', 'tests/native-unix-workspaces.mjs', 'tests/proxy-failure-probe.mjs', 'tests/browser-privacy-fixture.mjs', 'tests/connect-handler.mjs', 'tests/core-startup-observer.cjs', '.github/workflows/build-desktop-unix.yml']
   workflow_dispatch:
+    inputs:
+      speed_probe:
+        description: Fixed production egress diagnosis or guarded repair verification
+        type: choice
+        default: none
+        options: [none, before, after, observe, pool-observe, nearby-ssh, ordinary-labels, ordinary-quality, subscription-regions, subscription-catalogue, dns-forward, au-isolation, au-isolation-deploy, au-relay, au-relay-deploy, dns-ipv4, au-ipv4-isolation, au-ipv4-deploy, ssh-candidate, ssh-deploy, gateway-policy, node-dns, node-throughput, node-au-throughput]
+      routes_only:
+        description: Verify selected workspace routes without repackaging native browsers
+        type: boolean
+        default: false
+      font_inventory_only:
+        description: Inspect original font metadata from the retained e5ed180 archive without building or running a product
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
+  workspace-routes:
+    if: ${{ inputs.font_inventory_only != true && (inputs.speed_probe == '' || inputs.speed_probe == 'none') }}
+    name: workspace routes · ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: linux-x64, runner: ubuntu-22.04, asset: mihomo-linux-amd64-v1.19.32.gz }
+          - { target: macos-arm64, runner: macos-26, asset: mihomo-darwin-arm64-v1.19.32.gz }
+          - { target: windows-x64, runner: windows-2022, asset: mihomo-windows-amd64-compatible-v1.19.32.zip }
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify ownership, cancellation, fixed selection and core lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/ui.js
+          node --check src/diagnostics-ui.js
+          node --check tests/native-diagnostics-panel.mjs
+          node --check tests/native-workspace-routes.mjs
+          node --test tests/network.test.js tests/profiles.test.js tests/workspace-routes.test.js tests/diagnostics-controller.test.js tests/core-startup-observer.test.js
+      - name: Prepare the same pinned official Mihomo used by desktop packages
+        if: matrix.target != 'windows-x64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/lyco-route-test"
+          gh release download v1.19.32 -R MetaCubeX/mihomo -p '${{ matrix.asset }}' -D "$RUNNER_TEMP/lyco-route-test"
+          gzip -dc "$RUNNER_TEMP/lyco-route-test/${{ matrix.asset }}" > "$RUNNER_TEMP/lyco-route-test/mihomo"
+          chmod +x "$RUNNER_TEMP/lyco-route-test/mihomo"
+          echo "LYCO_MIHOMO_PATH=$RUNNER_TEMP/lyco-route-test/mihomo" >> "$GITHUB_ENV"
+      - name: Prepare pinned Windows compatible Mihomo
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $dir="$env:RUNNER_TEMP\lyco-route-test"
+          New-Item -Force -ItemType Directory $dir | Out-Null
+          gh release download v1.19.32 -R MetaCubeX/mihomo -p '${{ matrix.asset }}' -D $dir
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Expand-Archive "$dir\${{ matrix.asset }}" -DestinationPath "$dir\unpacked"
+          $binary=Get-ChildItem "$dir\unpacked" -Recurse -File -Filter '*.exe' | Where-Object {$_.Name -match '^mihomo'} | Select-Object -First 1
+          if (-not $binary) { throw 'Official Mihomo executable missing' }
+          Copy-Item -LiteralPath $binary.FullName -Destination "$dir\mihomo.exe"
+          "LYCO_MIHOMO_PATH=$dir\mihomo.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      - name: Observe real per-workspace authenticated upstreams and stopped-route behavior
+        run: node tests/workspace-routes-integration.mjs
+      - name: Retain route observations without subscription credentials
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-workspace-routes-${{ matrix.target }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-workspace-route-evidence
+          if-no-files-found: warn
+          retention-days: 7
   desktop:
+    needs: workspace-routes
+    if: ${{ inputs.routes_only != true && inputs.font_inventory_only != true && (inputs.speed_probe == '' || inputs.speed_probe == 'none') }}
     name: ${{ matrix.target }}
     strategy:
       fail-fast: false
@@ -27,7 +128,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       OPENBROWSER_PACKAGE_VARIANT: with-kernel
       OPENBROWSER_BUNDLE_KERNEL: 'true'
-      LYCO_DESKTOP_PUBLIC_RELEASE: 'true'
+      LYCO_DESKTOP_PUBLIC_RELEASE: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
       OPENBROWSER_PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
       - name: Checkout LYCO integration
@@ -63,7 +164,10 @@ jobs:
           for f in main.js preload.js renderer.js lyco/network.js lyco/ui.js lyco/workbench.js; do
             node --check "upstream/Browserapp/$f"
           done
-          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js
+          node --test lyco/tests/network.test.js lyco/tests/profiles.test.js lyco/tests/native-identity.test.js lyco/tests/startup-pages.test.js lyco/tests/third-party-notices.test.js
+          node --test lyco/tests/ui-font.test.mjs
+          node --test lyco/tests/workspace-routes.test.js
+          node --test lyco/tests/update-policy.test.js lyco/tests/update-download.test.js lyco/tests/product-version.test.js
 
       - uses: actions/setup-python@v5
         with:
@@ -124,7 +228,7 @@ jobs:
           npm run selftest
           npm run selftest:isolation
           npm run selftest:proxyconcurrency
-          node --test ../../lyco/tests/upstream-start-failure.test.js
+          node --test ../../lyco/tests/upstream-start-failure.test.js ../../lyco/tests/upstream-update-download.test.js ../../lyco/tests/upstream-product-version.test.js
 
       - name: Package desktop application in runner only
         working-directory: upstream/Browserapp
@@ -151,12 +255,160 @@ jobs:
           test -f upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app/lyco/core/mihomo
           cp upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel.tar.gz upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
 
-      - name: Upload macOS DMG to GitHub prerelease
+      - name: Install the native packaged acceptance driver
+        shell: bash
+        run: npm install --prefix lyco --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+
+      - name: Real packaged macOS environment and proxy acceptance
         if: matrix.target == 'macos-arm64'
+        shell: bash
+        env:
+          LYCO_UNIX_EVIDENCE: ${{ runner.temp }}/lyco-unix-macos
+        run: |
+          node lyco/tests/native-unix-workspaces.mjs upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel/OpenBrowser.app/Contents/MacOS/OpenBrowser upstream/Browserapp/dist/OpenBrowser-macOS-arm64-with-kernel/OpenBrowser.app/Contents/Resources/app
+
+      - name: Real packaged Linux environment and proxy acceptance
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        env:
+          LYCO_UNIX_EVIDENCE: ${{ runner.temp }}/lyco-unix-linux
+        run: |
+          xvfb-run -a node lyco/tests/native-unix-workspaces.mjs upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/OpenBrowser upstream/Browserapp/dist/OpenBrowser-Linux-x86_64-with-kernel/runtime/resources/app
+
+      - name: Retain original Unix native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-unix-native-${{ matrix.target }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-unix-*/report.json
+            ${{ runner.temp }}/lyco-unix-*/workbench.png
+            ${{ runner.temp }}/lyco-unix-*/account-proxy_*.png
+            ${{ runner.temp }}/lyco-unix-*/ui-cjk-workbench.png
+            ${{ runner.temp }}/lyco-unix-*/workspace-*.png
+            ${{ runner.temp }}/lyco-unix-*/*-diagnostics-*.png
+          retention-days: 7
+
+      - name: Upload macOS DMG to GitHub prerelease
+        if: matrix.target == 'macos-arm64' && github.event_name != 'pull_request'
         shell: bash
         run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-macOS-arm64-MVP.dmg
 
       - name: Upload Linux portable tar.gz to GitHub prerelease
-        if: matrix.target == 'linux-x64'
+        if: matrix.target == 'linux-x64' && github.event_name != 'pull_request'
         shell: bash
         run: bash lyco/scripts/ci-publish-release.sh upstream/Browserapp/dist/LYCO-Browser-Linux-x64-MVP.tar.gz
+
+  packaged-font-inventory:
+    if: ${{ inputs.font_inventory_only == true && (inputs.speed_probe == '' || inputs.speed_probe == 'none') }}
+    name: Retained desktop fonts · original metadata only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      # GitHub exposes draft assets only to push-capable credentials. This
+      # isolated job only downloads the pinned private candidate; no publishing.
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install isolated pinned metadata decoders
+        run: |
+          python3 -m venv "$RUNNER_TEMP/font-audit-tools"
+          "$RUNNER_TEMP/font-audit-tools/bin/pip" install fonttools==4.60.1 Brotli==1.1.0
+      - name: Read only the retained candidate with its exact reviewed digest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/font-audit-input"
+          gh release download ci-e5ed18067c7a -R "$GITHUB_REPOSITORY" -p LYCO-Browser-Linux-x64-MVP.tar.gz -D "$RUNNER_TEMP/font-audit-input"
+      - name: Decode original font metadata without repository credentials
+        run: |
+          "$RUNNER_TEMP/font-audit-tools/bin/python" scripts/audit-packaged-fonts.py "$RUNNER_TEMP/font-audit-input/LYCO-Browser-Linux-x64-MVP.tar.gz" "$RUNNER_TEMP/font-audit-evidence"
+      - name: Retain original copyright and license fields with file hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-packaged-font-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/font-audit-evidence
+          if-no-files-found: warn
+          retention-days: 7
+
+  speed-probe:
+    if: github.event_name == 'workflow_dispatch' && inputs.speed_probe != 'none'
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ (inputs.speed_probe == 'pool-observe' || inputs.speed_probe == 'ordinary-quality') && 20 || 10 }}
+    env:
+      PROBE_HOST: ${{ inputs.speed_probe == 'node-au-throughput' && '13.236.116.49' || startsWith(inputs.speed_probe, 'node-') && '43.108.85.230' || '8.153.102.122' }}
+      PROBE_USER: ${{ inputs.speed_probe == 'node-au-throughput' && 'ec2-user' || 'root' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify automatic relay preference against owned fixtures
+        if: inputs.speed_probe == 'gateway-policy'
+        run: python3 -m unittest discover -s tests/ops -p test_proxy_gateway_policy.py -v
+      - name: Prevent retrying an operation that may have changed production
+        run: python3 -m unittest discover -s tests/ops -p test_scoped_ssh_retry.py -v
+      - uses: actions/setup-node@v4
+        if: inputs.speed_probe == 'subscription-regions' || inputs.speed_probe == 'subscription-catalogue'
+        with: {node-version: '22'}
+      - name: Verify display regions, identity compatibility and actual core parsing
+        if: inputs.speed_probe == 'subscription-regions' || inputs.speed_probe == 'subscription-catalogue'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests/ops -p test_proxy_region_labels.py -v
+          python3 -m unittest discover -s tests/ops -p test_proxy_catalogue_visibility.py -v
+          node --test tests/workspace-routes.test.js
+          mkdir -p "$RUNNER_TEMP/region-core"
+          gh release download v1.19.32 -R MetaCubeX/mihomo -p mihomo-linux-amd64-v1.19.32.gz -D "$RUNNER_TEMP/region-core"
+          test "$(sha256sum "$RUNNER_TEMP/region-core/mihomo-linux-amd64-v1.19.32.gz" | cut -d ' ' -f 1)" = 8451100836c9eda194331c2babfad490b2faf30cebc1a04b0e76fd8ac2d35d10
+          gzip -dc "$RUNNER_TEMP/region-core/mihomo-linux-amd64-v1.19.32.gz" > "$RUNNER_TEMP/region-core/mihomo"
+          chmod +x "$RUNNER_TEMP/region-core/mihomo"
+          python3 tests/ops/check_region_formats.py "$RUNNER_TEMP/region-core/mihomo"
+          LYCO_MIHOMO_PATH="$RUNNER_TEMP/region-core/mihomo" node tests/workspace-routes-integration.mjs
+      - name: Generate one-use probe identity
+        run: |
+          umask 077
+          if [[ '${{ inputs.speed_probe }}' == node-* ]]; then
+            ssh-keygen -q -t rsa -b 3072 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
+          else
+            ssh-keygen -q -t ed25519 -N '' -C lyco-speed-${{ github.run_id }} -f "$RUNNER_TEMP/probe-key"
+          fi
+          printf '%s\n' '8.153.102.122 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFdaqiP/PZx1RyCI/pfrLGgpJwX/EXRSFaWvVs3xrfsd' > "$RUNNER_TEMP/probe-hosts"
+          printf '%s\n' '43.108.85.230 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOP9gGY5OMAuqBm0YWojftBF/SdwZP5dEWJYL0mqCGpT' >> "$RUNNER_TEMP/probe-hosts"
+          printf '%s\n' '43.108.85.230 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBVs0rMUkG8swe6GbMp6GYeLmmHf/cFrWO91lN+X5QBnFxABKB4oSZOysIirfiBfA5FLDNxoDdnLF8koYiVnVNI=' >> "$RUNNER_TEMP/probe-hosts"
+          printf '%s\n' '13.236.116.49 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBA6Ap+yEdSgyLdt73SJT4vhL+0gCxoHuhTAkMW3CXFJIlJECuxMrasCZubbuzQXZ87+DvwGt5f2OTcb79qEtt+0=' >> "$RUNNER_TEMP/probe-hosts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proxy-speed-public-key-${{ github.run_id }}
+          path: ${{ runner.temp }}/probe-key.pub
+          retention-days: 1
+      - name: Await narrowly scoped temporary authorization
+        run: |
+          export LYCO_PROBE_PHASE='${{ inputs.speed_probe }}'
+          bash scripts/run-scoped-ssh-probe.sh
+          python3 - <<'PY'
+          import json,hashlib,os,pathlib
+          d=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'proxy-speed-result.json').read_text())
+          source=('proxy_node_dns.py' if d['phase'].startswith('node-') else
+              {'gateway-policy':'proxy_gateway_deploy.py','ordinary-labels':'ordinary_labels_deploy.py','ordinary-quality':'ordinary_quality_deploy.py','subscription-regions':'proxy_region_labels_deploy.py','subscription-catalogue':'proxy_catalogue_deploy.py','dns-forward':'proxy_dns_forward.py','au-isolation':'proxy_au_isolation.py','au-isolation-deploy':'proxy_au_isolation_deploy.py','au-relay':'proxy_au_relay.py','au-relay-deploy':'proxy_au_relay_deploy.py','dns-ipv4':'proxy_dns_ipv4.py','au-ipv4-isolation':'proxy_au_ipv4_isolation.py','au-ipv4-deploy':'proxy_au_ipv4_deploy.py'}.get(d['phase'],'proxy_speed_probe.py'))
+          assert d['probeSourceSha256']==hashlib.sha256((pathlib.Path('tests/ops')/source).read_bytes()).hexdigest()
+          for field,file in [('policySourceSha256','proxy_gateway_policy.py'),('subscriptionContractSourceSha256','proxy_subscription_contract.py'),('qualitySourceSha256','ordinary_quality.py'),('regionLabelsSourceSha256','proxy_region_labels.py'),('catalogueSourceSha256','proxy_catalogue_visibility.py')]:
+              assert field not in d or d[field]==hashlib.sha256((pathlib.Path('tests/ops')/file).read_bytes()).hexdigest()
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proxy-speed-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/proxy-speed-result.json
+            ${{ runner.temp }}/proxy-speed-ssh.log
+          retention-days: 7
+      - name: Remove private one-use identity
+        if: always()
+        run: rm -f "$RUNNER_TEMP/probe-key"

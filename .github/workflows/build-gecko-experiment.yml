@@ -1,0 +1,52 @@
+name: Source-built Gecko native route experiment
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: source-built-gecko-native-experiment
+  cancel-in-progress: false
+jobs:
+  native-engine:
+    name: Compile actual patched Gecko C++ · x86_64 experiment only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare disposable build host disk
+        run: |
+          mkdir -p "$RUNNER_TEMP/lyco-gecko-build-evidence"
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-before.txt"
+          free -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/memory.txt"
+          # Only the fresh hosted runner's unused SDKs. Gecko bootstrap installs
+          # its own selected Android tools; product jobs run on other hosts.
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-after.txt"
+          test "$(df --output=avail -B1 "$RUNNER_TEMP" | tail -1)" -gt 45000000000
+      - name: Build the pinned source with native route fix
+        run: bash tests/mobile/engine/source/build-engine.sh
+      - name: Retain compiled experiment dependency
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-built-gecko-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-output/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+      - name: Preserve source, patch, original logs and scope
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-build-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          retention-days: 7

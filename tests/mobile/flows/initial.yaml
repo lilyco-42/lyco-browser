@@ -1,0 +1,39 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: create.yaml
+    env:
+      NAME: mobile-A
+      URL: http://lyco-fixture.invalid:18080/probe?owner=mobile-A
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-A
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-A"
+    timeout: 30000
+- runFlow: navigation.yaml
+- runFlow: close.yaml
+- runFlow:
+    file: create.yaml
+    env:
+      NAME: mobile-B
+      URL: http://lyco-fixture.invalid:18080/probe?owner=mobile-B
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-B
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-B"
+    timeout: 30000
+- runFlow: close.yaml
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-A
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-A"
+    timeout: 30000
+- runFlow: close.yaml

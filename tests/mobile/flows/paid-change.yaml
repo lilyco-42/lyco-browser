@@ -1,0 +1,31 @@
+appId: top.lain42.lycobrowser
+---
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- tapOn: "选择线路 CI route B"
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: DOWN
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "LYCO route B owner A"
+    timeout: 30000
+- runFlow: close.yaml
+- tapOn: "会员与代理"
+- scrollUntilVisible:
+    element: "退出"
+    direction: UP
+- tapOn: "退出"
+- runFlow:
+    file: paid-login.yaml
+    env:
+      OWNER: ci-owner-b
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "部分环境已绑定其他网站账号，登录所属账号后可查看。"
+    direction: DOWN
+- assertNotVisible: "打开环境 paid-A"
+- assertNotVisible: "打开环境 paid-B"
+- takeScreenshot: paid-other-account-hidden

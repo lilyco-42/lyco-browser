@@ -37,7 +37,7 @@ test('before every launch verifies account and overrides a stale or manually rem
  assert.equal(started.proxy,'http://127.0.0.1:18002');assert.equal(started.proxyId,profile.proxyId);
  assert.equal(started.proxyMeta.lycoManaged,true);assert.equal(started.proxyMeta.directBypass,false);
  state.username='owner-b';await assert.rejects(()=>engine.start(profile),/另一网站账号/);
- state.username='owner-a';state.entitled=false;await assert.rejects(()=>engine.start(profile),/有效代理月卡/);
+ state.username='owner-a';state.entitled=false;await assert.rejects(()=>engine.start(profile),/有效代理订阅/);
  assert.equal(calls.starts.length,1);
 });
 test('ownership survives application restart and other user environments are preserved',async t=>{
@@ -107,4 +107,23 @@ test('unexpected proxy loss shuts down only bound managed environments',async t=
  await args.network.onCoreExit();
  assert.deepEqual(calls.stops,[profile.id]);
  assert.equal(calls.stops.includes('independent'),false);
+});
+
+test('a Billing authorization-loss event closes only persisted managed environments',async t=>{
+ const {service,engine,args,calls}=setup(t);
+ const {profile}=await service.create();engine.profiles.set('manual',{id:'manual'});
+ await args.network.onAuthorizationLost();
+ assert.deepEqual(calls.stops,[profile.id]);
+});
+
+test('new managed profiles use the selected kernel capability without rewriting existing explicit modes',async t=>{
+ const {args,engine,service}=setup(t);
+ const {profile:existing}=await service.create();
+ assert.equal(existing.privacy.clientRects,'native');
+ const restarted={...engine,start:async p=>p};
+ const compatible=new LycoProfiles({...args,engine:restarted,layoutPolicy:()=> 'noise'});
+ const {profile}=await compatible.create();
+ assert.equal(profile.privacy.clientRects,'noise');
+ assert.equal(restarted.profiles.get(existing.id).privacy.clientRects,'native');
+ assert.equal(profile.networkMode,'proxy');
 });

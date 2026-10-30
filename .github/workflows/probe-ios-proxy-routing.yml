@@ -1,0 +1,50 @@
+name: Investigate iOS public proxy routing (not release acceptance)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/mobile/ios-proxy-probe.swift'
+      - 'tests/mobile/run-ios-proxy-probe.sh'
+      - 'tests/mobile/proxy-probe-fixture.py'
+      - '.github/workflows/probe-ios-proxy-routing.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  isolated-wkwebview:
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache-dependency-path: mobile/core/go.sum}
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - name: Build the actual pinned Apple core for the isolated application
+        working-directory: mobile/core
+        run: bash build-native.sh apple
+      - name: Compile and run the minimal native proxy matrix
+        timeout-minutes: 9
+        run: bash tests/mobile/run-ios-proxy-probe.sh
+      - name: Collect original simulator diagnostics after the investigation
+        if: always()
+        timeout-minutes: 1
+        run: |
+          evidence="$RUNNER_TEMP/lyco-ios-proxy-probe"
+          if [[ -s "$evidence/simulator-udid.txt" ]]; then
+            device=$(cat "$evidence/simulator-udid.txt")
+            xcrun simctl io "$device" screenshot "$evidence/probe-screen.png" || true
+            xcrun simctl spawn "$device" log show --style compact --last 5m --predicate 'process == "LYCOProxyProbe"' > "$evidence/probe-system.log" 2>&1 || true
+          fi
+      - name: Retain the original investigation observations even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-ios-proxy-investigation-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-ios-proxy-probe
+          if-no-files-found: warn
+          retention-days: 7

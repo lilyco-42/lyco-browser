@@ -4,13 +4,27 @@ const fs=require('node:fs'),path=require('node:path');
 const {replaceOne}=require('./source-patch');
 const {nativeGetterMatches}=require('../src/native-navigator');
 const {noisyRectGeometry}=require('../src/rect-geometry');
+const {parseProductVersion}=require('../src/product-version');
 const base=path.resolve(__dirname,'..'),app=path.resolve(process.argv[2]||path.join(base,'upstream','Browserapp'));
 if(!fs.existsSync(path.join(app,'main.js'))||!fs.existsSync(path.join(app,'package.json')))throw Error('Pinned OpenBrowser source required');
+require('node:child_process').execFileSync(process.execPath,[path.join(base,'scripts/ui-font.mjs'),app],{stdio:'inherit'});
+const productFile=path.join(base,'apps','universal','src','product.json');
+const product=parseProductVersion(JSON.parse(fs.readFileSync(productFile,'utf8')));
+const packageFile=path.join(app,'package.json');
+const packageInfo=JSON.parse(fs.readFileSync(packageFile,'utf8'));
+packageInfo.version=product.version;
+fs.writeFileSync(packageFile,JSON.stringify(packageInfo,null,2)+'\n');
 function one(file,from,to){
  const p=path.join(app,file),s=fs.readFileSync(p,'utf8');
  fs.writeFileSync(p,replaceOne(s,from,to,file),'utf8');
 }
 const join=(...parts)=>parts.join('\n');
+// Native kernels may expose a navigator member directly on the instance.
+// Keep absent APIs absent, but do not skip an exposed own member just because
+// it is not installed on Navigator.prototype.
+one('automation/fingerprint.js',
+ '        try { if (!(key in navProto)) continue; } catch (_) { continue; }',
+ '        try { if (!(key in navProto) && !(typeof navigator !== "undefined" && key in navigator)) continue; } catch (_) { continue; }');
 // A newly discovered country cannot confirm the country of a stale/default
 // saved timezone. Preserve valid exact network timezones and explicit custom
 // settings; only let IP-mode fallback derive from the newly known country.
@@ -71,25 +85,73 @@ for (const [key,value] of [['userAgent','U.userAgent'],['appVersion','U.appVersi
  one('automation/user-agent.js', 'define(proto, "'+key+'", () => '+value+');',
   'define(proto, "'+key+'", () => '+value+', receiver);');
 }
-for(const file of ['network.js','profiles.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','view.html','ui.js','workbench.js','workbench.css','account.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
+for(const file of ['network.js','profiles.js','workspace-routes.js','native-identity.js','new-tab-gate.js','startup-pages.js','session-restore.js','update-policy.js','update-download.js','view.html','ui.js','workbench.js','workbench.css','account.css','ui-font.css','desktop-appearance.js','desktop-ui.js','diagnostics-controller.js','diagnostics-ui.js']){
  const dst=path.join(app,'lyco',file);fs.mkdirSync(path.dirname(dst),{recursive:true});
  fs.copyFileSync(path.join(base,'src',file),dst);
 }
 fs.mkdirSync(path.join(app,'lyco','core'),{recursive:true});
+fs.copyFileSync(productFile,path.join(app,'lyco','product.json'));
 fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.txt'),path.join(app,'lyco','core','LICENSE-MIHOMO.txt'));
+fs.copyFileSync(path.join(base,'src','LICENSE-MIHOMO.source.json'),path.join(app,'lyco','core','LICENSE-MIHOMO.source.json'));
 const view=fs.readFileSync(path.join(base,'src','view.html'),'utf8');
 one('index.html','<title>OpenBrowser</title>','<title>LYCO Browser · 代理与会员</title>');
 one('index.html','href="assets/logo-pixel.png?v=20261002-flat"','href="assets/logo.png"');
 one('index.html','src="assets/logo-pixel.png?v=20261002-flat" alt="OpenBrowser"','src="assets/logo.png" alt="Lyco 原创角色"');
 one('index.html','<strong>OpenBrowser</strong><small data-i18n="app.brand.sub">','<strong>LYCO Browser</strong><small data-i18n="app.brand.sub">');
 one('index.html','href="https://github.com/sheying2013/OpenBrowser"','href="https://github.com/lilyco-42/lyco-browser"');
-one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';","const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';");
+one('main.js',"const UPDATE_REPOSITORY = 'sheying2013/OpenBrowser';",join(
+ "const UPDATE_REPOSITORY = 'lilyco-42/lyco-browser';",
+ "const {resolveStableReleaseMeta, updateAssetUrlIsAllowed} = require('./lyco/update-policy');",
+ "const {resolveAssetSha256, copyVerifiedUpdate} = require('./lyco/update-download');"));
+// The pinned upstream's Atom-first resolver also sees CI and preview tags.
+// Keep its callers, but resolve only official stable releases for this product.
+for(const [pattern,replacement] of [
+ [/async function resolveLatestReleaseMeta\(\) \{[\s\S]*?\n\}\n(?=\nasync function resolveReleaseAsset)/g,
+  'async function resolveLatestReleaseMeta() {\n  return resolveStableReleaseMeta({fetch, userAgent: updateUserAgent(), timeout: UPDATE_TIMEOUT_MS});\n}\n'],
+ [/function updateUrlIsAllowed\(value, assetName\) \{[\s\S]*?\n\}\n(?=\nfunction updateUserAgent)/g,
+  'function updateUrlIsAllowed(value, assetName) {\n  return updateAssetUrlIsAllowed(value, assetName);\n}\n'],
+ [/      const reader = response\.body\.getReader\(\);\n      while \(true\) \{[\s\S]*?\n      \}\n/g,
+  join('      received = await copyVerifiedUpdate({reader: response.body.getReader(), file,',
+   '        expectedSha256: result.asset.sha256,',
+   "        expectedSize: result.asset.size || (response.headers.get('content-encoding') ? 0 : contentLength),",
+   '        maxBytes: UPDATE_MAX_BYTES, onProgress: value => {',
+   '          received = value;',
+   "          emit({ type: 'app-update-progress', received, total: contentLength || result.asset.size || 0, percent: contentLength ? Math.min(100, Math.round(received / contentLength * 100)) : null, version: result.remoteVersion });",
+   '        }});','')],
+]){
+ const matches=fs.readFileSync(path.join(app,'main.js'),'utf8').replace(/\r\n/g,'\n').match(pattern);
+ if(matches?.length!==1)throw Error('Pinned updater function boundary mismatch');
+ one('main.js',matches[0],replacement);
+}
+one('main.js','        const asset = Array.isArray(release.assets)',join(
+ '        if (release.draft !== false || release.prerelease !== false || release.tag_name !== `v${remoteVersion}`) return null;',
+ '        const asset = Array.isArray(release.assets)'));
+one('main.js',"const APP_UPDATE_CACHE_FILE = path.join(app.getPath('userData'), 'openbrowser-update-status.json');",
+ "const APP_UPDATE_CACHE_FILE = path.join(app.getPath('userData'), 'lyco-stable-update-status.json');");
+one('main.js','  return {\n    // supported = can show green/red',join(
+ '  if (asset) asset.sha256 = await resolveAssetSha256({asset, remoteVersion, release: meta.apiRelease,',
+ '    userAgent: updateUserAgent()}).catch(() => null);',
+ '  return {',
+ '    // supported = can show green/red'));
+one('main.js','canDownload: Boolean(assetName && asset?.browser_download_url),',
+ 'canDownload: Boolean(assetName && asset?.browser_download_url && asset?.sha256),');
+one('main.js','asset: asset ? { name: asset.name, size: asset.size || 0, browser_download_url: asset.browser_download_url } : null,',
+ 'asset: asset ? { name: asset.name, size: asset.size || 0, browser_download_url: asset.browser_download_url, sha256: asset.sha256 } : null,');
+one('main.js',"    const file = await fsp.open(temporaryPath, 'w');","    const file = await fsp.open(temporaryPath, 'wx');");
+one('main.js','      canDownload: Boolean(raw.canDownload),',
+ "      canDownload: Boolean(raw.canDownload && /^[a-f\\d]{64}$/i.test(raw.asset?.sha256 || '')),");
+// The updater must request the assets this product actually publishes.
+one('main.js', "  'darwin:x64': 'OpenBrowser-macOS-x86_64.dmg',\n", '');
+one('main.js', "'darwin:arm64': 'OpenBrowser-macOS-arm64-with-kernel.dmg'", "'darwin:arm64': 'LYCO-Browser-macOS-arm64-MVP.dmg'");
+one('main.js', "'win32:x64': 'OpenBrowser-Windows-x86_64-with-kernel.exe'", "'win32:x64': 'LYCO-Browser-Windows-x64-MVP.exe'");
+one('main.js', "'linux:x64': 'OpenBrowser-Linux-x86_64-with-kernel.tar.gz'", "'linux:x64': 'LYCO-Browser-Linux-x64-MVP.tar.gz'");
 one('index.html','<button class="nav" data-view="proxies">',join(
  '<button class="nav" data-view="lyco" lang="zh-CN" translate="no" aria-label="LYCO 账户与代理" title="LYCO 账户与代理"><i data-lucide="shield-check"></i><span class="lyco-nav-label">账户与代理</span></button>',
  '<button class="nav" data-view="proxies">'));
 one('index.html','<section class="view" id="view-groups">',view+'\n<section class="view" id="view-groups">');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/workbench.css">\n</head>');
 one('index.html','</head>','<link rel="stylesheet" href="lyco/account.css">\n</head>');
+one('index.html','</head>','<link rel="stylesheet" href="lyco/ui-font.css">\n</head>');
 one('index.html','</body>','<script src="lyco/ui.js"></script>\n<script src="lyco/workbench.js"></script>\n<script src="lyco/desktop-ui.js"></script>\n<script src="lyco/diagnostics-controller.js"></script>\n<script src="lyco/diagnostics-ui.js"></script>\n</body>');
 // UDA reads the host desktop only. Profile-specific locale/fingerprint APIs are
 // untouched, and an explicit light/dark preference still wins over the OS.
@@ -117,7 +179,10 @@ one('renderer.js','function viewMetaFor(view) {',join(
  '  if (view === "lyco") return ["LYCO 代理与会员","代理权益、独立环境与官方结算"];'));
 one('preload.js',"  getInfo: () => ipcRenderer.invoke('system:info'),",join(
  "  lycoDesktopAppearance: () => ipcRenderer.invoke('lyco:desktop-appearance'),",
- "  lycoCreateProfile: () => ipcRenderer.invoke('lyco:create-profile'),",
+ "  lycoCreateProfile: (params) => ipcRenderer.invoke('lyco:create-profile', params),",
+ "  lycoRouteCatalog: () => ipcRenderer.invoke('lyco:route-catalog'),",
+ "  lycoListProfileRoutes: () => ipcRenderer.invoke('lyco:profile-routes'),",
+ "  lycoSetProfileRoute: (params) => ipcRenderer.invoke('lyco:set-profile-route', params),",
  "  lycoCopyExtension: () => ipcRenderer.invoke('lyco:copy-extension'),",
  "  lycoStatus: () => ipcRenderer.invoke('lyco:status'),",
  "  lycoLogin: (params) => ipcRenderer.invoke('lyco:login', params),",
@@ -150,7 +215,10 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('lyco:logout', () => lycoProfiles.disconnect({logout:true}));",
  "  registerTrustedIpc('lyco:connect', () => lycoNetwork.connect());",
  "  registerTrustedIpc('lyco:disconnect', () => lycoProfiles.disconnect());",
- "  registerTrustedIpc('lyco:create-profile', () => lycoProfiles.create());",
+ "  registerTrustedIpc('lyco:create-profile', (_event, params) => lycoProfiles.create(params || {}));",
+ "  registerTrustedIpc('lyco:route-catalog', () => lycoProfiles.routeCatalog());",
+ "  registerTrustedIpc('lyco:profile-routes', () => lycoProfiles.listRoutes());",
+ "  registerTrustedIpc('lyco:set-profile-route', (_event, params) => lycoProfiles.setRoute(params || {}));",
  "  registerTrustedIpc('lyco:copy-extension', async () => {",
  "    const connection = await lycoNetwork.extensionConnection();",
  "    require('electron').clipboard.writeText(JSON.stringify(connection));",
@@ -170,7 +238,7 @@ one('main.js',"  registerTrustedIpc('app:open-github', async () => {",join(
  "  registerTrustedIpc('app:open-github', async () => {"));
 one('main.js','.then(() => localSettingsWriter.flushNow())',join(
  '.then(() => localSettingsWriter.flushNow())',
- '    .then(() => lycoNetwork?.disconnect())'));
+ '    .then(() => lycoProfiles ? lycoProfiles.disconnect() : lycoNetwork?.disconnect())'));
 console.log('LYCO overlay applied to pinned upstream');
 
 // Protect only LYCO owned proxy windows from the upstream local-host bypass.
@@ -261,6 +329,12 @@ one('engine.js', '    const completedInitialTargets = new Set();', join(
  '      connection.lycoIdentityRefusedSessions.add(sessionId);',
  "      void connection.command('Target.closeTarget', {targetId}).catch(() => {});",
  '    }});'));
+// Generic UA/metrics preparation may invalidate Chromium's CPU override.
+// Finalize only that override after document scripts: restoring the complete
+// native device here would overwrite their configured navigator properties.
+one('engine.js', '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();', join(
+ '    await item?.lycoNativeIdentity?.finalizeSession(connection, sessionId, targetInfo);',
+ '    if (!item.fpAppliedTargets) item.fpAppliedTargets = new Set();'));
 one('engine.js', '        const destroyedId = event.params?.targetId;', join(
  '        const destroyedId = event.params?.targetId;',
  '        newTabGate.targetClosed(destroyedId);',
@@ -394,7 +468,7 @@ one('engine.js', '      item.cdpError = error.message;', join(
 one('engine.js',
  '    const tabs = await cdp.tabs(port);',
  join('    const tabs = await cdp.tabs(port);',
- '    await options.trackOn?.lycoNativeIdentity?.apply(tabs);'));
+ '    await options.trackOn?.lycoNativeIdentity?.apply(tabs, options.trackOn?.fpAppliedTargets);'));
 one('engine.js',
  "      let bypass = '<-loopback>;127.0.0.1;localhost';",
  "      let bypass = this.lycoIsManagedProfile?.(profile) ? '<-loopback>' : '<-loopback>;127.0.0.1;localhost';");
@@ -408,7 +482,7 @@ one('engine.js',"      const kernelVer = browser?.version || (isOpenBrowser148(b
 
 one('main.js',"  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",join(
  "  engine = new BrowserEngine(app, { profileDataRoot: localSettings.profileDataRoot });",
- "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData')});"));
+ "  lycoProfiles = new LycoProfiles({network:lycoNetwork,engine,proxyStore:()=>automation?.proxyStore,dataDir:app.getPath('userData'),layoutPolicy:()=>require('./automation/browser-kernel').isWayfernKernel(engine.browserSelection()?.browser||{})?'native':'noise'});"));
 one('renderer.js','function renderProfiles() {',join(
  'function lycoPreferredGroup() {',
  "  return activeGroupFilter === 'ungrouped' ? UNGROUPED_ID : (findGroup(activeGroupFilter)?.id || listGroups()[0]?.id || UNGROUPED_ID);",

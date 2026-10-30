@@ -29,7 +29,7 @@ test('explicit connect and disconnect restore prior browser settings without iss
  assert.equal((await app.message('connect',{code:app.code().replace('127.0.0.1','example.com')})).ok,false);
  assert.deepEqual(app.get(),before);
  await app.message('disconnect');assert.equal(app.get().value.mode,'auto_detect');
- await app.message('open-shop');assert.deepEqual(app.tabs,[{url:'https://lain42.top/shop/#proxy_1m'}]);
+ await app.message('open-shop');assert.deepEqual(app.tabs,[{url:'https://lain42.top/vpn/#plans'}]);
 });
 test('expiry and lost session block owned proxy settings; other extensions are left alone',async()=>{
  const app=await setup();await app.message('connect',{code:app.code()});

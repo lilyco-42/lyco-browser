@@ -1,0 +1,22 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- tapOn: "会员与代理"
+- tapOn:
+    id: "网站用户名"
+- inputText: ci-owner-a
+- pressKey: Enter
+- tapOn:
+    id: "网站密码"
+- inputText: CI_fixture_password
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "登录并验证权益"
+    direction: DOWN
+- tapOn: "登录并验证权益"
+- extendedWaitUntil:
+    visible: ".*SSLHandshakeException.*"
+    timeout: 30000
+- assertNotVisible: "代理年卡有效"
+- takeScreenshot: paid-untrusted-fixture-ca-rejected

@@ -1,0 +1,87 @@
+name: Mobile subscription core · source build and real routing
+on:
+  pull_request:
+    branches: [main]
+    paths: ['mobile/core/**', '.github/workflows/mobile-core.yml']
+  workflow_dispatch:
+    inputs:
+      routing_only:
+        description: Run the real routing suite without rebuilding unchanged native bindings
+        type: boolean
+        default: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+jobs:
+  core-routing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile/core
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
+      - name: Resolve verified Go modules (retry transient checksum service failures)
+        run: |
+          for attempt in 1 2 3; do
+            go mod tidy && break
+            test "$attempt" != 3 || exit 1
+            sleep 5
+          done
+      - run: go test -race -tags with_quic,with_utls -count=1 ./...
+      - name: Retain resolved dependency checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-mobile-core-lock-${{ github.run_id }}
+          path: |
+            mobile/core/go.mod
+            mobile/core/go.sum
+          retention-days: 7
+  native-bindings:
+    needs: core-routing
+    if: github.event_name != 'workflow_dispatch' || !inputs.routing_only
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {platform: android, runner: ubuntu-24.04}
+          - {platform: apple, runner: macos-26}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: mobile/core
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - name: Build native bindings from the pinned Go source
+        run: bash build-native.sh ${{ matrix.platform }}
+      - name: Retain tested application and verified Go module sources
+        if: matrix.platform == 'android'
+        run: python3 bundle-source.py
+      - name: Retain native libraries and generated API for integration review
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-mobile-core-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-tunnel.aar
+            ${{ runner.temp }}/lyco-tunnel-apple.tar.gz
+            ${{ runner.temp }}/lyco-tunnel-bindings.txt
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 7

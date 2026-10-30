@@ -1,0 +1,5 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {"modules": ["LycoMobileBrowserModule"]},
+  "android": {"modules": ["top.lain42.browser.LycoMobileBrowserModule"]}
+}

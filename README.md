@@ -19,7 +19,7 @@ ZIP SHA-256：`b3530f515ae539f0f0c500d5d473782525f286fd5c189a49feafcbe063cc4b53`
 此入口固定到已验收的产品源提交 `65b51acdbf5bb7e8c2273ea219c82b3cb0547463`，实际测试合并提交 `46d7fde745a1fe6fcaa5054fbd526f5c0952eb45`；[PR #24](https://github.com/lilyco-42/lyco-browser/pull/24) 已合并，main 合并提交 `3c03a10` 与测试提交内容树一致。下载不会随其他平台或文档版本漂移。可用 `Get-FileHash .\LYCO-Browser-Windows-x64-MVP.exe -Algorithm SHA256` 核对。
 
 1. 下载并安装或解压，打开 **LYCO Browser**。
-2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对月卡。也可通过环境编辑器配置自有代理。
+2. 如需使用本站线路，在 **LYCO 代理与会员** 登录已有网站账号并核对代理订阅。也可通过环境编辑器配置自有代理。
 3. 本站月卡用户点击 **一键创建专属代理环境**；购买或续费由你主动打开[官网商城](https://lain42.top/shop/#proxy_1m)完成。
 4. 在环境列表双击启动。点击 **环境检测** 可选择运行中的环境并打开对应检测页。
 
@@ -114,25 +114,29 @@ tests/network.test.js
 - LYCO 特定代码只是集成层，不代表整个复合安装包已经通过商业闭源分发的法律合规审核。
 
 
-## React Native 全平台架构（2026-10-15）
+## 五平台发行开发（PR #31）
 
-共享源码在 `apps/universal/`，使用 Expo SDK 56 / React Native 0.85，包含 **官网登录、有效月卡检查、购买与续费、环境元数据本机持久化、移动端临时网页浏览**。这套 React Native 界面不调用管理接口、也不内嵌支付密钥或保存账户 JWT 到存储。
+共享源码在 `apps/universal/`，使用 Expo SDK 56 / React Native 0.85，包含官网登录、有效月卡检查、官网购买与续费入口、环境元数据持久化及原生移动浏览环境。网站 JWT 仅保存在应用内存；网页没有账户或代理凭据桥接接口。当前工作仍在 [PR #31](https://github.com/lilyco-42/lyco-browser/pull/31)，尚未完成五平台商业发行，验收记录与待办见[发行进度](docs/ALL-PLATFORM-READINESS.md)。
 
-| 目标 | React Native 控制层 | 浏览器内核 | VPN 出口 | GitHub Actions 目标 |
+| 目标 | 应用 | 浏览环境隔离 | 浏览代理 | GitHub Actions 目标 |
 |---|---|---|---|---|
-| Android | RN/Expo 原生 APK | Android System WebView（临时页面） | 原生 VpnService 待做 | `build-universal.yml / android` |
-| iOS | RN/Expo 原生 Simulator App | WKWebView（临时页面） | Network Extension 待做 | `build-universal.yml / ios-simulator` |
-| Windows | RN Web 控制 UI + OpenBrowser 桌面版 | OpenBrowser Chromium | Mihomo 绑定独立环境 | `build-universal.yml / web` + `build-windows.yml` |
-| macOS | RN Web 控制 UI + OpenBrowser 桌面版 | OpenBrowser / Wayfern（按上游分发） | Mihomo 绑定独立环境 | `build-universal.yml / web` + `build-desktop-unix.yml` |
-| Linux | RN Web 控制 UI + OpenBrowser 桌面版 | Chromium / Google Chrome（按上游分发） | Mihomo 绑定独立环境 | `build-universal.yml / web` + `build-desktop-unix.yml` |
+| Android 9+ | RN/Expo APK | System WebView 环境专用数据目录、独立浏览进程 | 源码构建 sing-box；官网线路或自备 HTTP(S) | `build-universal.yml / android` |
+| iOS 17+ | RN/Expo 原生 App | WKWebView 独立持久 WKWebsiteDataStore | 源码构建 sing-box；带本机随机认证的 SOCKS5，回环目标绕过问题未解决 | `build-universal.yml / ios-simulator` |
+| Windows x64 | OpenBrowser 桌面版 | Wayfern 独立环境与保存身份 | Mihomo 绑定独立环境 | `build-windows.yml` |
+| macOS ARM64 | OpenBrowser 桌面版 | Wayfern 独立环境与保存身份 | Mihomo 绑定独立环境 | `build-desktop-unix.yml` |
+| Linux x64 | OpenBrowser 桌面版 | 随包 Chromium 独立数据目录 | Mihomo 绑定独立环境 | `build-desktop-unix.yml` |
 
-**不虚构移动端“防关联”能力：** React Native 和普通 WebView 本身不能保证独立指纹、设备参数伪装、WebRTC/DNS 防泄漏；`incognito` 是临时浏览，不等于每个环境都有独立浏览器存储或内核。iOS 替代浏览器内核需遵守 Apple 地区资格与 entitlement 规则。原生 VPN 需要单独实现并取得 Android/iOS 对应权限。现阶段 Android/iOS 只是 **可验证的多环境管理 + 会员控制 + 临时 WebView MVP**，不能宣称已具有桌面指纹浏览器的全部能力。
+Android 一次打开一个环境，关闭时结束浏览进程，防止旧 worker 沿用其他环境的代理。iOS 在建视图前给环境数据存储配置代理并关闭 failover；独立原生复现仍观察到本机目标直连，因此这项配置不足以证明故障时禁止直连。官网线路在启动前核实账号与有效月卡，原生层定期续验，失效或超过核实期限后停止。支持的订阅协议与实际测试范围以当前 Actions 为准，不能从编译成功推断所有节点均可连接。
+
+移动端提供原生地址栏、前进后退与刷新。环境列表的“清除网站数据”保留环境条目，“删除环境”在原生清除成功后删除条目，均由用户确认；其他环境的数据保留。Android 使用公开 API 设置环境自有的数据与缓存根，浏览进程停止后删除该根。Android 已签名候选已通过 A/B Cookie、localStorage、IndexedDB 隔离、清除与删除的完整原生验收；iOS 同样通过存储流程，但代理故障负向未通过，见[发行进度](docs/ALL-PLATFORM-READINESS.md)。
+
+**能力边界：** 移动端独立网站数据与浏览代理不能等同于独立硬件指纹、全设备 VPN 或 WebRTC/DNS 零泄漏。RN Web 产物是会员管理控制台，不能代替三个桌面应用；不同内核的指纹能力分别验收。代理故障直连、DNS/IPv6、真机与商业发行门禁仍需完成。
 
 **支付合规：** 测试版可打开官网商城；Apple App Store / Google Play 正式上架时需按适用地区及类别检查应用内数字商品支付和外链政策，不能默认允许绕过商店支付限制。
 
 **构建边界：** `npm install` / Expo prebuild / TypeScript check / Gradle / Xcode / macOS DMG / Linux tar.gz / Windows EXE 的构建和运行只能发生在 GitHub Actions runners。AgentDock 只处理版本管理、编辑、提交，不在设备/生产服务器上编译或执行。
 
-Android 交付未签名 debug APK；iOS 交付**模拟器未签名 App**（无法直接安装在真实 iPhone，正式 IPA 需要 Apple Developer 证书）；Web 是 RN 控制台静态资源；macOS/Linux 是原生 OpenBrowser 发行包。**不要把 CI 源码检查等同于实际设备端到端验收或支付成功。**
+Android 默认构建打包 JS 的独立预览 APK；签名候选通过手动工作流使用保留的 LYCO 密钥，运行门禁通过后仅留候选 Artifact。iOS 可构建未签名模拟器 App 和独立的 iPhone ARM64 设备归档；设备 IPA 尚无有效签名，不能直接安装，真实设备和商店分发仍需有效 Apple 签名资格。macOS 签名公证、Windows 商业代码签名和商店账号尚未完成。**不要把 CI 检查等同于真机验收、商店上架或真实付款。**
 
 ## 路线
 
@@ -154,7 +158,7 @@ Actions 同时运行协议/权限/到期回归，以及真实 Chromium 的扩展
 
 ## 网站订阅专属环境（本轮开发）
 
-“代理与会员”新增一键创建专属代理环境：登录已有网站账号、核对月卡后自动启动内置 Mihomo、在代理库保存本地线路并创建已选好代理的独立环境。再从环境列表点击启动即可，不需要用户记端口或手动绑定。
+“代理与会员”新增一键创建专属代理环境：登录已有网站账号、核对代理订阅后自动启动内置 Mihomo、在代理库保存本地线路并创建已选好代理的独立环境。再从环境列表点击启动即可，不需要用户记端口或手动绑定。
 
 专属环境记录所属网站账号；每次启动重新核对账号和月卡，并自动更新重连后的本地端口。切换到其他网站账号或月卡失效时拒绝启动该环境；退出或断开会关闭受管窗口。已知月卡到期会停止本地核心。手动环境及原代理库操作保留。
 

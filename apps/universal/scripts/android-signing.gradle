@@ -1,0 +1,20 @@
+// Used only by the manually dispatched signed-candidate job. No key or password
+// belongs in source, Gradle arguments, build logs, or the APK assets.
+//
+// Android Gradle Plugin finalizes DSL state before afterEvaluate callbacks run.
+// Register signing configuration in finalizeDsl so modern AGP can create variants
+// without throwing "It is too late to add new signing configs".
+allprojects { candidate ->
+  candidate.plugins.withId('com.android.application') {
+    def androidComponents = candidate.extensions.getByName('androidComponents')
+    androidComponents.finalizeDsl { android ->
+      def signing = android.signingConfigs.maybeCreate('lycoRelease')
+      signing.storeFile = new File(System.getenv('LYCO_ANDROID_KEYSTORE'))
+      signing.storeType = 'PKCS12'
+      signing.storePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+      signing.keyAlias = System.getenv('ANDROID_KEY_ALIAS')
+      signing.keyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+      android.buildTypes.getByName('release').signingConfig = signing
+    }
+  }
+}
