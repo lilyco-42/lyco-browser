@@ -8,8 +8,21 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
  const fixture=await createWorkspaceRoutingFixture({chainedA:true}),created=[],connections=[];
  const result=report.workspaceRoutes={observations:[],pageRequests:[],checks:[]};
  const choose=async(id,label)=>{
-  await page.locator('#'+id+'-button').click();
-  await page.locator('#'+id+'-menu').getByRole('option',{name:label,exact:true}).click();
+  try{
+   await page.locator('#'+id+'-button').click();
+   await page.locator('#'+id+'-menu').getByRole('option',{name:label,exact:true}).click();
+  }catch(error){
+   result.selectorFailure=await page.evaluate(id=>{
+    const select=document.getElementById(id),button=document.getElementById(id+'-button'),menu=document.getElementById(id+'-menu');
+    return {id,value:select?.value,options:[...select?.options||[]].map(node=>({value:node.value,text:node.textContent})),
+     buttonExpanded:button?.getAttribute('aria-expanded'),buttonDisabled:button?.disabled,
+     menuLabels:menu?[...menu.querySelectorAll('[role="option"]')].map(node=>node.textContent):[],
+     query:document.getElementById('lyco-route-search')?.value,focusedElement:document.activeElement?.id,
+     scrollY:window.scrollY,viewport:{width:innerWidth,height:innerHeight}};
+   },id).catch(()=>({unavailable:true}));
+   await page.screenshot({path:path.join(evidence,'workspace-route-selector-failure.png')}).catch(()=>{});
+   throw error;
+  }
  };
  const waitPhase=async(phase,expected,previous)=>{
   const deadline=Date.now()+45000;
