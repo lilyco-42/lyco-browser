@@ -2,6 +2,10 @@
 
 目标保持为 Windows x64、macOS ARM64、Linux x64、Android、iOS 均具备代理连接与独立浏览环境，再发行。当前 PR：[#31](https://github.com/lilyco-42/lyco-browser/pull/31)。默认下载仍指向 README 中已验收的旧 Windows 预览包。
 
+2026-11-02 补查 `cb05f24`：Windows [41014443466](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443466) 仍在原生环境启动时因硬件/显卡回执被拒绝；macOS [41014443462](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443462) 的实际打包应用同样失败，同轮 Linux 成品任务及三平台核心路由任务成功。不能用 Linux 或核心路由成功替代其他平台的成品证明。Windows 独立 SDK [41014443369](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443369) 的完整原始 ZIP（2239 字节，SHA-256 `427edaab1f720035944d2e262d30ef452672a2410a6735238ac9621d79a700e0`）已核验：20 个新页面观察全部完成；自定义 GPU、GPU 后二次写硬件和 GPU 后仅写硬件三种模式均未保住所选 CPU/内存。语言/时区模式成功不等于 GPU 组合可用；产品拒绝与身份缓存保留检查继续生效。
+
+Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutdown，退出码 143；没有可验证 AAR，也无法从已丢失的重定向日志确定中断阶段。`7d4baf8` 改为实时保留原始阶段日志，新完整构建 [41439355235](https://github.com/lilyco-42/lyco-browser/actions/runs/41439355235) 已启动，尚无编译或运行通过结论。底层补丁、产品依赖、现有环境与原验收条件不变；五平台发行仍未完成。
+
 ## 已有证据
 
 移动 `655e071` 新增[环境保存官网线路](MOBILE-WORKSPACE-ROUTES.md)：账号归属、保存所选节点、重开保留选择、缺失节点拒绝回退及版本封装已实现。新增策略/迁移单元、类型和 Web 回归 [40676034809](https://github.com/lilyco-42/lyco-browser/actions/runs/40676034809) 通过；签名 Android [40676041190](https://github.com/lilyco-42/lyco-browser/actions/runs/40676041190) 原有完整原生验收通过，APK SHA-256 `338718ad3c29a51599579af12b5c7ef2ea8bc321de35485704e39227d35637f5`。新增官网绑定 [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 对同一未修改签名 APK 完成整组 12 项与 7 份实际 TCP/三类存储观察：重启恢复、缺失/断线不回退且 B 可用、换线保留数据、跨账号隐藏、旧版拒绝覆盖、恢复安装和原生撤权均通过；绑定/降级/恢复元数据摘要一致。iPhone [40677110486](https://github.com/lilyco-42/lyco-browser/actions/runs/40677110486) 设备编译成功，IPA SHA-256 `27e87797aabd8a74edbc22bbb27c7cb72225e08dc35d4d482d7d1a137133ab92`；未签名、不可直接安装、无真机证明。
