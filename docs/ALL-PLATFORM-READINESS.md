@@ -4,7 +4,11 @@
 
 2026-11-02 补查 `cb05f24`：Windows [41014443466](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443466) 仍在原生环境启动时因硬件/显卡回执被拒绝；macOS [41014443462](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443462) 的实际打包应用同样失败，同轮 Linux 成品任务及三平台核心路由任务成功。不能用 Linux 或核心路由成功替代其他平台的成品证明。Windows 独立 SDK [41014443369](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443369) 的完整原始 ZIP（2239 字节，SHA-256 `427edaab1f720035944d2e262d30ef452672a2410a6735238ac9621d79a700e0`）已核验：20 个新页面观察全部完成；自定义 GPU、GPU 后二次写硬件和 GPU 后仅写硬件三种模式均未保住所选 CPU/内存。语言/时区模式成功不等于 GPU 组合可用；产品拒绝与身份缓存保留检查继续生效。
 
-Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutdown，退出码 143；没有可验证 AAR，也无法从已丢失的重定向日志确定中断阶段。`7d4baf8` 改为实时保留原始阶段日志，新完整构建 [41439355235](https://github.com/lilyco-42/lyco-browser/actions/runs/41439355235) 已启动，尚无编译或运行通过结论。底层补丁、产品依赖、现有环境与原验收条件不变；五平台发行仍未完成。
+`521be90` 的 [41443469209](https://github.com/lilyco-42/lyco-browser/actions/runs/41443469209) Linux/macOS 实际成品已通过完整主检查和新增 1252 条受控目录的搜索验收，详见[完整目录搜索](WORKSPACE-ROUTES.md#完整目录搜索)。保留此前 macOS 的原生配置失败记录；本轮未修底层身份逻辑，不能宣布硬件兼容性稳定问题已解决。
+
+Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutdown，退出码 143；没有可验证 AAR，也无法从已丢失的重定向日志确定中断阶段。`7d4baf8` 的 [41439355235](https://github.com/lilyco-42/lyco-browser/actions/runs/41439355235) 使用实时阶段日志，已通过 bootstrap、单文件格式及差异检查并进入实际编译，但在 2026-11-02T12:19:39Z 再次因运行器关闭而退出 143，无 AAR；不能据此认定补丁编译失败或内存不足。新资源记录及负载受限构建 [41445348901](https://github.com/lilyco-42/lyco-browser/actions/runs/41445348901) 已启动，尚无通过结论。底层补丁、产品依赖、现有环境与原验收条件不变；五平台发行仍未完成。
+
+官方元数据 [41440308103](https://github.com/lilyco-42/lyco-browser/actions/runs/41440308103) 已真实返回 HTTP200 与 Wayfern `155.0.8059.79`。静态档案 [41441842796](https://github.com/lilyco-42/lyco-browser/actions/runs/41441842796) 核验 1599626910 字节、完整 SHA-256 `43925a0841c254f66289565cd1d65f7d783c1f1e40b2a77fd402253c59b3e8b1` 和 CRC。后续 [41444394428](https://github.com/lilyco-42/lyco-browser/actions/runs/41444394428) 确认唯一 Windows 大小写冲突是内容完全相同的 `D3DCompiler_47.dll` 别名，准备脚本只对这一已锁定摘要的别名保留一份，其他冲突继续拒绝。独立运行 [41444926801](https://github.com/lilyco-42/lyco-browser/actions/runs/41444926801) 完成档案准备，但未取得调试端口，零个原生能力场景通过；新版尚未证明兼容。按官方启动器的应用数据目录约定及有界启动诊断继续测试 [41445898518](https://github.com/lilyco-42/lyco-browser/actions/runs/41445898518)，未替换产品默认内核、身份缓存或下载安装包。
 
 ## 已有证据
 
