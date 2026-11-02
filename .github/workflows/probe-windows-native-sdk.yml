@@ -57,6 +57,12 @@ jobs:
                   if url.scheme!='https' or url.hostname not in ['download.wayfern.com','donutbrowser.com'] or url.username or url.password or url.query or url.fragment:
                       result['downloads'][platform]={'available':True,'url_retained':False}
                   else:result['downloads'][platform]={'available':True,'url':value}
+              candidate='https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip'
+              if result['downloads'].get('windows-x64',{}).get('url')==candidate:
+                  head=urllib.request.Request(candidate,method='HEAD',headers={'User-Agent':'LYCO-official-archive-audit/1.0'})
+                  with urllib.request.urlopen(head,timeout=30) as response:
+                      result['fixedCandidateArchiveHeaders']={'http_status':response.status,'url':response.url,
+                          'contentLength':response.headers.get('Content-Length'),'contentType':response.headers.get('Content-Type')}
           except urllib.error.HTTPError as error:
               result['http_status']=error.code
           except Exception as error:
