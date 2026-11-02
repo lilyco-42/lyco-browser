@@ -14,7 +14,8 @@ const cdp = requireApp('./cdp');
 const {ensureKernelReadyForLaunch} = requireApp('./automation/browser-kernel');
 const candidate = Boolean(process.env.LYCO_NATIVE_CANDIDATE_PATH);
 const binary = candidate ? path.resolve(process.env.LYCO_NATIVE_CANDIDATE_PATH) : path.join(appRoot, 'kernels/windows-x64/chrome.exe');
-if(candidate && (path.relative(path.resolve(process.env.RUNNER_TEMP,'lyco-native-candidate'),binary).startsWith('..')
+const candidateRelative=path.relative(path.resolve(process.env.RUNNER_TEMP,'lyco-native-candidate'),binary);
+if(candidate && (path.isAbsolute(candidateRelative) || candidateRelative==='..' || candidateRelative.startsWith('..'+path.sep)
   || path.basename(binary)!=='chrome.exe'))throw Error('Candidate is outside its reviewed runner directory');
 const evidence = path.join(process.env.RUNNER_TEMP, 'lyco-sdk-order-probe');
 await fs.mkdir(evidence, {recursive: true});

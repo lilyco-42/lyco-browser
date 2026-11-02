@@ -20,7 +20,8 @@ stage.mkdir(exist_ok=False)
 archive_path = stage/'original.zip'
 digest = hashlib.sha256()
 size = 0
-with urllib.request.urlopen(manifest['url'], timeout=60) as response, archive_path.open('xb') as stream:
+request = urllib.request.Request(manifest['url'], headers={'User-Agent': 'LYCO-official-archive-audit/1.0'})
+with urllib.request.urlopen(request, timeout=60) as response, archive_path.open('xb') as stream:
     assert response.status == 200 and response.url == manifest['url']
     assert int(response.headers['Content-Length']) == manifest['expected_bytes']
     for block in iter(lambda: response.read(1024*1024), b''):
