@@ -5,6 +5,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import stat
+from collections import defaultdict
 import urllib.request
 import zipfile
 
@@ -55,6 +56,22 @@ with zipfile.ZipFile(archive_path) as archive:
     result['executable'] = {'path': executable.filename, 'bytes': executable.file_size, 'sha256': executable_digest}
     result['fileCount'] = len(rows)
     result['expandedBytes'] = sum(row.file_size for row in rows)
+    by_windows_path = defaultdict(list)
+    for row in rows:
+        by_windows_path[PurePosixPath(row.filename.replace('\\', '/')).as_posix().casefold()].append(row)
+    result['windowsPathCollisions'] = []
+    for group in by_windows_path.values():
+        if len(group) < 2:
+            continue
+        observed = []
+        for row in group:
+            entry = {'path': row.filename, 'directory': row.is_dir(), 'bytes': row.file_size}
+            if not row.is_dir():
+                with archive.open(row) as stream:
+                    entry['sha256'] = hashlib.file_digest(stream, 'sha256').hexdigest()
+            observed.append(entry)
+        result['windowsPathCollisions'].append(observed)
+    (evidence/'archive-paths.json').write_text(json.dumps([{'path': row.filename, 'bytes': row.file_size, 'directory': row.is_dir()} for row in rows], indent=2)+'\n')
     result['publicNotices'] = []
     notice_names = {'license', 'license.txt', 'license.chromium.html', 'licenses.chromium.html', 'notice', 'notice.txt', 'credits.html'}
     for row in rows:
