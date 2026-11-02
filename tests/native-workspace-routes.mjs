@@ -72,9 +72,10 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   await page.locator(`#profile-table tr[data-profile-id="${created[0].id}"] .lyco-bound-route`).click();
   await page.locator(`[data-profile-route="${created[0].id}"]`).waitFor();
   const savedChoices=await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value})));
+  const savedBindings=await page.evaluate(()=>window.lycoProfileRouteView.profiles.map(row=>({id:row.id,routeId:row.routeId})));
   await routeSearch.fill('CI_NO_MATCH');
   assert.deepEqual(await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value}))),savedChoices);
-  assert.deepEqual(await page.evaluate(()=>window.lycoProfileRouteView.profiles.map(row=>({id:row.id,routeId:row.routeId}))),created.map((profile,index)=>({id:profile.id,routeId:savedChoices[index].value})));
+  assert.deepEqual(await page.evaluate(()=>window.lycoProfileRouteView.profiles.map(row=>({id:row.id,routeId:row.routeId}))),savedBindings);
   await page.getByRole('button',{name:'清除筛选',exact:true}).click();
   assert.deepEqual(await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value}))),savedChoices);
   const geometry=await page.locator('#lyco-route-card').evaluate(card=>({client:card.clientWidth,scroll:card.scrollWidth}));

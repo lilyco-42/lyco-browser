@@ -215,9 +215,14 @@ try{
  await page.evaluate(id=>window.ops.stopProfile(id),directProfile.id);
  report.checks.push('unmanaged-native-http-websocket-tls-direct-positive-controls');
  await verifyNativeWorkspaceRoutes({app,page,report,evidence});
- await page.locator('[data-view="lyco"]').click();await page.locator('#lyco-logout').click();
+ await page.locator('[data-view="lyco"]').click();
+ await page.getByRole('searchbox',{name:'搜索已加载的线路',exact:true}).fill('CI route A');
+ await page.locator('#lyco-logout').click();
  await page.waitForFunction(()=>document.getElementById('view-lyco').getAttribute('aria-busy')==='false'&&document.getElementById('lyco-feedback').textContent.includes('已退出'));
  assert.equal((await page.evaluate(()=>window.ops.lycoStatus())).logged_in,false);
+ assert.equal(await page.locator('#lyco-route-search').inputValue(),'');
+ assert.equal(await page.locator('#lyco-route-search').isDisabled(),true);
+ assert.deepEqual(await page.locator('#lyco-create-route option').allTextContents(),['默认订阅线路']);
  await page.locator('[data-view="profiles"]').click();
  await page.waitForFunction(()=>document.querySelectorAll('#profile-table .lyco-bound-route').length===0);
  report.checks.push('native-logout');
