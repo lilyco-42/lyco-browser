@@ -28,7 +28,13 @@ jobs:
           from urllib.parse import urlsplit
           result={'source':'https://donutbrowser.com/wayfern.json','scope':'Public metadata only; no binary, license token, or product acceptance'}
           try:
-              with urllib.request.urlopen(result['source'],timeout=30) as response:
+              # Match the official public metadata client, without account
+              # headers, cookies or tokens (api_client.rs blob 6fcc182c924505cc0be3dffe7f52aaef545b347c).
+              request=urllib.request.Request(result['source'],headers={
+                  'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+                  'Accept':'application/json',
+              })
+              with urllib.request.urlopen(request,timeout=30) as response:
                   raw=response.read(2*1024*1024+1)
                   result['http_status']=response.status
               if len(raw)>2*1024*1024:raise ValueError('metadata too large')
@@ -36,6 +42,10 @@ jobs:
               version=data.get('version','')
               if not isinstance(version,str) or not re.fullmatch(r'[0-9]+(?:\.[0-9]+){0,3}',version):raise ValueError('invalid version')
               result['version']=version;result['downloads']={}
+              revision=data.get('revision')
+              if revision is not None:
+                  if type(revision) is not int or not 1<=revision<=4294967295:raise ValueError('invalid revision')
+                  result['revision']=revision
               for platform in ['windows-x86_64','windows-x64','linux-x86_64','linux-x64','macos-aarch64','macos-arm64','macos-x86_64','macos-x64']:
                   value=data.get('downloads',{}).get(platform)
                   if not isinstance(value,str):continue
