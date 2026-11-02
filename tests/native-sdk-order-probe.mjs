@@ -69,6 +69,7 @@ try {
     const profile = await fs.mkdtemp(path.join(candidateProfiles,'lyco-sdk-profile-'));
     const persona = ['--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
       '--lang=en-GB','--accept-lang=en-GB,en','--force-device-scale-factor=1','--disable-blink-features=AutomationControlled'];
+    const startupDeadline=Date.now()+30000;
     const child = spawn(binary,['--user-data-dir='+profile,'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1',
       '--no-first-run','--no-default-browser-check','--disable-background-networking',
       ...(candidate?['--enable-logging=stderr','--log-level=0']:[]),
@@ -79,7 +80,7 @@ try {
     let connection;
     try {
       let port;
-      for (let attempt=0;attempt<150;attempt++) {
+      for (let attempt=0;attempt<150 && Date.now()<startupDeadline;attempt++) {
         try {port=Number((await fs.readFile(path.join(profile,'DevToolsActivePort'),'utf8')).split(/\r?\n/)[0]);if(port)break;} catch {}
         await sleep(200);
       }
@@ -111,9 +112,21 @@ try {
           types:domain?.types?.map(value=>({id:value.id,type:value.type,properties:value.properties?.map(descriptor)})),
         },null,2)+'\n');
       }
-      const tabs = await cdp.tabs(port);
-      const blank = tabs.find(tab=>tab.type==='page' && tab.url==='about:blank');
-      if (!blank) throw Error('No initial blank page');
+      // A listening browser debugger can precede its first page target. Wait
+      // for that target within the SAME original 30-second startup budget.
+      let tabs=[],blank;
+      do{
+        tabs=await cdp.tabs(port);
+        blank=tabs.find(tab=>tab.type==='page' && tab.url==='about:blank');
+        if(blank)break;
+        await sleep(100);
+      }while(Date.now()<startupDeadline);
+      if (!blank){
+        await fs.writeFile(path.join(evidence,'initial-target-failure.json'),JSON.stringify({candidate,mode,
+          targetTypes:tabs.map(tab=>tab.type),urlSchemes:tabs.map(tab=>{try{return new URL(tab.url).protocol}catch{return 'invalid'}}),
+          startupBudgetMs:30000,createdReplacementTarget:false},null,2)+'\n');
+        throw Error('No initial blank page');
+      }
       const seed = unpack(await cdp.call(blank.webSocketDebuggerUrl,'Wayfern.getFingerprint',{}));
       // Both hardware values must differ from the original native defaults, so
       // a coincidentally matching generated identity cannot pass this probe.
