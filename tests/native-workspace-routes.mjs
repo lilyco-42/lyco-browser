@@ -6,11 +6,19 @@ import {createWorkspaceRoutingFixture} from './workspace-routing-fixture.mjs';
 export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
  if(process.env.GITHUB_ACTIONS!=='true')throw Error('Packaged workspace route acceptance requires Actions');
  const fixture=await createWorkspaceRoutingFixture({chainedA:true}),created=[],connections=[];
+ // Catalogue aliases stay on the fixture-owned upstream; they never introduce
+ // an external destination. Selected A/B still use the original real routes.
+ for(let index=0;index<1249;index++)fixture.subscription.proxies.push({...fixture.subscription.proxies[0],name:'CI catalogue '+String(index).padStart(4,'0')});
  const result=report.workspaceRoutes={observations:[],pageRequests:[],checks:[]};
  const choose=async(id,label)=>{
   try{
+   const exactLabel=new RegExp('^'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$');
+   const expected=await page.locator('#'+id+' option').filter({hasText:exactLabel}).getAttribute('value');
    await page.locator('#'+id+'-button').click();
-   await page.locator('#'+id+'-menu').getByRole('option',{name:label,exact:true}).click();
+   // The host's selected-item checkmark is CSS-generated and enters its
+   // accessible name. Match the original option text, then verify its identity.
+   await page.locator('#'+id+'-menu').getByRole('option').filter({hasText:exactLabel}).click();
+   assert.equal(await page.locator('#'+id).inputValue(),expected,'The actual menu must select the requested node identity');
   }catch(error){
    result.selectorFailure=await page.evaluate(id=>{
     const select=document.getElementById(id),button=document.getElementById(id+'-button'),menu=document.getElementById(id+'-menu');
@@ -42,6 +50,8 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   await page.locator('[data-view="lyco"]').click();await page.locator('#lyco-load-routes').click();
   await page.locator('#lyco-create-route option').filter({hasText:'CI route A'}).waitFor({state:'attached'});
   const options=await page.locator('#lyco-create-route option').evaluateAll(nodes=>nodes.map(node=>({id:node.value,label:node.textContent})));
+  assert.equal(options.length,fixture.subscription.proxies.length+1,'Every catalogue entry must remain available before filtering');
+  result.catalogueEntries=fixture.subscription.proxies.length;
   assert.doesNotMatch(JSON.stringify(options),/CI_PRIVATE_ROUTE|password|127\.0\.0\.1/);
   const routeSearch=page.getByRole('searchbox',{name:'搜索已加载的线路',exact:true});
   await routeSearch.fill('cI ROUTE a');
