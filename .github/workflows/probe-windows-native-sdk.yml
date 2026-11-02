@@ -9,6 +9,10 @@ on:
         description: Inspect the official public kernel feed without downloading or running another browser
         type: boolean
         default: false
+      archive_only:
+        description: Inspect the fixed official Chromium 155 ZIP without executing a browser
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   current-public-metadata:
-    if: inputs.metadata_only
+    if: ${{ inputs.metadata_only && !inputs.archive_only }}
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -66,8 +70,27 @@ jobs:
           name: lyco-official-kernel-metadata-${{ github.run_id }}
           path: ${{ runner.temp }}/official-wayfern-metadata.json
           retention-days: 7
+  official-archive:
+    if: ${{ inputs.archive_only && !inputs.metadata_only }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Inspect the original official archive without executing it
+        run: python3 tests/native-sdk-archive-audit.py
+      - name: Preserve archive metadata and public notices only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-wayfern-archive-audit-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-wayfern-archive-audit
+          if-no-files-found: warn
+          retention-days: 7
   native-sdk:
-    if: ${{ !inputs.metadata_only }}
+    if: ${{ !inputs.metadata_only && !inputs.archive_only }}
     runs-on: windows-2022
     timeout-minutes: 15
     steps:

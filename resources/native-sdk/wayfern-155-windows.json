@@ -1,0 +1,10 @@
+{
+  "vendor": "Wayfern",
+  "version": "155.0.8059.79",
+  "platform": "windows-x64",
+  "url": "https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip",
+  "metadata_source": "https://donutbrowser.com/wayfern.json",
+  "metadata_run": 41440308103,
+  "metadata_artifact_sha256": "55a1ff648a7d6e680e4bb687cca2a36235cdf2c38cb17d61340b90abc4d30781",
+  "scope": "Official archive discovery only; no browser execution, product adoption or release acceptance"
+}
