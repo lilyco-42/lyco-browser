@@ -71,3 +71,13 @@ The builder now passes only the affected C++ path, as documented in the official
 GeckoView contributor guide, and preserves the changed-file list and patched
 source before checking the exact single-file and whitespace guards. Neither
 guard is relaxed. This failure produced no compiled dependency or runtime proof.
+
+The second attempt of 40853280935 ended with exit 143 and an explicit runner
+shutdown at 2026-10-29T15:58:49Z. Its last visible source check passed; all remaining
+output had been redirected into files on the lost runner, so neither the exact
+interrupted phase nor a compiler failure can be established from that attempt.
+No AAR was retained. The builder now streams every original phase log to Actions
+as well as its artifact file, and records phase, status and exit code in
+BUILD-STATE.json. A failed command still fails the build through pipefail;
+source/patch/ABI/acceptance guards are unchanged. This improves diagnosis of
+interrupted builds, and is not evidence that the native fix compiles or works.

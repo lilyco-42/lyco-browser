@@ -6,10 +6,29 @@ source_root="$RUNNER_TEMP/lyco-gecko-source"
 evidence="$RUNNER_TEMP/lyco-gecko-build-evidence"
 output="$RUNNER_TEMP/lyco-gecko-build-output"
 mkdir -p "$evidence" "$output"
+current_phase=initialization
+run_phase() {
+ current_phase=$1
+ shift
+ printf '\nGecko source build phase: %s (%s)\n' "$current_phase" "$(date -u +%FT%TZ)"
+ printf '{"phase":"%s","status":"running","checkedAt":"%s"}\n' \
+  "$current_phase" "$(date -u +%FT%TZ)" > "$evidence/BUILD-STATE.json"
+ # Keep original output both in the artifact and the live Actions log. A host
+ # shutdown can prevent even an always() artifact step from running.
+ if "$@" 2>&1 | tee "$evidence/$current_phase.log"; then
+  printf '{"phase":"%s","status":"complete","checkedAt":"%s"}\n' \
+   "$current_phase" "$(date -u +%FT%TZ)" > "$evidence/BUILD-STATE.json"
+ else
+  local status=$?
+  printf '{"phase":"%s","status":"failed","exitCode":%s,"checkedAt":"%s"}\n' \
+   "$current_phase" "$status" "$(date -u +%FT%TZ)" > "$evidence/BUILD-STATE.json"
+  return "$status"
+ fi
+}
 export MOZBUILD_STATE_PATH="$RUNNER_TEMP/lyco-mozbuild"
 export CARGO_BUILD_JOBS=2
-git clone --depth=1 --branch FIREFOX_159_0_RELEASE --single-branch \
- https://github.com/mozilla-firefox/firefox.git "$source_root" > "$evidence/checkout.log" 2>&1
+run_phase checkout git clone --depth=1 --branch FIREFOX_159_0_RELEASE --single-branch \
+ https://github.com/mozilla-firefox/firefox.git "$source_root"
 cd "$source_root"
 test "$(git rev-parse HEAD)" = 9a2dc53c369c7ae5172018b35988e1d2ffeff402
 printf '%s  %s\n' 918068eebc2080e170de43acbf3d10c3643f7fe8a82102548e38025622129988 \
@@ -27,31 +46,16 @@ mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-lyco
 mk_add_options MOZ_MAKE_FLAGS=-j2
 MOZCONFIG
 cp .mozconfig "$evidence/mozconfig.txt"
-if ! ./mach --no-interactive bootstrap --application-choice='GeckoView/Firefox for Android' > "$evidence/bootstrap.log" 2>&1; then
- tail -n 100 "$evidence/bootstrap.log"
- exit 1
-fi
-if ! ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp > "$evidence/format.log" 2>&1; then
- tail -n 100 "$evidence/format.log"
- exit 1
-fi
+run_phase bootstrap ./mach --no-interactive bootstrap --application-choice='GeckoView/Firefox for Android'
+run_phase format ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
 git diff --name-only > "$evidence/changed-files.txt"
 git diff -- dom/media/webrtc/jsapi/PeerConnectionImpl.cpp > "$evidence/applied.patch"
 cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp "$evidence/PeerConnectionImpl.cpp"
 git diff --check
 test "$(git diff --name-only)" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp
-if ! ./mach build > "$evidence/compile.log" 2>&1; then
- tail -n 120 "$evidence/compile.log"
- exit 1
-fi
-if ! ./mach package > "$evidence/package.log" 2>&1; then
- tail -n 100 "$evidence/package.log"
- exit 1
-fi
-if ! ./mach android archive-geckoview > "$evidence/archive.log" 2>&1; then
- tail -n 100 "$evidence/archive.log"
- exit 1
-fi
+run_phase compile ./mach build
+run_phase package ./mach package
+run_phase archive ./mach android archive-geckoview
 python3 - "$source_root" "$evidence" "$output" <<'PY'
 import hashlib,json,os,shutil,sys,zipfile
 from pathlib import Path
