@@ -13,6 +13,7 @@ root = Path(__file__).resolve().parents[1]
 manifest = json.loads((root/'resources/native-sdk/wayfern-155-windows.json').read_text())
 assert manifest['version'] == '155.0.8059.79' and manifest['platform'] == 'windows-x64'
 assert manifest['url'] == 'https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip'
+assert type(manifest['expected_bytes']) is int and 0 < manifest['expected_bytes'] <= 2*1024**3
 evidence = Path(os.environ['RUNNER_TEMP'])/'lyco-wayfern-archive-audit'
 evidence.mkdir(parents=True, exist_ok=True)
 archive_path = Path(os.environ['RUNNER_TEMP'])/'lyco-wayfern-discovery.zip'
@@ -22,12 +23,16 @@ size = 0
 with urllib.request.urlopen(request, timeout=60) as response, archive_path.open('xb') as stream:
     assert response.status == 200 and response.url == manifest['url'], 'Unexpected download response or redirect'
     length = response.headers.get('Content-Length')
+    headers = {'url': response.url, 'status': response.status, 'contentLength': length}
+    (evidence/'download-headers.json').write_text(json.dumps(headers, indent=2)+'\n')
+    print(json.dumps(headers), flush=True)
+    assert length is not None and int(length) == manifest['expected_bytes'], 'Official archive length changed'
     for block in iter(lambda: response.read(1024*1024), b''):
         size += len(block)
-        assert size <= 512*1024**2, 'Archive exceeds discovery size limit'
+        assert size <= manifest['expected_bytes'], 'Archive exceeds its observed official length'
         stream.write(block)
         digest.update(block)
-assert size > 0 and (length is None or size == int(length)), 'Incomplete archive download'
+assert size == manifest['expected_bytes'], 'Incomplete archive download'
 result = {
     'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
     'manifest': manifest, 'archiveBytes': size, 'archiveSha256': digest.hexdigest(),
@@ -36,7 +41,7 @@ result = {
 }
 with zipfile.ZipFile(archive_path) as archive:
     rows = archive.infolist()
-    assert rows and sum(row.file_size for row in rows) <= 4*1024**3, 'Unexpected expanded archive size'
+    assert rows and len(rows) <= 10000 and sum(row.file_size for row in rows) <= 8*1024**3, 'Unexpected expanded archive size'
     for row in rows:
         path = PurePosixPath(row.filename.replace('\\', '/'))
         assert not path.is_absolute() and '..' not in path.parts and not re.match(r'^[A-Za-z]:', str(path))

@@ -6,5 +6,7 @@
   "metadata_source": "https://donutbrowser.com/wayfern.json",
   "metadata_run": 41440308103,
   "metadata_artifact_sha256": "55a1ff648a7d6e680e4bb687cca2a36235cdf2c38cb17d61340b90abc4d30781",
+  "expected_bytes": 1599626910,
+  "archive_length_observation_run": 41441463821,
   "scope": "Official archive discovery only; no browser execution, product adoption or release acceptance"
 }
