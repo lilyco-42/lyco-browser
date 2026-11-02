@@ -6,6 +6,23 @@ source_root="$RUNNER_TEMP/lyco-gecko-source"
 evidence="$RUNNER_TEMP/lyco-gecko-build-evidence"
 output="$RUNNER_TEMP/lyco-gecko-build-output"
 mkdir -p "$evidence" "$output"
+python3 -u - "$evidence/resources.log" <<'PY' &
+import datetime,json,subprocess,sys,time
+from pathlib import Path
+while True:
+    memory={}
+    for line in Path('/proc/meminfo').read_text().splitlines():
+        key,_,value=line.partition(':')
+        if key in ['MemTotal','MemAvailable','SwapTotal','SwapFree']:memory[key]=value.strip()
+    row={'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'memory':memory,
+         'largestProcesses':subprocess.check_output(['ps','-eo','pid,comm,rss','--sort=-rss'],text=True).splitlines()[:9]}
+    line=json.dumps(row)
+    print('Build resources: '+line,flush=True)
+    with open(sys.argv[1],'a') as stream:stream.write(line+'\n')
+    time.sleep(30)
+PY
+resource_monitor=$!
+trap 'kill "$resource_monitor" 2>/dev/null || true' EXIT
 current_phase=initialization
 run_phase() {
  current_phase=$1
@@ -26,7 +43,15 @@ run_phase() {
  fi
 }
 export MOZBUILD_STATE_PATH="$RUNNER_TEMP/lyco-mozbuild"
-export CARGO_BUILD_JOBS=2
+export CARGO_BUILD_JOBS=1
+export GRADLE_USER_HOME="$RUNNER_TEMP/lyco-gecko-gradle"
+mkdir -p "$GRADLE_USER_HOME"
+cat > "$GRADLE_USER_HOME/gradle.properties" <<'GRADLE'
+org.gradle.jvmargs=-Xmx2g
+org.gradle.workers.max=1
+org.gradle.daemon=false
+GRADLE
+cp "$GRADLE_USER_HOME/gradle.properties" "$evidence/gradle.properties"
 run_phase checkout git clone --depth=1 --branch FIREFOX_159_0_RELEASE --single-branch \
  https://github.com/mozilla-firefox/firefox.git "$source_root"
 cd "$source_root"
@@ -43,7 +68,7 @@ ac_add_options --disable-debug
 ac_add_options --disable-tests
 ac_add_options --enable-optimize
 mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-lyco
-mk_add_options MOZ_MAKE_FLAGS=-j2
+mk_add_options MOZ_MAKE_FLAGS=-j1
 MOZCONFIG
 cp .mozconfig "$evidence/mozconfig.txt"
 run_phase bootstrap ./mach --no-interactive bootstrap --application-choice='GeckoView/Firefox for Android'

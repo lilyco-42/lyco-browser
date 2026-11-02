@@ -81,3 +81,16 @@ as well as its artifact file, and records phase, status and exit code in
 BUILD-STATE.json. A failed command still fails the build through pipefail;
 source/patch/ABI/acceptance guards are unchanged. This improves diagnosis of
 interrupted builds, and is not evidence that the native fix compiles or works.
+
+The streamed replacement 41439355235 completed bootstrap and the single-file
+format/diff guards, then entered native compilation at 2026-11-02T11:52:38Z.
+The runner again shut down at 12:19:39Z with exit 143; no AAR or evidence artifact
+was uploaded. The original job log establishes that compilation was active,
+but does not establish an out-of-memory cause or a C++ diagnostic failure.
+The next builder records memory, swap and process RSS every 30 seconds in the
+live log and evidence file, uses one C++/Rust build job and one Gradle worker,
+caps the Gradle heap at 2 GiB and stops retaining its daemon between tasks.
+These are disposable build-host settings only: the release optimization,
+native patch, source/ABI checks and downstream runtime gates are unchanged.
+Gradle user-home properties and their precedence follow the
+[official build-environment documentation](https://docs.gradle.org/current/userguide/build_environment.html).
