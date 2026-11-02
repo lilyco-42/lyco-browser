@@ -20,6 +20,8 @@ if(candidate && (path.isAbsolute(candidateRelative) || candidateRelative==='..' 
 const evidence = path.join(process.env.RUNNER_TEMP, 'lyco-sdk-order-probe');
 await fs.mkdir(evidence, {recursive: true});
 const rows = [], observations = new Map();
+const candidateProfiles=candidate?path.join(process.env.LOCALAPPDATA,'LYCO Native SDK Probe'):process.env.RUNNER_TEMP;
+await fs.mkdir(candidateProfiles,{recursive:true});
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
   const key = url.searchParams.get('case');
@@ -48,12 +50,18 @@ try {
   // It accepts the vendor terms; it does not supply or manufacture a token.
   await ensureKernelReadyForLaunch({path: binary});
   for (const mode of ['cold','ready','ready-cpu','native-settings','persona-launch','combined','native-locale','native-gpu','native-two-step','native-hardware-patch']) {
-    const profile = await fs.mkdtemp(path.join(process.env.RUNNER_TEMP,'lyco-sdk-profile-'));
+    // The official launcher uses an application-data volume, because the
+    // engine cannot resolve every temporary/RAM volume for profile storage.
+    const profile = await fs.mkdtemp(path.join(candidateProfiles,'lyco-sdk-profile-'));
     const persona = ['--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
       '--lang=en-GB','--accept-lang=en-GB,en','--force-device-scale-factor=1','--disable-blink-features=AutomationControlled'];
     const child = spawn(binary,['--user-data-dir='+profile,'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1',
       '--no-first-run','--no-default-browser-check','--disable-background-networking',
-      ...(['persona-launch','combined'].includes(mode)?persona:[]),'about:blank'],{stdio:'ignore',windowsHide:false});
+      ...(candidate?['--enable-logging=stderr','--log-level=0']:[]),
+      ...(['persona-launch','combined'].includes(mode)?persona:[]),'about:blank'],{stdio:['ignore','ignore','pipe'],windowsHide:false});
+    let stderr='',spawnError;
+    child.stderr.on('data',chunk=>{stderr=(stderr+chunk.toString('utf8')).slice(-32768)});
+    child.on('error',error=>{spawnError=error.code||'spawn-error'});
     let connection;
     try {
       let port;
@@ -61,7 +69,19 @@ try {
         try {port=Number((await fs.readFile(path.join(profile,'DevToolsActivePort'),'utf8')).split(/\r?\n/)[0]);if(port)break;} catch {}
         await sleep(200);
       }
-      if (!Number.isInteger(port) || port<1024 || port>65535) throw Error('Owned kernel did not provide a loopback debugger');
+      if (!Number.isInteger(port) || port<1024 || port>65535){
+        await fs.writeFile(path.join(evidence,'startup-failure.json'),JSON.stringify({candidate,mode,exitCode:child.exitCode,
+          signalCode:child.signalCode,spawnError:spawnError||null,storage:candidate?'local-app-data':'runner-temp',
+          // Keep codes and diagnostic categories, never generated device
+          // payloads, user-data paths, tokens or raw browser stderr.
+          errorCodes:[...new Set(stderr.match(/\b(?:ERR_[A-Z_]+|0x[0-9a-fA-F]{8})\b/g)||[])],
+          stderrCategories:{terms:/terms|eula/i.test(stderr),license:/license|entitlement|token/i.test(stderr),
+            storage:/volume|disk/i.test(stderr),identity:/identity|fingerprint/i.test(stderr),
+            fatal:/:FATAL:|fatal error/i.test(stderr),dll:/dll|side.by.side/i.test(stderr)},
+          stderrObserved:stderr.length>0,
+        },null,2)+'\n');
+        throw Error('Owned kernel did not provide a loopback debugger');
+      }
       if(mode==='cold') {
         // Public debugger protocol metadata, never device payloads or tokens.
         const protocol=await cdp.json('http://127.0.0.1:'+port+'/json/protocol');
