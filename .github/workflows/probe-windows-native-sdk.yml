@@ -13,6 +13,10 @@ on:
         description: Inspect the fixed official Chromium 155 ZIP without executing a browser
         type: boolean
         default: false
+      official_candidate:
+        description: Independently run the SHA-locked official Wayfern 155 candidate; no product adoption
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -122,6 +126,12 @@ jobs:
       - name: Prepare pinned host modules
         working-directory: upstream/Browserapp
         run: npm ci --ignore-scripts
+      - uses: actions/setup-python@v5
+        if: inputs.official_candidate
+        with: {python-version: '3.13'}
+      - name: Prepare the reviewed official candidate on this disposable runner
+        if: inputs.official_candidate
+        run: python lyco/tests/native-sdk-prepare-candidate.py
       - name: Measure native writes before and after protocol readiness
         timeout-minutes: 6
         run: node lyco/tests/native-sdk-order-probe.mjs upstream/Browserapp

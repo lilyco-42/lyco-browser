@@ -12,7 +12,10 @@ const appRoot = path.resolve(process.argv[2]);
 const requireApp = createRequire(path.join(appRoot, 'package.json'));
 const cdp = requireApp('./cdp');
 const {ensureKernelReadyForLaunch} = requireApp('./automation/browser-kernel');
-const binary = path.join(appRoot, 'kernels/windows-x64/chrome.exe');
+const candidate = Boolean(process.env.LYCO_NATIVE_CANDIDATE_PATH);
+const binary = candidate ? path.resolve(process.env.LYCO_NATIVE_CANDIDATE_PATH) : path.join(appRoot, 'kernels/windows-x64/chrome.exe');
+if(candidate && (path.relative(path.resolve(process.env.RUNNER_TEMP,'lyco-native-candidate'),binary).startsWith('..')
+  || path.basename(binary)!=='chrome.exe'))throw Error('Candidate is outside its reviewed runner directory');
 const evidence = path.join(process.env.RUNNER_TEMP, 'lyco-sdk-order-probe');
 await fs.mkdir(evidence, {recursive: true});
 const rows = [], observations = new Map();
@@ -143,7 +146,8 @@ try {
           scope:'Actual product preparation against the pinned SDK; not full application acceptance',
           refusedIncompatibleSettings:refused,
         },null,2)+'\n');
-        if(!refused) throw Error('Product preparation accepted incompatible native hardware');
+        if(!candidate && !refused) throw Error('Product preparation accepted incompatible native hardware');
+        if(candidate) await fs.writeFile(path.join(evidence,'candidate-product-settings.json'),JSON.stringify({accepted:!refused},null,2)+'\n');
       }
       if(failures.length) throw Error('Native setup failed');
     } finally {
@@ -155,4 +159,14 @@ try {
   console.log(JSON.stringify({scope:'Pinned SDK ordering investigation, not release acceptance',cases:rows.length,
     modes:rows.map(row=>({case:row.case,firstScriptMatches:row.firstScriptMatches,laterNativeMatches:row.laterNativeMatches}))},null,2));
   if(rows.length!==20 || rows.some(row=>!row.firstScript)) throw Error('Investigation incomplete');
+  if(candidate){
+    const required=rows.filter(row=>['cold','persona-launch','combined','native-settings','native-locale','native-gpu'].includes(row.mode));
+    const prepared=JSON.parse(await fs.readFile(path.join(evidence,'candidate-product-settings.json'),'utf8'));
+    const qualified=prepared.accepted && required.length===12 && required.every(row=>
+      Object.values(row.baselineDiffers).every(value=>value===false) && row.nativeCanvasSeedPreserved===true &&
+      [row.receiptMatches,row.immediateNativeMatches,row.firstScriptMatches,row.laterNativeMatches,row.nativeSettingsPreserved].every(values=>Object.values(values).every(value=>value===true)));
+    await fs.writeFile(path.join(evidence,'candidate-assessment.json'),JSON.stringify({qualified,checkedCases:required.map(row=>row.case),
+      scope:'Native SDK compatibility only; full packaged application, migration, licensing and all-platform gates remain required',productAdopted:false},null,2)+'\n');
+    if(!qualified)throw Error('Official candidate did not preserve the requested native settings');
+  }
 } finally {await new Promise(resolve=>server.close(resolve));}
