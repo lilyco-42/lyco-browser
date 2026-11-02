@@ -46,9 +46,23 @@ const unpack = result => {
 };
 const matches = (value,wanted) => Object.fromEntries(['hardwareConcurrency','deviceMemory'].map(key => [key,value?.[key]===wanted[key]]));
 try {
-  // Use the same upstream, owner-authorized initialization as the application.
-  // It accepts the vendor terms; it does not supply or manufacture a token.
-  await ensureKernelReadyForLaunch({path: binary});
+  // Owner authorization for Wayfern runtime/distribution is recorded in the
+  // README. Use the vendor's public one-shot initialization for the unmodified
+  // candidate; the legacy host only recognizes its older directory layouts.
+  if(candidate){
+    let output='',exitCode=0;
+    try{
+      const result=await promisify(execFile)(binary,['--accept-terms-and-conditions'],{timeout:20000,windowsHide:true,maxBuffer:256*1024});
+      output=String(result.stdout||'')+'\n'+String(result.stderr||'');
+    }catch(error){
+      exitCode=error.code;output=String(error.stdout||'')+'\n'+String(error.stderr||'');
+    }
+    const marker=await fs.stat(path.join(process.env.APPDATA,'Wayfern','license-accepted')).then(info=>info.isFile()).catch(()=>false);
+    const accepted=/Terms and Conditions accepted|License recorded|You can now run Wayfern normally/i.test(output)||marker;
+    await fs.writeFile(path.join(evidence,'vendor-initialization.json'),JSON.stringify({accepted,exitCode,markerPresent:marker,
+      command:'--accept-terms-and-conditions',nativePolicyModified:false,tokenSupplied:false},null,2)+'\n');
+    if(!accepted)throw Error('Official candidate initialization did not confirm vendor terms acceptance');
+  }else await ensureKernelReadyForLaunch({path: binary});
   for (const mode of ['cold','ready','ready-cpu','native-settings','persona-launch','combined','native-locale','native-gpu','native-two-step','native-hardware-patch']) {
     // The official launcher uses an application-data volume, because the
     // engine cannot resolve every temporary/RAM volume for profile storage.
@@ -83,6 +97,11 @@ try {
         throw Error('Owned kernel did not provide a loopback debugger');
       }
       if(mode==='cold') {
+        const browserInfo=await cdp.json('http://127.0.0.1:'+port+'/json/version');
+        const actualVersion=String(browserInfo.Browser||'');
+        await fs.writeFile(path.join(evidence,'browser-version.json'),JSON.stringify({browser:actualVersion.slice(0,120),
+          protocol:String(browserInfo['Protocol-Version']||'').slice(0,40)},null,2)+'\n');
+        if(candidate && !actualVersion.endsWith('/155.0.8059.79'))throw Error('Candidate runtime version differs from the locked official archive');
         // Public debugger protocol metadata, never device payloads or tokens.
         const protocol=await cdp.json('http://127.0.0.1:'+port+'/json/protocol');
         const domain=protocol.domains?.find(value=>value.domain==='Wayfern');
