@@ -33,7 +33,8 @@ assert size == manifest['expected_bytes'] and digest.hexdigest() == manifest['sh
 with zipfile.ZipFile(archive_path) as archive:
     assert sum(row.file_size for row in archive.infolist()) <= 8*1024**3
     assert archive.testzip() is None
-    targets = set()
+    targets = {}
+    identical_aliases = []
     for row in archive.infolist():
         path = PurePosixPath(row.filename.replace('\\', '/'))
         assert path.parts and not path.is_absolute() and '..' not in path.parts
@@ -42,14 +43,26 @@ with zipfile.ZipFile(archive_path) as archive:
         target = stage.joinpath(*path.parts)
         assert target.is_relative_to(stage)
         key = str(target).casefold()
-        assert key not in targets, 'Archive has a colliding Windows path'
-        targets.add(key)
+        if key in targets:
+            previous = targets[key]
+            approved = [alias for alias in manifest['identical_windows_aliases']
+                        if alias['keep'] == previous.filename and alias['alias'] == row.filename]
+            assert len(approved) == 1, 'Archive has an unreviewed colliding Windows path'
+            alias = approved[0]
+            for member in [previous, row]:
+                assert not member.is_dir() and member.file_size == alias['bytes']
+                with archive.open(member) as stream:
+                    assert hashlib.file_digest(stream, 'sha256').hexdigest() == alias['sha256']
+            identical_aliases.append(alias)
+            continue
+        targets[key] = row
         if row.is_dir():
             target.mkdir(parents=True, exist_ok=True)
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             with archive.open(row) as source, target.open('xb') as output:
                 shutil.copyfileobj(source, output, 1024*1024)
+    assert identical_aliases == manifest['identical_windows_aliases'], 'Reviewed case alias changed'
 binary = stage/manifest['executable']
 with binary.open('rb') as stream:
     assert hashlib.file_digest(stream, 'sha256').hexdigest() == manifest['executable_sha256']
@@ -58,6 +71,7 @@ evidence.mkdir(parents=True, exist_ok=True)
 proof = {'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
          'manifest': manifest, 'archiveBytesVerified': size, 'archiveSha256Verified': digest.hexdigest(),
          'executableSha256Verified': manifest['executable_sha256'],
+         'verifiedIdenticalCaseAliases': identical_aliases,
          'scope': 'Independent candidate only; default product kernel and user data unchanged'}
 (evidence/'candidate-archive.json').write_text(json.dumps(proof, indent=2)+'\n')
 with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:

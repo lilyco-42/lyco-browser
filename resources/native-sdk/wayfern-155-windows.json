@@ -12,5 +12,14 @@
   "archive_audit_run": 41441842796,
   "executable": "wayfern-155.0.8059.79_windows_x64/chrome.exe",
   "executable_sha256": "1b49fdb3b79de9427b247e0c6bb41a8668e5f7b75ba0da39e6d5518cb2cb25e3",
+  "windows_path_audit_run": 41444394428,
+  "identical_windows_aliases": [
+    {
+      "keep": "wayfern-155.0.8059.79_windows_x64/D3DCompiler_47.dll",
+      "alias": "wayfern-155.0.8059.79_windows_x64/d3dcompiler_47.dll",
+      "bytes": 4741568,
+      "sha256": "e407b9ffadef47e87994dc488214f75405cf04ee99589f2315fc7ab99fd1dfe2"
+    }
+  ],
   "scope": "Official archive discovery only; no browser execution, product adoption or release acceptance"
 }
