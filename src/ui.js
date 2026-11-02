@@ -1,6 +1,6 @@
 'use strict';
 (() => {
- let busy=false,routeOwner='',routeNodes=[],routeRowsKey='',routeRenderGeneration=0;
+ let busy=false,routeOwner='',routeNodes=[],routeChoices=[],routeRowsKey='',routeRenderGeneration=0;
  const e = id => document.getElementById(id);
  const message = (value, err=false) => { e('lyco-feedback').textContent=String(value||'');e('lyco-feedback').dataset.tone=err?'error':'status'; };
  const option=(value,text)=>{const node=document.createElement('option');node.value=value;node.textContent=text;return node};
@@ -9,13 +9,32 @@
   window.dispatchEvent(new Event('lyco-profile-routes-changed'));
  };
  function routeOptions(select,value='',savedLabel='已保存线路（请加载官网线路核对）'){
-  select.replaceChildren(option('','默认订阅线路'),...routeNodes.map(node=>option(node.id,node.label)));
-  if(value&&!routeNodes.some(node=>node.id===value))select.append(option(value,routeNodes.length?savedLabel+'（当前目录未找到）':savedLabel));
+  select.replaceChildren(option('','默认订阅线路'),...routeChoices.map(node=>option(node.id,node.label)));
+  if(value&&!routeChoices.some(node=>node.id===value)){
+   const known=routeNodes.find(node=>node.id===value);
+   const retained=option(value,known?.label||(routeNodes.length?savedLabel+'（当前目录未找到）':savedLabel));
+   retained.dataset.savedLabel=known?.label||savedLabel;select.append(retained);
+  }
   select.value=value;
+ }
+ function filterRouteChoices(){
+  const terms=e('lyco-route-search').value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  routeChoices=routeNodes.filter(node=>terms.every(term=>node.label.toLocaleLowerCase().includes(term)));
+  e('lyco-route-count').textContent=routeNodes.length?'共 '+routeNodes.length+' 条线路，匹配 '+routeChoices.length+' 条。当前选择始终保留，筛选不会更换线路。':'加载官网线路后，可按名称或已有标注搜索。';
+  e('lyco-route-search').disabled=busy||!routeNodes.length;
+  e('lyco-clear-route-search').disabled=busy||!e('lyco-route-search').value;
+ }
+ function filterRouteOptions(){
+  filterRouteChoices();
+  for(const select of [e('lyco-create-route'),...e('lyco-profile-routes').querySelectorAll('select')]){
+   const value=select.value,selected=select.selectedOptions[0];
+   routeOptions(select,value,selected?.dataset.savedLabel||selected?.textContent||'已保存线路');
+  }
  }
  async function renderRoutes(s){
   const generation=++routeRenderGeneration;
-  if(routeOwner!==s.username||!s.logged_in){routeOwner=s.logged_in?s.username:'';routeNodes=[];routeRowsKey='';routeOptions(e('lyco-create-route'));publishRoutes(routeOwner,[])}
+  if(routeOwner!==s.username||!s.logged_in){routeOwner=s.logged_in?s.username:'';routeNodes=[];routeRowsKey='';e('lyco-route-search').value='';filterRouteChoices();routeOptions(e('lyco-create-route'));publishRoutes(routeOwner,[])}
+  filterRouteChoices();
   e('lyco-load-routes').disabled=!s.entitled||!s.has_core||busy;
   e('lyco-create-route').disabled=!s.entitled||busy;
   const result=s.logged_in?await window.ops.lycoListProfileRoutes():{owner:'',profiles:[]};
@@ -91,11 +110,13 @@
  e('lyco-pick-core').onclick=()=>run(()=>window.ops.lycoChooseCore(),'代理核心路径已核实');
  e('lyco-connect').onclick=()=>run(()=>window.ops.lycoConnect(),'代理已启动，可导入代理库');
  e('lyco-disconnect').onclick=()=>run(()=>window.ops.lycoDisconnect(),'代理已断开');
+ e('lyco-route-search').addEventListener('input',filterRouteOptions);
+ e('lyco-clear-route-search').onclick=()=>{e('lyco-route-search').value='';filterRouteOptions();e('lyco-route-search').focus()};
  e('lyco-load-routes').onclick=()=>run(async()=>{
-  const selected=e('lyco-create-route').value,selectedLabel=e('lyco-create-route').selectedOptions[0]?.textContent||'原选线路';
+  const selected=e('lyco-create-route').value,selectedOption=e('lyco-create-route').selectedOptions[0],selectedLabel=selectedOption?.dataset.savedLabel||selectedOption?.textContent||'原选线路';
   const result=await window.ops.lycoRouteCatalog(),state=await window.ops.lycoStatus();
   if(!state.logged_in||state.username!==result.owner)throw Error('账号已变化，请重新加载线路');
-  routeOwner=result.owner;routeNodes=result.nodes;routeRowsKey='';routeOptions(e('lyco-create-route'),selected,selectedLabel);
+  routeOwner=result.owner;routeNodes=result.nodes;routeRowsKey='';filterRouteChoices();routeOptions(e('lyco-create-route'),selected,selectedLabel);
  },'官网线路已加载，可为新环境选择固定节点');
  e('lyco-create-profile').onclick=()=>run(async()=>{
   const result=await window.ops.lycoCreateProfile({routeId:e('lyco-create-route').value});

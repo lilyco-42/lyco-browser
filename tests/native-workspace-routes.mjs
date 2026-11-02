@@ -30,6 +30,22 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   await page.locator('#lyco-create-route option').filter({hasText:'CI route A'}).waitFor({state:'attached'});
   const options=await page.locator('#lyco-create-route option').evaluateAll(nodes=>nodes.map(node=>({id:node.value,label:node.textContent})));
   assert.doesNotMatch(JSON.stringify(options),/CI_PRIVATE_ROUTE|password|127\.0\.0\.1/);
+  const routeSearch=page.getByRole('searchbox',{name:'搜索已加载的线路',exact:true});
+  await routeSearch.fill('cI ROUTE a');
+  assert.deepEqual(await page.locator('#lyco-create-route option').allTextContents(),['默认订阅线路','CI route A']);
+  await choose('lyco-create-route','CI route A');
+  const searchedSelection=await page.locator('#lyco-create-route').inputValue();
+  await routeSearch.fill('CI route B');
+  assert.equal(await page.locator('#lyco-create-route').inputValue(),searchedSelection,'Filtering must retain the selected node even when another node matches');
+  assert.deepEqual(new Set(await page.locator('#lyco-create-route option').allTextContents()),new Set(['默认订阅线路','CI route A','CI route B']));
+  await routeSearch.fill('CI_NO_MATCH');
+  assert.equal(await page.locator('#lyco-create-route').inputValue(),searchedSelection);
+  assert.deepEqual(await page.locator('#lyco-create-route option').allTextContents(),['默认订阅线路','CI route A']);
+  assert.match(await page.locator('#lyco-route-count').textContent(),/匹配 0 条/);
+  await page.getByRole('button',{name:'清除筛选',exact:true}).click();
+  assert.deepEqual(await page.locator('#lyco-create-route option').evaluateAll(nodes=>nodes.map(node=>({id:node.value,label:node.textContent}))),options);
+  assert.equal(await page.locator('#lyco-create-route').inputValue(),searchedSelection);
+  result.checks.push('actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory');
   for(const owner of ['A','B']){
    await page.locator('[data-view="lyco"]').click();
    await choose('lyco-create-route','CI route '+owner);
@@ -55,6 +71,12 @@ export async function verifyNativeWorkspaceRoutes({app,page,report,evidence}){
   await page.screenshot({path:path.join(evidence,'workspace-route-list.png')});
   await page.locator(`#profile-table tr[data-profile-id="${created[0].id}"] .lyco-bound-route`).click();
   await page.locator(`[data-profile-route="${created[0].id}"]`).waitFor();
+  const savedChoices=await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value})));
+  await routeSearch.fill('CI_NO_MATCH');
+  assert.deepEqual(await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value}))),savedChoices);
+  assert.deepEqual(await page.evaluate(()=>window.lycoProfileRouteView.profiles.map(row=>({id:row.id,routeId:row.routeId}))),created.map((profile,index)=>({id:profile.id,routeId:savedChoices[index].value})));
+  await page.getByRole('button',{name:'清除筛选',exact:true}).click();
+  assert.deepEqual(await page.locator('#lyco-profile-routes select').evaluateAll(nodes=>nodes.map(node=>({id:node.id,value:node.value}))),savedChoices);
   const geometry=await page.locator('#lyco-route-card').evaluate(card=>({client:card.clientWidth,scroll:card.scrollWidth}));
   assert.ok(geometry.scroll<=geometry.client+1,'Selected route controls must fit the actual workbench');
   await page.screenshot({path:path.join(evidence,'workspace-selected-routes.png')});
