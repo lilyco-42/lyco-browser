@@ -36,6 +36,12 @@ Node 夹具的可信 CONNECT 与错误 CA 拒绝均有效；原有 36 项和三�
 
 夹具本身先以正确 CA 完成真实 CONNECT/源站内容正向，再以同一信任锚拒绝第二端口的错误 CA。原生结果另要求 H2 流归属、可信证书验证、全部健康目标经代理、停上游无源站访问。只有实际 WebView 场景全部成立才允许进一步讨论接入产品，其他传输成功不能替代它。上述真实运行已编译并完整执行，但未通过；产品、用户数据及默认内核均未替换。
 
+## 替代 Network Extension 路线的部署约束
+
+Relay 失败后核对 Apple 的 [TN3134](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment)：iOS packet tunnel 的按应用模式要求受管设备，app proxy provider 也仅限受管设备，不能将这两项直接当普通用户客户端的替换方案。[NEPacketTunnelProvider](https://developer.apple.com/documentation/networkextension/nepackettunnelprovider) 要求真实 Network Extension entitlement；未签名归档不是运行授权。
+
+[路由说明](https://developer.apple.com/documentation/networkextension/routing-your-vpn-network-traffic)区分默认路由、接口作用域、enforceRoutes 和 includeAllNetworks；[includeAllNetworks](https://developer.apple.com/documentation/networkextension/nevpnprotocol/includeallnetworks)仍有系统规定的例外。文档未给本次 127.0.0.1 门槛提供实际通过证据，不能因选项名称或 API 存在声称覆盖回环。[TN3120](https://developer.apple.com/documentation/technotes/tn3120-expected-use-cases-for-network-extension-packet-tunnel-providers)要求 packet tunnel 用于真实远端隧道，不把内容过滤、任意 DNS 接管或在扩展内放代理监听器当支持的替代。当前未采用新扩展、签名、设备管理或全设备流量改变；后续如选全隧道，必须单独证明完整功能、流量边界、生命周期和真实分发条件。
+
 ## 已完成的系统请求对照
 
 `beac7c9` 的 [41554045712](https://github.com/lilyco-42/lyco-browser/actions/runs/41554045712) 已实际编译并完成全部 29 个观察：iOS26.4 模拟器、SDK26.5、Xcode26.6/17F113。两种传输的直接正向均有效，源站收到 29 个原始请求，页面/响应内容均正确。结果如下：
