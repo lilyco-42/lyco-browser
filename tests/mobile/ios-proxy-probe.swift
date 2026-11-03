@@ -12,6 +12,9 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
   private var web: WKWebView?
   private var core: LycotunnelSession?
   private var foundationSession: URLSession?
+  private var networkConnection: NWConnection?
+  private var networkContext: NWParameters.PrivacyContext?
+  private var networkBytes = Data()
   private var timeout: DispatchWorkItem?
   private var index = 0
   private var generation = 0
@@ -28,6 +31,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
       mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
     }
     return original.map { ("webview", $0.0, $0.1) } + foundation.map { ("urlsession", $0.0, $0.1) }
+      + foundation.map { ("network", $0.0, $0.1) }
   }()
   func application(_ application: UIApplication,didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey:Any]?) -> Bool {
     let window = UIWindow(frame: UIScreen.main.bounds)
@@ -46,7 +50,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     let caseId = (transport == "webview" ? "" : transport+"-")+mode+"-"+phase
     row = ["case":caseId,"mode":mode,"phase":phase,"transport":transport]
     caseStartedUptime = ProcessInfo.processInfo.systemUptime
-    let store = WKWebsiteDataStore(forIdentifier: UUID())
+    let store = transport == "webview" ? WKWebsiteDataStore(forIdentifier: UUID()) : nil
     var proxyConfigurations: [ProxyConfiguration] = []
     if mode != "direct-control" {
       var port = UInt16(phase == "stopped-local" ? 1 : 18081)
@@ -67,12 +71,13 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
       if mode == "core-socks-wildcard" {proxy.excludedDomains = [];proxy.matchDomains = ["*"]}
       proxy.allowFailover = false
       proxyConfigurations = [proxy]
-      store.proxyConfigurations = proxyConfigurations
-      row["configurationCount"] = store.proxyConfigurations.count
-      row["allowsFailover"] = store.proxyConfigurations.first?.allowFailover ?? true
+      store?.proxyConfigurations = proxyConfigurations
+      let applied = store?.proxyConfigurations ?? proxyConfigurations
+      row["configurationCount"] = applied.count
+      row["allowsFailover"] = applied.first?.allowFailover ?? true
     }
     if transport == "webview" {
-      let config = WKWebViewConfiguration();config.websiteDataStore = store
+      let config = WKWebViewConfiguration();config.websiteDataStore = store!
       let view = WKWebView(frame: window!.rootViewController!.view.bounds,configuration: config)
       view.autoresizingMask = [.flexibleWidth,.flexibleHeight];view.navigationDelegate = self
       window!.rootViewController!.view.addSubview(view);web = view
@@ -86,9 +91,46 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     let timer = DispatchWorkItem {if self.generation == current {self.finish("timeout")}}
     timeout = timer;DispatchQueue.main.asyncAfter(deadline: .now()+budget,execute: timer)
     let request = URLRequest(url: URL(string: "http://"+host+":18080/probe?case="+caseId)!)
+    if transport == "network" {
+      let parameters = NWParameters.tcp
+      let context = NWParameters.PrivacyContext(description: "LYCO owned "+caseId)
+      context.proxyConfigurations = proxyConfigurations
+      if mode != "direct-control" {
+        row["configurationCount"] = context.proxyConfigurations.count
+        row["allowsFailover"] = context.proxyConfigurations.first?.allowFailover ?? true
+      }
+      parameters.setPrivacyContext(context);networkContext = context
+      let connection = NWConnection(host: .init(host),port: .init(rawValue: 18080)!,using: parameters)
+      networkConnection = connection;networkBytes = Data()
+      connection.stateUpdateHandler = { [weak self,weak connection] state in
+        guard let self,let connection,self.generation == current,self.finishedGeneration != current else {return}
+        switch state {
+        case .ready:
+          if self.row["connectionReady"] as? Bool == true {return}
+          self.row["connectionReady"] = true
+          let bytes = Data(("GET /probe?case="+caseId+" HTTP/1.1\r\nHost: "+host+":18080\r\nConnection: close\r\n\r\n").utf8)
+          connection.send(content: bytes,completion: .contentProcessed { [weak self,weak connection] error in
+            guard let self,let connection,self.generation == current,self.finishedGeneration != current else {return}
+            if let error {self.recordNetworkError(error);self.finish("send-failed");return}
+            self.receiveNetwork(connection,generation: current,caseId: caseId)
+          })
+        case .waiting(let error):
+          self.row["connectionWaiting"] = true;self.recordNetworkError(error)
+        case .failed(let error):
+          self.recordNetworkError(error);self.finish("connection-failed")
+        default:break
+        }
+      }
+      connection.start(queue: .main)
+      return
+    }
     if transport == "urlsession" {
       let config = URLSessionConfiguration.ephemeral
       config.proxyConfigurations = proxyConfigurations
+      if mode != "direct-control" {
+        row["configurationCount"] = config.proxyConfigurations.count
+        row["allowsFailover"] = config.proxyConfigurations.first?.allowFailover ?? true
+      }
       config.timeoutIntervalForRequest = budget;config.timeoutIntervalForResource = budget
       config.urlCache = nil
       let session = URLSession(configuration: config);foundationSession = session
@@ -109,6 +151,32 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     }
     web!.load(request)
   }
+  private func recordNetworkError(_ error: NWError) {
+    switch error {
+    case .posix(let code):row["errorDomain"] = "posix";row["errorCode"] = code.rawValue
+    case .dns(let code):row["errorDomain"] = "dns";row["errorCode"] = code
+    case .tls(let code):row["errorDomain"] = "tls";row["errorCode"] = code
+    @unknown default:row["errorDomain"] = "unknown"
+    }
+  }
+  private func receiveNetwork(_ connection: NWConnection,generation current: Int,caseId: String) {
+    connection.receive(minimumIncompleteLength: 1,maximumLength: 4096) { [weak self,weak connection] content,_,complete,error in
+      guard let self,let connection,self.generation == current,self.finishedGeneration != current else {return}
+      if let content {self.networkBytes.append(content)}
+      if self.networkBytes.count > 32768 {self.finish("oversized-response");return}
+      if let error {self.recordNetworkError(error);self.finish("receive-failed");return}
+      if complete {
+        let response = String(data: self.networkBytes,encoding: .utf8) ?? ""
+        let pieces = response.components(separatedBy: "\r\n\r\n")
+        let status = response.components(separatedBy: "\r\n").first?.split(separator: " ")
+        let code = status.flatMap { $0.count > 1 ? Int($0[1]) : nil }
+        self.row["httpStatus"] = code;self.row["receivedBytes"] = self.networkBytes.count
+        self.row["originContent"] = code == 200 && pieces.dropFirst().joined(separator: "\r\n\r\n").contains("LYCO_ORIGIN "+caseId)
+        self.finish("loaded");return
+      }
+      self.receiveNetwork(connection,generation: current,caseId: caseId)
+    }
+  }
   private func finish(_ status: String) {
     guard finishedGeneration != generation else {return}
     finishedGeneration = generation
@@ -118,6 +186,8 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     results.append(row);index += 1
     web?.stopLoading();web?.navigationDelegate = nil;web?.removeFromSuperview();web = nil
     foundationSession?.invalidateAndCancel();foundationSession = nil
+    networkConnection?.stateUpdateHandler = nil;networkConnection?.cancel();networkConnection = nil
+    networkContext = nil;networkBytes = Data()
     try? core?.close();core = nil
     DispatchQueue.main.asyncAfter(deadline: .now()+0.15) {self.next()}
   }

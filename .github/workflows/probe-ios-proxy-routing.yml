@@ -27,9 +27,12 @@ jobs:
       - name: Build the actual pinned Apple core for the isolated application
         working-directory: mobile/core
         run: bash build-native.sh apple
-      - name: Compile and run the minimal native proxy matrix
-        timeout-minutes: 9
-        run: bash tests/mobile/run-ios-proxy-probe.sh
+      - name: Compile, boot and install the isolated native application
+        timeout-minutes: 12
+        run: bash tests/mobile/run-ios-proxy-probe.sh prepare
+      - name: Run the original routing gates and independent transport controls
+        timeout-minutes: 6
+        run: bash tests/mobile/run-ios-proxy-probe.sh run
       - name: Collect original simulator diagnostics after the investigation
         if: always()
         timeout-minutes: 1

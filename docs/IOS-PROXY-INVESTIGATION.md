@@ -15,7 +15,9 @@
 
 原始 192529 字节 ZIP 的完整 SHA-256 为 `0e91fc6f142585962e7f2cbe05e1fbb2cbe28e12487a049b4734bafcbc7cab5b`，CRC 已核验。结果、源站归属、阶段时间和原始日志均保存。模拟器启动耗时 6 分 36 秒、安装 1 分 17 秒；应用从启动到收集结果约 48 秒。原始拒绝信息已打印，随后还报告步骤 9 分钟总时限到达。所有 29 个观察已完成，不能把这个总时限当成唯一失败原因，或当成缺少结果而重跑相同配置。
 
-下一步需要区分 Foundation 与更低层 Network.framework 的路由选择；公开 `NWParameters.PrivacyContext` 和 `setPrivacyContext` 仅是后续独立对照的候选，当前尚未实现或验证。新增对照时应将模拟器准备与请求执行分成独立步骤，保留全部原有正负向和逐场景预算；不能通过增加请求时限让失败配置通过。
+后续源码新增 7 个 Network.framework 原生 TCP 对照：使用公开 [NWParameters.PrivacyContext](https://developer.apple.com/documentation/network/nwparameters/privacycontext) 的相同代理配置，再用 [setPrivacyContext](https://developer.apple.com/documentation/network/nwparameters/setprivacycontext(_:)) 关联 NWConnection 参数。每次请求独立创建连接和上下文，直接发送自有 HTTP 请求，检查原始状态码、内容和源站 TCP 归属，不经过 URLSession。其直连和域名代理正向未成立时，不推断低层行为；结果也不能替代 WebView 验收。
+
+原有 29 个场景保留，总计 36 个场景须各完成一次，并核对各传输配置的实际读回值。模拟器编译、启动和安装与请求执行分成独立步骤，跨步骤绑定同一运行、源码、设备与可执行文件摘要，拒绝旧结果和重复执行。请求阶段保留原有逐场景 6 秒及首个 WebView 正向 30 秒预算；外层采集等待增加 60 秒以覆盖新增 7 个请求及收集余量，不是原功能门槛变化。此新增源码尚待真实编译与原生验证，产品未修改。
 
 ## 对照设计与来源
 
