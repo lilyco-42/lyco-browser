@@ -12,6 +12,9 @@ Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutd
 
 ## 已有证据
 
+移动端完整目录搜索已进入新签名候选验收：[41563675880](https://github.com/lilyco-42/lyco-browser/actions/runs/41563675880) 的实际保留证书 APK 已通过原有完整存储、导航、代理正负向与许可页检查；[41586183938](https://github.com/lilyco-42/lyco-browser/actions/runs/41586183938) 正用同一包执行原有保存线路检查及新增 1252 条目录搜索。搜索不得改变选择或保存记录，完整目录保留；具体摘要与范围见[移动线路](MOBILE-WORKSPACE-ROUTES.md#完整线路目录搜索)。新搜索整组结果与 RTC 仍未通过，五平台条件不变。
+
+
 iOS 后续 [41557341314](https://github.com/lilyco-42/lyco-browser/actions/runs/41557341314) 已完成全部 36 个场景并核验原始 ZIP。新增 NWConnection/PrivacyContext 对照也在有效域名代理和配置读回下重现本机地址绕过；没有安全 WebView 模式。本轮准备步骤独立，请求阶段约 30 秒，无总时限超时，明确保留实际路由失败。不能以更换系统请求包装或调整采集等待宣称修复；后续公开 RelayHop [41562850867](https://github.com/lilyco-42/lyco-browser/actions/runs/41562850867) 已完成全部 48 项：两个系统传输的严格 TLS 域名互通及证书拒绝成立，本机地址仍绕过；WebView 可信域名连接 -1202 且信任回调未触发。原始 ZIP 已完整核验，没有安全模式，未接入产品。
 
 iOS 独立 [41554045712](https://github.com/lilyco-42/lyco-browser/actions/runs/41554045712) 已完成 22 个 WebView 和 7 个 URLSession 原生观察：两者域名代理正向均成立，但真实本机地址在健康和停用上游时均直连。反例已在独立系统请求中重现，不能继续只修改工作台或 WebView 初始化。原始 ZIP 完整大小/摘要/CRC 已核验；流程末尾同时到达总时限，但所有结果已保存，不能据此忽略实际路由失败。详见 [iOS 绕过定位](IOS-PROXY-INVESTIGATION.md)。
