@@ -43,6 +43,8 @@ function ProfileEditor({profile,saving,onSave,onCancel}:{profile:Profile;saving:
   <SafeAreaView style={styles.root}><KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>编辑环境</Text>
+     <Text style={styles.hint}>当前环境：{profile.name}</Text>
+     {profile.route?<Text style={styles.hint}>所属账号：{profile.route.owner} · 官网线路：{profile.route.routeName}</Text>:null}
      <Text style={styles.hint}>修改名称和下次打开的首页，保留本环境的网站数据和官网线路。</Text>
      <Field label="修改环境名称" value={name} onChangeText={setName} disabled={saving}/>
      <Field label="修改首页 URL" value={url} onChangeText={setUrl} disabled={saving}/>
