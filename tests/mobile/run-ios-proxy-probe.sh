@@ -34,7 +34,8 @@ Path(sys.argv[1]).write_bytes(plistlib.dumps({
  'CFBundleExecutable':'LYCOProxyProbe','CFBundlePackageType':'APPL',
  'CFBundleVersion':'1','CFBundleShortVersionString':'1.0','MinimumOSVersion':'17.0',
  'CFBundleSupportedPlatforms':['iPhoneSimulator'],'UIDeviceFamily':[1,2],
- 'LSRequiresIPhoneOS':True,'NSAppTransportSecurity':{'NSAllowsArbitraryLoadsInWebContent':True},
+ # This isolated HTTP fixture also exercises URLSession; product ATS is unchanged.
+ 'LSRequiresIPhoneOS':True,'NSAppTransportSecurity':{'NSAllowsArbitraryLoads':True},
 }))
 PY
 xcrun simctl list devices available --json > "$evidence/simulators.json"
@@ -64,7 +65,9 @@ xcrun simctl install "$device" "$app"
 stage 'Launch minimal application' | tee -a "$evidence/stages.txt"
 xcrun simctl launch "$device" top.lain42.lycoproxyprobe > "$evidence/launch.txt"
 container=$(xcrun simctl get_app_container "$device" top.lain42.lycoproxyprobe data)
-for attempt in $(seq 1 180); do
+# Seven additional URLSession cases retain 6s each; original WebView budgets
+# and assertions are unchanged. This only budgets collecting the larger matrix.
+for attempt in $(seq 1 240); do
   if [[ -s "$container/Documents/results.json" ]]; then break; fi
   sleep 1
 done
@@ -73,8 +76,11 @@ cp "$container/Documents/results.json" "$evidence/results.json"
 python3 - "$evidence" <<'PY'
 import json,os,sys
 from pathlib import Path
-root=Path(sys.argv[1]);rows=json.loads((root/'results.json').read_text());events=json.loads((root/'network.json').read_text())
-assert len(rows)==22, 'All proxy modes and their independent phases must finish'
+root=Path(sys.argv[1]);all_rows=json.loads((root/'results.json').read_text());events=json.loads((root/'network.json').read_text())
+assert len(all_rows)==29, 'All original modes and independent Foundation controls must finish'
+rows=[row for row in all_rows if row['transport']=='webview']
+foundation=[row for row in all_rows if row['transport']=='urlsession']
+assert len(rows)==22 and len(foundation)==7
 baseline=[e for e in events if e['case']=='direct-control-local']
 assert baseline and all(not e['viaProxy'] for e in baseline), 'Direct positive control did not reach the same live origin'
 control=[row for row in rows if row['case']=='direct-control-local']
@@ -88,10 +94,30 @@ for mode in modes:
                 for row in probes if row['phase']!='stopped-local')
     stopped=not any(e['case']==mode+'-stopped-local' for e in events)
     if healthy and stopped:safe.append(mode)
+foundation_control=[row for row in foundation if row['mode']=='direct-control']
+foundation_baseline=[e for e in events if e['case']=='urlsession-direct-control-local']
+foundation_valid=(len(foundation_control)==1 and foundation_control[0]['result']=='loaded' and
+                  foundation_control[0].get('originContent') and bool(foundation_baseline) and
+                  all(not e['viaProxy'] for e in foundation_baseline))
+comparisons=[]
+for mode in ['direct-http','core-socks']:
+    for phase in ['domain','local','stopped-local']:
+        case='urlsession-'+mode+'-'+phase
+        observed,=[row for row in foundation if row['case']==case]
+        requests=[e for e in events if e['case']==case]
+        comparisons.append({'case':case,'result':observed['result'],'originContent':observed.get('originContent',False),
+                            'proxyRequests':sum(e['viaProxy'] for e in requests),
+                            'directRequests':sum(not e['viaProxy'] for e in requests)})
 summary={'commit':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],
          'scope':'Isolated iOS public-API investigation; not product acceptance or device certification',
-         'safeModesForTheseCases':safe,'modes':modes,'originRequests':len(events)}
+         'safeModesForTheseCases':safe,'modes':modes,'originRequests':len(events),
+         'foundationControlValid':foundation_valid,'foundationComparisons':comparisons,
+         'foundationDomainControls':{mode:any(row['case']=='urlsession-'+mode+'-domain' and
+              row['result']=='loaded' and row['originContent'] and row['proxyRequests']>0 and row['directRequests']==0
+              for row in comparisons) for mode in ['direct-http','core-socks']},
+         'foundationIsNotAWebViewReplacement':True}
 (root/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
 print(json.dumps(summary,indent=2))
+assert foundation_valid, 'Foundation direct positive control is invalid; do not infer a system-layer failure'
 if not safe:raise SystemExit('No tested public proxy configuration passed both healthy routing and stopped local negative control')
 PY

@@ -11,6 +11,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
   var window: UIWindow?
   private var web: WKWebView?
   private var core: LycotunnelSession?
+  private var foundationSession: URLSession?
   private var timeout: DispatchWorkItem?
   private var index = 0
   private var generation = 0
@@ -19,9 +20,15 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
   private var row: [String: Any] = [:]
   private var results: [[String: Any]] = []
   private let modes = ["direct-control", "direct-http", "direct-http-v6", "core-http", "core-socks", "core-socks-empty", "core-socks-explicit", "core-socks-wildcard"]
-  private lazy var cases: [(String, String)] = modes.flatMap { mode in
-    mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
-  }
+  private lazy var cases: [(String, String, String)] = {
+    let original: [(String, String)] = self.modes.flatMap { mode in
+      mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
+    }
+    let foundation: [(String, String)] = ["direct-control", "direct-http", "core-socks"].flatMap { mode in
+      mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
+    }
+    return original.map { ("webview", $0.0, $0.1) } + foundation.map { ("urlsession", $0.0, $0.1) }
+  }()
   func application(_ application: UIApplication,didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey:Any]?) -> Bool {
     let window = UIWindow(frame: UIScreen.main.bounds)
     window.rootViewController = UIViewController();window.makeKeyAndVisible();self.window = window
@@ -35,11 +42,12 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     }
     generation += 1
     let current = generation
-    let (mode,phase) = cases[index]
-    let caseId = mode+"-"+phase
-    row = ["case":caseId,"mode":mode,"phase":phase]
+    let (transport,mode,phase) = cases[index]
+    let caseId = (transport == "webview" ? "" : transport+"-")+mode+"-"+phase
+    row = ["case":caseId,"mode":mode,"phase":phase,"transport":transport]
     caseStartedUptime = ProcessInfo.processInfo.systemUptime
     let store = WKWebsiteDataStore(forIdentifier: UUID())
+    var proxyConfigurations: [ProxyConfiguration] = []
     if mode != "direct-control" {
       var port = UInt16(phase == "stopped-local" ? 1 : 18081)
       if mode.hasPrefix("core-") {
@@ -58,23 +66,48 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
       if mode == "core-socks-explicit" {proxy.excludedDomains = [];proxy.matchDomains = ["127.0.0.1","lyco-fixture.invalid"]}
       if mode == "core-socks-wildcard" {proxy.excludedDomains = [];proxy.matchDomains = ["*"]}
       proxy.allowFailover = false
-      store.proxyConfigurations = [proxy]
+      proxyConfigurations = [proxy]
+      store.proxyConfigurations = proxyConfigurations
       row["configurationCount"] = store.proxyConfigurations.count
       row["allowsFailover"] = store.proxyConfigurations.first?.allowFailover ?? true
     }
-    let config = WKWebViewConfiguration();config.websiteDataStore = store
-    let view = WKWebView(frame: window!.rootViewController!.view.bounds,configuration: config)
-    view.autoresizingMask = [.flexibleWidth,.flexibleHeight];view.navigationDelegate = self
-    window!.rootViewController!.view.addSubview(view);web = view
+    if transport == "webview" {
+      let config = WKWebViewConfiguration();config.websiteDataStore = store
+      let view = WKWebView(frame: window!.rootViewController!.view.bounds,configuration: config)
+      view.autoresizingMask = [.flexibleWidth,.flexibleHeight];view.navigationDelegate = self
+      window!.rootViewController!.view.addSubview(view);web = view
+    }
     let host = phase == "domain" ? "lyco-fixture.invalid" : "127.0.0.1"
     // The first WKWebView also starts WebKit's processes. Its direct positive
     // control must actually complete before its absence can mean anything.
     // Proxy and stopped-proxy cases retain their original budget/assertions.
-    let budget: TimeInterval = mode == "direct-control" ? 30 : 6
+    let budget: TimeInterval = transport == "webview" && mode == "direct-control" ? 30 : 6
     row["navigationBudgetSeconds"] = budget
     let timer = DispatchWorkItem {if self.generation == current {self.finish("timeout")}}
     timeout = timer;DispatchQueue.main.asyncAfter(deadline: .now()+budget,execute: timer)
-    view.load(URLRequest(url: URL(string: "http://"+host+":18080/probe?case="+caseId)!))
+    let request = URLRequest(url: URL(string: "http://"+host+":18080/probe?case="+caseId)!)
+    if transport == "urlsession" {
+      let config = URLSessionConfiguration.ephemeral
+      config.proxyConfigurations = proxyConfigurations
+      config.timeoutIntervalForRequest = budget;config.timeoutIntervalForResource = budget
+      config.urlCache = nil
+      let session = URLSession(configuration: config);foundationSession = session
+      session.dataTask(with: request) { data,response,error in
+        DispatchQueue.main.async {
+          guard self.generation == current, self.finishedGeneration != current else {return}
+          if let error {
+            self.row["errorCode"] = (error as NSError).code
+            self.finish("request-failed");return
+          }
+          let status = (response as? HTTPURLResponse)?.statusCode
+          self.row["httpStatus"] = status
+          self.row["originContent"] = status == 200 && String(data: data ?? Data(),encoding: .utf8)?.contains("LYCO_ORIGIN "+caseId) == true
+          self.finish("loaded")
+        }
+      }.resume()
+      return
+    }
+    web!.load(request)
   }
   private func finish(_ status: String) {
     guard finishedGeneration != generation else {return}
@@ -84,6 +117,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     row["elapsedSeconds"] = ProcessInfo.processInfo.systemUptime-caseStartedUptime
     results.append(row);index += 1
     web?.stopLoading();web?.navigationDelegate = nil;web?.removeFromSuperview();web = nil
+    foundationSession?.invalidateAndCancel();foundationSession = nil
     try? core?.close();core = nil
     DispatchQueue.main.asyncAfter(deadline: .now()+0.15) {self.next()}
   }
