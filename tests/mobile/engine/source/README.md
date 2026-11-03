@@ -94,3 +94,16 @@ These are disposable build-host settings only: the release optimization,
 native patch, source/ABI checks and downstream runtime gates are unchanged.
 Gradle user-home properties and their precedence follow the
 [official build-environment documentation](https://docs.gradle.org/current/userguide/build_environment.html).
+
+Resource-limited run 41445348901 is now terminal: the hosted runner lost
+communication at 2026-11-02T14:04:22Z. Its logs API returns BlobNotFound and
+its artifact list is empty. No compiler result or memory diagnosis is available.
+The next build uses a separate non-root systemd service, reserves at least 2 GiB
+and CPU capacity for the runner, and verifies the actual cgroup before compiling.
+That small preflight is uploaded before the long build. An observer outside the
+build group records memory events, peak usage, disk availability and unit exit
+status; no unbounded fallback is allowed. The downstream consumer binds this
+wrapper as well as the builder, patch and workflow to the successful source run.
+The native patch, optimized release build and all runtime gates remain unchanged.
+This uses documented [systemd resource controls](https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html)
+and [systemd-run](https://www.freedesktop.org/software/systemd/man/latest/systemd-run.html).

@@ -16,7 +16,8 @@ PY
 )
 git fetch --no-tags origin "$source"
 git diff --exit-code "$source" HEAD -- .github/workflows/build-gecko-experiment.yml \
- tests/mobile/engine/source/build-engine.sh tests/mobile/engine/source/proxy-default-address.patch
+ tests/mobile/engine/source/build-engine.sh tests/mobile/engine/source/build-host.py \
+ tests/mobile/engine/source/proxy-default-address.patch
 gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LYCO_SOURCE_ENGINE_RUN/artifacts" > "$stage/artifacts.json"
 artifact=$(python3 - "$stage/artifacts.json" "$LYCO_SOURCE_ENGINE_RUN" <<'PY'
 import json,sys
