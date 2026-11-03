@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-03T00:43:17.250322+00:00",
+  "scope": "Read-only source notice-gap audit for exact locked npm versions; no package execution, license replacement or release clearance",
+  "lockSha256": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6",
+  "packages": [
+    {
+      "name": "jimp-compact",
+      "version": "0.16.1",
+      "lockPath": "node_modules/jimp-compact",
+      "integrity": "sha512-dZ6Ra7u1G8c4Letq/B5EzAxj4tLFHL+cGtdpR+PVm4yzPDj+lCk+AbivWt1eOM+ikzkowtyV7qSqX6qr3t71Ww==",
+      "declaredLicense": "MIT",
+      "metadataSource": "https://registry.npmjs.org/jimp-compact/0.16.1",
+      "metadataSha256": "8e4257f89e50b3b3c5a875bdab0f37d46fead8a7c9c1139d3bf833a604c6aafe",
+      "upstreamRepository": "unjs-archive/jimp-compact",
+      "npmGitHead": "c4cdbe12832de484d83d38aa0c14d7709f5ca657",
+      "treeSource": "https://api.github.com/repos/unjs-archive/jimp-compact/git/trees/c4cdbe12832de484d83d38aa0c14d7709f5ca657?recursive=1",
+      "treeSha": "c4cdbe12832de484d83d38aa0c14d7709f5ca657",
+      "treeResponseSha256": "7830c8f015dbfadbc094314222dff0f18c66ec630770d5ffb29c6fad866ddfc1",
+      "treeTruncated": false,
+      "treeEntries": 14,
+      "dedicatedNoticePaths": [],
+      "supplementAdded": false,
+      "reviewRetained": true,
+      "readme": {
+        "source": "https://raw.githubusercontent.com/unjs-archive/jimp-compact/c4cdbe12832de484d83d38aa0c14d7709f5ca657/README.md",
+        "bytes": 1322,
+        "sha256": "972c97f9a3650668316b09c45508054ebb51b6630010dde5d64b4c92687e5b29",
+        "copyrightAndMitGrantPhrasesAllPresent": false
+      }
+    },
+    {
+      "name": "structured-headers",
+      "version": "0.4.1",
+      "lockPath": "node_modules/structured-headers",
+      "integrity": "sha512-0MP/Cxx5SzeeZ10p/bZI0S6MpgD+yxAhi1BOQ34jgnMXsCq3j1t6tQnZu+KdlL7dvJTLT3g9xN8tl10TqgFMcg==",
+      "declaredLicense": "MIT",
+      "metadataSource": "https://registry.npmjs.org/structured-headers/0.4.1",
+      "metadataSha256": "30e5aec6c29b04285554068570fa74893f16ae8874425ad10c3b660dce265941",
+      "upstreamRepository": "evert/structured-headers",
+      "npmGitHead": "f83b278e51d6b6cf565908342e0ca3f57f5b7bd1",
+      "treeSource": "https://api.github.com/repos/evert/structured-headers/git/trees/f83b278e51d6b6cf565908342e0ca3f57f5b7bd1?recursive=1",
+      "treeSha": "f83b278e51d6b6cf565908342e0ca3f57f5b7bd1",
+      "treeResponseSha256": "30cf164f605123878ce990fbc2ebc76c4205f6e5498fd522e4db3f83886ae837",
+      "treeTruncated": false,
+      "treeEntries": 23,
+      "dedicatedNoticePaths": [],
+      "supplementAdded": false,
+      "reviewRetained": true,
+      "readme": {
+        "source": "https://raw.githubusercontent.com/evert/structured-headers/f83b278e51d6b6cf565908342e0ca3f57f5b7bd1/readme.md",
+        "bytes": 5196,
+        "sha256": "749956c0848ddcf5261df2050add8c74d409b59d8c07845e7b06a73c490bb0be",
+        "copyrightAndMitGrantPhrasesAllPresent": false
+      }
+    },
+    {
+      "name": "tr46",
+      "version": "0.0.3",
+      "lockPath": "node_modules/tr46",
+      "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==",
+      "declaredLicense": "MIT",
+      "metadataSource": "https://registry.npmjs.org/tr46/0.0.3",
+      "metadataSha256": "c20d82a358f998dd564519689765373451149661ebfca1040450f0fdf180878f",
+      "upstreamRepository": "jsdom/tr46",
+      "npmGitHead": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
+      "treeSource": "https://api.github.com/repos/jsdom/tr46/git/trees/a8009f9ce80ff5dbe71dd71e203afe4e4c878d28?recursive=1",
+      "treeSha": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
+      "treeResponseSha256": "14eadf03ef7356228ce6a6556c390a6368853f49c7d22632330275ff287a43ba",
+      "treeTruncated": false,
+      "treeEntries": 13,
+      "dedicatedNoticePaths": [],
+      "supplementAdded": false,
+      "reviewRetained": true
+    }
+  ]
+}
