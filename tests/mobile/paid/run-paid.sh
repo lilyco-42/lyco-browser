@@ -73,6 +73,17 @@ PY
 adb shell am force-stop top.lain42.lycobrowser
 bash "$root/install-ci-ca.sh" "$private_ca/mitmproxy-ca-cert.pem"
 maestro_test paid-initial
+control '{"catalogueCopies":1250}'
+adb shell am force-stop top.lain42.lycobrowser
+mkdir -p "$private_storage/search-before"
+adb pull /data/user/0/top.lain42.lycobrowser/databases "$private_storage/search-before/" > /dev/null
+cp "$evidence/network.json" "$evidence/search-network-before.json"
+maestro_test paid-search
+adb shell am force-stop top.lain42.lycobrowser
+mkdir -p "$private_storage/search-after"
+adb pull /data/user/0/top.lain42.lycobrowser/databases "$private_storage/search-after/" > /dev/null
+python3 "$root/inspect-search.py" "$private_storage" "$evidence"
+control '{"catalogueCopies":0}'
 adb shell am force-stop top.lain42.lycobrowser
 LYCO_PHASE_SUFFIX=-A maestro_test paid-reopen -e ROUTE=A
 maestro test -e "ORIGIN=$origin" "$root/../flows/close.yaml"

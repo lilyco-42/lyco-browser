@@ -12,6 +12,9 @@ appId: top.lain42.lycobrowser
     element: "已保存线路 CI route A"
     direction: UP
 - assertVisible: "已保存线路 CI route A"
+- scrollUntilVisible:
+    element: "选择线路 CI route B"
+    direction: DOWN
 - assertVisible: "选择线路 CI route B"
 - assertNotVisible: "选择线路 CI route A"
 - scrollUntilVisible:

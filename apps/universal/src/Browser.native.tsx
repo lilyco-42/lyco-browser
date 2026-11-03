@@ -9,12 +9,13 @@ export default function Browser({profile,onClose,session,onBindRoute}:BrowserPro
  const [proxy,setProxy]=useState('');
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('');
  const [subscription,setSubscription]=useState<IdentifiedMobileSubscription|null>(null);
+ const [routeQuery,setRouteQuery]=useState('');
  const [selected,setSelected]=useState(profile.route?.routeId||''),[manual,setManual]=useState(!session&&!profile.route);
  const opening=useRef(false),mounted=useRef(true),latestSession=useRef(session);
  latestSession.current=session;
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;void closeMobileProfiles().catch(()=>{})}},[]);
- useEffect(()=>{setSubscription(null);setMessage('')},[session?.token,session?.username]);
- useEffect(()=>{setSelected(profile.route?.routeId||'')},[profile.id,profile.route?.routeId]);
+ useEffect(()=>{setSubscription(null);setMessage('');setRouteQuery('')},[session?.token,session?.username]);
+ useEffect(()=>{setSelected(profile.route?.routeId||'');setRouteQuery('')},[profile.id,profile.route?.routeId]);
  function current(snapshot:BrowserSession|undefined=session){
   return mounted.current&&latestSession.current?.token===snapshot?.token&&latestSession.current?.username===snapshot?.username;
  }
@@ -60,6 +61,12 @@ export default function Browser({profile,onClose,session,onBindRoute}:BrowserPro
   await openMobileProfile(profile,proxy,()=>current());if(mounted.current)setMessage('已提交环境启动，实际网络状态见浏览窗口');
  })}
  const available=Boolean(subscription?.nodes.some(row=>row.id===selected));
+ const selectedNode=subscription?.nodes.find(node=>node.id===selected);
+ const terms=routeQuery.normalize('NFKC').toLowerCase().trim().split(/\s+/).filter(Boolean);
+ const visibleNodes=subscription?.nodes.filter(node=>{
+  const label=(node.name+' '+node.outbound.type).normalize('NFKC').toLowerCase();
+  return terms.every(term=>label.includes(term));
+ })||[];
  return <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
  <ScrollView contentContainerStyle={s.shell} keyboardShouldPersistTaps="handled">
   <Text style={s.title}>{profile.name}</Text>
@@ -69,9 +76,19 @@ export default function Browser({profile,onClose,session,onBindRoute}:BrowserPro
   {session&&!accessError&&<>
    <Text style={s.title}>官网订阅线路</Text>
    <Pressable accessibilityRole="button" disabled={busy} onPress={loadRoutes} style={s.button}><Text>加载 / 刷新官网线路</Text></Pressable>
-   {subscription?.nodes.map(node=><Pressable key={node.id} accessibilityRole="radio" accessibilityLabel={'选择线路 '+node.name}
+   {subscription&&<>
+    <TextInput testID="mobile-route-search" accessibilityLabel="搜索已加载的线路" style={s.input} value={routeQuery} onChangeText={setRouteQuery}
+     editable={!busy} autoCapitalize="none" autoCorrect={false} maxLength={160} returnKeyType="search"
+     placeholder="搜索名称、地区文字或协议" placeholderTextColor="#8995aa"/>
+    <Text style={s.copy}>显示 {visibleNodes.length} / {subscription.nodes.length} 条已加载线路</Text>
+    <Text style={s.copy}>搜索只筛选显示，不会自动换线。</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel="清除线路搜索" disabled={busy||!routeQuery} onPress={()=>setRouteQuery('')} style={[s.button,(busy||!routeQuery)&&s.disabled]}><Text>清除线路搜索</Text></Pressable>
+    {selectedNode&&<Text style={s.copy} accessibilityLabel={'当前选择线路 '+selectedNode.name}>当前选择：{selectedNode.name}</Text>}
+    {!!terms.length&&!visibleNodes.length&&<Text style={s.copy}>没有匹配线路。清除搜索可查看完整目录；已选线路保持不变。</Text>}
+   </>}
+   {visibleNodes.map(node=><Pressable key={node.id} accessibilityRole="radio" accessibilityLabel={'选择线路 '+node.name}
     accessibilityState={{checked:selected===node.id,disabled:busy}} disabled={busy} onPress={()=>setSelected(node.id)} style={[s.route,selected===node.id&&s.selected]}>
-    <Text style={s.copy}>{selected===node.id?'●':'○'} {node.name}</Text></Pressable>)}
+    <Text style={s.copy}>{selected===node.id?'●':'○'} {node.name} · {node.outbound.type}</Text></Pressable>)}
    {!!subscription?.unavailable&&<Text style={s.copy}>另有 {subscription.unavailable} 条线路暂不支持当前移动内核。</Text>}
    <Text style={s.copy}>保存或打开都会记住所选线路。更换线路先关闭当前浏览环境；原有网站数据保留。已保存线路不可用时不会改选其他线路。</Text>
    <Pressable accessibilityRole="button" disabled={busy||!available} onPress={saveRoute} style={[s.button,(busy||!available)&&s.disabled]}><Text>保存所选线路</Text></Pressable>

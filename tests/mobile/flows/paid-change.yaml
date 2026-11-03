@@ -4,6 +4,9 @@ appId: top.lain42.lycobrowser
     file: paid-open.yaml
     env:
       NAME: paid-A
+- scrollUntilVisible:
+    element: "选择线路 CI route B"
+    direction: DOWN
 - tapOn: "选择线路 CI route B"
 - scrollUntilVisible:
     element: "通过官网线路打开环境"

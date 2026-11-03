@@ -1,0 +1,59 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- runFlow:
+    file: paid-login.yaml
+    env:
+      OWNER: ci-owner-a
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- scrollUntilVisible:
+    element: "搜索已加载的线路"
+    direction: DOWN
+- assertVisible: "显示 1252 / 1252 条已加载线路"
+- tapOn: "搜索已加载的线路"
+- inputText: "jp 1249 HTTP"
+- hideKeyboard
+- assertVisible: "显示 1 / 1252 条已加载线路"
+- scrollUntilVisible:
+    element: "选择线路 CI catalogue 1249 普通 日本 JP"
+    direction: DOWN
+- assertNotVisible: "选择线路 CI route A"
+- scrollUntilVisible:
+    element: "当前选择线路 CI route A"
+    direction: UP
+- assertVisible: "当前选择线路 CI route A"
+- scrollUntilVisible:
+    element: "搜索已加载的线路"
+    direction: UP
+- tapOn: "搜索已加载的线路"
+- eraseText: 160
+- inputText: "no-such-owned-route"
+- hideKeyboard
+- assertVisible: "显示 0 / 1252 条已加载线路"
+- scrollUntilVisible:
+    element: "当前选择线路 CI route A"
+    direction: DOWN
+- assertVisible: "当前选择线路 CI route A"
+- takeScreenshot: paid-search-zero-retains-selection
+- scrollUntilVisible:
+    element: "清除线路搜索"
+    direction: UP
+- tapOn: "清除线路搜索"
+- assertVisible: "显示 1252 / 1252 条已加载线路"
+- takeScreenshot: paid-search-full-directory-restored
+- tapOn: "搜索已加载的线路"
+- inputText: "CI route"
+- hideKeyboard
+- assertVisible: "显示 2 / 1252 条已加载线路"
+- scrollUntilVisible:
+    element: "当前选择线路 CI route A"
+    direction: DOWN
+- assertVisible: "当前选择线路 CI route A"
+- scrollUntilVisible:
+    element: "返回环境列表"
+    direction: DOWN
+- tapOn: "返回环境列表"

@@ -9,15 +9,18 @@ const directory=path.join(process.env.RUNNER_TEMP,'lyco-mobile-paid');await fs.m
 // Match the existing mobile acceptance's explicit one-hour persistent cookie;
 // multiple real APK installs/UI drivers may exceed the desktop's ten minutes.
 const routes=await createWorkspaceRoutingFixture({browserOriginHost:'10.0.2.2',indexedDB:true,visibleStatus:true,cookieMaxAge:3600});
-const requests=[];let hideA=false,revoked=false;
+const requests=[];let hideA=false,revoked=false,catalogueCopies=0;
 const owners=new Map([['CI_OWNER_A_TOKEN','ci-owner-a'],['CI_OWNER_B_TOKEN','ci-owner-b']]);
 const subscription=()=>{
  const nodes=routes.subscription.proxies.filter(node=>!hideA||node.name!=='CI route A').map(node=>({...node,server:'10.0.2.2'}));
+ // Owned aliases exercise a large directory, never claim independent exits.
+ const source=nodes.find(node=>node.name==='CI route A');
+ if(source)for(let i=0;i<catalogueCopies;i++)nodes.push({...source,name:'CI catalogue '+String(i).padStart(4,'0')+' 普通 日本 JP'});
  return {proxies:nodes,'proxy-groups':[{name:'PROXY',type:'select',proxies:nodes.map(node=>node.name)}]};
 };
 let writing=Promise.resolve();
 const write=()=>{
- const content=JSON.stringify({requests,observations:routes.observations,pageRequests:routes.pageRequests,checks:routes.checks,proxyProbes:routes.proxyProbes,hideA,revoked},null,2);
+ const content=JSON.stringify({requests,observations:routes.observations,pageRequests:routes.pageRequests,checks:routes.checks,proxyProbes:routes.proxyProbes,hideA,revoked,catalogueCopies},null,2);
  writing=writing.then(async()=>{const temporary=path.join(directory,'network.json.tmp');await fs.writeFile(temporary,content);await fs.rename(temporary,path.join(directory,'network.json'))});
  return writing;
 };
@@ -28,6 +31,10 @@ const server=http.createServer(async(req,res)=>{
   const action=JSON.parse(body);
   if(action.hideA!==undefined)hideA=Boolean(action.hideA);
   if(action.revoked!==undefined)revoked=Boolean(action.revoked);
+  if(action.catalogueCopies!==undefined){
+   if(![0,1250].includes(action.catalogueCopies)){send(400,{error:'Owned catalogue size refused'});return}
+   catalogueCopies=action.catalogueCopies;
+  }
   if(action.stop)await routes.stopNode(action.stop);
   if(action.restart)await routes.restartNode(action.restart);
   await write();send(200,{ok:true});return;
@@ -40,7 +47,7 @@ const server=http.createServer(async(req,res)=>{
   else send(200,{token:data.username==='ci-owner-a'?'CI_OWNER_A_TOKEN':'CI_OWNER_B_TOKEN'});
  }else if(!owner)send(401,{});
  else if(url.pathname==='/studio/api/me')send(200,{username:owner,points:{balance:1000},entitlements:revoked?[]:[{product:'proxy_1m',purchase_product:'proxy_1y',status:'active',expires_at:'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIMobilePaid'}}]});
- else if(url.pathname==='/studio/api/sub/CIMobilePaid/clash')send(200,subscription());
+ else if(url.pathname==='/studio/api/sub/CIMobilePaid/clash'){const value=subscription();logged.catalogueSize=value.proxies.length;send(200,value)}
  else send(404,{});
  await write();
 });

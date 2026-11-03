@@ -13,11 +13,14 @@ assert {row['owner'] for row in data['requests'] if row['path']=='/studio/api/lo
 assert data['revoked'] and sum(row['path']=='/studio/api/me' for row in data['requests'])>=8
 assert any(row['path']=='/studio/api/me' and row['nativeGuard'] and row['revoked'] for row in data['requests']),'Native Billing guard did not consume the fixture revocation'
 for phase in ['legacy','bound','downgrade','final']:assert (root/f'storage-{phase}.json').exists()
+search=json.loads((root/'catalogue-search.json').read_text())
+assert search['uiFlowPassed'] and search['catalogueEntries']==1252 and search['metadataUnchanged'] and search['newOriginPages']==0
 proof={'checks':['unchanged-signed-apk-default-tls-rejects-untrusted-ci-ca','legacy-to-v2-upgrade-keeps-profile-uuid-and-three-website-storage-types',
  'saved-A-and-B-used-real-authenticated-selected-upstreams','process-restart-relogin-restores-A-choice-and-storage','missing-A-never-selects-B',
  'stopped-A-no-direct-or-system-proxy-fallback-and-B-remains-usable','explicit-A-to-B-keeps-A-data-and-B-separate','other-account-cannot-see-owned-environments',
  'actual-old-apk-refuses-v2-and-cannot-overwrite-bindings','return-to-current-apk-retains-owner-route-and-storage','native-paid-session-revocation-removes-webview',
- 'actual-asyncstorage-has-opaque-bindings-and-no-node-or-account-credentials'],
- 'observations':rows,'candidate':json.loads((root/'candidate.json').read_text()),'realPayments':False,
+ 'actual-asyncstorage-has-opaque-bindings-and-no-node-or-account-credentials',
+ 'actual-1252-entry-search-zero-results-and-clear-retain-selected-node-and-persisted-metadata'],
+ 'observations':rows,'catalogueSearch':search,'candidate':json.loads((root/'candidate.json').read_text()),'realPayments':False,
  'scope':'API35 disposable rooted emulator trusts a CI-only CA for test Billing responses. No APK/runtime API/TLS changes. Native WebView uses actual authenticated HTTP upstreams and real same-origin TCP/storage observations; not customer egress, real payment, iOS routing or a store release.'}
 (root/'RESULT.json').write_text(json.dumps(proof,indent=2));print(json.dumps(proof,indent=2))
