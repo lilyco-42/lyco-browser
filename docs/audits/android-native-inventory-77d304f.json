@@ -1,0 +1,595 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-03T07:36:12.391293+00:00",
+  "scope": "Read-only ZIP/ELF inventory of actual retained signed APK; no application or library execution",
+  "source": "77d304fe9c2b14ecb8a4e218e56c21869b0f0ae0",
+  "run": 41594819546,
+  "job": 125779601829,
+  "apkSha256": "39ed9dee059fa945447571f18321de32d12aaac001e278e12cba25ba02045972",
+  "apkBytes": 129832443,
+  "originalCandidateArchiveSha256": "94ca85e103c44ab22c6c0c032962029e24b46d57ff932dae7843550d7a16b759",
+  "fullOriginalArchiveAndApkCrcVerified": true,
+  "nativeLibraries": [
+    {
+      "path": "lib/arm64-v8a/libappmodules.so",
+      "bytes": 167280,
+      "sha256": "0f1a27268146af2665419d4e69c9987ee96c70035bbd3d420e4e6abf5133ed94",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libc++_shared.so",
+      "bytes": 1292904,
+      "sha256": "3e852764502d06e0cf1080d532ae7c608b7649d946a3a9d7e84e3d4b7d683214",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libexpo-modules-core.so",
+      "bytes": 1424848,
+      "sha256": "e4ebd140919d9161b3ea848c8a0791c65a1ff06749584dd605399b67745b1ede",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libfbjni.so",
+      "bytes": 177000,
+      "sha256": "a9e35ba55d3f956920281f519385f8a72475ee24819799cb08375fdd4cce2b22",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libgifimage.so",
+      "bytes": 318992,
+      "sha256": "9f605249728da7091569772a38a4dde298ed48e1e73fed3da0e4b662ef38715c",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libgojni.so",
+      "bytes": 36053720,
+      "sha256": "452de0c43bd121210e5297dda739ec587152ab2b02186a8ba1309b7d304abbda",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libhermestooling.so",
+      "bytes": 138504,
+      "sha256": "072b7efd45640623eca4fab4cd88cb71948ebc59a82a72b6ef2e07af97c76edd",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libhermesvm.so",
+      "bytes": 2460728,
+      "sha256": "a497ad26e54785680581a7653dd0386af8e07e4290007f21917ec94e2774a078",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libimagepipeline.so",
+      "bytes": 8760,
+      "sha256": "1b377992e4256fa9398ec057722f84a359c7d588e570c8a41f51d930c19ece7d",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libjsi.so",
+      "bytes": 395912,
+      "sha256": "246517043246d22950510346a83b4a89799aaa501da2d436a07a974fe63cfa06",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libnative-filters.so",
+      "bytes": 23712,
+      "sha256": "4294b57460e70a6351ce7ae2733a79c088c907dfa54673a657227ec5bb669594",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libnative-imagetranscoder.so",
+      "bytes": 585376,
+      "sha256": "2aed28298a25afd52ac670cf9682398c6c7ba42a57195c01efd565e7ddfe17ca",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libreact_codegen_safeareacontext.so",
+      "bytes": 157760,
+      "sha256": "a7ff66aafbfef047432412c65b199da208d73cc231087acaf09d35dd8ccc584e",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libreactnative.so",
+      "bytes": 6657080,
+      "sha256": "c7e658d8c6765b7ab641b3a24a27b97465cc9da022f213fff1ebefdedba2913a",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libstatic-webp.so",
+      "bytes": 501856,
+      "sha256": "f3e5f9ab4f93f2a0a057285a2de9c93ba0ab59c76c22874d0356493ce283c4c7",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/arm64-v8a/libzstd-kmp.so",
+      "bytes": 731872,
+      "sha256": "10ec47f13bee884450b0911066019ba7aa6b4164a4c1f8c33c9d30dd3fd8868a",
+      "abi": "arm64-v8a",
+      "elfClass": 64,
+      "elfMachine": 183,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libappmodules.so",
+      "bytes": 166584,
+      "sha256": "2fa7238c324bd7a65f80c665836810b477ff2e0ba343ad1becb15599571eeb43",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libc++_shared.so",
+      "bytes": 1252080,
+      "sha256": "0a2c7afa35b183fdd5a3cb20e2080ad54cbea06c2a4f0bc8f122cb7d1e9e0b9f",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libexpo-modules-core.so",
+      "bytes": 1387080,
+      "sha256": "5a470c367bb4524f92b3f130bd8d50a529b112cf4509e574c5d448cff98af46c",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libfbjni.so",
+      "bytes": 172952,
+      "sha256": "a51410366a0394e05bc04052cfb237c70dcf7d4d53a56e1d00a041436cb0b653",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libgifimage.so",
+      "bytes": 302952,
+      "sha256": "20768d822119deee9beeccfd4340987976381587b519b630f5393fee4d731c1f",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libgojni.so",
+      "bytes": 38566616,
+      "sha256": "4bbf24afbb17b9d7401a9856bf4627298fac4605ac05448ebbf7bbaf511ed061",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libhermestooling.so",
+      "bytes": 135184,
+      "sha256": "052605acc50e238ff71391c78659b5ea33c677a9dfe482788b2f74d5d8f94a23",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libhermesvm.so",
+      "bytes": 2575016,
+      "sha256": "fbb8ceab67d3da8c28be817539fe3d7da2c8a991676818d5b1b23f8c4d690dc6",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libimagepipeline.so",
+      "bytes": 8464,
+      "sha256": "2e596f4955f65abaa93c891b49eb58b5416581806a04bde0097cc369ae4dbfb3",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libjsi.so",
+      "bytes": 402984,
+      "sha256": "0fca96fcd757cd4c4ebe1204b5450a0cd19a2bc6212adaab48507d082481a999",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libnative-filters.so",
+      "bytes": 30528,
+      "sha256": "1a5270f007dd4b2f0fc52ceac82e05143648ba9be59c2213a21cf61c84f1f5e5",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libnative-imagetranscoder.so",
+      "bytes": 720432,
+      "sha256": "f6b92ad7f1c30973f40704c46987504757c3d079c7f4ace6efc8b318dd9c22f3",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libreact_codegen_safeareacontext.so",
+      "bytes": 158168,
+      "sha256": "103feea56ee429fa17bbab17733a403e8d202b81adba386d4c1fc2ab522169dc",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libreactnative.so",
+      "bytes": 6770448,
+      "sha256": "5a8a1bcf748211d4b4a6e9e5b8399a5ff0d160964caad2d7e8361c1f505ce003",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libstatic-webp.so",
+      "bytes": 560968,
+      "sha256": "e7884cd18761b5ee54de98b9a3f4b9e4b0dea364c186e24ff9b740b29742562b",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    },
+    {
+      "path": "lib/x86_64/libzstd-kmp.so",
+      "bytes": 816568,
+      "sha256": "fefcbdcd59580a3043c62380a83d92f13c031c278481e22591a2c75112296e28",
+      "abi": "x86_64",
+      "elfClass": 64,
+      "elfMachine": 62,
+      "licenseAndSourceMapping": "not established by this file inventory"
+    }
+  ],
+  "namedNoticeFiles": [
+    {
+      "path": "META-INF/androidx/annotation/annotation/LICENSE.txt",
+      "bytes": 10175,
+      "sha256": "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"
+    },
+    {
+      "path": "okhttp3/internal/publicsuffix/NOTICE",
+      "bytes": 218,
+      "sha256": "8a9c58fbded5ea3474315e4a9824ca8b1486098a1a03e897e0b19419d5e1876a"
+    }
+  ],
+  "versionDescriptors": [
+    {
+      "path": "META-INF/androidx.activity_activity.version",
+      "value": "1.8.0",
+      "bytes": 6,
+      "sha256": "3eb1ef94b5890ca727158b106142685c8733b0ace5bcb4cf3f0ac14f9f0643f4"
+    },
+    {
+      "path": "META-INF/androidx.annotation_annotation-experimental.version",
+      "value": "1.4.1",
+      "bytes": 6,
+      "sha256": "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"
+    },
+    {
+      "path": "META-INF/androidx.appcompat_appcompat-resources.version",
+      "value": "1.7.0",
+      "bytes": 6,
+      "sha256": "bb7320d831e7a151aa901c35e7326c752fa2ef5024f30768c42319b8bed171ed"
+    },
+    {
+      "path": "META-INF/androidx.appcompat_appcompat.version",
+      "value": "1.7.0",
+      "bytes": 6,
+      "sha256": "bb7320d831e7a151aa901c35e7326c752fa2ef5024f30768c42319b8bed171ed"
+    },
+    {
+      "path": "META-INF/androidx.arch.core_core-runtime.version",
+      "value": "task ':arch:core:core-runtime:writeVersionFile' property 'version'",
+      "bytes": 67,
+      "sha256": "1b7c606370188534dac5561fba2b2988093829697fce9e6e8832e9291d24ed00"
+    },
+    {
+      "path": "META-INF/androidx.autofill_autofill.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.cardview_cardview.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.coordinatorlayout_coordinatorlayout.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.core_core-ktx.version",
+      "value": "1.17.0",
+      "bytes": 7,
+      "sha256": "00afc49f1599e59129a59b64c2b019de3fe35300c05bb9d96cb25002576ff43b"
+    },
+    {
+      "path": "META-INF/androidx.core_core-viewtree.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.core_core.version",
+      "value": "1.17.0",
+      "bytes": 7,
+      "sha256": "00afc49f1599e59129a59b64c2b019de3fe35300c05bb9d96cb25002576ff43b"
+    },
+    {
+      "path": "META-INF/androidx.cursoradapter_cursoradapter.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.customview_customview.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.documentfile_documentfile.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.drawerlayout_drawerlayout.version",
+      "value": "1.1.1",
+      "bytes": 6,
+      "sha256": "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"
+    },
+    {
+      "path": "META-INF/androidx.dynamicanimation_dynamicanimation.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.emoji2_emoji2-views-helper.version",
+      "value": "1.3.0",
+      "bytes": 6,
+      "sha256": "64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663"
+    },
+    {
+      "path": "META-INF/androidx.emoji2_emoji2.version",
+      "value": "1.3.0",
+      "bytes": 6,
+      "sha256": "64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663"
+    },
+    {
+      "path": "META-INF/androidx.fragment_fragment.version",
+      "value": "1.5.4",
+      "bytes": 6,
+      "sha256": "879a67a197446479e783c8e22a58681fed324f09eac1ce808f6a5a4c5e1894ad"
+    },
+    {
+      "path": "META-INF/androidx.graphics_graphics-shapes.version",
+      "value": "1.0.1",
+      "bytes": 6,
+      "sha256": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066"
+    },
+    {
+      "path": "META-INF/androidx.interpolator_interpolator.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-livedata-core.version",
+      "value": "task ':lifecycle:lifecycle-livedata-core:writeVersionFile' property 'version'",
+      "bytes": 78,
+      "sha256": "474006d0cc8100f8dfc68d9269f233a347c29eb4a36d859c20a4953aa41d4dfc"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-livedata.version",
+      "value": "task ':lifecycle:lifecycle-livedata:writeVersionFile' property 'version'",
+      "bytes": 73,
+      "sha256": "8fb16c24c98902ba99917588dbfd038df0d9bf8693c9256e2ba9952c78b44b33"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-process.version",
+      "value": "task ':lifecycle:lifecycle-process:writeVersionFile' property 'version'",
+      "bytes": 72,
+      "sha256": "ade1aef8b090839ec122c696be949dd1633ccbac22bcb1a0f895bacde74f66fd"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-runtime.version",
+      "value": "task ':lifecycle:lifecycle-runtime:writeVersionFile' property 'version'",
+      "bytes": 72,
+      "sha256": "4257cccbba3f7aea521a40937d1bfdd5949f5f3e1ed689c402a4f2977109030b"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version",
+      "value": "task ':lifecycle:lifecycle-viewmodel-savedstate:writeVersionFile' property 'version'",
+      "bytes": 85,
+      "sha256": "421fc63528b574159fbab9883b3767b85c6f073415e4f58a166acd93706db90c"
+    },
+    {
+      "path": "META-INF/androidx.lifecycle_lifecycle-viewmodel.version",
+      "value": "task ':lifecycle:lifecycle-viewmodel:writeVersionFile' property 'version'",
+      "bytes": 74,
+      "sha256": "405e9f0f83651ca097dac96b53a9d149a9b6f1c890d232e1f3e86bc03fcc62b1"
+    },
+    {
+      "path": "META-INF/androidx.loader_loader.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.profileinstaller_profileinstaller.version",
+      "value": "1.3.1",
+      "bytes": 6,
+      "sha256": "10e2e117b01523891ca271a615ae36e9d5e52348fd7d642f66727602c1b8dcbe"
+    },
+    {
+      "path": "META-INF/androidx.recyclerview_recyclerview.version",
+      "value": "1.2.1",
+      "bytes": 6,
+      "sha256": "6cf4e084b47f33c9b02ef79279d157833868f8f70514169a768be353ee328fea"
+    },
+    {
+      "path": "META-INF/androidx.savedstate_savedstate.version",
+      "value": "1.2.1",
+      "bytes": 6,
+      "sha256": "6cf4e084b47f33c9b02ef79279d157833868f8f70514169a768be353ee328fea"
+    },
+    {
+      "path": "META-INF/androidx.startup_startup-runtime.version",
+      "value": "1.1.1",
+      "bytes": 6,
+      "sha256": "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"
+    },
+    {
+      "path": "META-INF/androidx.swiperefreshlayout_swiperefreshlayout.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.tracing_tracing-ktx.version",
+      "value": "1.2.0",
+      "bytes": 6,
+      "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+    },
+    {
+      "path": "META-INF/androidx.tracing_tracing.version",
+      "value": "1.2.0",
+      "bytes": 6,
+      "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+    },
+    {
+      "path": "META-INF/androidx.transition_transition.version",
+      "value": "1.5.0",
+      "bytes": 6,
+      "sha256": "acb57a7135b2d7d6e665f67f056e21353023b93835f54def1ae523bf76f1bfb3"
+    },
+    {
+      "path": "META-INF/androidx.vectordrawable_vectordrawable-animated.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.vectordrawable_vectordrawable.version",
+      "value": "1.1.0",
+      "bytes": 6,
+      "sha256": "1575e1af4a95f12f70b4ee6a6adce8160953d93ea17dc2611b90883ccc3ad3b8"
+    },
+    {
+      "path": "META-INF/androidx.versionedparcelable_versionedparcelable.version",
+      "value": "1.1.1",
+      "bytes": 6,
+      "sha256": "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"
+    },
+    {
+      "path": "META-INF/androidx.viewpager2_viewpager2.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.viewpager_viewpager.version",
+      "value": "1.0.0",
+      "bytes": 6,
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"
+    },
+    {
+      "path": "META-INF/androidx.webkit_webkit.version",
+      "value": "1.14.0",
+      "bytes": 7,
+      "sha256": "bb0df1bd902faba507c15975eb9973e695f2732f760d851b4f9c7ba17068f5ff"
+    },
+    {
+      "path": "META-INF/com.google.android.material_material.version",
+      "value": "1.13.0",
+      "bytes": 7,
+      "sha256": "b4a9545a385e9701482be56a0efee678d467d9c586ec476f2c5986cfaa24e96c"
+    },
+    {
+      "path": "META-INF/kotlinx_coroutines_android.version",
+      "value": "1.10.2",
+      "bytes": 6,
+      "sha256": "34d597db43ca53b2fd72ccbdd1af7a0fe238c2c0b8321dad8f43a1613143fc62"
+    },
+    {
+      "path": "META-INF/kotlinx_coroutines_core.version",
+      "value": "1.10.2",
+      "bytes": 6,
+      "sha256": "34d597db43ca53b2fd72ccbdd1af7a0fe238c2c0b8321dad8f43a1613143fc62"
+    }
+  ],
+  "limitations": [
+    "ELF headers establish compiled ABI only, not real-device compatibility or native function success.",
+    "Filename matching does not inspect bundled JS strings and does not prove absence of other copyright texts. Existing offline npm/core notice UI remains separate.",
+    "Version descriptors identify the recorded metadata only; no completeness claim for Gradle/Pods/native dependencies.",
+    "Library filenames do not establish component ownership, source revision, license or complete source-delivery compliance.",
+    "Commercial delivery still requires each component mapped to original notices, corresponding source and applicable terms."
+  ],
+  "commercialClearanceProven": false,
+  "productRuntimeAcceptanceAdded": false
+}
