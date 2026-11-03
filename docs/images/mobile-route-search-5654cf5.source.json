@@ -1,0 +1,13 @@
+{
+  "source": "5654cf5c1225b28d8612fdbdefb31644eb4b6830",
+  "candidateRun": 41563675880,
+  "candidateApkSha256": "e9852bc90bec63f28405d3c08c1c576db4fc48018705d76fd8c6941783556e57",
+  "acceptanceRun": 41586183938,
+  "acceptanceSource": "e7b483cedbfe73db133ab73af0384b27f37c52b3",
+  "originalArtifact": 13208128821,
+  "originalArtifactSha256": "78ac6862750a108720ec50da694c89b6447a2ac37bb93b9f1a2b60d6fd51518f",
+  "originalPath": "paid-search-debug/paid-search/takeScreenshot/paid-search-zero-retains-selection.png",
+  "screenshotSha256": "a5981a2bd5a7afbaa7547838fe6eb8d166afa7192c422d3d20ddb3711c2eddea",
+  "imageEdited": false,
+  "scope": "Actual signed APK on API35 with CI Billing and 1252 owned directory entries; 1250 aliases share one upstream, no customer or iOS/RTC proof"
+}
