@@ -107,3 +107,13 @@ wrapper as well as the builder, patch and workflow to the successful source run.
 The native patch, optimized release build and all runtime gates remain unchanged.
 This uses documented [systemd resource controls](https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html)
 and [systemd-run](https://www.freedesktop.org/software/systemd/man/latest/systemd-run.html).
+
+Host preflight 41552388207 stopped before compilation: the initial wrapper
+incorrectly assumed memory.max exists on the v2 root. Its complete 925-byte
+evidence ZIP was verified by SHA-256 and CRC; the host had 15 GiB RAM, 3 GiB
+swap and 103 GiB available disk. The wrapper now reads existing ancestor limits
+and still requires exact effective limits on the new child. The hierarchy-root
+exception follows the [kernel cgroup v2 conventions](https://docs.kernel.org/admin-guide/cgroup-v2.html#conventions).
+Run 41552695786 validates the corrected wrapper; neither run proves the native
+patch or runtime behavior. The Python shared-library tool path is explicitly
+preserved without passing Actions authentication variables to the child.
