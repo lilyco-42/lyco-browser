@@ -14,6 +14,8 @@ Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutd
 
 移动端完整目录搜索已在实际签名包通过：[41563675880](https://github.com/lilyco-42/lyco-browser/actions/runs/41563675880) 通过原有完整存储、导航、代理正负向与许可页检查；[41586183938](https://github.com/lilyco-42/lyco-browser/actions/runs/41586183938) 对同一包的原有 12 项及新增搜索共 13 项全部通过，7 次源站与存储观察保留，搜索前后实际记录不变且无额外源站访问。1252 条受控目录含同一上游别名，不表示全部真实出口健康。iPhone [41586547941](https://github.com/lilyco-42/lyco-browser/actions/runs/41586547941) 已编译同一界面的 ARM64 未签名设备归档，尚无可安装、真机运行或 iOS 搜索证明；RTC 与 iOS 路由仍未通过。具体摘要、截图与范围见[移动线路](MOBILE-WORKSPACE-ROUTES.md#完整线路目录搜索)，五平台条件不变。
 
+移动环境新增名称和下次首页编辑，保持原身份、账号、线路和网站数据。新签名候选 [41594819546](https://github.com/lilyco-42/lyco-browser/actions/runs/41594819546) 的原有整组原生验收通过，完整原始档案已核验；新增编辑由同包 [41596731418](https://github.com/lilyco-42/lyco-browser/actions/runs/41596731418) 继续验收，iPhone 设备编译 [41596754756](https://github.com/lilyco-42/lyco-browser/actions/runs/41596754756) 进行中，均不提前记作新增功能通过。
+
 
 iOS 后续 [41557341314](https://github.com/lilyco-42/lyco-browser/actions/runs/41557341314) 已完成全部 36 个场景并核验原始 ZIP。新增 NWConnection/PrivacyContext 对照也在有效域名代理和配置读回下重现本机地址绕过；没有安全 WebView 模式。本轮准备步骤独立，请求阶段约 30 秒，无总时限超时，明确保留实际路由失败。不能以更换系统请求包装或调整采集等待宣称修复；后续公开 RelayHop [41562850867](https://github.com/lilyco-42/lyco-browser/actions/runs/41562850867) 已完成全部 48 项：两个系统传输的严格 TLS 域名互通及证书拒绝成立，本机地址仍绕过；WebView 可信域名连接 -1202 且信任回调未触发。原始 ZIP 已完整核验，没有安全模式，未接入产品。
 
