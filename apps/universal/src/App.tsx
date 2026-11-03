@@ -41,18 +41,20 @@ function ProfileEditor({profile,saving,onSave,onCancel}:{profile:Profile;saving:
  }
  return <Modal visible onRequestClose={()=>{if(!saving&&!pending.current)onCancel()}} animationType="slide">
   <SafeAreaView style={styles.root}><KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
-   <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+   <ScrollView style={{flex:1}} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>编辑环境</Text>
      <Text style={styles.hint}>当前环境：{profile.name}</Text>
      {profile.route?<Text style={styles.hint}>所属账号：{profile.route.owner} · 官网线路：{profile.route.routeName}</Text>:null}
      <Text style={styles.hint}>修改名称和下次打开的首页，保留本环境的网站数据和官网线路。</Text>
      <Field label="修改环境名称" value={name} onChangeText={setName} disabled={saving}/>
      <Field label="修改首页 URL" value={url} onChangeText={setUrl} disabled={saving}/>
-     {error?<Text accessibilityRole="alert" style={styles.note}>{error}</Text>:null}
-     <Action title={saving?'正在保存修改…':'保存环境修改'} disabled={saving} onPress={()=>{void save()}}/>
-     <Action title="取消编辑" secondary disabled={saving} onPress={()=>{if(!pending.current)onCancel()}}/>
     </View>
    </ScrollView>
+   <View style={styles.editorActions}>
+    {error?<Text accessibilityRole="alert" style={styles.note}>{error}</Text>:null}
+    <Action title={saving?'正在保存修改…':'保存环境修改'} disabled={saving} onPress={()=>{void save()}}/>
+    <Action title="取消编辑" secondary disabled={saving} onPress={()=>{if(!pending.current)onCancel()}}/>
+   </View>
   </KeyboardAvoidingView></SafeAreaView>
  </Modal>;
 }
@@ -308,6 +310,7 @@ const styles=StyleSheet.create({
  tab:{flex:1,paddingVertical:15,alignItems:'center'},activeTab:{borderBottomWidth:3,borderBottomColor:COLOR.gold},
  tabText:{color:COLOR.muted,fontSize:13},activeTabText:{color:COLOR.text,fontWeight:'700'},
  container:{paddingHorizontal:16,paddingTop:18,paddingBottom:40,maxWidth:900,width:'100%',alignSelf:'center',gap:15},
+ editorActions:{flexShrink:0,padding:16,gap:10,maxWidth:900,width:'100%',alignSelf:'center',borderTopWidth:1,borderTopColor:COLOR.line},
  card:{padding:20,backgroundColor:COLOR.panel,borderColor:COLOR.line,borderWidth:1,borderRadius:19,gap:10},
  cardTitle:{fontSize:19,fontWeight:'800',color:COLOR.text,marginBottom:4},
  hint:{color:COLOR.muted,fontSize:13,lineHeight:22},

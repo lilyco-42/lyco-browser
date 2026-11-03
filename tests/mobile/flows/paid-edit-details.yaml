@@ -23,6 +23,8 @@ appId: top.lain42.lycobrowser
     direction: DOWN
 - tapOn: "保存环境修改"
 - assertVisible: "已更新环境名称和首页，网站数据与官网线路保留"
+- assertNotVisible:
+    id: "修改环境名称"
 - scrollUntilVisible:
     element: "编辑环境 ${TO_NAME}"
     direction: DOWN

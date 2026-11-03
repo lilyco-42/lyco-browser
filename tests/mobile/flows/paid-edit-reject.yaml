@@ -13,6 +13,8 @@ appId: top.lain42.lycobrowser
     element: "取消编辑"
     direction: DOWN
 - tapOn: "取消编辑"
+- assertNotVisible:
+    id: "修改环境名称"
 - assertNotVisible: "编辑环境 discarded-edit"
 - scrollUntilVisible:
     element: "编辑环境 paid-A"
@@ -50,6 +52,8 @@ appId: top.lain42.lycobrowser
     element: "取消编辑"
     direction: DOWN
 - tapOn: "取消编辑"
+- assertNotVisible:
+    id: "修改环境名称"
 - scrollUntilVisible:
     element: "编辑环境 paid-A"
     direction: DOWN
