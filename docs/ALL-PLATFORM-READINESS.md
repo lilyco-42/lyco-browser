@@ -12,6 +12,8 @@ Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutd
 
 ## 已有证据
 
+iOS 后续 [41557341314](https://github.com/lilyco-42/lyco-browser/actions/runs/41557341314) 已完成全部 36 个场景并核验原始 ZIP。新增 NWConnection/PrivacyContext 对照也在有效域名代理和配置读回下重现本机地址绕过；没有安全 WebView 模式。本轮准备步骤独立，请求阶段约 30 秒，无总时限超时，明确保留实际路由失败。不能以更换系统请求包装或调整采集等待宣称修复；后续公开 RelayHop 路线仍只待验证，尚未进入产品。
+
 iOS 独立 [41554045712](https://github.com/lilyco-42/lyco-browser/actions/runs/41554045712) 已完成 22 个 WebView 和 7 个 URLSession 原生观察：两者域名代理正向均成立，但真实本机地址在健康和停用上游时均直连。反例已在独立系统请求中重现，不能继续只修改工作台或 WebView 初始化。原始 ZIP 完整大小/摘要/CRC 已核验；流程末尾同时到达总时限，但所有结果已保存，不能据此忽略实际路由失败。详见 [iOS 绕过定位](IOS-PROXY-INVESTIGATION.md)。
 
 移动 `655e071` 新增[环境保存官网线路](MOBILE-WORKSPACE-ROUTES.md)：账号归属、保存所选节点、重开保留选择、缺失节点拒绝回退及版本封装已实现。新增策略/迁移单元、类型和 Web 回归 [40676034809](https://github.com/lilyco-42/lyco-browser/actions/runs/40676034809) 通过；签名 Android [40676041190](https://github.com/lilyco-42/lyco-browser/actions/runs/40676041190) 原有完整原生验收通过，APK SHA-256 `338718ad3c29a51599579af12b5c7ef2ea8bc321de35485704e39227d35637f5`。新增官网绑定 [40709909923](https://github.com/lilyco-42/lyco-browser/actions/runs/40709909923) 对同一未修改签名 APK 完成整组 12 项与 7 份实际 TCP/三类存储观察：重启恢复、缺失/断线不回退且 B 可用、换线保留数据、跨账号隐藏、旧版拒绝覆盖、恢复安装和原生撤权均通过；绑定/降级/恢复元数据摘要一致。iPhone [40677110486](https://github.com/lilyco-42/lyco-browser/actions/runs/40677110486) 设备编译成功，IPA SHA-256 `27e87797aabd8a74edbc22bbb27c7cb72225e08dc35d4d482d7d1a137133ab92`；未签名、不可直接安装、无真机证明。

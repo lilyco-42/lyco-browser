@@ -2,6 +2,20 @@
 
 当前产品与独立试验都保留回环地址及停代理负向，尚未通过发行条件。[40608302339](https://github.com/lilyco-42/lyco-browser/actions/runs/40608302339) 的 22 个原生观察和有效直连对照表明，七种公开 WebView 代理配置均未同时满足健康代理路由与停代理时无直连；不能继续把切换 HTTP/SOCKS 或清空匹配列表当成修复。
 
+## 最新 36 个原生观察
+
+`3470773` 的 [41557341314](https://github.com/lilyco-42/lyco-browser/actions/runs/41557341314) 已通过独立准备步骤及源码/运行/可执行文件摘要绑定，完成全部 36 个唯一场景。iOS26.4 模拟器、SDK26.5、Xcode26.6/17F113；三层直接正向均有效，三层域名均真实经过代理，实际配置读回均为一项代理且 `allowFailover=false`。新增低层 TCP 对照结果：
+
+| NWConnection + 独立 PrivacyContext | HTTP CONNECT | 核心 SOCKS |
+| --- | ---: | ---: |
+| 域名经过代理 | 1/1 | 1/1 |
+| 健康时本机地址直接访问 | 1/1 | 1/1 |
+| 停用上游后本机地址直接访问 | 1/1 | 1/1 |
+
+原来的 WebView 与 URLSession 反例同时保持，所有 36 份源站内容均完整收到，但没有安全 WebView 模式。请求阶段约 30 秒，没有总时限超时，明确因原路由门槛失败而退出 1；不能再归因于准备时间或上层响应解析。它把反例扩展到所测系统 TCP 接口，不证明封闭系统内部的确切实现原因，也不是所有 iOS 版本的结论。
+
+原始 187072 字节 ZIP 的 SHA-256 为 `71d2a8427ebff24ae8024fff2aec673972aa2009f1432eadeaa582d653b3ae6c`，完整大小和 CRC 已核验，原始结果、归属和日志保留。公开 API 的另一类 [HTTP/2 RelayHop](https://developer.apple.com/documentation/network/proxyconfiguration/relayhop) 是后续最小互通候选，当前没有实现或采用。其试验必须保留原 36 项、真实代理正向、停上游负向及严格 TLS；API 文档存在不代表它已经解决本机地址边界。
+
 ## 已完成的系统请求对照
 
 `beac7c9` 的 [41554045712](https://github.com/lilyco-42/lyco-browser/actions/runs/41554045712) 已实际编译并完成全部 29 个观察：iOS26.4 模拟器、SDK26.5、Xcode26.6/17F113。两种传输的直接正向均有效，源站收到 29 个原始请求，页面/响应内容均正确。结果如下：
@@ -17,7 +31,7 @@
 
 后续源码新增 7 个 Network.framework 原生 TCP 对照：使用公开 [NWParameters.PrivacyContext](https://developer.apple.com/documentation/network/nwparameters/privacycontext) 的相同代理配置，再用 [setPrivacyContext](https://developer.apple.com/documentation/network/nwparameters/setprivacycontext(_:)) 关联 NWConnection 参数。每次请求独立创建连接和上下文，直接发送自有 HTTP 请求，检查原始状态码、内容和源站 TCP 归属，不经过 URLSession。其直连和域名代理正向未成立时，不推断低层行为；结果也不能替代 WebView 验收。
 
-原有 29 个场景保留，总计 36 个场景须各完成一次，并核对各传输配置的实际读回值。模拟器编译、启动和安装与请求执行分成独立步骤，跨步骤绑定同一运行、源码、设备与可执行文件摘要，拒绝旧结果和重复执行。请求阶段保留原有逐场景 6 秒及首个 WebView 正向 30 秒预算；外层采集等待增加 60 秒以覆盖新增 7 个请求及收集余量，不是原功能门槛变化。此新增源码尚待真实编译与原生验证，产品未修改。
+原有 29 个场景保留，总计 36 个场景须各完成一次，并核对各传输配置的实际读回值。模拟器编译、启动和安装与请求执行分成独立步骤，跨步骤绑定同一运行、源码、设备与可执行文件摘要，拒绝旧结果和重复执行。请求阶段保留原有逐场景 6 秒及首个 WebView 正向 30 秒预算；外层采集等待增加 60 秒以覆盖新增 7 个请求及收集余量，不是原功能门槛变化。此新增源码已在上述运行实际编译与运行，产品未修改，原功能门槛仍失败。
 
 ## 对照设计与来源
 
