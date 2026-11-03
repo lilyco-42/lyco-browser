@@ -3,6 +3,7 @@
 import UIKit
 import WebKit
 import Network
+import Security
 import Lycotunnel
 
 @available(iOS 17.0, *)
@@ -30,8 +31,12 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     let foundation: [(String, String)] = ["direct-control", "direct-http", "core-socks"].flatMap { mode in
       mode == "direct-control" ? [(mode,"local")] : [(mode,"domain"),(mode,"local"),(mode,"stopped-local")]
     }
+    let relay = ["webview","urlsession","network"].flatMap { transport in
+      [(transport,"relay-h2","domain"),(transport,"relay-h2","local"),
+       (transport,"relay-h2","stopped-local"),(transport,"relay-untrusted","domain")]
+    }
     return original.map { ("webview", $0.0, $0.1) } + foundation.map { ("urlsession", $0.0, $0.1) }
-      + foundation.map { ("network", $0.0, $0.1) }
+      + foundation.map { ("network", $0.0, $0.1) } + relay
   }()
   func application(_ application: UIApplication,didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey:Any]?) -> Bool {
     let window = UIWindow(frame: UIScreen.main.bounds)
@@ -54,6 +59,7 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
     var proxyConfigurations: [ProxyConfiguration] = []
     if mode != "direct-control" {
       var port = UInt16(phase == "stopped-local" ? 1 : 18081)
+      if mode.hasPrefix("relay-") {port = phase == "stopped-local" ? 1 : mode == "relay-untrusted" ? 18083 : 18082}
       if mode.hasPrefix("core-") {
         let outbound = "{\"type\":\"http\",\"server\":\"127.0.0.1\",\"server_port\":"+String(port)+"}"
         var error: NSError?
@@ -63,7 +69,13 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
       // Different proxy and origin IPs distinguish a proxy-server-address
       // exemption from a general loopback exemption. Product gates stay intact.
       let endpoint = NWEndpoint.hostPort(host: mode == "direct-http-v6" ? "::1" : "127.0.0.1",port: NWEndpoint.Port(rawValue: port)!)
-      var proxy = mode.contains("socks") ? ProxyConfiguration(socksv5Proxy: endpoint) : ProxyConfiguration(httpCONNECTProxy: endpoint,tlsOptions: nil)
+      var proxy: ProxyConfiguration
+      if mode.hasPrefix("relay-") {
+        guard let value = relayProxy(endpoint,generation: current) else {finish("relay-certificate-unavailable");return}
+        proxy = value
+      } else {
+        proxy = mode.contains("socks") ? ProxyConfiguration(socksv5Proxy: endpoint) : ProxyConfiguration(httpCONNECTProxy: endpoint,tlsOptions: nil)
+      }
       row["initialMatchCount"] = proxy.matchDomains.count;row["initialExcludedCount"] = proxy.excludedDomains.count
       if let core {proxy.applyCredential(username: core.username(),password: core.password())}
       if mode == "core-socks-empty" {proxy.excludedDomains = [];proxy.matchDomains = []}
@@ -150,6 +162,32 @@ final class ProbeDelegate: UIResponder, UIApplicationDelegate, WKNavigationDeleg
       return
     }
     web!.load(request)
+  }
+  private func relayProxy(_ endpoint: NWEndpoint,generation current: Int) -> ProxyConfiguration? {
+    guard let url = Bundle.main.url(forResource: "relay-anchor",withExtension: "der"),
+      let bytes = try? Data(contentsOf: url),let anchor = SecCertificateCreateWithData(nil,bytes as CFData) else {return nil}
+    row["relayTrustChecks"] = 0;row["relayTrustAcceptedCount"] = 0;row["relayTrustRejectedCount"] = 0
+    row["relayTrustSetupValid"] = true
+    let options = NWProtocolTLS.Options()
+    sec_protocol_options_set_verify_block(options.securityProtocolOptions,{ [weak self] _,trust,complete in
+      let value = sec_trust_copy_ref(trust).takeRetainedValue()
+      let statuses = [SecTrustSetNetworkFetchAllowed(value,false),
+        SecTrustSetPolicies(value,SecPolicyCreateSSL(true,"127.0.0.1" as CFString)),
+        SecTrustSetAnchorCertificates(value,[anchor] as CFArray),SecTrustSetAnchorCertificatesOnly(value,true)]
+      let configured = statuses.allSatisfy { $0 == errSecSuccess }
+      let accepted = configured && SecTrustEvaluateWithError(value,nil)
+      DispatchQueue.main.async {
+        guard let self,self.generation == current,self.finishedGeneration != current else {complete(false);return}
+        self.row["relayTrustChecks"] = (self.row["relayTrustChecks"] as? Int ?? 0)+1
+        let key = accepted ? "relayTrustAcceptedCount" : "relayTrustRejectedCount"
+        self.row[key] = (self.row[key] as? Int ?? 0)+1
+        self.row["relayTrustSetupValid"] = configured && (self.row["relayTrustSetupValid"] as? Bool ?? false)
+        complete(accepted)
+      }
+    },DispatchQueue.global(qos: .userInitiated))
+    let hop = ProxyConfiguration.RelayHop(http2RelayEndpoint: endpoint,tlsOptions: options,
+      additionalHTTPHeaderFields: ["X-Lyco-Owned-Relay":"lyco-owned-fixture-v1"])
+    return ProxyConfiguration(relayHops: [hop])
   }
   private func recordNetworkError(_ error: NWError) {
     switch error {

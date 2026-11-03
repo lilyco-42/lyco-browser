@@ -14,7 +14,17 @@
 
 原来的 WebView 与 URLSession 反例同时保持，所有 36 份源站内容均完整收到，但没有安全 WebView 模式。请求阶段约 30 秒，没有总时限超时，明确因原路由门槛失败而退出 1；不能再归因于准备时间或上层响应解析。它把反例扩展到所测系统 TCP 接口，不证明封闭系统内部的确切实现原因，也不是所有 iOS 版本的结论。
 
-原始 187072 字节 ZIP 的 SHA-256 为 `71d2a8427ebff24ae8024fff2aec673972aa2009f1432eadeaa582d653b3ae6c`，完整大小和 CRC 已核验，原始结果、归属和日志保留。公开 API 的另一类 [HTTP/2 RelayHop](https://developer.apple.com/documentation/network/proxyconfiguration/relayhop) 是后续最小互通候选，当前没有实现或采用。其试验必须保留原 36 项、真实代理正向、停上游负向及严格 TLS；API 文档存在不代表它已经解决本机地址边界。
+原始 187072 字节 ZIP 的 SHA-256 为 `71d2a8427ebff24ae8024fff2aec673972aa2009f1432eadeaa582d653b3ae6c`，完整大小和 CRC 已核验，原始结果、归属和日志保留。公开 API 的另一类 [HTTP/2 RelayHop](https://developer.apple.com/documentation/network/proxyconfiguration/relayhop) 是后续最小互通候选；下节为后续测试源码，尚无采用或通过证明。其试验必须保留原 36 项、真实代理正向、停上游负向及严格 TLS；API 文档存在不代表它已经解决本机地址边界。
+
+## HTTP/2 Relay 最小互通源码
+
+后续测试源码保留上述 36 项，新增三层传输的 Relay 域名/本机/停上游场景及每层错误证书负向，共 48 项。原有逐请求 6 秒和首个 WebView 正向 30 秒不变，整体收集与步骤预算仅为新增场景增加余量。
+
+独立 Node22 HTTP/2 夹具只监听运行器回环，允许两个自有目标的 CONNECT，继续经过同一个 Python HTTP 代理；源站原有 TCP 源端口归属规则保持，并额外记录实际 H2 流及原生场景编号。Node 控制请求与原生请求分别标识，不将夹具正向计作浏览器证明。它只验证 TCP 互通，不实现或声称 UDP/RTC 已通过。
+
+两套临时 CA/叶证书和私钥仅在真实 Actions 运行器生成；私钥目录不进入工件。App 只打包公开的正确信任锚，并绑定资源摘要。通过公开 [TLS 验证回调](https://developer.apple.com/documentation/security/sec_protocol_options_set_verify_block(_:_:_:))，为该信任对象限制锚、验证 127.0.0.1 服务器身份、禁止网络取证后实际评估信任；没有接受全部证书、安装系统 CA 或修改全局 TLS。第二个 Relay 端口使用另一 CA，原生回调必须实际拒绝它且源站不能收到该场景请求。配置无法携带验证回调、正向不成立或负向未拒绝时，均不能据此采用方案。
+
+夹具本身先以正确 CA 完成真实 CONNECT/源站内容正向，再以同一信任锚拒绝第二端口的错误 CA。原生结果另要求 H2 流归属、可信证书验证、全部健康目标经代理、停上游无源站访问。只有实际 WebView 场景全部成立才允许进一步讨论接入产品，其他传输成功不能替代它。当前仅完成测试源码，尚待真实编译与运行；产品、用户数据及默认内核均未替换。
 
 ## 已完成的系统请求对照
 

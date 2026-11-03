@@ -6,6 +6,7 @@ on:
       - 'tests/mobile/ios-proxy-probe.swift'
       - 'tests/mobile/run-ios-proxy-probe.sh'
       - 'tests/mobile/proxy-probe-fixture.py'
+      - 'tests/mobile/h2-relay-fixture.mjs'
       - '.github/workflows/probe-ios-proxy-routing.yml'
   workflow_dispatch:
 permissions:
@@ -24,6 +25,8 @@ jobs:
         with: {go-version: '1.25.5', cache-dependency-path: mobile/core/go.sum}
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
       - name: Build the actual pinned Apple core for the isolated application
         working-directory: mobile/core
         run: bash build-native.sh apple
@@ -31,7 +34,7 @@ jobs:
         timeout-minutes: 12
         run: bash tests/mobile/run-ios-proxy-probe.sh prepare
       - name: Run the original routing gates and independent transport controls
-        timeout-minutes: 6
+        timeout-minutes: 7
         run: bash tests/mobile/run-ios-proxy-probe.sh run
       - name: Collect original simulator diagnostics after the investigation
         if: always()
