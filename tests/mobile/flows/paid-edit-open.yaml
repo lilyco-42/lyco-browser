@@ -1,0 +1,14 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- runFlow:
+    file: paid-login.yaml
+    env:
+      OWNER: ci-owner-a
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "编辑环境 ${NAME}"
+    direction: DOWN
+- tapOn: "编辑环境 ${NAME}"
+- assertVisible: "编辑环境"

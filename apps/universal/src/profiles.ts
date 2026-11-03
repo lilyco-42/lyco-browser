@@ -1,7 +1,7 @@
 import {randomUUID} from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PROFILE_STORAGE_KEY,decodeProfileMetadata,encodeProfileMetadata,safeUrl,type Profile,type RouteBinding} from './profile-metadata.mjs';
-export {safeUrl,type Profile,type RouteBinding} from './profile-metadata.mjs';
+export {safeUrl,editProfileDetails,type Profile,type RouteBinding} from './profile-metadata.mjs';
 export type BrowserSession={token:string;username:string};
 export type BrowserProps={profile:Profile;onClose:()=>void;session?:BrowserSession;onBindRoute:(binding:RouteBinding)=>Promise<Profile>};
 export async function readProfiles():Promise<Profile[]>{

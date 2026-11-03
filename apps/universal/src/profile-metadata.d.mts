@@ -3,5 +3,6 @@ export type Profile={id:string;name:string;url:string;createdAt:number;route?:Ro
 export const PROFILE_STORAGE_KEY:string;
 export function safeUrl(url:string):string;
 export function routeBinding(value:unknown):RouteBinding;
+export function editProfileDetails(profile:Profile,name:string,url:string):Profile;
 export function decodeProfileMetadata(raw:string|null,makeId:()=>string):{profiles:Profile[];migrated:boolean};
 export function encodeProfileMetadata(rows:Profile[]):string;

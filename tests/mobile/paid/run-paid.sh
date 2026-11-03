@@ -52,11 +52,15 @@ maestro_test(){
  local label="$name${LYCO_PHASE_SUFFIX:-}"
  maestro test --format junit --output "$evidence/$label.xml" --test-output-dir "$evidence/$label" --debug-output "$evidence/$label-debug" --flatten-debug-output -e "ORIGIN=$origin" "$@" "$root/../flows/$name.yaml"
 }
-storage(){
+private_snapshot(){
  local phase=$1
  adb shell am force-stop top.lain42.lycobrowser
  mkdir -p "$private_storage/$phase"
  adb pull /data/user/0/top.lain42.lycobrowser/databases "$private_storage/$phase/" > /dev/null
+}
+storage(){
+ local phase=$1
+ private_snapshot "$phase"
  python3 "$root/inspect-storage.py" "$private_storage/$phase" "$evidence" "$phase"
 }
 control(){ curl --fail --silent --show-error --max-time 10 -H 'Content-Type: application/json' -d "$1" http://127.0.0.1:18086/control >/dev/null; }
@@ -74,16 +78,23 @@ adb shell am force-stop top.lain42.lycobrowser
 bash "$root/install-ci-ca.sh" "$private_ca/mitmproxy-ca-cert.pem"
 maestro_test paid-initial
 control '{"catalogueCopies":1250}'
-adb shell am force-stop top.lain42.lycobrowser
-mkdir -p "$private_storage/search-before"
-adb pull /data/user/0/top.lain42.lycobrowser/databases "$private_storage/search-before/" > /dev/null
+private_snapshot search-before
 cp "$evidence/network.json" "$evidence/search-network-before.json"
 maestro_test paid-search
-adb shell am force-stop top.lain42.lycobrowser
-mkdir -p "$private_storage/search-after"
-adb pull /data/user/0/top.lain42.lycobrowser/databases "$private_storage/search-after/" > /dev/null
+private_snapshot search-after
 python3 "$root/inspect-search.py" "$private_storage" "$evidence"
 control '{"catalogueCopies":0}'
+private_snapshot edit-before
+cp "$evidence/network.json" "$evidence/edit-network-before.json"
+maestro_test paid-edit-reject
+private_snapshot edit-rejected
+cp "$evidence/network.json" "$evidence/edit-network-rejected.json"
+LYCO_PHASE_SUFFIX=-save maestro_test paid-edit-details -e FROM_NAME=paid-A -e TO_NAME=paid-A-edited -e "TO_URL=$origin/page?owner=A&phase=paid-A-edited"
+private_snapshot edit-saved
+maestro_test paid-edit-reopen
+LYCO_PHASE_SUFFIX=-restore maestro_test paid-edit-details -e FROM_NAME=paid-A-edited -e TO_NAME=paid-A -e "TO_URL=$origin/page?owner=A&phase=paid-A"
+private_snapshot edit-restored
+python3 "$root/inspect-edit.py" "$private_storage" "$evidence"
 adb shell am force-stop top.lain42.lycobrowser
 LYCO_PHASE_SUFFIX=-A maestro_test paid-reopen -e ROUTE=A
 maestro test -e "ORIGIN=$origin" "$root/../flows/close.yaml"

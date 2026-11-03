@@ -1,23 +1,9 @@
 """Compare actual private AsyncStorage copies; emit hashes, never credentials."""
-import hashlib,json,sqlite3,sys,xml.etree.ElementTree as ET
+import hashlib,json,sys,xml.etree.ElementTree as ET
 from pathlib import Path
+from profile_storage import read_profile_metadata
 private,evidence=map(Path,sys.argv[1:])
-def metadata(label):
-    values=[]
-    for file in (private/label).rglob('*'):
-        if not file.is_file() or file.name.endswith(('-wal','-shm')):continue
-        with file.open('rb') as stream:
-            if stream.read(16)!=b'SQLite format 3\x00':continue
-        db=sqlite3.connect(f'file:{file}?mode=ro',uri=True)
-        try:
-            tables={row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            if 'catalystLocalStorage' in tables:
-                row=db.execute('SELECT value FROM catalystLocalStorage WHERE key=?',('lyco:browser-profile-metadata:v1',)).fetchone()
-                if row:values.append(row[0])
-        finally:db.close()
-    assert len(values)==1,'Expected one actual profile metadata record'
-    return values[0]
-before,after=metadata('search-before'),metadata('search-after')
+before,after=read_profile_metadata(private/'search-before'),read_profile_metadata(private/'search-after')
 assert before==after,'Filtering or clearing changed persisted environment metadata'
 baseline=json.loads((evidence/'search-network-before.json').read_text())
 network=json.loads((evidence/'network.json').read_text())

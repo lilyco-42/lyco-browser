@@ -1,0 +1,56 @@
+appId: top.lain42.lycobrowser
+---
+- runFlow:
+    file: paid-edit-open.yaml
+    env:
+      NAME: paid-A
+- tapOn:
+    id: "修改环境名称"
+- eraseText: 100
+- inputText: "discarded-edit"
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "取消编辑"
+    direction: DOWN
+- tapOn: "取消编辑"
+- assertNotVisible: "编辑环境 discarded-edit"
+- scrollUntilVisible:
+    element: "编辑环境 paid-A"
+    direction: DOWN
+- tapOn: "编辑环境 paid-A"
+- tapOn:
+    id: "修改环境名称"
+- eraseText: 100
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "保存环境修改"
+    direction: DOWN
+- tapOn: "保存环境修改"
+- assertVisible: "请输入90字符以内的环境名称"
+- scrollUntilVisible:
+    element:
+      id: "修改环境名称"
+    direction: UP
+- tapOn:
+    id: "修改环境名称"
+- inputText: "paid-A"
+- pressKey: Enter
+- tapOn:
+    id: "修改首页 URL"
+- eraseText: 160
+- inputText: "javascript:alert(1)"
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "保存环境修改"
+    direction: DOWN
+- tapOn: "保存环境修改"
+- assertVisible: "仅允许 http/https 网页"
+- takeScreenshot: paid-edit-invalid-url
+- scrollUntilVisible:
+    element: "取消编辑"
+    direction: DOWN
+- tapOn: "取消编辑"
+- scrollUntilVisible:
+    element: "编辑环境 paid-A"
+    direction: DOWN
+- assertVisible: "编辑环境 paid-A"

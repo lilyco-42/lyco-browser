@@ -1,10 +1,10 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {ActivityIndicator,Alert,BackHandler,Keyboard,KeyboardAvoidingView,Linking,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
+import {ActivityIndicator,Alert,BackHandler,Keyboard,KeyboardAvoidingView,Linking,Modal,Platform,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View} from 'react-native';
 import Browser from './Browser';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {closeMobileProfiles,clearMobileProfile} from './mobile-browser';
 import {ACCOUNT,SHOP,login,account,proxyEntitlement,proxyPlanName,type Account} from './billing';
-import {createProfile,readProfiles,saveProfiles,type Profile,type RouteBinding} from './profiles';
+import {createProfile,editProfileDetails,readProfiles,saveProfiles,type Profile,type RouteBinding} from './profiles';
 import {assertProfileAccess} from './mobile-route-policy.mjs';
 import {routeBinding} from './profile-metadata.mjs';
 import coreNotices from './core-notices.json';
@@ -28,6 +28,32 @@ function Field({label,value,onChangeText,placeholder,secureTextEntry=false,disab
    returnKeyType="done" submitBehavior="blurAndSubmit" onSubmitEditing={()=>Keyboard.dismiss()} secureTextEntry={secureTextEntry} accessibilityLabel={label}/>
  </View>;
 }
+function ProfileEditor({profile,saving,onSave,onCancel}:{profile:Profile;saving:boolean;onSave:(name:string,url:string)=>Promise<void>;onCancel:()=>void}){
+ const [name,setName]=useState(profile.name),[url,setUrl]=useState(profile.url),[error,setError]=useState('');
+ const pending=useRef(false),live=useRef(true);
+ useEffect(()=>{live.current=true;return()=>{live.current=false}},[]);
+ async function save(){
+  if(pending.current)return;
+  Keyboard.dismiss();pending.current=true;setError('');
+  try{await onSave(name,url)}
+  catch(error){if(live.current)setError(error instanceof Error?error.message:'无法保存环境修改')}
+  finally{pending.current=false}
+ }
+ return <Modal visible onRequestClose={()=>{if(!saving&&!pending.current)onCancel()}} animationType="slide">
+  <SafeAreaView style={styles.root}><KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
+   <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>编辑环境</Text>
+     <Text style={styles.hint}>修改名称和下次打开的首页，保留本环境的网站数据和官网线路。</Text>
+     <Field label="修改环境名称" value={name} onChangeText={setName} disabled={saving}/>
+     <Field label="修改首页 URL" value={url} onChangeText={setUrl} disabled={saving}/>
+     {error?<Text accessibilityRole="alert" style={styles.note}>{error}</Text>:null}
+     <Action title={saving?'正在保存修改…':'保存环境修改'} disabled={saving} onPress={()=>{void save()}}/>
+     <Action title="取消编辑" secondary disabled={saving} onPress={()=>{if(!pending.current)onCancel()}}/>
+    </View>
+   </ScrollView>
+  </KeyboardAvoidingView></SafeAreaView>
+ </Modal>;
+}
 export default function App(){
  const [screen,setScreen]=useState<Screen>('home');
  const [showCoreLicense,setShowCoreLicense]=useState(false);
@@ -41,6 +67,7 @@ export default function App(){
  const profileMutation=useRef(false);
  const [name,setName]=useState(''),[url,setUrl]=useState('');
  const [openProfile,setOpenProfile]=useState<Profile|null>(null);
+ const [editing,setEditing]=useState<{id:string;generation:number}|null>(null);
  useEffect(()=>{
   let live=true;
   closeMobileProfiles().catch(()=>{if(live)setNote('无法核实旧浏览环境是否已停止，请重新打开应用')});
@@ -56,6 +83,7 @@ export default function App(){
   return()=>subscription.remove();
  },[openProfile,screen]);
  async function doLogin(){
+  setEditing(null);
   const generation=++authGeneration.current;
   setBusy(true);setNote('登录中…');
   try{
@@ -74,10 +102,11 @@ export default function App(){
   const generation=authGeneration.current;
   setBusy(true);
   try{const next=await account(token);if(generation===authGeneration.current){setMe(next);setNote('权益已刷新')}}
-  catch(e){if(generation===authGeneration.current){setMe(null);setToken('');try{await closeMobileProfiles()}catch{}setNote('请重新登录：'+(e as Error).message)}}
+  catch(e){if(generation===authGeneration.current){setEditing(null);setMe(null);setToken('');try{await closeMobileProfiles()}catch{}setNote('请重新登录：'+(e as Error).message)}}
   finally{if(generation===authGeneration.current)setBusy(false)}
  }
  async function logout(){
+  setEditing(null);
   authGeneration.current++;setBusy(true);setPassword('');setToken('');setMe(null);
   try{await closeMobileProfiles();setNote('已退出并停止本机浏览环境')}
   catch{setNote('账号会话已清除，请关闭仍在运行的浏览环境')}
@@ -102,6 +131,30 @@ export default function App(){
   profileMutation.current=true;setSavingProfiles(true);return true;
  }
  function endProfileMutation(){profileMutation.current=false;setSavingProfiles(false)}
+ function startProfileEdit(id:string){
+  if(!profilesLoaded||busy||profileMutation.current)return;
+  const profile=profiles.find(row=>row.id===id);
+  try{
+   if(!profile)throw Error('环境已变化');
+   assertProfileAccess(profile,me?.username);
+   setEditing({id,generation:authGeneration.current});
+  }catch(error){setNote((error as Error).message)}
+ }
+ async function updateProfileDetails(id:string,name:string,url:string){
+  const context=editing;
+  if(busy||!context||context.id!==id||context.generation!==authGeneration.current)throw Error('环境或登录会话已变化，请重新编辑');
+  if(!beginProfileMutation())throw Error('正在保存环境，请稍后重试');
+  try{
+   const profile=profiles.find(row=>row.id===id);if(!profile)throw Error('环境已变化');
+   assertProfileAccess(profile,me?.username);
+   const updated=editProfileDetails(profile,name,url);
+   await closeMobileProfiles();
+   if(context.generation!==authGeneration.current)throw Error('登录会话已变化，请重新编辑');
+   const next=profiles.map(row=>row.id===id?updated:row);
+   await saveProfiles(next);setProfiles(next);
+   if(context.generation===authGeneration.current){setEditing(null);setNote('已更新环境名称和首页，网站数据与官网线路保留')}
+  }finally{endProfileMutation()}
+ }
  async function bindProfileRoute(binding:RouteBinding):Promise<Profile>{
   if(!beginProfileMutation())throw Error('正在保存环境，请稍后重试');
   const generation=authGeneration.current;
@@ -154,6 +207,7 @@ export default function App(){
  }
  const entitlement=me?proxyEntitlement(me):null;
  const visibleProfiles=profiles.filter(row=>!row.route||row.route.owner===me?.username);
+ const editingProfile=editing&&!busy?visibleProfiles.find(row=>row.id===editing.id):undefined;
  if(openProfile)return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
   <Browser profile={openProfile} onClose={closeBrowser} onBindRoute={bindProfileRoute} session={token&&me?.username?{token,username:me.username}:undefined}/></SafeAreaView>;
  return <SafeAreaView style={styles.root}><StatusBar barStyle="light-content" />
@@ -212,6 +266,7 @@ export default function App(){
       <Text style={styles.cardTitle}>{row.name}</Text><Text style={styles.hint}>{row.url}</Text>
       {row.route&&<Text style={styles.hint}>官网线路：{row.route.routeName}</Text>}
       <View style={styles.actions}><Action title="打开网页" label={"打开环境 "+row.name} disabled={savingProfiles} onPress={()=>setOpenProfile(row)}/>
+       <Action title="编辑环境" label={"编辑环境 "+row.name} secondary disabled={busy||savingProfiles} onPress={()=>startProfileEdit(row.id)}/>
        {Platform.OS==='android'||Platform.OS==='ios'?<>
         <Action title="清除网站数据" label={"清除环境 "+row.name} secondary disabled={savingProfiles} onPress={()=>confirmProfileData(row,false)}/>
         <Action title="删除环境" label={"删除环境 "+row.name} secondary disabled={savingProfiles} onPress={()=>confirmProfileData(row,true)}/>
@@ -238,6 +293,8 @@ export default function App(){
    <Text style={styles.footer}>LYCO Browser · {product.version} · {product.channel==='stable'?'正式版':'内部测试版'}</Text>
   </ScrollView>
   </KeyboardAvoidingView>
+  {editingProfile?<ProfileEditor key={editingProfile.id} profile={editingProfile} saving={savingProfiles}
+   onSave={(name,url)=>updateProfileDetails(editingProfile.id,name,url)} onCancel={()=>{if(!profileMutation.current)setEditing(null)}}/>:null}
  </SafeAreaView>;
 }
 const styles=StyleSheet.create({

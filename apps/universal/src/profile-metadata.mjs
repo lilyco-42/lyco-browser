@@ -26,6 +26,11 @@ function profileRow(value){
  return {id:value.id.toLowerCase(),name:value.name,url:safeUrl(value.url),createdAt:value.createdAt,
   ...(value.route!==undefined?{route:routeBinding(value.route)}:{})};
 }
+export function editProfileDetails(profile,name,url){
+ const original=profileRow(profile);
+ if(typeof name!=='string'||!name.trim()||name.length>90)throw Error('请输入90字符以内的环境名称');
+ return {...original,name:name.trim(),url:safeUrl(url)};
+}
 export function decodeProfileMetadata(raw,makeId){
  if(raw===null||raw==='')return {profiles:[],migrated:false};
  if(typeof raw!=='string'||raw.length>2000000)throw Error('环境记录无法读取，原有数据已保留');
@@ -55,5 +60,7 @@ export function encodeProfileMetadata(rows){
  if(!Array.isArray(rows)||rows.length>100)throw Error('每台设备最多保存100个环境');
  const profiles=rows.map(profileRow);
  if(new Set(profiles.map(row=>row.id)).size!==profiles.length)throw Error('环境标识重复，无法保存');
- return HEADER+JSON.stringify({version:2,profiles});
+ const encoded=HEADER+JSON.stringify({version:2,profiles});
+ if(encoded.length>2000000)throw Error('环境记录过大，原有数据已保留');
+ return encoded;
 }

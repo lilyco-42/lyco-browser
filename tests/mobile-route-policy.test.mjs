@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {decodeProfileMetadata,encodeProfileMetadata,routeBinding} from '../apps/universal/src/profile-metadata.mjs';
+import {decodeProfileMetadata,encodeProfileMetadata,routeBinding,editProfileDetails} from '../apps/universal/src/profile-metadata.mjs';
 import {nodeIdentityInput,bindingForNode,assertProfileAccess,assertManualProfile,restoredRouteSelection,selectedMobileNode,assertPaidProfile} from '../apps/universal/src/mobile-route-policy.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Mobile profile verification runs in Actions only');
 const id='12abcdef-0123-4567-89ab-0123456789ab';
@@ -78,4 +78,22 @@ test('paid launch requires the exact fresh selected catalog node, owner and boun
  for(const value of [{...subscription,verifiedAt:1000001},{...subscription,verifiedAt:NaN},{...subscription,expiresAt:1000000}])assert.throws(()=>assertPaidProfile(bound,value,a,session,1000000),/权益核实已过期/);
  assert.throws(()=>assertPaidProfile(bound,subscription,a,session,1300000),/权益核实已过期/);
  assert.throws(()=>routeBinding({...bound.route,routeName:'\n'}),/绑定记录无效/);
+});
+test('editing details preserves immutable website identity, original creation time and owned route',()=>{
+ const bound=Object.freeze({...profile(),route:Object.freeze(bindingForNode('owner-a',node()))});
+ const edited=editProfileDetails(bound,' Store renamed ','https://example.com/new?view=1');
+ assert.deepEqual(edited,{...bound,name:'Store renamed',url:'https://example.com/new?view=1'});
+ assert.equal(bound.name,'Store A');assert.equal(bound.url,'https://example.com/');
+ assert.deepEqual(decodeProfileMetadata(encodeProfileMetadata([edited]),()=>{throw Error('Editing must not allocate a UUID')}).profiles,[edited]);
+ assert.throws(()=>assertProfileAccess(edited,'owner-b'),/所属账号/);
+ const restored=editProfileDetails(edited,bound.name,bound.url);
+ assert.equal(encodeProfileMetadata([restored]),encodeProfileMetadata([bound]));
+});
+test('invalid edits never mutate or silently strip the original website identity and route',()=>{
+ const bound={...profile(),route:bindingForNode('owner-a',node())},original=encodeProfileMetadata([bound]);
+ for(const name of ['', '   ', 'x'.repeat(91),null])assert.throws(()=>editProfileDetails(bound,name,bound.url),/环境名称/);
+ for(const url of ['javascript:alert(1)','file:///private/data','https://name:secret@example.com/'])assert.throws(()=>editProfileDetails(bound,'New name',url));
+ assert.throws(()=>editProfileDetails({...bound,route:null},'New name',bound.url),/绑定记录无效/);
+ assert.equal(encodeProfileMetadata([bound]),original);
+ assert.throws(()=>encodeProfileMetadata([editProfileDetails(bound,'New name','https://example.com/'+'x'.repeat(2000000))]),/记录过大/);
 });

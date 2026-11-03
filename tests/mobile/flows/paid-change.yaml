@@ -31,4 +31,6 @@ appId: top.lain42.lycobrowser
     direction: DOWN
 - assertNotVisible: "打开环境 paid-A"
 - assertNotVisible: "打开环境 paid-B"
+- assertNotVisible: "编辑环境 paid-A"
+- assertNotVisible: "编辑环境 paid-B"
 - takeScreenshot: paid-other-account-hidden
