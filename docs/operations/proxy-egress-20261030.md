@@ -1,5 +1,45 @@
 # 2026-10-30 proxy latency and download repair
 
+## Superseding observation: 2026-11-03 00:17 UTC
+
+Subsequent independent maintenance superseded the October 30 fingerprints and
+default-gateway assumptions below. Read current state before any change; no old
+deployment or rollback plan is reusable. This is a passive SSH observation, not
+a fresh performance acceptance.
+
+The five primary services are active/enabled with NRestarts=0. Australian SSH
+remains active, Philippine SSH remains disabled backup, and the temporary
+au-interactive unit is absent. DNS and panel TCP still use ssh-fast, but gateway
+preference is **enabled=false**. The old proof cannot establish that every
+current subscription uses the Australian route.
+
+Observed SHA-256 values:
+
+- Route: `16fae36b60c3701b5ffe909ce9b171762c6bf7808f2a3a034e4500673a2a8235`
+- Preference: `8273e6a88a751fa518ae6bd054be5f42e1ddcce5eb06bd472998cd587467c339`
+- Application: `bf5df5bfd2d46f67b83d06ff8d222a4eb630a0e2d64f972826f09f6ddf10fd4d`
+
+These match November 2. AU SSH has zero warnings in the preceding hour. Existing
+reports show 17/27 official health approvals, 16/17 throughput entries with
+2,000,000-byte samples, ordinary quality 14/15, a 32-entry deep pool and a
+632-entry full public cache from nine source products. Cache counts changed
+from the previous source snapshot; these are different scopes, not proof that
+every catalogue node works or that a client SSH speed gate passed. The complete
+manual catalogue policy is retained. No route, service or customer credential
+was changed for this observation.
+
+Last optimization experiment 41014136927 did not pass performance gates and was
+not adopted. Earlier HK relay, QoS and separate AU-flow experiments also ended
+without a retained optimization. Expired Actions authorization and seven
+hash-matched helpers were removed November 2; production AU/PH keys and services
+remain. There is no active proxy experiment. New runtime validation requires
+new active-path fault evidence, no conflicting Actions run, fresh scoped
+authorization and cleanup. Execution remains genuine Actions with SSH-only
+server management.
+
+The remaining sections are historical, including that day's then-current
+state. They are not present-day routing instructions.
+
 ## Current state after 10:03 CST recovery
 
 The earlier Korean interactive/DNS path stopped responding. [40988152219](https://github.com/lilyco-42/lyco-browser/actions/runs/40988152219) confirmed all current member requests timed out although services remained active. Philippine-only HTTPS DNS restored pages but failed the unchanged download minimum, so it was not deployed. The retained Australian SSH route with independent HTTPS DNS passed [40989140434](https://github.com/lilyco-42/lyco-browser/actions/runs/40989140434).

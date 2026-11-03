@@ -17,9 +17,25 @@ evidence = Path(os.environ['RUNNER_TEMP']) / 'lyco-gecko-build-evidence'
 evidence.mkdir(parents=True, exist_ok=True)
 memory = dict(line.split(':', 1) for line in Path('/proc/meminfo').read_text().splitlines())
 total = int(memory['MemTotal'].split()[0]) * 1024
-parent_limit = Path('/sys/fs/cgroup/memory.max').read_text().strip()
-if parent_limit != 'max':
-    total = min(total, int(parent_limit))
+group_root = Path('/sys/fs/cgroup')
+if not (group_root / 'cgroup.controllers').is_file():
+    raise SystemExit('Unified resource controllers required; no unbounded fallback')
+current_group = next(line.split(':', 2)[2] for line in Path('/proc/self/cgroup').read_text().splitlines()
+                     if line.startswith('0::'))
+if not current_group.startswith('/') or '..' in current_group.split('/'):
+    raise SystemExit('Invalid runner resource group')
+parent = group_root / current_group.lstrip('/')
+# The v2 hierarchy root intentionally has no memory.max. Child/ancestor limits
+# still constrain usable capacity; the actual build child must expose limits.
+while True:
+    limit_path = parent / 'memory.max'
+    if limit_path.is_file():
+        limit = limit_path.read_text().strip()
+        if limit != 'max':
+            total = min(total, int(limit))
+    if parent == group_root:
+        break
+    parent = parent.parent
 maximum = (total - max(2 * 1024**3, total // 5)) // 4096 * 4096
 if maximum < 4 * 1024**3:
     raise SystemExit('Build host has insufficient memory after reserving runner capacity')
@@ -42,7 +58,7 @@ command = ['sudo', '-n', 'systemd-run', '--unit=' + unit, '--service-type=exec',
            '--property=CPUQuota=' + str(quota) + '%', '--property=OOMPolicy=stop']
 # The build needs tool paths and public run identifiers, never the runner's
 # authentication environment or its artifact/runtime tokens.
-for key in ['HOME', 'USER', 'PATH', 'JAVA_HOME', 'RUNNER_TEMP', 'GITHUB_WORKSPACE',
+for key in ['HOME', 'USER', 'PATH', 'JAVA_HOME', 'LD_LIBRARY_PATH', 'RUNNER_TEMP', 'GITHUB_WORKSPACE',
             'GITHUB_ACTIONS', 'GITHUB_SHA', 'GITHUB_RUN_ID', 'CI', 'LANG']:
     if key in os.environ:
         command.append('--setenv=' + key + '=' + os.environ[key])
