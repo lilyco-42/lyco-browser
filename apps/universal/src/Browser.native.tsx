@@ -88,7 +88,7 @@ export default function Browser({profile,onClose,session,onBindRoute}:BrowserPro
    </>}
    {visibleNodes.map(node=><Pressable key={node.id} accessibilityRole="radio" accessibilityLabel={'选择线路 '+node.name}
     accessibilityState={{checked:selected===node.id,disabled:busy}} disabled={busy} onPress={()=>setSelected(node.id)} style={[s.route,selected===node.id&&s.selected]}>
-    <Text style={s.copy}>{selected===node.id?'●':'○'} {node.name} · {node.outbound.type}</Text></Pressable>)}
+    <Text style={s.copy}>{selected===node.id?'●':'○'} {node.name} · {String(node.outbound.type)}</Text></Pressable>)}
    {!!subscription?.unavailable&&<Text style={s.copy}>另有 {subscription.unavailable} 条线路暂不支持当前移动内核。</Text>}
    <Text style={s.copy}>保存或打开都会记住所选线路。更换线路先关闭当前浏览环境；原有网站数据保留。已保存线路不可用时不会改选其他线路。</Text>
    <Pressable accessibilityRole="button" disabled={busy||!available} onPress={saveRoute} style={[s.button,(busy||!available)&&s.disabled]}><Text>保存所选线路</Text></Pressable>
