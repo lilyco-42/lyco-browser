@@ -39,7 +39,9 @@ while True:
 maximum = (total - max(2 * 1024**3, total // 5)) // 4096 * 4096
 if maximum < 4 * 1024**3:
     raise SystemExit('Build host has insufficient memory after reserving runner capacity')
-high = (maximum * 85 // 100) // 4096 * 4096
+# The 85% soft limit caused sustained reclaim during gkrust with no hard-limit
+# or OOM events. Leave room for that working set inside the same reserved cap.
+high = (maximum * 95 // 100) // 4096 * 4096
 swap = min(int(memory['SwapTotal'].split()[0]) * 1024, 1024**3)
 quota = max(100, (os.cpu_count() or 1) * 75)
 unit = 'lyco-gecko-' + os.environ['GITHUB_RUN_ID'] + ('-check' if check else '-build') + '.service'

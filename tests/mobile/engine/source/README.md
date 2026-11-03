@@ -117,3 +117,24 @@ exception follows the [kernel cgroup v2 conventions](https://docs.kernel.org/adm
 Run 41552695786 validates the corrected wrapper; neither run proves the native
 patch or runtime behavior. The Python shared-library tool path is explicitly
 preserved without passing Actions authentication variables to the child.
+
+Run [41552695786](https://github.com/lilyco-42/lyco-browser/actions/runs/41552695786)
+ended at the hosted job's six-hour limit on 2026-11-03, not with a compiler
+success or an OOM diagnosis. The full original evidence ZIP is 166000 bytes,
+SHA-256 `3d82720b60794229033fb4198eb5afb35144fc4b5d426b11975ecea739b5b931`;
+size, SHA and CRC were verified. Bootstrap and the single-file checks passed;
+compilation started at 00:32:50Z and its last printed crate was gkrust at 37:19.
+No AAR was produced. The 719 group-external samples record 26058601 soft-limit
+reclaim events, zero hard-limit/OOM/kill events, a peak of 11792769024 bytes and
+at least 76342099968 bytes of free disk. The final Rust process used about
+10 GB RSS and the group's final full memory-pressure average was about 70%.
+
+The next bounded experiment raises only MemoryHigh from 85% to 95% of the same
+MemoryMax. The host reserve, hard memory cap, swap cap, CPU cap, non-root and
+authentication-environment boundaries remain. The native six-line patch,
+optimized release configuration, single C++/Rust build job and downstream
+runtime gates are unchanged. The original soft limit was below the observed
+working set; the [kernel's memory.high documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files)
+explains its reclaim/throttling behavior. This is an evidence-based hypothesis,
+not proof that the new threshold compiles or fixes RTC. Its actual child-group
+limits must still pass the original strict preflight before compilation.
