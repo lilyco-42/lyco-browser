@@ -13,11 +13,15 @@ on:
         description: Inspect original JavaScript sources of a successful signed Android build run
         type: string
         default: ''
+      native_go_origin:
+        description: Retain exact module sources and notice originals from a successful APK native metadata audit
+        type: string
+        default: ''
 permissions:
   contents: read
 jobs:
   offline-notices:
-    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate }}
+    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -52,6 +56,35 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
             ${{ runner.temp }}/lyco-npm-notice-evidence
           if-no-files-found: error
+          retention-days: 7
+
+  native-go-sources:
+    if: ${{ inputs.native_go_origin != '' }}
+    name: Original sources and notice candidates for actual APK Go modules
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NATIVE_GO_ORIGIN: ${{ inputs.native_go_origin }}
+      NATIVE_ANDROID_CANDIDATE: ${{ inputs.native_android_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
+      - name: Collect locked original sources and verbatim notice candidates without executing target code
+        run: python3 scripts/collect-native-go-sources.py "$NATIVE_GO_ORIGIN"
+      - name: Preserve exact originals, scoped manifest and incomplete progress on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-go-sources-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-native-go-sources
+          if-no-files-found: error
+          compression-level: 0
           retention-days: 7
 
   native-js-export:
