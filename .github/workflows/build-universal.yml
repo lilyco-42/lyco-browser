@@ -42,6 +42,11 @@ on:
         description: 'Compile a pinned Gecko C++ route experiment; no product build, adoption or release'
         type: boolean
         default: false
+      source_engine_abi:
+        description: 'Source experiment architecture; ARM64 builds are archive verification only'
+        type: choice
+        options: [x86_64, arm64-v8a]
+        default: x86_64
       native_engine_probe:
         description: 'Standalone non-debuggable Gecko native policy capability experiment; no product engine change'
         type: boolean
@@ -695,7 +700,13 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/lyco-engine-private"
 
   source-built-native-engine:
-    if: ${{ inputs.source_engine_build && !inputs.native_engine_source_run }}
+    if: ${{ inputs.source_engine_build && !inputs.native_engine_source_run && inputs.source_engine_abi != 'arm64-v8a' }}
     uses: ./.github/workflows/build-gecko-experiment.yml
+    permissions:
+      contents: read
+
+  source-built-arm64-engine:
+    if: ${{ inputs.source_engine_build && !inputs.native_engine_source_run && inputs.source_engine_abi == 'arm64-v8a' }}
+    uses: ./.github/workflows/build-gecko-arm64.yml
     permissions:
       contents: read
