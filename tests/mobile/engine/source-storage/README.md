@@ -32,7 +32,9 @@ Dispatch the universal workflow with `source_engine_build=true`,
 build inputs false/empty. A separate read-only reusable job checks all four
 tested base-file hashes and the exact new patch hash, then derives a private
 runner recipe. Original builder/host/route patch and the queued ARM64 adapter
-are never edited. It preserves pinned upstream, full native optimization, Rust
+are never edited. Both outer and reusable workflow concurrency groups are
+separate from the existing queued source build, which must not be replaced.
+It preserves pinned upstream, full native optimization, Rust
 level 2, absent native debug symbols, original resources and actual Maven/AAR
 byte-equality gates. Whole modified-source formatting runs in Actions. The
 changed-source allowlist is exactly the existing RTC C++ file plus LSNG C++ and

@@ -61,9 +61,11 @@ on:
         default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.source_engine_build && 'source-engine-build' || (inputs.native_engine_probe && 'engine-probe' || (inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build'))) }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.source_engine_build && (inputs.native_engine_storage && 'source-storage-build' || 'source-engine-build') || (inputs.native_engine_probe && 'engine-probe' || (inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build'))) }}
   # Preserve the active native runtime evidence; newer pushes replace only the
   # pending run. A long iOS/Android acceptance must not be erased by a docs fix.
+  # Storage source builds also have a distinct outer group so a new experiment
+  # cannot replace the already queued original ARM64 source build.
   cancel-in-progress: false
 
 permissions:
