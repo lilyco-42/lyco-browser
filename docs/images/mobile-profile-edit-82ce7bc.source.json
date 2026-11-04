@@ -1,0 +1,12 @@
+{
+  "sourceRun": 41768535129,
+  "sourceJob": 126372542318,
+  "candidateRun": 41754332654,
+  "candidateSource": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+  "apkSha256": "8bed4c44c56c38f610bd5852910568a22a1d6a52678bbf8681b20a427cd11e99",
+  "originalZipSha256": "32a4f22b76b524907845ea79094920318eab64467cc302f86f20eeb197d524ad",
+  "sourcePath": "outputs/client-readiness-20261104/41768535129/evidence/original/paid-edit-details-save-debug/paid-edit-details/takeScreenshot/paid-edit-details-saved.png",
+  "screenshotSha256": "b6cb330f3f7f4560692121996723f191855853acf5b2138f465b0a82b2d6b78b",
+  "copiedUnmodified": true,
+  "scope": "Actual saved environment screen in owned CI fixture; not customer egress or a release"
+}
