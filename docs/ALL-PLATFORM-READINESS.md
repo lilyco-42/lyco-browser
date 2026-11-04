@@ -2,6 +2,10 @@
 
 目标保持为 Windows x64、macOS ARM64、Linux x64、Android、iOS 均具备代理连接与独立浏览环境，再发行。当前 PR：[#31](https://github.com/lilyco-42/lyco-browser/pull/31)。默认下载仍指向 README 中已验收的旧 Windows 预览包。
 
+2026-11-04 最新记录：环境编辑的同包 [41600136374](https://github.com/lilyco-42/lyco-browser/actions/runs/41600136374) 在恢复首页时失败，原始界面显示测试清除不完整、留下旧网址尾部；保存和重启的部分流程通过仍不能代替整组验收。`82edff8` 改为全选替换、完整文本核对并明确收起键盘；同一个未修改签名 APK 的 [41745820186](https://github.com/lilyco-42/lyco-browser/actions/runs/41745820186) 复验进行中。iPhone [41600149916](https://github.com/lilyco-42/lyco-browser/actions/runs/41600149916) 的完整原始 ZIP/IPA、摘要、CRC、ARM64/iPhoneOS、版本和离线 JS 已核验，仍未签名、不可直接安装。
+
+95% 软内存边界的源码构建 [41590673052](https://github.com/lilyco-42/lyco-browser/actions/runs/41590673052) 已因 6 小时时限取消，无 AAR；完整原始证据仍显示大量内存回收、零 OOM。新 [41746470057](https://github.com/lilyco-42/lyco-browser/actions/runs/41746470057) 仅显式关闭调试符号，并先核对实际优化级别仍为 2；保留全部宿主资源限制、原生补丁和运行门槛，尚待其自身配置及编译结果。详见[源码记录](../tests/mobile/engine/source/README.md#second-bounded-build-terminal-evidence-and-symbol-configuration)。历史记录中的旧“进行中”状态以本段终态和新句柄为准。
+
 2026-11-02 补查 `cb05f24`：Windows [41014443466](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443466) 仍在原生环境启动时因硬件/显卡回执被拒绝；macOS [41014443462](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443462) 的实际打包应用同样失败，同轮 Linux 成品任务及三平台核心路由任务成功。不能用 Linux 或核心路由成功替代其他平台的成品证明。Windows 独立 SDK [41014443369](https://github.com/lilyco-42/lyco-browser/actions/runs/41014443369) 的完整原始 ZIP（2239 字节，SHA-256 `427edaab1f720035944d2e262d30ef452672a2410a6735238ac9621d79a700e0`）已核验：20 个新页面观察全部完成；自定义 GPU、GPU 后二次写硬件和 GPU 后仅写硬件三种模式均未保住所选 CPU/内存。语言/时区模式成功不等于 GPU 组合可用；产品拒绝与身份缓存保留检查继续生效。
 
 `521be90` 的 [41443469209](https://github.com/lilyco-42/lyco-browser/actions/runs/41443469209) Linux/macOS 实际成品已通过完整主检查和新增 1252 条受控目录的搜索验收，详见[完整目录搜索](WORKSPACE-ROUTES.md#完整目录搜索)。保留此前 macOS 的原生配置失败记录；本轮未修底层身份逻辑，不能宣布硬件兼容性稳定问题已解决。
