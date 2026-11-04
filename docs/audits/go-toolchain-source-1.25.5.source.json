@@ -1,0 +1,276 @@
+{
+  "checkedAt": "2026-11-04T05:03:45.820907+00:00",
+  "run": 41776442283,
+  "job": 126397815550,
+  "status": "completed",
+  "conclusion": "success",
+  "completedAt": "2026-11-04T04:59:25Z",
+  "collectorSource": "9ac693e312d62c58bba7cfeaad5a0dea5c5fc47a",
+  "artifact": 13296484767,
+  "originalZipBytes": 37040133,
+  "originalZipSha256": "0c9c26a9f08ec839844952cf91ab423ba9cfb81eaec350080893df9d090a5905",
+  "fullOriginalZipSizeShaCrcVerified": true,
+  "sourceVersion": "go1.25.5",
+  "officialSourceArchiveBytes": 31983405,
+  "officialSourceArchiveSha256": "22a5fd0a91efcd28a1b0537106b9959b2804b61f59c3758b51e8e5429c1a954f",
+  "officialSourceArchiveUrl": "https://go.dev/dl/go1.25.5.src.tar.gz",
+  "officialPublishedMetadataSizeShaMatch": true,
+  "completeSourceGzipCrcVerified": true,
+  "completeSourceFileIndexVerified": true,
+  "indexedEntries": 16067,
+  "regularSourceFiles": 14480,
+  "noticeCandidateFiles": 37,
+  "allNoticeBytesMatchOriginalSourceTar": true,
+  "rootNoticeCandidates": [
+    {
+      "originalPath": "go/LICENSE",
+      "retainedFile": "notice-000.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/PATENTS",
+      "retainedFile": "notice-001.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    }
+  ],
+  "originalSourceManifestSha256": "7983dc74a61b1edd34e689d715875a5a898b40db71c2b14b0c2ca339cc9081b8",
+  "observedNativeGoCatalogSha256": "8dd661c87580366993b73a5304c97576c16d52abea90254e9a4f974744976b75",
+  "fullJobLogBytes": 14212,
+  "fullJobLogSha256": "89507c97760806249b06bf109fb113ca9e3eeb43eca6bf64283cb66289917610",
+  "nativeBinaryReproductionProven": false,
+  "completeCorrespondingSourceProven": false,
+  "completeLicenseClearanceProven": false,
+  "clientNoticePackagingProven": false,
+  "limits": [
+    "Not a per-file linked-code inventory",
+    "Does not cover NDK/cgo C dependencies, generated bindings or other native libraries",
+    "Does not prove source-to-binary reproduction or packaging of these notices in a client"
+  ],
+  "noticeCandidates": [
+    {
+      "originalPath": "go/LICENSE",
+      "retainedFile": "notice-000.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/PATENTS",
+      "retainedFile": "notice-001.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/compile/internal/ssa/_gen/vendor/golang.org/x/tools/LICENSE",
+      "retainedFile": "notice-002.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/compile/internal/ssa/_gen/vendor/golang.org/x/tools/PATENTS",
+      "retainedFile": "notice-003.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/github.com/google/pprof/AUTHORS",
+      "retainedFile": "notice-004.txt",
+      "bytes": 305,
+      "sha256": "8a196dfd9252ad9cb0670365e680d6b19560c688776fa76f0203854ae2c0e29c"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/github.com/google/pprof/LICENSE",
+      "retainedFile": "notice-005.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/github.com/google/pprof/third_party/svgpan/LICENSE",
+      "retainedFile": "notice-006.txt",
+      "bytes": 1754,
+      "sha256": "154c946c17de61ca71d28e13673d76a5798e6e25995a7397fbae157afc8f62b4"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/github.com/ianlancetaylor/demangle/LICENSE",
+      "retainedFile": "notice-007.txt",
+      "bytes": 1479,
+      "sha256": "b73277f7730993ef8e7f80aed83e5309762fed4d77eced982abb2c00657c074d"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/arch/LICENSE",
+      "retainedFile": "notice-008.txt",
+      "bytes": 1453,
+      "sha256": "8cda009bd927676a95ee7ce2dae921442ac4d9584d041b56ecfcba6839032f0b"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/arch/PATENTS",
+      "retainedFile": "notice-009.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/build/LICENSE",
+      "retainedFile": "notice-010.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/build/PATENTS",
+      "retainedFile": "notice-011.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/mod/LICENSE",
+      "retainedFile": "notice-012.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/mod/PATENTS",
+      "retainedFile": "notice-013.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/sync/LICENSE",
+      "retainedFile": "notice-014.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/sync/PATENTS",
+      "retainedFile": "notice-015.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/sys/LICENSE",
+      "retainedFile": "notice-016.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/sys/PATENTS",
+      "retainedFile": "notice-017.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/telemetry/LICENSE",
+      "retainedFile": "notice-018.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/telemetry/PATENTS",
+      "retainedFile": "notice-019.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/term/LICENSE",
+      "retainedFile": "notice-020.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/term/PATENTS",
+      "retainedFile": "notice-021.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/text/LICENSE",
+      "retainedFile": "notice-022.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/text/PATENTS",
+      "retainedFile": "notice-023.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/tools/LICENSE",
+      "retainedFile": "notice-024.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/golang.org/x/tools/PATENTS",
+      "retainedFile": "notice-025.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/cmd/vendor/rsc.io/markdown/LICENSE",
+      "retainedFile": "notice-026.txt",
+      "bytes": 1479,
+      "sha256": "2d36597f7117c38b006835ae7f537487207d8ec407aa9d9980794b2030cbc067"
+    },
+    {
+      "originalPath": "go/src/crypto/internal/boring/LICENSE",
+      "retainedFile": "notice-027.txt",
+      "bytes": 9714,
+      "sha256": "56210f826b8f0fbac3160dfe55c97f4019eb6cdda3963b5a0eab8a8bdb62360e"
+    },
+    {
+      "originalPath": "go/src/internal/copyright/copyright_test.go",
+      "retainedFile": "notice-028.txt",
+      "bytes": 1651,
+      "sha256": "76236a9d9b2991f7fac5b8cee70e37e2b5c3ebc3c521c3622c22cfe751ed0718"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/crypto/LICENSE",
+      "retainedFile": "notice-029.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/crypto/PATENTS",
+      "retainedFile": "notice-030.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/net/LICENSE",
+      "retainedFile": "notice-031.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/net/PATENTS",
+      "retainedFile": "notice-032.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/sys/LICENSE",
+      "retainedFile": "notice-033.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/sys/PATENTS",
+      "retainedFile": "notice-034.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/text/LICENSE",
+      "retainedFile": "notice-035.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "originalPath": "go/src/vendor/golang.org/x/text/PATENTS",
+      "retainedFile": "notice-036.txt",
+      "bytes": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+    }
+  ],
+  "scope": "Exact official compiler/runtime/standard-library source and verbatim notice candidates for the observed Go version; no build or target execution"
+}
