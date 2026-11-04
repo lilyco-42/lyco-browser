@@ -1,5 +1,27 @@
 # Source-built native route experiment
 
+Latest verified build: genuine run [41772782539](https://github.com/lilyco-42/lyco-browser/actions/runs/41772782539)
+at `69110444d0742c231f55f0b1ccd489fa9fac2bdb` completed successfully.
+The complete compiled ZIP (91631272 bytes, SHA-256
+`583d453e909ebe5cf445109f58c075f08fe79399a4702075545656f055b9bb60`)
+and complete evidence ZIP (151709 bytes, SHA-256
+`e7b08f5c1109688f307b1732cfbbdbc652961d3a5d56110f0ca90ecba3279b7e`)
+were independently checked for size, digest and CRC. The retained AAR is 91629479
+bytes, SHA-256 `e0b7c7d00055588b2b2cdb312cb15d560ebdff2d9f2550bb6ab26c6f89af837c`;
+its CRC, 13 x86_64 ELF files, single-file C++ patch, actual optimized configuration
+and exact Maven publication bytes were checked. This is build evidence only.
+The first consumer failed before runtime on a namespaced POM root. Corrected
+consumer [41810285687](https://github.com/lilyco-42/lyco-browser/actions/runs/41810285687)
+passed all 29 native capability checks using this same AAR and unchanged POM
+dependencies. The complete 101294747-byte ZIP (SHA-256
+`87645469cf52ab8b0afa214d38ac8bece54a59d66c377c5a015368a2955a9f30`),
+raw observations and all 13 native library bytes were independently checked. Nine
+applicable contexts complete actual TURN datachannels, with valid before/after
+controls, no direct STUN under healthy/stopped policy, all three actual loopback
+HTTP targets via the selected proxy, and no stopped-route fallback. This remains
+an independent disposable-signed x86_64 capability experiment, not product
+adoption, ARM64 acceptance or storage/non-exportable CryptoKey migration.
+
 The genuine stock-Gecko experiment 40820087794 at 95123ff has valid controls:
 all nine applicable contexts complete real TURN TCP PING/ACK before and after
 policy. With proxy_only active, native `nicer` logs record `use only default local

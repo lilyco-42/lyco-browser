@@ -2,6 +2,12 @@
 
 需求保持五平台代理连接与独立环境：不能泄漏网站数据、节点凭据或绕过所选线路；现有用户环境和数据不能因换引擎静默丢失。当前 Android document-start 方案的真实空文档反例见[网络边界](MOBILE-NETWORK-BOUNDARIES.md)，不是假设。
 
+2026-11-04 最新终态：[41772782539](https://github.com/lilyco-42/lyco-browser/actions/runs/41772782539) 已真实完成固定源码的优化原生编译，成功保留 AAR。完整原始编译档案 91631272 字节、SHA-256 `583d453e909ebe5cf445109f58c075f08fe79399a4702075545656f055b9bb60`；构建证据档案 151709 字节、SHA-256 `e7b08f5c1109688f307b1732cfbbdbc652961d3a5d56110f0ca90ecba3279b7e`，均完整大小/SHA/CRC 核验。AAR 91629479 字节、SHA-256 `e0b7c7d00055588b2b2cdb312cb15d560ebdff2d9f2550bb6ab26c6f89af837c`；内部 CRC、13 份 x86_64 ELF、补丁仅目标 C++ 文件、优化且无原生调试符号及实际 Maven 发布字节一致均已核对。以下旧记录中“无 AAR/仍构建”仅指各自历史运行。
+
+首个独立消费 [41808267941](https://github.com/lilyco-42/lyco-browser/actions/runs/41808267941) 因消费 POM 的命名空间前缀导致 Gradle 根标签解析失败，尚未运行 RTC 场景。`28a2cd5` 仅保留默认 XML 命名空间并验证依赖子树不变，再用同一成功 AAR 运行 [41810285687](https://github.com/lilyco-42/lyco-browser/actions/runs/41810285687)。该验证已成功完成 29 项检查：[未修改的原始结果](audits/source-engine-runtime-41810285687.json)及[核验来源](audits/source-engine-runtime-41810285687.source.json)绑定完整 101294747 字节 ZIP（SHA-256 `87645469cf52ab8b0afa214d38ac8bece54a59d66c377c5a015368a2955a9f30`）、实际 APK 和来源 AAR。已另行检查完整大小/SHA/CRC、13 份原生库字节、未变的 POM 依赖子树、每个原始网络上下文及事件/SDP/stats。10 个案例中旧构造器原生不存在，9 个适用案例四阶段全部完成；前后直连各有 9 个真实 STUN 与 9 个 TURN 数据确认，健康策略下直接 STUN 为 0、9 个实际 TURN 确认全部经所选代理，停止后 STUN/TURN/消息/回环请求均为 0。健康时 127.0.0.1、::1、localhost 的三次请求均经所选线路成功，前后直连对照也均成功。没有重写原始 RTC 观察或页面策略。
+
+当前结论仅为独立 x86_64 引擎能力通过；实验 APK 为 223967187 字节、SHA-256 `dd1d4dafc21196e2bf03e9c82309f11072f82ae509fdd2d8826aae2c6b39a8f9`，使用一次性实验签名，不是所有者产品包。下一步需在同一门槛下完成 ARM64、产品原生桥接、逐 UUID 的存储隔离与进程关闭、旧环境 Cookie/localStorage/IndexedDB 及不可导出 CryptoKey 迁移验证，保留原环境和失败断言；不得把能力研究替代完整产品、客户线路或 iOS 验收。
+
 ## 实际调研与约束
 
 | 候选 | 已取得证据 | 尚缺及决策 |
