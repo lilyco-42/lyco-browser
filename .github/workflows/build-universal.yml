@@ -447,7 +447,35 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  android-legacy-fixture:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.paid_routes_candidate != '' && !inputs.network_probe_candidate && !inputs.native_engine_probe && !inputs.source_engine_build && !inputs.native_engine_source_run }}
+    name: Prepare exact historical Android compatibility fixture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Draft downloads require push access (GitHub releases API). Limit that
+    # permission to this fixed-hash download job; no builds or device tools run.
+    permissions:
+      contents: write
+      actions: read
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 1, persist-credentials: false}
+      - name: Recover only the exact original signed historical files
+        run: python3 tests/mobile/paid/download-legacy.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lyco-legacy-fixture-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-paid-legacy
+          if-no-files-found: error
+          retention-days: 7
+
   android-paid-routes:
+    needs: android-legacy-fixture
     if: ${{ inputs.paid_routes_candidate != '' && !inputs.network_probe_candidate && !inputs.native_engine_probe && !inputs.source_engine_build && !inputs.native_engine_source_run }}
     name: Actual signed Android saved-node acceptance
     runs-on: ubuntu-24.04
@@ -481,7 +509,7 @@ jobs:
           git diff --exit-code "$candidate_sha" HEAD -- apps/universal mobile/core src/product-version.js
           mkdir -p "$RUNNER_TEMP/lyco-paid-candidate" "$RUNNER_TEMP/lyco-paid-legacy" "$RUNNER_TEMP/lyco-mobile-paid"
           gh run download "$LYCO_PAID_CANDIDATE_RUN" -R "$GITHUB_REPOSITORY" -n "lyco-android-candidate-$LYCO_PAID_CANDIDATE_RUN" -D "$RUNNER_TEMP/lyco-paid-candidate"
-          python3 tests/mobile/paid/download-legacy.py
+          python3 tests/mobile/paid/download-legacy.py --from-current-run
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
           for label in candidate legacy; do
             directory="$RUNNER_TEMP/lyco-paid-$label"

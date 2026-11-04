@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import zipfile
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true', 'Run only in genuine Actions'
@@ -48,7 +49,35 @@ assert len(named) <= 1, 'Ambiguous historical candidate'
 available = [a for a in named if not a['expired']]
 receipt = {'sourceRun': run['id'], 'sourceCommit': run['head_sha'], 'apkModified': False,
            'rebuiltOrResigned': False, 'files': manifest['files']}
-if available:
+if sys.argv[1:] == ['--from-current-run']:
+    # The device job keeps a read-only token. Only the short preparatory job
+    # can read an unpublished draft, which GitHub restricts to push access.
+    current = api(f'actions/runs/{os.environ["GITHUB_RUN_ID"]}')
+    assert current['head_sha'] == os.environ['GITHUB_SHA']
+    assert current['event'] == 'workflow_dispatch' and current['path'] == run['path']
+    jobs = api(f'actions/runs/{current["id"]}/jobs?per_page=100')
+    assert jobs['total_count'] <= 100
+    prepared, = [j for j in jobs['jobs'] if j['name'] == 'Prepare exact historical Android compatibility fixture']
+    assert prepared['status'] == 'completed' and prepared['conclusion'] == 'success'
+    artifacts = api(f'actions/runs/{current["id"]}/artifacts?per_page=100')
+    assert artifacts['total_count'] <= 100
+    artifact, = [a for a in artifacts['artifacts'] if a['name'] == f'lyco-legacy-fixture-{current["id"]}' and not a['expired']]
+    archive_path = root / 'lyco-paid-legacy-prepared.zip'
+    download(f'actions/artifacts/{artifact["id"]}/zip', archive_path)
+    verify(archive_path, {'bytes': artifact['size_in_bytes'], 'sha256': artifact['digest'].removeprefix('sha256:')})
+    with zipfile.ZipFile(archive_path) as archive:
+        names = set(manifest['files']) | {'legacy-fetch.json'}
+        assert set(archive.namelist()) == names and len(archive.namelist()) == len(names)
+        assert archive.testzip() is None
+        archive.extractall(target)
+    original_receipt = json.loads((target / 'legacy-fetch.json').read_text())
+    for key, value in receipt.items():
+        assert original_receipt[key] == value
+    receipt = {**original_receipt, 'preparedArtifactId': artifact['id'],
+               'preparedArtifactDigest': artifact['digest'], 'deviceJobTokenReadOnly': True}
+elif sys.argv[1:]:
+    raise ValueError('Unsupported fixture source mode')
+elif available:
     artifact, = available
     archive_path = root / 'lyco-paid-legacy-original.zip'
     download(f'actions/artifacts/{artifact["id"]}/zip', archive_path)
@@ -90,6 +119,7 @@ assert signature['releaseIdentityMatches'] is True and signature['releaseSigning
 with zipfile.ZipFile(target / 'LYCO-Browser-Android-preview.apk') as archive:
     assert archive.testzip() is None
 (evidence / 'legacy-fetch.json').write_text(json.dumps(receipt, indent=2) + '\n')
+(target / 'legacy-fetch.json').write_text(json.dumps(receipt, indent=2) + '\n')
 print(json.dumps({'historicalSource': run['head_sha'], 'fixtureSource': receipt['source'],
                   'apkSha256': manifest['files']['LYCO-Browser-Android-preview.apk']['sha256'],
                   'rebuiltOrResigned': False, 'actualSignatureAndDeviceChecksStillRequired': True}))
