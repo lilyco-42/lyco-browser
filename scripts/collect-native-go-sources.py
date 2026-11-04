@@ -164,6 +164,25 @@ def main():
                     originalGoSumSha256=sha(locks / 'go.sum'), originalGoModSha256=sha(locks / 'go.mod'))
     shutil.copyfile(locks / 'go.mod', root / 'original-core.go.mod')
     shutil.copyfile(locks / 'go.sum', root / 'original-core.go.sum')
+    # Preserve complete original UTF-8 text for an offline client view; no
+    # inferred SPDX labels, replacement license text or whitespace rewriting.
+    catalog = {'schemaVersion': 1, 'generated': True, 'goVersion': version,
+               'sourceRun': os.environ['GITHUB_RUN_ID'], 'producerCommit': commit,
+               'originalGoModSha256': manifest['originalGoModSha256'],
+               'originalGoSumSha256': manifest['originalGoSumSha256'], 'packages': []}
+    for module in manifest['modules']:
+        files = []
+        for notice in module['noticeCandidates']:
+            raw = (root / module['directory'] / notice['retainedFile']).read_bytes()
+            require(hashlib.sha256(raw).hexdigest() == notice['sha256'], 'Retained notice drift')
+            text = raw.decode('utf-8')
+            require(text.encode('utf-8') == raw, 'Notice text must preserve original bytes')
+            files.append({'name': notice['originalPath'], 'text': text, 'sha256': notice['sha256']})
+        catalog['packages'].append({'id': module['path'] + '@' + module['version'],
+                                    'name': module['path'], 'version': module['version'],
+                                    'sum': module['sum'], 'goModSum': module['goModSum'], 'files': files})
+    save(root / 'OFFLINE-GO-NOTICES.json', catalog)
+    manifest['offlineNoticeCatalogSha256'] = sha(root / 'OFFLINE-GO-NOTICES.json')
     shutil.rmtree(stage)
     save(manifest_path, manifest)
     print(json.dumps({'moduleCount': manifest['moduleCount'], 'noticeCandidateFiles': manifest['noticeCandidateFiles'],
