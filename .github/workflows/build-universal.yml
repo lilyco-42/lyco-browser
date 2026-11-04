@@ -51,6 +51,10 @@ on:
         description: 'Standalone non-debuggable Gecko native policy capability experiment; no product engine change'
         type: boolean
         default: false
+      native_engine_storage:
+        description: 'With native_engine_probe: verify owned per-UUID persistence and non-exportable keys using the verified source engine'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.source_engine_build && 'source-engine-build' || (inputs.native_engine_probe && 'engine-probe' || (inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build'))) }}
@@ -649,7 +653,11 @@ jobs:
           IOS: ${{ inputs.ios_device }}
           PAID: ${{ inputs.paid_routes_candidate }}
           NETWORK: ${{ inputs.network_probe_candidate }}
-        run: test "$SIGNED" = false && test "$IOS" = false && test -z "$PAID" && test -z "$NETWORK"
+          STORAGE: ${{ inputs.native_engine_storage }}
+          SOURCE_ENGINE: ${{ inputs.native_engine_source_run }}
+        run: |
+          test "$SIGNED" = false && test "$IOS" = false && test -z "$PAID" && test -z "$NETWORK"
+          if [[ "$STORAGE" == true ]]; then test "$SOURCE_ENGINE" = 41772782539; fi
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
       - uses: actions/setup-python@v5
@@ -669,9 +677,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           LYCO_SOURCE_ENGINE_RUN: ${{ inputs.native_engine_source_run }}
         run: bash tests/mobile/engine/download-source-engine.sh
+      - name: Check new storage experiment syntax without executing it locally
+        if: ${{ inputs.native_engine_storage }}
+        run: |
+          python3 -m py_compile tests/mobile/engine/storage/fixture.py tests/mobile/engine/storage/run-storage.py tests/mobile/engine/storage/assert-storage.py
+          node --check tests/mobile/engine/storage/page.js
       - name: Build the standalone release-mode engine experiment
         run: bash tests/mobile/engine/build-probe.sh
       - name: Prepare owned TURN and peer
+        if: ${{ !inputs.native_engine_storage }}
         run: bash tests/mobile/network/prepare-peer.sh
       - name: Enable KVM for native engine observations
         run: |
@@ -679,6 +693,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Native before-after controls, empty frames, TURN and real loopback targets
+        if: ${{ !inputs.native_engine_storage }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -687,11 +702,21 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
           script: bash tests/mobile/engine/run-probe.sh
+      - name: Actual cold profile storage, non-exportable keys and owned root clear
+        if: ${{ inputs.native_engine_storage }}
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: python3 tests/mobile/engine/storage/run-storage.py
       - name: Preserve original experiment binary, native observations and counterexamples
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lyco-native-engine-experiment-${{ github.run_id }}
+          name: ${{ inputs.native_engine_storage && 'lyco-native-engine-storage' || 'lyco-native-engine-experiment' }}-${{ github.run_id }}
           path: ${{ runner.temp }}/lyco-mobile-network
           retention-days: 7
           if-no-files-found: warn

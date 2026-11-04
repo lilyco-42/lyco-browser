@@ -4,5 +4,6 @@
   <application android:label="LYCO native engine experiment"
       android:usesCleartextTraffic="true" android:theme="@android:style/Theme.Material.Light.NoActionBar">
     <activity android:name=".ProbeActivity" android:exported="true" android:launchMode="singleTop" />
+    <activity android:name=".StorageProbeActivity" android:exported="true" />
   </application>
 </manifest>
