@@ -1,0 +1,53 @@
+--- a/dom/localstorage/ActorsParent.cpp
++++ b/dom/localstorage/ActorsParent.cpp
+@@ -269,18 +269,6 @@
+ static const uint32_t kUsageFileSize = 12;
+ static const uint32_t kUsageFileCookie = 0x420a420a;
+ 
+-/**
+- * How long between the first moment we know we have data to be written on a
+- * `Connection` and when we should actually perform the write.  This helps
+- * limit disk churn under silly usage patterns and is historically consistent
+- * with the previous, legacy implementation.
+- *
+- * Note that flushing happens downstream of Snapshot checkpointing and its
+- * batch mechanism which helps avoid wasteful IPC in the case of silly content
+- * code.
+- */
+-const uint32_t kFlushTimeoutMs = 5000;
+-
+ const bool kDefaultShadowWrites = false;
+ const uint32_t kDefaultSnapshotPrefill = 16384;
+ const uint32_t kDefaultSnapshotGradualPrefill = 4096;
+@@ -4316,9 +4304,12 @@
+     MOZ_ASSERT(mFlushTimer);
+   }
+ 
++  // Preserve upstream batching by default. Embedders can request an earlier
++  // database write without changing snapshot checkpointing or storage format.
+   MOZ_ALWAYS_SUCCEEDS(mFlushTimer->InitWithNamedFuncCallback(
+-      FlushTimerCallback, this, kFlushTimeoutMs, nsITimer::TYPE_ONE_SHOT,
+-      "Connection::FlushTimerCallback"_ns));
++      FlushTimerCallback, this,
++      StaticPrefs::dom_storage_database_flushIntervalMs(),
++      nsITimer::TYPE_ONE_SHOT, "Connection::FlushTimerCallback"_ns));
+ 
+   mFlushScheduled = true;
+ }
+--- a/modules/libpref/init/StaticPrefList.yaml
++++ b/modules/libpref/init/StaticPrefList.yaml
+@@ -5576,6 +5576,14 @@
+   value: 5000
+   mirror: always
+ 
++# How long localStorage database changes are batched before a write is queued.
++# This is independent of snapshot idle/checkpoint timing. Zero queues an earlier
++# asynchronous write; it does not provide a synchronous durability fence.
++- name: dom.storage.database.flushIntervalMs
++  type: RelaxedAtomicUint32
++  value: 5000
++  mirror: always
++
+ # Is support for Storage test APIs enabled?
+ - name: dom.storage.testing
+   type: SequentiallyConsistentAtomicBool

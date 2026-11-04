@@ -52,7 +52,7 @@ on:
         type: boolean
         default: false
       native_engine_storage:
-        description: 'With native_engine_probe: verify owned per-UUID persistence and non-exportable keys using the verified source engine'
+        description: 'With native_engine_probe: verify storage; with source_engine_build: compile isolated x86 storage-policy archive'
         type: boolean
         default: false
       native_engine_cookie_flush:
@@ -733,13 +733,19 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/lyco-engine-private"
 
   source-built-native-engine:
-    if: ${{ inputs.source_engine_build && !inputs.native_engine_source_run && inputs.source_engine_abi != 'arm64-v8a' }}
+    if: ${{ inputs.source_engine_build && !inputs.native_engine_storage && !inputs.native_engine_source_run && inputs.source_engine_abi != 'arm64-v8a' }}
     uses: ./.github/workflows/build-gecko-experiment.yml
     permissions:
       contents: read
 
   source-built-arm64-engine:
-    if: ${{ inputs.source_engine_build && !inputs.native_engine_source_run && inputs.source_engine_abi == 'arm64-v8a' }}
+    if: ${{ inputs.source_engine_build && !inputs.native_engine_storage && !inputs.native_engine_source_run && inputs.source_engine_abi == 'arm64-v8a' }}
     uses: ./.github/workflows/build-gecko-arm64.yml
+    permissions:
+      contents: read
+
+  source-built-storage-engine:
+    if: ${{ inputs.source_engine_build && inputs.native_engine_storage && !inputs.native_engine_probe && !inputs.native_engine_source_run && inputs.source_engine_abi == 'x86_64' }}
+    uses: ./.github/workflows/build-gecko-storage.yml
     permissions:
       contents: read

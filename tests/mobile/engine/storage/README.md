@@ -127,3 +127,18 @@ requirements. No fixed wait, page injection, data replay, key export, legacy or
 testing-only storage API is introduced. Product code and the queued ARM64 recipe
 remain unchanged. This comparison requires genuine Actions; code alone is not
 a persistence result.
+
+That comparison completed in [41875833193](https://github.com/lilyco-42/lyco-browser/actions/runs/41875833193).
+All nine original reports and twelve abrupt process-close receipts were
+independently checked. Cookie values survived all three original reopens;
+localStorage still returned null. IDB, actual original non-exportable key use,
+export rejection and same-ciphertext decryption remained valid. All three
+combined data checks therefore still failed, and no success gate was removed.
+The full 97866424-byte original ZIP (SHA-256
+`23b80fa74988c1c8bb739665cd7db9e7e104bea5d7384c4b894f8167f1f20a3e`),
+CRC, full logs, source receipts and thirteen actual APK libraries against the
+same AAR were verified. This single experiment is not a synchronous disk
+guarantee or product adoption. The next [separate source build](../source-storage/README.md)
+targets LSNG's database timer with a production preference, preserves its
+5000ms default, original snapshots/transactions/storage format and exact base
+route patch, and still requires compilation plus complete runtime gates.

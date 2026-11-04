@@ -1,5 +1,7 @@
 # 五平台商业发行进度
 
+Cookie 单项对照 [41875833193](https://github.com/lilyco-42/lyco-browser/actions/runs/41875833193) 已完成原九阶段：Cookie 三次重开保留，本地存储仍为空；IDB、原非导出密钥和原密文解密保持，三项组合数据断言仍失败。完整 97866424 字节原始 ZIP/SHA/CRC、89025 字节日志、原始来源及 13 份实际库与原 AAR 字节已核验，[未修改结果](audits/gecko-storage-cookie-41875833193.json)及[来源](audits/gecko-storage-cookie-41875833193.source.json)保留。没有重复已通过的正常关闭或 RTC 组。下一项[独立源码实验](../tests/mobile/engine/source-storage/README.md)只把 LSNG 硬编码写入计时变为可配置生产偏好，默认仍为 5000ms；不改变 snapshot、事务、存储格式、密钥或原 RTC 补丁。新源码编译、原件、异常退出/隐私和性能验证均尚未通过，不能据补丁或 Cookie 单项改善称为存储修复或产品采用。原四份构建脚本与七份排队 ARM64 输入不变。
+
 正常关闭对照 [41873067393](https://github.com/lilyco-42/lyco-browser/actions/runs/41873067393)（源 `e4f2191`）已完成：独立 x86_64/API35 实验正常关闭组九阶段全部通过，九份原生 `onShutdown` 回执、十二份强制终止后无进程记录、真实网站数据及不可导出密钥/原密文解密均已核验；清除 A 后 B 保持，清除 B 后为空。完整 98253580 字节原始 ZIP（SHA-256 `236dbf15612f19a9c8989daf84a515ed96e137901bc86af7bc9c423f763a7389`）、110974 字节完整日志、原始源文件摘要及 APK 中 13 份库与同一优化 AAR 字节一致均另行检查。[未修改组合结果](audits/gecko-storage-matrix-41873067393.json)及[核验来源](audits/gecko-storage-matrix-41873067393.source.json)保留。强制退出组仍重现三项 Cookie/localStorage 失败，组合任务因此仍为失败；正常组通过不能替代异常退出、ARM64、产品采用或旧 WebView 密钥迁移证明。仅正常组请求完整关闭阶段 0，没有放宽原断言、增加固定等待、重放数据或重新生成读取阶段密钥。
 
 目标保持为 Windows x64、macOS ARM64、Linux x64、Android、iOS 均具备代理连接与独立浏览环境，再发行。当前 PR：[#31](https://github.com/lilyco-42/lyco-browser/pull/31)。默认下载仍指向 README 中已验收的旧 Windows 预览包。

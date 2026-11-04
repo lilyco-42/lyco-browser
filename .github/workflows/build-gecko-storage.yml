@@ -1,0 +1,65 @@
+name: Source-built Gecko storage-policy archive experiment
+on:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: source-built-gecko-storage-experiment
+  cancel-in-progress: false
+jobs:
+  native-engine:
+    name: Compile actual patched Gecko C++ · storage policy archive only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '21'}
+      - name: Derive storage-policy recipe without modifying the tested base
+        run: |
+          python3 -m py_compile tests/mobile/engine/source-storage/prepare.py tests/mobile/engine/source-storage/verify-output.py
+          python3 tests/mobile/engine/source-storage/prepare.py
+          bash -n "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-engine.sh"
+      - name: Prepare disposable build host disk
+        run: |
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-before.txt"
+          free -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/memory.txt"
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-after.txt"
+          test "$(df --output=avail -B1 "$RUNNER_TEMP" | tail -1)" -gt 45000000000
+      - name: Validate unchanged build host resource containment
+        run: python3 "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-host.py" --check
+      - name: Preserve exact adaptation and host preflight before compilation
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-storage-host-preflight-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-gecko-build-evidence/host-check-*.json
+            ${{ runner.temp }}/lyco-gecko-build-evidence/STORAGE-RECIPE.json
+            ${{ runner.temp }}/lyco-gecko-build-evidence/base-*
+            ${{ runner.temp }}/lyco-gecko-build-evidence/generated-*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Compile the native storage-policy experiment
+        run: python3 "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-host.py"
+      - name: Verify compiled ELF and exact changed native sources
+        run: python3 tests/mobile/engine/source-storage/verify-output.py
+      - name: Retain compiled storage-policy archive without adopting it
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-built-gecko-storage-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-output/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Preserve original storage-policy source, adaptation and observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-storage-build-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          if-no-files-found: warn
+          retention-days: 7
