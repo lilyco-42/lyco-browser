@@ -1,0 +1,14 @@
+{
+  "analysisRun": 41769842645,
+  "analysisJob": 126376707366,
+  "analysisSource": "bbc2a626ff36388fceb05531247da86734d2b128",
+  "nativeBuildRun": 41754332654,
+  "nativeBuildSource": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+  "reportSha256": "df6bdf1484ad66b99d4d810a8b78f29097b8cc89dd5132747b58d5585704f1b5",
+  "originalAnalysisZipBytes": 2266084,
+  "originalAnalysisZipSha256": "7612c4e979a5985c588a7c96a907096b876e28192d1fb7ae2bf9d9a6845b952c",
+  "fullOriginalAndNestedArchiveChecksVerified": true,
+  "originalReportCopiedUnmodified": true,
+  "actualApkSignatureRechecked": true,
+  "licenseClearanceProven": false
+}
