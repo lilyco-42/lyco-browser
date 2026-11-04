@@ -55,6 +55,10 @@ on:
         description: 'With native_engine_probe: verify owned per-UUID persistence and non-exportable keys using the verified source engine'
         type: boolean
         default: false
+      native_engine_cookie_flush:
+        description: 'With native_engine_storage: run only the new abrupt cookie-buffer comparison; retains all original storage assertions'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.source_engine_build && 'source-engine-build' || (inputs.native_engine_probe && 'engine-probe' || (inputs.network_probe_candidate && 'network-probe' || (inputs.paid_routes_candidate && 'paid-routes' || 'platform-build'))) }}
@@ -654,10 +658,12 @@ jobs:
           PAID: ${{ inputs.paid_routes_candidate }}
           NETWORK: ${{ inputs.network_probe_candidate }}
           STORAGE: ${{ inputs.native_engine_storage }}
+          COOKIE_FLUSH: ${{ inputs.native_engine_cookie_flush }}
           SOURCE_ENGINE: ${{ inputs.native_engine_source_run }}
         run: |
           test "$SIGNED" = false && test "$IOS" = false && test -z "$PAID" && test -z "$NETWORK"
           if [[ "$STORAGE" == true ]]; then test "$SOURCE_ENGINE" = 41772782539; fi
+          if [[ "$COOKIE_FLUSH" == true ]]; then test "$STORAGE" = true; fi
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
       - uses: actions/setup-python@v5
@@ -705,13 +711,15 @@ jobs:
       - name: Actual cold profile storage, non-exportable keys and owned root clear
         if: ${{ inputs.native_engine_storage }}
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          LYCO_STORAGE_CLOSE_MODE: ${{ inputs.native_engine_cookie_flush && 'eager-cookie' || '' }}
         with:
           api-level: 35
           target: default
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
-          script: python3 tests/mobile/engine/storage/run-matrix.py
+          script: ${{ inputs.native_engine_cookie_flush && 'python3 tests/mobile/engine/storage/run-storage.py' || 'python3 tests/mobile/engine/storage/run-matrix.py' }}
       - name: Preserve original experiment binary, native observations and counterexamples
         if: always()
         uses: actions/upload-artifact@v4

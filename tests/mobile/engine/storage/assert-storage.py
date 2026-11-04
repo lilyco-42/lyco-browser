@@ -36,7 +36,7 @@ checks['actual-complete-process-close-before-every-step'] = (len(processes) == 1
     and {r['before'] for r in processes} == set(expected) | {'clear-a', 'clear-b', 'finished'}
     and all(r['forceStopCompleted'] is True and r['remainingPackageProcesses'] == [] for r in processes))
 mode = root.name.removeprefix('storage-')
-assert mode in ['abrupt', 'graceful']
+assert mode in ['abrupt', 'graceful', 'eager-cookie']
 if mode == 'graceful':
     acknowledgements = [r for r in processes if r.get('nativeShutdownCallbackObserved') is True]
     checks['actual-Gecko-shutdown-before-every-reporting-process-stop'] = (
@@ -45,6 +45,8 @@ for profile, name in [('A', 'clear-a'), ('B', 'clear-b')]:
     wanted = '11111111-1111-4111-8111-111111111111' if profile == 'A' else '22222222-2222-4222-8222-222222222222'
     if mode == 'graceful':
         wanted = '33333333-3333-4333-8333-333333333333' if profile == 'A' else '44444444-4444-4444-8444-444444444444'
+    elif mode == 'eager-cookie':
+        wanted = '55555555-5555-4555-8555-555555555555' if profile == 'A' else '66666666-6666-4666-8666-666666666666'
     checks[name + '-native-root-removal-completed'] = any(n.get('text') == 'STORAGE CLEARED: ' + wanted for n in ET.parse(root / (name + '-ui.xml')).iter('node'))
 candidate = json.loads((root / 'candidate.json').read_text())
 checks['same-verified-source-built-native-engine'] = (candidate.get('packagedNativeLibrariesMatchSourceAar') is True

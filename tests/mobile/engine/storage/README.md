@@ -104,3 +104,26 @@ normal-close capability for the owned x86 experiment only. It does not solve
 abrupt termination, old WebView data/key migration, ARM64 or product integration.
 The unchanged passing RTC experiment does not need a repeat for this storage-only
 change.
+
+The next independent comparison isolates cookie buffering without repeating the
+unchanged successful normal-close and RTC runs. Pinned upstream
+[`CookieDBWriteQueue::MaybeScheduleFlush`](https://github.com/mozilla-firefox/firefox/blob/9a2dc53c369c7ae5172018b35988e1d2ffeff402/netwerk/cookie/CookieDBWriteQueue.cpp)
+uses `network.cookie.db.flushIntervalMs` as an ordinary one-shot timer delay;
+zero schedules the flush without the default 500ms batching delay. It does not
+disable writing, make the asynchronous database transaction synchronous, or
+prove that disk writes completed. LSNG has a separate hard-coded write timer,
+so this preference alone is not expected to establish full abrupt durability.
+
+Dispatch with the same three storage inputs plus
+`native_engine_cookie_flush=true`. This runs only `eager-cookie` with owned UUIDs
+5555… and 6666…, the same original nine abrupt-stop phases and every original
+Cookie/localStorage/IDB/key/route/clear assertion. Native startup requires this
+mode to match its own UUID pair and requests only the cookie timer preference;
+it does not request normal shutdown or modify localStorage policy. Requested
+configuration is logged and source-bound without claiming preference readback.
+The original two-mode matrix remains the default; its failure is retained, and
+even a future passing cookie-only observation cannot replace its complete data
+requirements. No fixed wait, page injection, data replay, key export, legacy or
+testing-only storage API is introduced. Product code and the queued ARM64 recipe
+remain unchanged. This comparison requires genuine Actions; code alone is not
+a persistence result.

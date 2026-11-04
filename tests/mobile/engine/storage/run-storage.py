@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 mode = os.environ['LYCO_STORAGE_CLOSE_MODE']
-assert mode in ['abrupt', 'graceful']
+assert mode in ['abrupt', 'graceful', 'eager-cookie']
 base = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
 root = base / ('storage-' + mode)
 root.mkdir()
@@ -23,6 +23,8 @@ package = 'top.lain42.lycoengineprobe'
 ids = {'A': '11111111-1111-4111-8111-111111111111', 'B': '22222222-2222-4222-8222-222222222222'}
 if mode == 'graceful':
     ids = {'A': '33333333-3333-4333-8333-333333333333', 'B': '44444444-4444-4444-8444-444444444444'}
+elif mode == 'eager-cookie':
+    ids = {'A': '55555555-5555-4555-8555-555555555555', 'B': '66666666-6666-4666-8666-666666666666'}
 processes = []
 active_phase = None
 
@@ -100,6 +102,7 @@ source_files = [here / name for name in ['page.js', 'fixture.py', 'run-storage.p
 source_files += [here.parent / 'app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java', here.parent / 'app/src/main/AndroidManifest.xml']
 (root / 'storage-source.json').write_text(json.dumps({'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
     'closeMode': mode, 'requestedFastShutdownStage': 0 if mode == 'graceful' else None,
+    'requestedCookieFlushIntervalMs': 0 if mode == 'eager-cookie' else None,
     'preferenceReadbackProven': False,
     'files': [{'path': str(p.relative_to(Path(os.environ['GITHUB_WORKSPACE']))), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_files]}, indent=2) + '\n')
 fixture_log = (root / 'storage-fixture.log').open('w')

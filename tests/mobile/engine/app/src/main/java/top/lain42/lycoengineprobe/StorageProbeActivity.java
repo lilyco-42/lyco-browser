@@ -46,7 +46,9 @@ public final class StorageProbeActivity extends Activity {
             if (!"11111111-1111-4111-8111-111111111111".equals(id)
                     && !"22222222-2222-4222-8222-222222222222".equals(id)
                     && !"33333333-3333-4333-8333-333333333333".equals(id)
-                    && !"44444444-4444-4444-8444-444444444444".equals(id)) {
+                    && !"44444444-4444-4444-8444-444444444444".equals(id)
+                    && !"55555555-5555-4555-8555-555555555555".equals(id)
+                    && !"66666666-6666-4666-8666-666666666666".equals(id)) {
                 throw new IllegalArgumentException("Only owned CI UUIDs are accepted");
             }
             File base = new File(getNoBackupFilesDir().getCanonicalFile(), "lyco-gecko-data-v1");
@@ -76,7 +78,9 @@ public final class StorageProbeActivity extends Activity {
             String closeMode = getIntent().getStringExtra("closeMode");
             boolean graceful = "33333333-3333-4333-8333-333333333333".equals(id)
                 || "44444444-4444-4444-8444-444444444444".equals(id);
-            if (!(graceful ? "graceful" : "abrupt").equals(closeMode)) {
+            boolean eagerCookie = "55555555-5555-4555-8555-555555555555".equals(id)
+                || "66666666-6666-4666-8666-666666666666".equals(id);
+            if (!(graceful ? "graceful" : (eagerCookie ? "eager-cookie" : "abrupt")).equals(closeMode)) {
                 throw new IllegalArgumentException("Owned UUID and shutdown comparison mode must match");
             }
             String url = getIntent().getDataString();
@@ -95,8 +99,10 @@ public final class StorageProbeActivity extends Activity {
             // Only the normal-close comparison requests full shutdown; the
             // original abrupt-stop profiles retain the engine's default.
             if (graceful) prefs.put("toolkit.shutdown.fastShutdownStage", 0);
+            if (eagerCookie) prefs.put("network.cookie.db.flushIntervalMs", 0);
             Log.i("LYCO_STORAGE_CONFIG", "Requested closeMode=" + closeMode
-                + " fastShutdownStage=" + (graceful ? "0" : "default") + " phase=" + phase);
+                + " fastShutdownStage=" + (graceful ? "0" : "default")
+                + " cookieFlushIntervalMs=" + (eagerCookie ? "0" : "default") + " phase=" + phase);
             File config = new File(getFilesDir(), "owned-storage-config.json");
             Files.write(config.toPath(), new JSONObject().put("prefs", prefs).toString().getBytes(StandardCharsets.UTF_8));
             GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder()
