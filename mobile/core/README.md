@@ -43,3 +43,31 @@ generated native APIs alongside the libraries. Install the Android library with
 `python3 install-android.py`; the Apple framework is copied into the Expo module's
 `ios/Frameworks` directory. The application CI workflow records the remaining
 Expo prebuild, native compilation and runtime acceptance steps.
+
+## Generated binding inputs
+
+The native component workflow opts into Android generated-source capture with
+`LYCO_CAPTURE_GENERATED_SOURCES=true`. Product builds leave it disabled. The
+pinned binder's `-work` flag preserves temporary Go/Java trees, but its
+[module-mode Android build](https://github.com/SagerNet/gomobile/blob/b2c30f47825831593d6980af8191527490f9c968/cmd/gomobile/bind_androidapp.go)
+deletes the per-architecture copied package after compilation. Retaining the
+temporary tree alone does not prove those exact copied inputs.
+
+`capture-go-build.py` delegates to the original pinned Go executable. For the
+two exact Android binding package directories only, it first copies source and
+resolved locks, invokes the real compiler, then verifies the inputs stayed
+unchanged. Compiler output size/SHA and ELF architecture are recorded.
+`retain-generated.py` requires those two actual outputs to byte-match both AAR
+libraries, retains Java and Go/Cgo work source, and records exact tool binary
+identities, embedded Go build metadata and the compiler's actual NDK revision.
+Only owned runner work/source directories are read; signing keys and runtime
+data are outside the capture. Binary compiler intermediates are excluded.
+
+The generated-source tar/SHA and raw receipts accompany the component artifact;
+the verified Go source bundle also embeds the same tar and its AAR binding.
+Its tested commit can be a PR merge commit, not the PR head; manifests record
+the actual checked-out tree. This new capture still needs genuine CI proof.
+It does not establish correspondence to the older signed APK, all SDK/NDK
+source delivery, license clearance, bit-for-bit reproduction, Apple capture or
+commercial release. Original routing/build gates remain required. No local
+execution or default product build change is part of this opt-in experiment.

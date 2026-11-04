@@ -56,6 +56,8 @@ jobs:
           - {platform: apple, runner: macos-26}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
+    env:
+      LYCO_CAPTURE_GENERATED_SOURCES: ${{ matrix.platform == 'android' && 'true' || 'false' }}
     defaults:
       run:
         working-directory: mobile/core
@@ -68,6 +70,10 @@ jobs:
           cache-dependency-path: mobile/core/go.sum
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
+      - name: Check generated source capture syntax on the real runner
+        run: |
+          bash -n build-native.sh
+          python3 -m py_compile capture-go-build.py retain-generated.py bundle-source.py
       - name: Build native bindings from the pinned Go source
         run: bash build-native.sh ${{ matrix.platform }}
       - name: Retain tested application and verified Go module sources
@@ -83,5 +89,15 @@ jobs:
             ${{ runner.temp }}/lyco-tunnel-bindings.txt
             ${{ runner.temp }}/lyco-mobile-core-source.tar.gz
             ${{ runner.temp }}/lyco-mobile-core-source.tar.gz.sha256
+            ${{ runner.temp }}/lyco-generated-bindings-android.tar.gz
+            ${{ runner.temp }}/lyco-generated-bindings-android.tar.gz.sha256
           if-no-files-found: error
+          retention-days: 7
+      - name: Retain original generated-source receipts and failures
+        if: ${{ always() && matrix.platform == 'android' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-generated-binding-receipts-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-binding-capture-android/published/
+          if-no-files-found: warn
           retention-days: 7

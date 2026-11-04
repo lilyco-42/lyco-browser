@@ -61,6 +61,19 @@ def main():
         for name in ('go.mod', 'go.sum'):
             shutil.copyfile(core / name, lock / name)
         records = []
+        generated = None
+        if os.environ.get('LYCO_CAPTURE_GENERATED_SOURCES') == 'true':
+            original = Path(os.environ['RUNNER_TEMP']) / 'lyco-generated-bindings-android.tar.gz'
+            receipt = Path(os.environ['RUNNER_TEMP']) / 'lyco-binding-capture-android/published/manifest.json'
+            generated = json.loads(receipt.read_text())
+            aar = Path(os.environ['RUNNER_TEMP']) / 'lyco-tunnel.aar'
+            if generated['componentAar']['sha256'] != hashlib.sha256(aar.read_bytes()).hexdigest():
+                raise RuntimeError('Generated source and actual native archive differ')
+            shutil.copyfile(original, target / 'generated-bindings-android.tar.gz')
+            generated = {'archiveSha256': hashlib.sha256(original.read_bytes()).hexdigest(),
+                         'componentAar': generated['componentAar'],
+                         'actualInputsUnchangedDuringCompile': generated['actualInputsUnchangedDuringCompile'],
+                         'completeCorrespondingSourceProven': False}
         for index, ((name, version), row) in enumerate(sorted(modules.items())):
             folder = target / 'modules' / str(index)
             folder.mkdir(parents=True)
@@ -74,6 +87,7 @@ def main():
                             'sha256': hashes})
         manifest = {'applicationCommit': run('git', '-C', str(root), 'rev-parse', 'HEAD').strip(),
                     'go': run('go', 'version').strip(), 'modules': records,
+                    'generatedBindings': generated,
                     'scope': 'Application tracked source plus Go application and binding-tool build modules; '
                              'not a complete inventory of npm, Pods, Android, browser kernels or platform SDKs.'}
         (target / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
