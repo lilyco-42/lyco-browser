@@ -46,3 +46,11 @@
 未修改的[原始报告](audits/native-android-libraries-41754332654.json)及[来源记录](audits/native-android-libraries-41754332654.source.json)绑定实际 APK `8bed4c44c56c38f610bd5852910568a22a1d6a52678bbf8681b20a427cd11e99`。32 份 ELF 库包含架构、逐文件摘要、动态依赖和可用编译器注释；其中 30 份与旧 `77d304f` 包逐字节相同，两份变化均为 `libgojni.so`。两种架构各读出相同的 72 项 Go 模块及其版本/校验和，全部匹配当前 `mobile/core/go.sum`，无模块替换；Go 版本 1.25.5、Android 目标、QUIC/uTLS 标签及嵌入 Git 版本 `82ce7bc` 均有原始记录。
 
 嵌入信息同时明确标记 `vcs.modified=true`，此事实保留：本轮没有独立保存该次生成的绑定源码，不能称为可重现的源码到二进制证明。编译器注释包含多种 Clang 版本，也不能由此推断完整 NDK 版本。动态依赖不覆盖静态合入组件；上述 72 项并非全部原生组件，仍需逐项关联原始版权文本、构建输入、生成源码及对应源码交付。原有三项 npm 缺原文记录、Pods/Gradle/内核/字体和平台 SDK 审查均保留。
+
+### 实际 Go 依赖的源码与声明原件
+
+[Actions 41773750136](https://github.com/lilyco-42/lyco-browser/actions/runs/41773750136) 已在固定 Go 1.25.5 下完成这些实际依赖的原件收集。新任务消费成功的原生元数据审阅档案，核验其完整大小/SHA/CRC、生产提交和实际 APK 关联，要求两种架构的模块集合一致，逐项使用 `go mod download` 获取精确版本，并要求模块及 go.mod 的 Go 校验和同时匹配原锁文件。它不编译或执行目标代码，也不修改产品锁文件；没有重跑已通过的编辑验收。
+
+完整原始结果 ZIP 为 78738800 字节，SHA-256 `d603cd940cd6b254e2e0310593dcd03c3f593e40ade7c20cd032571e65ef67b0`。下载后已独立核验完整 ZIP 大小/SHA/CRC、全部 72 个模块的原始 ZIP/go.mod/version.info 摘要、每个模块 ZIP 的 CRC，以及 104 份声明候选与原 ZIP 对应文件的逐字节一致性。[未修改的原始清单](audits/native-android-go-sources-41754332654.json)及[核验来源](audits/native-android-go-sources-41754332654.source.json)保留每个版本、Go 校验和、原件 SHA、相对目录和声明来源路径。72 个模块均有文件名匹配的候选，其中包含 LICENSE、NOTICE、COPYRIGHT、PATENTS 和 AUTHORS；候选存在不等于许可义务审查已经完成。
+
+档案还包含实际生产提交 `82ce7bc` 的完整受跟踪应用源码，压缩包 2579830 字节、SHA-256 `1f0c2aa8cbe3ac343143f94d864f2ba0bb66b9ba5e82c7316c6dadfc7928a9da`，其 Git 归档提交标记和内部核心锁文件均已核验。这补齐了当前 APK 已观察到的 Go 模块原件关联，不能覆盖 Go 标准库、cgo/NDK、未跟踪生成的绑定、其他原生库或全部对应源码。104 份原件尚未加入客户端离线声明页，Actions 审阅档案也不是长期客户源码下载渠道；这些交付工作仍需完成。
