@@ -60,12 +60,20 @@ with urllib.request.urlopen(url,timeout=60) as response:pom=response.read(1024*1
 assert hashlib.sha256(pom).hexdigest()=='760b60b556283f897c7258b04bf314f9c02cc5de26845d569c6d7a42d99d8c76'
 (evidence/'source-engine-original.pom').write_bytes(pom)
 ns='{http://maven.apache.org/POM/4.0.0}';tree=ET.fromstring(pom)
+# Maven expects an unprefixed project root with the POM default namespace.
+# Preserve every dependency and attribute while avoiding ElementTree's ns0 prefix.
+ET.register_namespace('',ns[1:-1])
+ET.register_namespace('xsi','http://www.w3.org/2001/XMLSchema-instance')
 for key,value in [('groupId','top.lain42.experimental'),('artifactId','geckoview-source'),('version','159.0-route-experiment')]:
     tree.find(ns+key).text=value
 repository=stage/'maven';module=repository/'top/lain42/experimental/geckoview-source/159.0-route-experiment'
 module.mkdir(parents=True)
 target=module/'geckoview-source-159.0-route-experiment.aar';aar.replace(target)
-ET.ElementTree(tree).write(module/'geckoview-source-159.0-route-experiment.pom',encoding='utf-8',xml_declaration=True)
+transformed=module/'geckoview-source-159.0-route-experiment.pom'
+ET.ElementTree(tree).write(transformed,encoding='utf-8',xml_declaration=True)
+assert b'<project ' in transformed.read_bytes() and b'<ns0:project' not in transformed.read_bytes()
+assert ET.tostring(ET.fromstring(pom).find(ns+'dependencies'))==ET.tostring(ET.parse(transformed).getroot().find(ns+'dependencies'))
+(evidence/'source-engine-consumer.pom').write_bytes(transformed.read_bytes())
 (evidence/'source-engine-build.json').write_text(json.dumps(meta,indent=2)+'\n')
 (evidence/'source-engine-artifact.json').write_text(json.dumps(entry,indent=2)+'\n')
 with open(os.environ['GITHUB_ENV'],'a') as output:

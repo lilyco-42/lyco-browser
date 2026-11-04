@@ -481,7 +481,7 @@ jobs:
           git diff --exit-code "$candidate_sha" HEAD -- apps/universal mobile/core src/product-version.js
           mkdir -p "$RUNNER_TEMP/lyco-paid-candidate" "$RUNNER_TEMP/lyco-paid-legacy" "$RUNNER_TEMP/lyco-mobile-paid"
           gh run download "$LYCO_PAID_CANDIDATE_RUN" -R "$GITHUB_REPOSITORY" -n "lyco-android-candidate-$LYCO_PAID_CANDIDATE_RUN" -D "$RUNNER_TEMP/lyco-paid-candidate"
-          gh run download 40630265066 -R "$GITHUB_REPOSITORY" -n lyco-android-candidate-40630265066 -D "$RUNNER_TEMP/lyco-paid-legacy"
+          python3 tests/mobile/paid/download-legacy.py
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
           for label in candidate legacy; do
             directory="$RUNNER_TEMP/lyco-paid-$label"
