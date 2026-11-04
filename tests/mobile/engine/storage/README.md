@@ -45,3 +45,24 @@ only. It does not prove WebView-to-Gecko migration, portability of non-exportabl
 keys across engines, ARM64 runtime, a complete product bridge, real customer
 routes, all-network privacy, iOS, licensing/source delivery or commercial release.
 All original product requirements and legacy data remain required.
+
+The first run [41813877950](https://github.com/lilyco-42/lyco-browser/actions/runs/41813877950)
+completed all nine original observations and failed three strict reopen checks:
+Cookie/localStorage were empty after abrupt force-stop, while IndexedDB values,
+non-exportable key use, export rejection and identical encrypted records survived.
+Its complete 97923694-byte original ZIP (SHA-256
+`940e30e4b2d7e91fd9389f12c7df6dfe14ece8ee40b7562b1ef0aa471b02766a`)
+and raw reports were verified and retained. This is a real failure, not a pass or
+a claim that all storage is lost. The original driver did not request native
+shutdown before Android terminated the process.
+
+The next causal comparison keeps that same abrupt matrix and every data/key
+assertion. A second matrix uses separate owned UUID roots and first invokes
+`GeckoSession.close()` and `GeckoRuntime.shutdown()`. It must observe the actual
+`GeckoRuntime.Delegate.onShutdown` callback, delivered from the pinned engine's
+`Gecko:Exited` event, before the same force-stop/process-absence check. There is
+no fixed flush sleep, artificial state replay, import or key regeneration. All
+nine original reports run in each mode, including clear-A/keep-B and clear-B.
+The combined job remains failed unless both modes pass; a normal-close success
+cannot conceal the abrupt-stop counterexample. Neither matrix proves WebView
+migration or changes any product environment.

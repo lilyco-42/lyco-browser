@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -11,11 +12,19 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
-root = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
+mode = os.environ['LYCO_STORAGE_CLOSE_MODE']
+assert mode in ['abrupt', 'graceful']
+base = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
+root = base / ('storage-' + mode)
+root.mkdir()
+shutil.copy2(base / 'candidate.json', root / 'candidate.json')
 here = Path(__file__).resolve().parent
 package = 'top.lain42.lycoengineprobe'
 ids = {'A': '11111111-1111-4111-8111-111111111111', 'B': '22222222-2222-4222-8222-222222222222'}
+if mode == 'graceful':
+    ids = {'A': '33333333-3333-4333-8333-333333333333', 'B': '44444444-4444-4444-8444-444444444444'}
 processes = []
+active_phase = None
 
 
 def shell(args):
@@ -23,6 +32,21 @@ def shell(args):
 
 
 def stop(label):
+    global active_phase
+    acknowledged = False
+    closed_phase = active_phase
+    if mode == 'graceful' and active_phase is not None:
+        shell(['am', 'start', '-W', '-n', package + '/.StorageProbeActivity', '--es', 'action', 'close'])
+        deadline = time.monotonic() + 20
+        while True:
+            shell(['uiautomator', 'dump', '/data/local/tmp/lyco-storage-close.xml'])
+            raw = shell(['cat', '/data/local/tmp/lyco-storage-close.xml'])
+            (root / (label + '-shutdown-ui.xml')).write_text(raw)
+            if any(n.get('text') == 'GECKO SHUTDOWN COMPLETE: ' + active_phase for n in ET.fromstring(raw).iter('node')):
+                acknowledged = True
+                break
+            assert time.monotonic() < deadline, 'Actual Gecko shutdown callback missing'
+            time.sleep(.25)
     shell(['am', 'force-stop', package])
     deadline = time.monotonic() + 20
     while True:
@@ -32,11 +56,15 @@ def stop(label):
             break
         assert time.monotonic() < deadline, 'Native engine processes did not stop'
         time.sleep(.25)
-    processes.append({'before': label, 'forceStopCompleted': True, 'remainingPackageProcesses': remaining})
+    processes.append({'before': label, 'forceStopCompleted': True, 'remainingPackageProcesses': remaining,
+                      'closeMode': mode, 'closedPhase': closed_phase,
+                      'nativeShutdownCallbackObserved': acknowledged})
+    active_phase = None
     (root / 'storage-processes.json').write_text(json.dumps(processes, indent=2) + '\n')
 
 
 def launch(profile, phase, action='read', value='none'):
+    global active_phase
     stop(phase)
     url = f'http://localhost:18080/storage?phase={phase}&action={action}&value={value}'
     output = shell(['am', 'start', '-W', '-n', package + '/.StorageProbeActivity', '--es', 'profile', ids[profile], '-d', url])
@@ -47,6 +75,7 @@ def launch(profile, phase, action='read', value='none'):
         found = [r for r in data['reports'] if r['observation']['phase'] == phase]
         if found:
             assert len(found) == 1
+            active_phase = phase
             break
         assert time.monotonic() < deadline, 'Actual browser report missing: ' + phase
         time.sleep(.2)
@@ -66,7 +95,7 @@ def clear(profile, phase):
         time.sleep(.25)
 
 
-source_files = [here / name for name in ['page.js', 'fixture.py', 'run-storage.py', 'assert-storage.py']]
+source_files = [here / name for name in ['page.js', 'fixture.py', 'run-storage.py', 'assert-storage.py', 'run-matrix.py']]
 source_files += [here.parent / 'app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java', here.parent / 'app/src/main/AndroidManifest.xml']
 (root / 'storage-source.json').write_text(json.dumps({'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
     'files': [{'path': str(p.relative_to(Path(os.environ['GITHUB_WORKSPACE']))), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_files]}, indent=2) + '\n')
@@ -84,7 +113,7 @@ try:
             time.sleep(.1)
     for port in [18080, 18081]:
         subprocess.run(['adb', 'reverse', f'tcp:{port}', f'tcp:{port}'], check=True)
-    subprocess.run(['adb', 'install', '-r', str(root / 'engine-probe.apk')], check=True)
+    subprocess.run(['adb', 'install', '-r', str(base / 'engine-probe.apk')], check=True)
     subprocess.run(['adb', 'logcat', '-c'], check=True)
     launch('A', 'a-empty')
     launch('A', 'a-seed', 'seed', 'A')

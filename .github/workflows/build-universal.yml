@@ -680,7 +680,7 @@ jobs:
       - name: Check new storage experiment syntax without executing it locally
         if: ${{ inputs.native_engine_storage }}
         run: |
-          python3 -m py_compile tests/mobile/engine/storage/fixture.py tests/mobile/engine/storage/run-storage.py tests/mobile/engine/storage/assert-storage.py
+          python3 -m py_compile tests/mobile/engine/storage/fixture.py tests/mobile/engine/storage/run-storage.py tests/mobile/engine/storage/assert-storage.py tests/mobile/engine/storage/run-matrix.py
           node --check tests/mobile/engine/storage/page.js
       - name: Build the standalone release-mode engine experiment
         run: bash tests/mobile/engine/build-probe.sh
@@ -711,7 +711,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
-          script: python3 tests/mobile/engine/storage/run-storage.py
+          script: python3 tests/mobile/engine/storage/run-matrix.py
       - name: Preserve original experiment binary, native observations and counterexamples
         if: always()
         uses: actions/upload-artifact@v4

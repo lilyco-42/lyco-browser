@@ -35,14 +35,22 @@ processes = json.loads((root / 'storage-processes.json').read_text())
 checks['actual-complete-process-close-before-every-step'] = (len(processes) == 12
     and {r['before'] for r in processes} == set(expected) | {'clear-a', 'clear-b', 'finished'}
     and all(r['forceStopCompleted'] is True and r['remainingPackageProcesses'] == [] for r in processes))
+mode = root.name.removeprefix('storage-')
+assert mode in ['abrupt', 'graceful']
+if mode == 'graceful':
+    acknowledgements = [r for r in processes if r.get('nativeShutdownCallbackObserved') is True]
+    checks['actual-Gecko-shutdown-before-every-reporting-process-stop'] = (
+        len(acknowledgements) == 9 and {r.get('closedPhase') for r in acknowledgements} == set(expected))
 for profile, name in [('A', 'clear-a'), ('B', 'clear-b')]:
     wanted = '11111111-1111-4111-8111-111111111111' if profile == 'A' else '22222222-2222-4222-8222-222222222222'
+    if mode == 'graceful':
+        wanted = '33333333-3333-4333-8333-333333333333' if profile == 'A' else '44444444-4444-4444-8444-444444444444'
     checks[name + '-native-root-removal-completed'] = any(n.get('text') == 'STORAGE CLEARED: ' + wanted for n in ET.parse(root / (name + '-ui.xml')).iter('node'))
 candidate = json.loads((root / 'candidate.json').read_text())
 checks['same-verified-source-built-native-engine'] = (candidate.get('packagedNativeLibrariesMatchSourceAar') is True
     and candidate.get('sourceEngineBuild', {}).get('run') == '41772782539' and candidate.get('notProductAPK') is True
     and candidate.get('debuggable') is False and candidate.get('pagePolicyScript') is False)
-result = {'passed': all(checks.values()), 'checks': checks, 'observations': raw['reports'],
+result = {'passed': all(checks.values()), 'closeMode': mode, 'checks': checks, 'observations': raw['reports'],
           'encryptedRecordSha256': fingerprints, 'candidate': candidate,
           'scope': 'Genuine API35 non-debuggable x86_64 Gecko capability only: cold per-UUID profile roots, same-origin Cookie/localStorage/IndexedDB, actual non-exportable AES-GCM CryptoKey persistence and exact root clearing. No product adoption, WebView migration, ARM64 runtime, customer credential/key export, all-network or release proof.',
           'productAdopted': False, 'webViewMigrationProven': False, 'arm64RuntimeProven': False,

@@ -10,6 +10,8 @@
 
 ARM64 档案构建 [41812206227](https://github.com/lilyco-42/lyco-browser/actions/runs/41812206227) 已单次创建，源 `b95b17c`，当前排队，尚无新编译或运行证明。它通过[独立架构适配](../tests/mobile/engine/source-arm64/README.md)读取四份摘要固定的已验证基础脚本，保留原文件，只在运行器私有副本中替换目标、JNI 目录和 ABI 元数据；原补丁、资源限制与优化门槛不变。准备阶段保存完整转换、原文件和生成脚本，成功后还须逐份核验真实 AArch64 ELF。请求返回过 HTTP502，但实际 API 找到已创建的同一任务，未重复提交。编译完成仍需另行取得 ARM64 运行、产品独立环境与迁移证据。
 
+独立[存储能力验证](../tests/mobile/engine/storage/README.md) [41813877950](https://github.com/lilyco-42/lyco-browser/actions/runs/41813877950) 已完成九阶段实际观察并失败。完整原始 97923694 字节 ZIP（SHA-256 `940e30e4b2d7e91fd9389f12c7df6dfe14ece8ee40b7562b1ef0aa471b02766a`）、APK/源码 AAR 中全部 13 份库的字节与原始报告已核验；[原始失败](audits/gecko-storage-41813877950.json)及[来源核验](audits/gecko-storage-41813877950.source.json)明确保留三项重开失败。强制终止后 Cookie/localStorage 为空，但 IndexedDB A/B 值、不可导出密钥、导出拒绝和原密文解密保持。原驱动未在强制终止前请求原生 shutdown，不能据此称为正常关闭已失败，也不能忽略当前反例。它消费同一已验证 x86_64 AAR，保留所有原有网络边界断言，新增真实每 UUID 进程冷启动与独立 profile 根：A/B 同源 Cookie、localStorage、IndexedDB，实际非导出 AES-GCM CryptoKey 的结构化克隆、重启后原密文解密及导出拒绝，以及清除 A 后 B 保持。每步均观察原生进程完全关闭，清除需原生完成 UI 和后续真实空数据同时成立。普通测试网页经独立记录的代理请求，不注入 JS 观察，不导出密钥、IV、密文或数据库；源代码接入不等于已证明存储隔离、WebView 跨引擎迁移或产品采用。
+
 ## 实际调研与约束
 
 | 候选 | 已取得证据 | 尚缺及决策 |

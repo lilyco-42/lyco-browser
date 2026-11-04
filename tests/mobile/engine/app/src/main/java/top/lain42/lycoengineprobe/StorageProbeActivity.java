@@ -1,6 +1,7 @@
 package top.lain42.lycoengineprobe;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,12 +27,15 @@ import java.util.UUID;
 public final class StorageProbeActivity extends Activity {
     private GeckoRuntime runtime;
     private GeckoSession session;
+    private TextView status;
+    private String phase;
+    private boolean closing;
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        TextView status = new TextView(this);
+        status = new TextView(this);
         layout.addView(status);
         setContentView(layout);
         try {
@@ -40,7 +44,9 @@ public final class StorageProbeActivity extends Activity {
             }
             String id = getIntent().getStringExtra("profile");
             if (!"11111111-1111-4111-8111-111111111111".equals(id)
-                    && !"22222222-2222-4222-8222-222222222222".equals(id)) {
+                    && !"22222222-2222-4222-8222-222222222222".equals(id)
+                    && !"33333333-3333-4333-8333-333333333333".equals(id)
+                    && !"44444444-4444-4444-8444-444444444444".equals(id)) {
                 throw new IllegalArgumentException("Only owned CI UUIDs are accepted");
             }
             File base = new File(getNoBackupFilesDir().getCanonicalFile(), "lyco-gecko-data-v1");
@@ -71,6 +77,7 @@ public final class StorageProbeActivity extends Activity {
             if (url == null || !url.matches("http://localhost:18080/storage\\?phase=[a-z-]{1,40}&action=(seed|read)&value=(A|B|none)")) {
                 throw new IllegalArgumentException("Only the owned loopback origin is accepted");
             }
+            phase = android.net.Uri.parse(url).getQueryParameter("phase");
             if (!profile.isDirectory() && !profile.mkdirs()) throw new IOException("Profile creation failed");
             JSONObject prefs = new JSONObject().put("network.proxy.type", 1)
                 .put("network.proxy.http", "127.0.0.1").put("network.proxy.http_port", 18081)
@@ -85,6 +92,12 @@ public final class StorageProbeActivity extends Activity {
                 .arguments(new String[] {"-profile", profile.getAbsolutePath()})
                 .aboutConfigEnabled(false).remoteDebuggingEnabled(false).build();
             runtime = GeckoRuntime.create(getApplicationContext(), settings);
+            runtime.setDelegate(() -> {
+                // An actual Gecko:Exited callback, never a timer or synthetic success.
+                runtime = null;
+                status.setText("GECKO SHUTDOWN COMPLETE: " + phase);
+                Log.i("LYCO_STORAGE_SHUTDOWN", "Actual Gecko exit: " + phase);
+            });
             session = new GeckoSession();
             session.setContentDelegate(new GeckoSession.ContentDelegate() {
                 @Override public void onTitleChange(GeckoSession source, String title) { status.setText(title); }
@@ -98,6 +111,14 @@ public final class StorageProbeActivity extends Activity {
             status.setText("STORAGE ERROR: " + error.getClass().getSimpleName());
             Log.e("LYCO_STORAGE_ERROR", "Owned storage experiment failed", error);
         }
+    }
+
+    @Override public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (!"close".equals(intent.getStringExtra("action")) || closing || runtime == null) return;
+        closing = true;
+        if (session != null) { session.close(); session = null; }
+        runtime.shutdown();
     }
 
     @Override public void onDestroy() {

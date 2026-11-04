@@ -10,7 +10,9 @@ import urllib.parse
 import uuid
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
-root = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
+mode = os.environ['LYCO_STORAGE_CLOSE_MODE']
+assert mode in ['abrupt', 'graceful']
+root = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network' / ('storage-' + mode)
 state = {'reports': [], 'pages': [], 'proxyRequests': []}
 lock = threading.Lock()
 
