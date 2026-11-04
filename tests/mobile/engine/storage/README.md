@@ -88,3 +88,19 @@ requested preference, without claiming runtime preference readback. The same
 optimized compiled AAR, non-debuggable APK, twenty-second actual callback budget,
 all nine phases per mode, strict data/key assertions and original abrupt-stop
 gate remain required. No product preference or data migration changes.
+
+The completed stage-0 comparison [41873067393](https://github.com/lilyco-42/lyco-browser/actions/runs/41873067393)
+passed all nine normal-close phases, with nine actual native callback UI/log
+receipts and twelve full-process-absence records. Raw Cookie/localStorage/IDB,
+original non-exportable key use, export rejection, same-ciphertext decryption and
+clear-A/keep-B/clear-B observations passed. The original abrupt group completed
+all nine phases and still failed the same three reopen checks, so the combined
+job correctly failed. The full original 98253580-byte archive (SHA-256
+`236dbf15612f19a9c8989daf84a515ed96e137901bc86af7bc9c423f763a7389`),
+its CRC, full log and all thirteen APK libraries against the same optimized AAR
+were independently checked. Source receipts match the exact committed files;
+pref request logging is still not runtime preference readback. This establishes
+normal-close capability for the owned x86 experiment only. It does not solve
+abrupt termination, old WebView data/key migration, ARM64 or product integration.
+The unchanged passing RTC experiment does not need a repeat for this storage-only
+change.

@@ -14,6 +14,8 @@ ARM64 档案构建 [41812206227](https://github.com/lilyco-42/lyco-browser/actio
 
 新对照 [41868772239](https://github.com/lilyco-42/lyco-browser/actions/runs/41868772239) 源 `63dbc46` 已通过语法与原生编译，但在安装 API35/default/x86_64 系统镜像时收到“Error on ZipFile unknown archive”，模拟器尚未启动，矩阵未执行。完整 97524328 字节原始 ZIP（SHA-256 `2b3f9c5904da23115dfc3e9e1cdb94724595d95d8b2ba6eaf2b73b9b4c292f8d`）及完整日志已核验并保留；不能当作新存储结果。确认实际终态后，仅为这次运行器镜像损坏在新运行器启动 [41869878855](https://github.com/lilyco-42/lyco-browser/actions/runs/41869878855)，源码 `9247d1b` 与上一轮测试实现逐字节相同。该任务现已失败：强制终止仍重现三项原失败；正常关闭在首个空 A 观察后父进程正常退出（0），但原生退出回调未到达，未执行正常重开。完整 98130313 字节原始 ZIP/SHA/CRC、日志和 13 份实际库已核验，[原始组合结果](audits/gecko-storage-matrix-41869878855.json)及[来源](audits/gecko-storage-matrix-41869878855.source.json)保留。原九阶段强制终止矩阵继续执行；新增九阶段正常关闭对照使用单独 UUID 根，需真实 `Gecko:Exited` / `Delegate.onShutdown` UI 回执，然后仍强制终止并确认无进程。没有增加固定等待、重放数据或生成替代密钥；只有两种模式均满足原 Cookie/localStorage/IndexedDB/密钥断言，组合任务才成功。此修改仍不构成存储修复或迁移通过证明。
 
+正常关闭对照 [41873067393](https://github.com/lilyco-42/lyco-browser/actions/runs/41873067393)（源 `e4f2191`）已完成：独立 x86_64/API35 实验正常关闭组九阶段全部通过，九份原生 `onShutdown` 回执、十二份强制终止后无进程记录、真实网站数据及不可导出密钥/原密文解密均已核验；清除 A 后 B 保持，清除 B 后为空。完整 98253580 字节原始 ZIP（SHA-256 `236dbf15612f19a9c8989daf84a515ed96e137901bc86af7bc9c423f763a7389`）、110974 字节完整日志、原始源文件摘要及 APK 中 13 份库与同一优化 AAR 字节一致均另行检查。[未修改组合结果](audits/gecko-storage-matrix-41873067393.json)及[核验来源](audits/gecko-storage-matrix-41873067393.source.json)保留。强制退出组仍重现三项 Cookie/localStorage 失败，组合任务因此仍为失败；正常组通过不能替代异常退出、ARM64、产品采用或旧 WebView 密钥迁移证明。仅正常组请求完整关闭阶段 0，没有放宽原断言、增加固定等待、重放数据或重新生成读取阶段密钥。
+
 ## 实际调研与约束
 
 | 候选 | 已取得证据 | 尚缺及决策 |
@@ -75,4 +77,6 @@ ARM64 档案构建 [41812206227](https://github.com/lilyco-42/lyco-browser/actio
 
 下一轮只把软门槛从同一硬上限的 85% 调至 95%，保留运行器预留、硬内存、交换空间及 CPU 限额；单并发、优化、补丁与原生验收保持。内核官方说明 memory.high 超限会触发回收和限速，所测软门槛低于实际工作集，因此进行这个受限实验；仍需真实预检、完整编译及原原生用例，不据配置修改宣布修复。
 
-正常退出回调的新验证只在独立实验的正常关闭 UUID 中请求 `toolkit.shutdown.fastShutdownStage=0`。固定上游优化构建默认值 1 可在 Java 收到 `Gecko:Exited` 前调用 `_exit(0)`；这是与实际退出相符的推断，尚未确认唯一原因。明确模式与 UUID 配对校验、请求配置来源和原生日志均保留，不声称已读回运行时偏好。仍使用原优化 AAR，不改强制退出模式、20 秒真实回调预算和九加九阶段数据/密钥断言，也不回放或导出数据；真实 Actions 验证前不能称为修复。
+已完成的正常退出回调验证只在独立实验的正常关闭 UUID 中请求 `toolkit.shutdown.fastShutdownStage=0`。固定上游优化构建默认值 1 可在 Java 收到 `Gecko:Exited` 前调用 `_exit(0)`；这是与实际退出相符的推断，尚未确认唯一原因。明确模式与 UUID 配对校验、请求配置来源和原生日志均保留，不声称已读回运行时偏好。仍使用原优化 AAR，不改强制退出模式、20 秒真实回调预算和九加九阶段数据/密钥断言，也不回放或导出数据；真实结果仅证明这组正常关闭能力，完整存储修复仍未通过。
+
+后续异常退出排查：固定上游 [Cookie 偏好](https://github.com/mozilla-firefox/firefox/blob/9a2dc53c369c7ae5172018b35988e1d2ffeff402/modules/libpref/init/StaticPrefList.yaml)记录 500ms 内存缓冲；[LSNG 实现](https://github.com/mozilla-firefox/firefox/blob/9a2dc53c369c7ae5172018b35988e1d2ffeff402/dom/localstorage/ActorsParent.cpp)的 Connection 另有硬编码 5000ms 写入计时，位于 snapshot checkpoint 下游，关闭时提前 flush。源码是与丢失相符的线索，尚无磁盘提交时序或唯一根因证明。不能把 snapshot 空闲计时设置当作 Connection 写入完成，也不能切换不受支持的旧存储、开启测试 API、等待计时器后再杀进程来替代原异常退出要求。
