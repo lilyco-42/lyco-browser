@@ -60,7 +60,8 @@ def main():
         require({'go/VERSION', 'go/LICENSE', 'go/src/runtime/runtime2.go', 'go/src/cmd/compile/main.go', 'go/src/cmd/cgo/main.go'} <= names, 'Incomplete official source tree')
         require(tar.extractfile('go/VERSION').read().splitlines()[0].decode() == version, 'Original VERSION differs')
         for member in members:
-            require(member.name.startswith('go/') and '..' not in PurePosixPath(member.name).parts, 'Unexpected original source path')
+            require((member.name.startswith('go/') or (member.isdir() and member.name == 'go'))
+                    and '..' not in PurePosixPath(member.name).parts, 'Unexpected original source path')
             if not member.isfile():
                 index.append({'path': member.name, 'kind': 'directory' if member.isdir() else 'link-or-other', 'link': member.linkname})
                 continue
