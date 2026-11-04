@@ -91,7 +91,7 @@ jobs:
 
   native-android-artifact:
     if: ${{ inputs.native_android_candidate != '' }}
-    name: Original signed Android APK JavaScript source inventory
+    name: Original signed Android APK source and native metadata inventory
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -107,6 +107,8 @@ jobs:
         with: {node-version: '22'}
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
       - name: Set isolated evidence directory
         run: echo "LYCO_NATIVE_JS_AUDIT=$RUNNER_TEMP/lyco-native-js-audit" >> "$GITHUB_ENV"
       - name: Verify bounded source-map interpretation
@@ -122,6 +124,12 @@ jobs:
           LYCO_REQUIRE_RELEASE_SIGNATURE=true python3 apps/universal/scripts/verify-android-signature.py "$LYCO_NATIVE_JS_AUDIT/RECHECKED-APK-SIGNATURE.txt" resources/signing/android-release-certificate.pem
       - name: Classify actual native packager sources against original build notices
         run: node scripts/audit-native-js-sources.mjs
+      - name: Read original native library metadata without executing target libraries
+        env:
+          GOWORK: 'off'
+          GO111MODULE: 'off'
+          GOTOOLCHAIN: local
+        run: go run scripts/audit-native-libraries.go
       - name: Retain original source evidence and classification
         if: always()
         uses: actions/upload-artifact@v4
@@ -132,6 +140,7 @@ jobs:
             ${{ runner.temp }}/lyco-native-js-audit/verified-artifacts.json
             ${{ runner.temp }}/lyco-native-js-audit/NATIVE-JS-INVENTORY.json
             ${{ runner.temp }}/lyco-native-js-audit/RECHECKED-APK-SIGNATURE.txt
+            ${{ runner.temp }}/lyco-native-js-audit/native-libraries
             ${{ runner.temp }}/lyco-native-js-audit/source-map/original.zip
             ${{ runner.temp }}/lyco-native-js-audit/notices/original.zip
           if-no-files-found: error
