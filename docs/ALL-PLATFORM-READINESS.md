@@ -111,3 +111,5 @@ Android 后续原生引擎试验尚不改变上面的产品状态：Gecko159 独
 
 
 实际 Android JavaScript 来源核对 [41769842645](https://github.com/lilyco-42/lyco-browser/actions/runs/41769842645) 已完成：七项解析门槛、原始 APK/map/notices 归档、实际签名和字节关联均通过；完整原件另行核验。601条来源映射28个npm包，无未匹配声明或观察到的原文缺口；三项安装树待审仍保留。这是当前签名 Android 包的 packager 来源观察，不能替代全部原生组件、iOS 来源、最终字节码行号或发行许可证明，详见[来源记录](NATIVE-JS-INVENTORY.md)。
+
+独立存储对照 [41869878855](https://github.com/lilyco-42/lyco-browser/actions/runs/41869878855) 已失败并完成原件核验：强制退出重复三项 Cookie/localStorage 重开失败；正常关闭仅取得首份空 A 报告，父进程退出 0 但未收到真实原生回调，没有正常重开结果。完整原始 ZIP、日志、同一 AAR 的 13 份库及[原始组合结果](audits/gecko-storage-matrix-41869878855.json)保留。下一验证仅在独立正常关闭 UUID 请求完整关闭阶段 0，以核对上游快速退出与缺失回调的关系；原强制退出及全部存储/密钥验收仍保留，无产品采用或迁移通过证明。

@@ -67,7 +67,8 @@ def launch(profile, phase, action='read', value='none'):
     global active_phase
     stop(phase)
     url = f'http://localhost:18080/storage?phase={phase}&action={action}&value={value}'
-    output = shell(['am', 'start', '-W', '-n', package + '/.StorageProbeActivity', '--es', 'profile', ids[profile], '-d', url])
+    output = shell(['am', 'start', '-W', '-n', package + '/.StorageProbeActivity', '--es', 'profile', ids[profile],
+                    '--es', 'closeMode', mode, '-d', url])
     (root / (phase + '-launch.txt')).write_text(output)
     deadline = time.monotonic() + 60
     while True:
@@ -98,6 +99,8 @@ def clear(profile, phase):
 source_files = [here / name for name in ['page.js', 'fixture.py', 'run-storage.py', 'assert-storage.py', 'run-matrix.py']]
 source_files += [here.parent / 'app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java', here.parent / 'app/src/main/AndroidManifest.xml']
 (root / 'storage-source.json').write_text(json.dumps({'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
+    'closeMode': mode, 'requestedFastShutdownStage': 0 if mode == 'graceful' else None,
+    'preferenceReadbackProven': False,
     'files': [{'path': str(p.relative_to(Path(os.environ['GITHUB_WORKSPACE']))), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_files]}, indent=2) + '\n')
 fixture_log = (root / 'storage-fixture.log').open('w')
 fixture = subprocess.Popen([sys.executable, str(here / 'fixture.py')], stdout=fixture_log, stderr=subprocess.STDOUT)

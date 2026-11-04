@@ -73,6 +73,12 @@ public final class StorageProbeActivity extends Activity {
                 status.setText("STORAGE CLEARED: " + id);
                 return;
             }
+            String closeMode = getIntent().getStringExtra("closeMode");
+            boolean graceful = "33333333-3333-4333-8333-333333333333".equals(id)
+                || "44444444-4444-4444-8444-444444444444".equals(id);
+            if (!(graceful ? "graceful" : "abrupt").equals(closeMode)) {
+                throw new IllegalArgumentException("Owned UUID and shutdown comparison mode must match");
+            }
             String url = getIntent().getDataString();
             if (url == null || !url.matches("http://localhost:18080/storage\\?phase=[a-z-]{1,40}&action=(seed|read)&value=(A|B|none)")) {
                 throw new IllegalArgumentException("Only the owned loopback origin is accepted");
@@ -85,6 +91,12 @@ public final class StorageProbeActivity extends Activity {
                 .put("network.proxy.share_proxy_settings", true).put("network.proxy.no_proxies_on", "")
                 .put("network.proxy.failover_direct", false).put("network.proxy.allow_hijacking_localhost", true)
                 .put("media.peerconnection.ice.proxy_only", true);
+            // Opt builds can call _exit(0) before nativeRun returns to Java.
+            // Only the normal-close comparison requests full shutdown; the
+            // original abrupt-stop profiles retain the engine's default.
+            if (graceful) prefs.put("toolkit.shutdown.fastShutdownStage", 0);
+            Log.i("LYCO_STORAGE_CONFIG", "Requested closeMode=" + closeMode
+                + " fastShutdownStage=" + (graceful ? "0" : "default") + " phase=" + phase);
             File config = new File(getFilesDir(), "owned-storage-config.json");
             Files.write(config.toPath(), new JSONObject().put("prefs", prefs).toString().getBytes(StandardCharsets.UTF_8));
             GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder()

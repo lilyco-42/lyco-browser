@@ -66,3 +66,25 @@ nine original reports run in each mode, including clear-A/keep-B and clear-B.
 The combined job remains failed unless both modes pass; a normal-close success
 cannot conceal the abrupt-stop counterexample. Neither matrix proves WebView
 migration or changes any product environment.
+
+The actual comparison [41869878855](https://github.com/lilyco-42/lyco-browser/actions/runs/41869878855)
+repeated the same three abrupt-stop failures. Its normal-close variant reached
+only the initial empty-A report: Android recorded the parent process exiting
+cleanly with code 0, but the actual shutdown callback did not arrive. No normal
+reopen or normal-close persistence result exists for that run. The complete
+98130313-byte original ZIP (SHA-256
+`7a4e0dbff805ddb8eb94642f3be8c0973ee9659a2c55d7518ed70892cda88264`)
+was checked for full size, SHA and CRC; its raw matrix remains failed.
+
+Pinned upstream opt builds default `toolkit.shutdown.fastShutdownStage` to 1,
+which may call `_exit(0)` before `GeckoThread` returns from `nativeRun` and
+dispatches `Gecko:Exited`. The [upstream shutdown documentation](https://firefox-source-docs.mozilla.org/ipc/proc_shutdown.html#fast-shutdown)
+describes stage 0 as full shutdown. This is a causal hypothesis consistent with
+the observed exit, not proof of the sole cause or of data durability.
+The next comparison requests stage 0 only for the two normal-close UUIDs. Native
+startup validates an explicit mode against its owned UUID pair; abrupt UUIDs
+retain the original default. Source receipts and native logs identify the
+requested preference, without claiming runtime preference readback. The same
+optimized compiled AAR, non-debuggable APK, twenty-second actual callback budget,
+all nine phases per mode, strict data/key assertions and original abrupt-stop
+gate remain required. No product preference or data migration changes.
