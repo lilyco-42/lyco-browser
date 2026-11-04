@@ -39,8 +39,10 @@ function ProfileEditor({profile,saving,onSave,onCancel}:{profile:Profile;saving:
   catch(error){if(live.current)setError(error instanceof Error?error.message:'无法保存环境修改')}
   finally{pending.current=false}
  }
+ // Android's native Modal already resizes for the keyboard; avoid a second height adjustment.
  return <Modal visible onRequestClose={()=>{if(!saving&&!pending.current)onCancel()}} animationType="slide">
-  <SafeAreaView style={styles.root}><KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
+  <SafeAreaView style={styles.root}><KeyboardAvoidingView style={{flex:1}}
+   enabled={Platform.OS!=='android'} behavior={Platform.OS==='ios'?'padding':undefined}>
    <ScrollView style={{flex:1}} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>编辑环境</Text>
      <Text style={styles.hint}>当前环境：{profile.name}</Text>

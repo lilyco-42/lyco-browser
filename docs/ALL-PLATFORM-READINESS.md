@@ -2,7 +2,7 @@
 
 目标保持为 Windows x64、macOS ARM64、Linux x64、Android、iOS 均具备代理连接与独立浏览环境，再发行。当前 PR：[#31](https://github.com/lilyco-42/lyco-browser/pull/31)。默认下载仍指向 README 中已验收的旧 Windows 预览包。
 
-2026-11-04 最新记录：环境编辑的同包 [41600136374](https://github.com/lilyco-42/lyco-browser/actions/runs/41600136374) 在恢复首页时失败，原始界面显示测试清除不完整、留下旧网址尾部；保存和重启的部分流程通过仍不能代替整组验收。`82edff8` 改为全选替换、完整文本核对并明确收起键盘；同一个未修改签名 APK 的 [41745820186](https://github.com/lilyco-42/lyco-browser/actions/runs/41745820186) 复验进行中。iPhone [41600149916](https://github.com/lilyco-42/lyco-browser/actions/runs/41600149916) 的完整原始 ZIP/IPA、摘要、CRC、ARM64/iPhoneOS、版本和离线 JS 已核验，仍未签名、不可直接安装。
+2026-11-04 最新记录：环境编辑的同包 [41600136374](https://github.com/lilyco-42/lyco-browser/actions/runs/41600136374) 在恢复首页时失败，原始界面显示测试清除不完整、留下旧网址尾部；保存和重启的部分流程通过仍不能代替整组验收。`82edff8` 改为全选替换、完整文本核对并明确收起键盘。同一个未修改签名 APK 的 [41745820186](https://github.com/lilyco-42/lyco-browser/actions/runs/41745820186) 在首次取消编辑时失败，尚未执行新的全字段替换。完整原始 ZIP（1001442 字节、SHA-256 `b20584f6f9b92c3235368dcfa74820189e960286f2b135a6e3a3c05a3ee7685f`）已核验大小、摘要和 CRC；操作日志显示键盘收起期间按钮移动，实际触点没有命中最终按钮。新版仅取消 Android 编辑弹窗的第二次 JS 高度调整，使用其原生窗口已有的键盘缩放；iOS 保留 padding。需要新签名 APK 及原有完整验收，尚不宣称修复通过。iPhone [41600149916](https://github.com/lilyco-42/lyco-browser/actions/runs/41600149916) 的完整原始 ZIP/IPA、摘要、CRC、ARM64/iPhoneOS、版本和离线 JS 已核验，仍未签名、不可直接安装。
 
 95% 软内存边界的源码构建 [41590673052](https://github.com/lilyco-42/lyco-browser/actions/runs/41590673052) 已因 6 小时时限取消，无 AAR；完整原始证据仍显示大量内存回收、零 OOM。新 [41746470057](https://github.com/lilyco-42/lyco-browser/actions/runs/41746470057) 仅显式关闭调试符号，并先核对实际优化级别仍为 2；保留全部宿主资源限制、原生补丁和运行门槛，尚待其自身配置及编译结果。详见[源码记录](../tests/mobile/engine/source/README.md#second-bounded-build-terminal-evidence-and-symbol-configuration)。历史记录中的旧“进行中”状态以本段终态和新句柄为准。
 
