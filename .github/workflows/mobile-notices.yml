@@ -17,11 +17,15 @@ on:
         description: Retain exact module sources and notice originals from a successful APK native metadata audit
         type: string
         default: ''
+      go_toolchain_source:
+        description: Retain pinned official Go compiler/runtime/standard-library sources without building targets
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   offline-notices:
-    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin }}
+    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin && !inputs.go_toolchain_source }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -57,6 +61,26 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
             ${{ runner.temp }}/lyco-npm-notice-evidence
           if-no-files-found: error
+          retention-days: 7
+
+  go-toolchain-source:
+    if: ${{ inputs.go_toolchain_source == true }}
+    name: Exact official Go compiler runtime and standard-library sources
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify the original release archive and retain source and notice candidates
+        run: python3 scripts/collect-go-toolchain-source.py
+      - name: Preserve original source archive and read-only source inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-go-toolchain-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-go-toolchain-source
+          if-no-files-found: error
+          compression-level: 0
           retention-days: 7
 
   native-go-sources:
