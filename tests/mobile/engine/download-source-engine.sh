@@ -47,6 +47,8 @@ assert meta['upstreamGitRevision']=='9a2dc53c369c7ae5172018b35988e1d2ffeff402'
 assert meta['publishedMavenHgRevision']=='5add844c26613d7e4d84c799d6e23cf987b1240d'
 assert meta['originalAffectedFileSha256']=='918068eebc2080e170de43acbf3d10c3643f7fe8a82102548e38025622129988'
 assert meta['compiledNativeCode'] is True and meta['artifactBuild'] is False and meta['productAdopted'] is False and meta['abi']=='x86_64'
+assert meta['gradlePublicationVariant']=='debug' and meta['publishedAarByteMatch'] is True
+assert meta['nativeOptimized'] is True and meta['nativeDebugSymbols'] is False
 aar=stage/'compiled/geckoview-lyco-default-route-experiment.aar'
 assert aar.stat().st_size==meta['aarBytes'] and digest(aar)==meta['aarSha256']
 with zipfile.ZipFile(aar) as archive:
