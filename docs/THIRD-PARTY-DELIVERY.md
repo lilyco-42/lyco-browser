@@ -38,3 +38,11 @@
 
 
 2026-11-03 对实际签名候选 [41594819546](https://github.com/lilyco-42/lyco-browser/actions/runs/41594819546) 的完整原件做只读 ZIP/ELF 盘点，新增[成品原生库索引](audits/android-native-inventory-77d304f.json)。索引绑定源码 `77d304f`、原始候选档案和实际 APK 摘要，逐项保留 32 份共享库的大小、SHA-256 与 ELF 架构：ARM64、x86_64 各 16 份；另有 45 份版本描述及 2 份名称含版权关键词的文件。没有执行应用或共享库。文件名不能证明组件来源和许可，关键词匹配也没有检查 JS 内的文本，不能据此说包内只有这两份声明；已有离线 npm/核心声明仍分别保留。下一步需将这些实际库逐一对应到构建依赖、原始声明及源码，尚未完成商业交付审查，也未新增运行通过证明。
+
+### 当前 Android 成品的原生元数据
+
+2026-11-04 的真实 [Actions 41772456928](https://github.com/lilyco-42/lyco-browser/actions/runs/41772456928) 重新取得 `82ce7bc` 签名候选 [41754332654](https://github.com/lilyco-42/lyco-browser/actions/runs/41754332654) 的三份完整原始档案，核验大小/SHA/CRC、实际 APK 与原生打包 JS 的字节对应，并独立复核保留签名身份。随后使用固定 Go 1.25.5 标准库读取 ELF 和嵌入构建信息，未加载或执行目标共享库。完整原始结果 ZIP 为 2283252 字节，SHA-256 `0643d5fd10a0ef7cfa66c2331ef5f2cb00ca36050ed0422a169cfdbf6420ee61`，已再次核验大小/SHA/CRC。
+
+未修改的[原始报告](audits/native-android-libraries-41754332654.json)及[来源记录](audits/native-android-libraries-41754332654.source.json)绑定实际 APK `8bed4c44c56c38f610bd5852910568a22a1d6a52678bbf8681b20a427cd11e99`。32 份 ELF 库包含架构、逐文件摘要、动态依赖和可用编译器注释；其中 30 份与旧 `77d304f` 包逐字节相同，两份变化均为 `libgojni.so`。两种架构各读出相同的 72 项 Go 模块及其版本/校验和，全部匹配当前 `mobile/core/go.sum`，无模块替换；Go 版本 1.25.5、Android 目标、QUIC/uTLS 标签及嵌入 Git 版本 `82ce7bc` 均有原始记录。
+
+嵌入信息同时明确标记 `vcs.modified=true`，此事实保留：本轮没有独立保存该次生成的绑定源码，不能称为可重现的源码到二进制证明。编译器注释包含多种 Clang 版本，也不能由此推断完整 NDK 版本。动态依赖不覆盖静态合入组件；上述 72 项并非全部原生组件，仍需逐项关联原始版权文本、构建输入、生成源码及对应源码交付。原有三项 npm 缺原文记录、Pods/Gradle/内核/字体和平台 SDK 审查均保留。
