@@ -10,6 +10,7 @@ import {routeBinding} from './profile-metadata.mjs';
 import coreNotices from './core-notices.json';
 import product from './product.json';
 import NpmNotices from './NpmNotices';
+import GoNotices from './GoNotices';
 
 type Screen='home'|'profiles'|'about';
 const COLOR={bg:'#10141e',panel:'#1a2130',line:'#30394e',text:'#f1f5fe',muted:'#a6b3ce',gold:'#ffcf77',blue:'#a0b8ff'};
@@ -284,6 +285,7 @@ export default function App(){
     <Text style={styles.hint}>反检测并非隐身承诺。独立账号、合法授权、合规使用，且不同平台的指纹能力不能保证完全相同。</Text>
     <Action title="官网帮助" secondary onPress={()=>openSite('https://lain42.top/vpn/')}/>
     <NpmNotices/>
+    {Platform.OS==='android'?<GoNotices/>:null}
     <Action title={showCoreLicense?'收起网络组件许可':'网络组件开源许可'} secondary onPress={()=>setShowCoreLicense(value=>!value)}/>
     {showCoreLicense&&<View style={{gap:12}}>
      <Text style={styles.value}>{coreNotices.name} {coreNotices.version}</Text>

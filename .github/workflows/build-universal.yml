@@ -131,6 +131,17 @@ jobs:
         with:
           go-version: '1.25.5'
           cache-dependency-path: mobile/core/go.sum
+      - name: Verify original offline Go dependency declarations
+        run: node scripts/verify-go-notices.mjs
+      - name: Preserve the exact offline Go declaration data
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-go-notices-android-${{ github.run_id }}
+          path: |
+            apps/universal/src/go-notices.json
+            apps/universal/third-party/go-notices-source.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Build and integrate the Android subscription core from source
         working-directory: mobile/core
         run: |

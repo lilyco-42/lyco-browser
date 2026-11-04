@@ -36,6 +36,17 @@ func main() {
 	require(runtime.Version() == "go1.25.5", "Pinned metadata reader required")
 	root := os.Getenv("LYCO_NATIVE_JS_AUDIT")
 	require(root != "", "Evidence directory required")
+	catalogBytes, err := os.ReadFile("apps/universal/src/go-notices.json"); must(err)
+	var catalog struct {
+		Generated bool `json:"generated"`
+		GoVersion string `json:"goVersion"`
+		Packages []struct { Name string `json:"name"`; Version string `json:"version"`; Sum string `json:"sum"` } `json:"packages"`
+	}
+	must(json.Unmarshal(catalogBytes, &catalog))
+	require(catalog.Generated && catalog.GoVersion == "go1.25.5" && len(catalog.Packages) > 0, "Verified offline Go catalog required")
+	expectedModules := map[string]bool{}
+	for _, module := range catalog.Packages { expectedModules[module.Name+"\x00"+module.Version+"\x00"+module.Sum] = true }
+	require(len(expectedModules) == len(catalog.Packages), "Duplicate catalog modules")
 	bindingBytes, err := os.ReadFile(filepath.Join(root, "verified-artifacts.json")); must(err)
 	var binding map[string]any
 	must(json.Unmarshal(bindingBytes, &binding))
@@ -78,7 +89,12 @@ func main() {
 		}
 		info, infoErr := buildinfo.Read(bytes.NewReader(data))
 		if infoErr == nil {
+			require(info.GoVersion == catalog.GoVersion && len(info.Deps) == len(expectedModules), "Actual APK Go dependencies differ from offline declarations")
+			for _, module := range info.Deps {
+				require(module.Replace == nil && expectedModules[module.Path+"\x00"+module.Version+"\x00"+module.Sum], "Actual APK module not covered by original offline catalog")
+			}
 			row["embeddedGoBuildInfo"] = info
+			row["offlineGoModuleGraphMatches"] = true
 			goInfoCount++
 			must(os.WriteFile(filepath.Join(output, parts[1]+"-"+parts[2]+".buildinfo.txt"), []byte(info.String()), 0600))
 		} else {
@@ -88,11 +104,13 @@ func main() {
 		must(binary.Close())
 	}
 	require(seen["lib/arm64-v8a/libgojni.so"] && seen["lib/x86_64/libgojni.so"], "Both original Go JNI libraries required")
+	require(goInfoCount == 2, "Both actual Go JNI dependency graphs must be readable and covered")
 	sort.Slice(libraries, func(i, j int) bool { return libraries[i]["path"].(string) < libraries[j]["path"].(string) })
 	report := map[string]any{"schemaVersion": 1, "sourceBinding": binding, "readerGoVersion": runtime.Version(),
 		"analyzerCommit": os.Getenv("GITHUB_SHA"), "analyzerRun": os.Getenv("GITHUB_RUN_ID"),
 		"scope": "Original APK ELF headers, DT_NEEDED, compiler comments and embedded Go build information; target libraries never executed",
 		"nativeLibraries": libraries, "nativeLibraryCount": len(libraries), "embeddedGoBuildInfoCount": goInfoCount,
+		"offlineGoCatalogSha256": digest(catalogBytes),
 		"completeLicenseMappingProven": false, "completeCorrespondingSourceProven": false,
 		"limits": []string{"Embedded metadata describes the binary; it does not prove a reproducible source-to-binary match", "DT_NEEDED omits statically linked components", "Compiler comments do not establish the complete NDK version", "Missing Go build metadata remains unknown; it does not mean no Go code is present"}}
 	encoded, err := json.MarshalIndent(report, "", "  "); must(err)

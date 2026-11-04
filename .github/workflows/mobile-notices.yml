@@ -32,6 +32,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
         working-directory: apps/universal
       - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - run: node apps/universal/scripts/verify-go-notices.mjs
       - run: node --test tests/npm-notices.test.mjs
       - run: node --test tests/exported-js-inventory.test.mjs
       - run: node --experimental-strip-types --test tests/mobile-billing.test.mjs tests/mobile-route-policy.test.mjs tests/mobile-rtc-policy.test.mjs

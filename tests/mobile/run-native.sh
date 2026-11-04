@@ -46,6 +46,9 @@ fi
 maestro --device "$device" test --format junit --output "$evidence/clear-data.xml" --test-output-dir "$evidence/clear-data" --debug-output "$evidence/clear-data-debug" --flatten-debug-output -e "PROXY=$proxy" "$root/flows/clear-data.yaml"
 maestro --device "$device" test --format junit --output "$evidence/delete-profile.xml" --test-output-dir "$evidence/delete-profile" --debug-output "$evidence/delete-profile-debug" --flatten-debug-output "$root/flows/delete-profile.yaml"
 maestro --device "$device" test --format junit --output "$evidence/notices.xml" --test-output-dir "$evidence/notices" --debug-output "$evidence/notices-debug" --flatten-debug-output "$root/flows/notices.yaml"
+if [[ "$platform" == android ]]; then
+  maestro --device "$device" test --format junit --output "$evidence/go-notices.xml" --test-output-dir "$evidence/go-notices" --debug-output "$evidence/go-notices-debug" --flatten-debug-output "$root/flows/go-notices.yaml"
+fi
 touch "$evidence/stop-proxy"
 python3 - "$evidence/proxy-stopped" <<'PY'
 import sys,time

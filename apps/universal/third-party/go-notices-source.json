@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sourceRun": "41774795974",
+  "producerCommit": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+  "nativeMetadataAuditRun": "41772456928",
+  "artifact": 13296940238,
+  "originalArchiveBytes": 79106033,
+  "originalArchiveSha256": "89c8b0c333c14b522c20c5c667f519768d7d9aee31f65847369fb30d6f508f84",
+  "catalogSha256": "8dd661c87580366993b73a5304c97576c16d52abea90254e9a4f974744976b75",
+  "coreSourceTree": "be42ced6350d9ed83ae5d71d632386e844cd17f9",
+  "moduleCount": 72,
+  "noticeFiles": 104,
+  "completeOriginalArchiveSizeShaCrcVerified": true,
+  "noticeBytesMatchOriginalModuleZips": true,
+  "completeLicenseClearanceProven": false,
+  "scope": "Android observed Go dependency originals; excludes Go standard library, NDK/cgo, generated bindings and other native libraries"
+}
