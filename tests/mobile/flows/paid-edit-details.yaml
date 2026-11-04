@@ -4,20 +4,20 @@ appId: top.lain42.lycobrowser
     file: paid-edit-open.yaml
     env:
       NAME: ${FROM_NAME}
-- tapOn:
-    id: "修改环境名称"
-- eraseText: 100
-- inputText: ${TO_NAME}
-- pressKey: Enter
+- runFlow:
+    file: paid-edit-text.yaml
+    env:
+      FIELD: "修改环境名称"
+      VALUE: ${TO_NAME}
 - scrollUntilVisible:
     element:
       id: "修改首页 URL"
     direction: DOWN
-- tapOn:
-    id: "修改首页 URL"
-- eraseText: 160
-- inputText: ${TO_URL}
-- pressKey: Enter
+- runFlow:
+    file: paid-edit-text.yaml
+    env:
+      FIELD: "修改首页 URL"
+      VALUE: ${TO_URL}
 - scrollUntilVisible:
     element: "保存环境修改"
     direction: DOWN
