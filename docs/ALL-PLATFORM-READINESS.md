@@ -22,6 +22,8 @@ Android 原生源码试验 `40853280935` 第二次尝试由运行器发出 shutd
 
 ## 已有证据
 
+ARM64 源码档案的单独 [41812206227](https://github.com/lilyco-42/lyco-browser/actions/runs/41812206227) 已创建并排队，保留已成功 x86_64 基础配方的四份固定摘要输入，使用仅目标架构变化的运行器副本。没有 ARM64 编译、运行或产品采用通过证明；完整原始 AAR/ELF、产品桥接、旧环境与不可导出 CryptoKey 迁移仍待验证。同一新签名 Android APK 的完整编辑/官网线路回归 [41810777700](https://github.com/lilyco-42/lyco-browser/actions/runs/41810777700) 仍在实际原生运行阶段；精确历史包准备和两包摘要/签名检查已成功，完整十四项结论尚未产生。
+
 移动端完整目录搜索已在实际签名包通过：[41563675880](https://github.com/lilyco-42/lyco-browser/actions/runs/41563675880) 通过原有完整存储、导航、代理正负向与许可页检查；[41586183938](https://github.com/lilyco-42/lyco-browser/actions/runs/41586183938) 对同一包的原有 12 项及新增搜索共 13 项全部通过，7 次源站与存储观察保留，搜索前后实际记录不变且无额外源站访问。1252 条受控目录含同一上游别名，不表示全部真实出口健康。iPhone [41586547941](https://github.com/lilyco-42/lyco-browser/actions/runs/41586547941) 已编译同一界面的 ARM64 未签名设备归档，尚无可安装、真机运行或 iOS 搜索证明；RTC 与 iOS 路由仍未通过。具体摘要、截图与范围见[移动线路](MOBILE-WORKSPACE-ROUTES.md#完整线路目录搜索)，五平台条件不变。
 
 移动环境新增名称和下次首页编辑，保持原身份、账号、线路和网站数据。新签名候选 [41594819546](https://github.com/lilyco-42/lyco-browser/actions/runs/41594819546) 的原有整组原生验收通过，完整原始档案已核验；新增编辑的同包 [41596731418](https://github.com/lilyco-42/lyco-browser/actions/runs/41596731418) 在取消后表单未关闭处失败；原始截图和层级显示按钮被滚动视口裁切，已将操作区移出滚动内容并加强关闭断言；新 [41597936723](https://github.com/lilyco-42/lyco-browser/actions/runs/41597936723) 类型、策略和原有完整原生验收通过，原始档案及保留证书已核验；同包新增编辑复验 [41600136374](https://github.com/lilyco-42/lyco-browser/actions/runs/41600136374) 已失败，修正后 iPhone 构建 [41600149916](https://github.com/lilyco-42/lyco-browser/actions/runs/41600149916) 已编译成功，具体范围及下一轮见顶部最新记录。修正前 iPhone 设备编译 [41596754756](https://github.com/lilyco-42/lyco-browser/actions/runs/41596754756) 已成功，完整原始 ZIP/IPA、摘要、CRC、ARM64/iPhoneOS 及离线 JS 已核验；未签名，不作为修正后界面或真机运行证明。
