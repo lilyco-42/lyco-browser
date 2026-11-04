@@ -185,6 +185,42 @@ jobs:
           python3 scripts/verify-built-version.py android "$RUNNER_TEMP/ANDROID-PACKAGE.txt" "$RUNNER_TEMP/ANDROID-VERSION-PROVENANCE.json"
           cd "$RUNNER_TEMP"
           sha256sum LYCO-Browser-Android-preview.apk ANDROID-SIGNATURE-PROVENANCE.json ANDROID-VERSION-PROVENANCE.json > ANDROID-SHA256SUMS.txt
+      - name: Bind actual Android build source map to the packaged bundle
+        run: |
+          set -euo pipefail
+          cp android/app/build/intermediates/sourcemaps/react/release/index.android.bundle.packager.map "$RUNNER_TEMP/ANDROID-PACKAGER-SOURCE.map"
+          cp android/app/build/generated/assets/react/release/index.android.bundle "$RUNNER_TEMP/ANDROID-GRADLE-BUNDLE"
+          test -s "$RUNNER_TEMP/ANDROID-PACKAGER-SOURCE.map"
+          test -s "$RUNNER_TEMP/ANDROID-GRADLE-BUNDLE"
+          python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])
+          apk=root/'LYCO-Browser-Android-preview.apk';bundle=root/'ANDROID-GRADLE-BUNDLE';source_map=root/'ANDROID-PACKAGER-SOURCE.map'
+          with zipfile.ZipFile(apk) as archive:
+              assert archive.namelist().count('assets/index.android.bundle')==1
+              assert archive.read('assets/index.android.bundle')==bundle.read_bytes(),'Build bundle differs from the packaged APK'
+          mapping=json.loads(source_map.read_text())
+          assert mapping.get('version')==3 and (mapping.get('sources') or mapping.get('sections')),'Native build source map missing sources'
+          sha=lambda file:hashlib.sha256(file.read_bytes()).hexdigest()
+          proof={'commit':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'apkSha256':sha(apk),'packagedBundleSha256':sha(bundle),'packagerMapSha256':sha(source_map),
+                 'bundleMatchesApk':True,'scope':'Original packager map and compiled bundle from this native build, bound to the exact APK; not a final bytecode line map, complete native dependency inventory or license clearance'}
+          (root/'ANDROID-JS-PROVENANCE.json').write_text(json.dumps(proof,indent=2)+'\n')
+          PY
+          cd "$RUNNER_TEMP"
+          sha256sum LYCO-Browser-Android-preview.apk ANDROID-GRADLE-BUNDLE ANDROID-PACKAGER-SOURCE.map ANDROID-JS-PROVENANCE.json ANDROID-VERSION-PROVENANCE.json > ANDROID-JS-SOURCE-SHA256SUMS.txt
+      - name: Retain actual Android build source mapping evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-js-source-android-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/ANDROID-GRADLE-BUNDLE
+            ${{ runner.temp }}/ANDROID-PACKAGER-SOURCE.map
+            ${{ runner.temp }}/ANDROID-JS-PROVENANCE.json
+            ${{ runner.temp }}/ANDROID-JS-SOURCE-SHA256SUMS.txt
+            ${{ runner.temp }}/ANDROID-VERSION-PROVENANCE.json
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/setup-python@v5
         with: {python-version: '3.13'}
       - name: Install pinned mobile UI test driver

@@ -21,3 +21,6 @@ JavaScript SHA-256：Android `405cfe09f4e0a4e520d5098083daa629e2de7d7f6efc23714b
 这些结果仅支持这次单独 JS 导出的来源观察。仍需关联实际分发成品及其全部原生组件；不能据此宣称三项缺失版权原文已补齐、全部分发义务完成，或 iOS 真机/路由已经通过。原本离线许可页验收默认流程保持；现有 `mobile-notices.yml` 的 `native_js_inventory=true` 手动输入才执行此研究分支。
 
 `60766b2` 增加 sourceRoot 形态拒绝后的 [40636765364](https://github.com/lilyco-42/lyco-browser/actions/runs/40636765364) 两平台复验成功，七项解析用例和上述来源、包名及目标观察均保持；下载的原始 bundle/map 摘要与 Actions 报告一致。
+
+
+2026-11-04 对实际签名包 [41748283716](https://github.com/lilyco-42/lyco-browser/actions/runs/41748283716) 及其完整原始日志的只读检查，确认原生构建已经生成 `index.android.bundle.packager.map`，但原先三个归档仅保留 APK、原生验收和依赖声明；APK 中有编译后的 bundle，没有 map。因此新增下一次 Android 构建的独立原件归档：保留这次实际 packager map、构建 bundle、版本与来源回执及摘要，先核对 bundle 和 APK 内字节一致，再绑定 APK/map/bundle 的 SHA-256。原件步骤尚待真实 Actions 验证。这里的 packager map 不冒充最终字节码行号映射，也不替代全部原生组件、许可清理或对应源码交付审查；之前独立 Expo 导出结果的范围不变。

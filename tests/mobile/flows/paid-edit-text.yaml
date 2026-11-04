@@ -4,6 +4,10 @@ appId: top.lain42.lycobrowser
 # Select the field's entire value, then require an exact UI readback.
 - tapOn:
     id: ${FIELD}
+- scrollUntilVisible:
+    element:
+      id: ${FIELD}
+    direction: DOWN
 - longPressOn:
     id: ${FIELD}
 - runFlow:
