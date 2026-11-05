@@ -1,5 +1,28 @@
 # Isolated native localStorage write policy
 
+The corrected source build
+[41940576338](https://github.com/lilyco-42/lyco-browser/actions/runs/41940576338)
+completed successfully on source `937bde85220b19a1433ff772b5f0b1a17238b4fc`.
+The complete original compiled ZIP is 91638841 bytes, SHA-256
+`decfdf533fa0f0858d7ede7e518decb4d33d2c92940280303531a48f944b4d36`;
+the original evidence ZIP is 395480 bytes, SHA-256
+`caaabf4fb9f65888fec1d733e7904f3e55d121c8a2dc25c31adac5c80a5cb3d7`.
+Both were independently verified for full size/SHA/CRC. The actual AAR is
+91628401 bytes, SHA-256
+`a141db25e9a2c3c8091f4b7c83e21f1d38ddd2b9a0ce43b1c1cb1433d824d016`.
+All thirteen actual x86_64 libraries, three original file hashes reconstructed
+from raw patches, exact recipe transformations and compiler/host/phase records
+were checked. The [unmodified build result](../../../../docs/audits/gecko-storage-source-41940576338.json)
+and [independent provenance](../../../../docs/audits/gecko-storage-source-41940576338.source.json)
+retain the defaults and limits.
+
+The isolated runtime consumer
+[41966583355](https://github.com/lilyco-42/lyco-browser/actions/runs/41966583355)
+has been dispatched once with the unchanged nine-phase data/key/clear/proxy and
+twelve abrupt process-stop gates. Runtime durability, full changed-binary RTC,
+ARM64, old-profile/key migration and adoption remain unproven. Do not repeat
+the completed source build or infer persistence from compilation.
+
 The original combined storage gate is still failed. In genuine run
 [41875833193](https://github.com/lilyco-42/lyco-browser/actions/runs/41875833193),
 requesting the existing cookie timer preference at zero retained actual Cookie
