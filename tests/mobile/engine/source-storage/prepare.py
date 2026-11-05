@@ -70,7 +70,7 @@ changes = [
     ('git apply "$root/proxy-default-address.patch"\n',
      'git apply "$root/proxy-default-address.patch"\n' + source_checks),
     ('run_phase format ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n',
-     'run_phase format ./mach format\n'),
+     'run_phase format ./mach format --skip-android dom/media/webrtc/jsapi/PeerConnectionImpl.cpp dom/localstorage/ActorsParent.cpp modules/libpref/init/StaticPrefList.yaml\n'),
     ('cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp "$evidence/PeerConnectionImpl.cpp"\n',
      'cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp "$evidence/PeerConnectionImpl.cpp"\n' + storage_evidence),
     ('test "$(git diff --name-only)" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n', source_allowlist),

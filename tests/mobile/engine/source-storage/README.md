@@ -36,7 +36,9 @@ are never edited. Both outer and reusable workflow concurrency groups are
 separate from the existing queued source build, which must not be replaced.
 It preserves pinned upstream, full native optimization, Rust
 level 2, absent native debug symbols, original resources and actual Maven/AAR
-byte-equality gates. Whole modified-source formatting runs in Actions. The
+byte-equality gates. Formatting of all three explicitly named modified source
+files runs in Actions. Android Java/Kotlin formatters are skipped because this
+patch changes neither language. The
 changed-source allowlist is exactly the existing RTC C++ file plus LSNG C++ and
 StaticPrefList; unknown changes fail. The route patch and route C++ checksums
 must remain identical to the previously verified source build.
@@ -56,3 +58,18 @@ five-platform commercial requirements remain open.
 All preparation, syntax, formatting, compilation and new runtime checks happen
 in genuine GitHub Actions. No local helper execution, automatic retry or gate
 reduction is part of this experiment.
+
+The first storage-policy build
+[41878180913](https://github.com/lilyco-42/lyco-browser/actions/runs/41878180913)
+stopped before compilation. Its full original 315109-byte evidence ZIP (SHA-256
+`5b203975afe72ed76b9e3e7f00871e481ce693f5425d479cc87e0d28d8501c30`)
+passed independent size, digest and CRC checks. Actual native compiler
+configuration retained optimization and disabled native debug symbols. The
+unqualified formatter selected outgoing upstream history as well as the workdir:
+50 files changed, instead of the declared three, and `git diff --check` rejected
+unrelated whitespace. It also attempted Android Java/Kotlin Gradle formatting
+before the required native build had produced `buildid.h`. The corrected
+adapter names every modified file and skips those unrelated language formatters;
+the three-file allowlist, whitespace checks and all original compile/archive
+gates remain mandatory. This is a build preparation fix, not a compiled archive
+or storage durability result.
