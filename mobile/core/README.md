@@ -66,7 +66,26 @@ data are outside the capture. Binary compiler intermediates are excluded.
 The generated-source tar/SHA and raw receipts accompany the component artifact;
 the verified Go source bundle also embeds the same tar and its AAR binding.
 Its tested commit can be a PR merge commit, not the PR head; manifests record
-the actual checked-out tree. This new capture still needs genuine CI proof.
+the actual checked-out tree. Genuine Android component run
+[41882642428](https://github.com/lilyco-42/lyco-browser/actions/runs/41882642428)
+passed both compiler calls and retained 266 Java/Go/Cgo work files. Independent
+inspection of both complete original ZIPs, the generated tar, both AAR ELF
+libraries and their inline Go build information verified the recorded inputs
+and actual output bytes. The parent source bundle also retained the exact
+tested merge tree and 405 original module ZIPs; all ZIP CRCs, SHA-256 and
+canonical Go module/go.mod checksums were checked. See the
+[unmodified capture manifest](../../docs/audits/android-generated-bindings-41882642428.json)
+and [independent source record](../../docs/audits/android-generated-bindings-41882642428.source.json).
+
+That first parent bundle's outer `go.sum` had 380 additional checksum lines
+after binding-tool dependency downloads. Both actual compiler locks survived
+unchanged inside the generated tar, and the outer file retained every original
+line, but its digest differed. The corrected opt-in source bundler now copies
+the captured compiler locks, requiring both architectures to agree. This
+packaging correction still needs a new genuine build and full original proof;
+the first archive is not retrospectively marked as an exact outer-lock match.
+The Android job succeeded; the overall run failed with Apple cancelled, so it
+is not an all-platform pass.
 It does not establish correspondence to the older signed APK, all SDK/NDK
 source delivery, license clearance, bit-for-bit reproduction, Apple capture or
 commercial release. Original routing/build gates remain required. No local

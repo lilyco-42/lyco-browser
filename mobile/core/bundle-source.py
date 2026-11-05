@@ -59,7 +59,22 @@ def main():
         lock = target / 'resolved-core-lock'
         lock.mkdir()
         for name in ('go.mod', 'go.sum'):
-            shutil.copyfile(core / name, lock / name)
+            source = core / name
+            if os.environ.get('LYCO_CAPTURE_GENERATED_SOURCES') == 'true':
+                published = Path(os.environ['RUNNER_TEMP']) / 'lyco-binding-capture-android/published'
+                captured = json.loads((published / 'manifest.json').read_text())
+                calls = captured['compilerCalls']
+                if len(calls) != 2 or {c['goarch'] for c in calls} != {'arm64', 'amd64'}:
+                    raise RuntimeError('Both actual compiler lock receipts are required')
+                expected = captured['resolvedCoreLocks'][name]
+                for call in calls:
+                    candidate = (published / call['receipt']).parent / ('core-' + name)
+                    candidate.resolve(strict=True).relative_to(published.resolve(strict=True))
+                    if (call['resolvedCoreLocks'][name] != expected
+                            or hashlib.sha256(candidate.read_bytes()).hexdigest() != expected):
+                        raise RuntimeError('Actual compiler locks differ between architectures')
+                    source = candidate
+            shutil.copyfile(source, lock / name)
         records = []
         generated = None
         if os.environ.get('LYCO_CAPTURE_GENERATED_SOURCES') == 'true':

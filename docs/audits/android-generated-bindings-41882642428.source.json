@@ -1,0 +1,126 @@
+{
+  "checkedAt": "2026-11-05T00:24:13.098087+00:00",
+  "run": 41882642428,
+  "androidJob": 126759356368,
+  "headSource": "21f3c460f5e68cadafca7201c90f8d02586c5991",
+  "testedMergeCommit": "6b83a382510b0f0602161a1a77d8568a9105c368",
+  "mergeParents": [
+    "8c08ddc6eb3f8f98d0c1d8d29453d328ef150f30",
+    "21f3c460f5e68cadafca7201c90f8d02586c5991"
+  ],
+  "androidConclusion": "success",
+  "overallWorkflowConclusion": "failure",
+  "appleConclusion": "cancelled",
+  "originals": [
+    {
+      "kind": "component",
+      "bytes": 808543847,
+      "sha256": "390085da933cd3950edc26374f560e5bd4dbca6cf710b34ac1e63068b9c2696b",
+      "entries": 6
+    },
+    {
+      "kind": "receipts",
+      "bytes": 589699,
+      "sha256": "21f905b06d66efa04934075e83a5f2214cc2fc58774491e4562072d597ce88c4",
+      "entries": 305
+    }
+  ],
+  "fullOriginalSizeShaCrcVerified": true,
+  "componentAar": {
+    "bytes": 50954130,
+    "sha256": "e156c8874c5ba0ae477a451562061e34cb0878d1a611dda1bb4a5087470fbb25",
+    "classesJarSha256": "18a1782fb70f0b6ac38605e7771bddcd9e678d704e0eb7d195868a8ad6e83c75",
+    "nativeLibraries": [
+      {
+        "path": "jni/arm64-v8a/libgojni.so",
+        "bytes": 52283720,
+        "sha256": "58af60d1bfe47f9fc291ae5c40f7db9843a5a27f12aa7ead9163186d53b848a8",
+        "elfMachine": 183,
+        "compilerCallReceipt": "calls/android-arm64-4686/receipt.json",
+        "embeddedBuildInfoPath": "native-go-build-info-arm64.txt",
+        "embeddedBuildInfoSha256": "b159a747dffa07f90d6d20ae20e0398ef64a76cd11399a216d7d8fe98061b04a"
+      },
+      {
+        "path": "jni/x86_64/libgojni.so",
+        "bytes": 55500248,
+        "sha256": "662d8bf54e45328d5870c354d4288290eb3b0c6e8be69c9a24b92e3634badbf1",
+        "elfMachine": 62,
+        "compilerCallReceipt": "calls/android-amd64-4687/receipt.json",
+        "embeddedBuildInfoPath": "native-go-build-info-amd64.txt",
+        "embeddedBuildInfoSha256": "d2a78f8bb1d5aad0aa58e1c98f183dfee0e678f76d4c9c503956cbbfea1788c5"
+      }
+    ]
+  },
+  "classesJarEntries": 15,
+  "actualNativeLibraries": [
+    {
+      "path": "jni/arm64-v8a/libgojni.so",
+      "bytes": 52283720,
+      "sha256": "58af60d1bfe47f9fc291ae5c40f7db9843a5a27f12aa7ead9163186d53b848a8",
+      "elfMachine": 183,
+      "compilerCallReceipt": "calls/android-arm64-4686/receipt.json",
+      "embeddedBuildInfoPath": "native-go-build-info-arm64.txt",
+      "embeddedBuildInfoSha256": "b159a747dffa07f90d6d20ae20e0398ef64a76cd11399a216d7d8fe98061b04a",
+      "inlineGoBuildInfoMatchesRetainedRecord": true,
+      "goVersion": "go1.25.5",
+      "vcsModified": true
+    },
+    {
+      "path": "jni/x86_64/libgojni.so",
+      "bytes": 55500248,
+      "sha256": "662d8bf54e45328d5870c354d4288290eb3b0c6e8be69c9a24b92e3634badbf1",
+      "elfMachine": 62,
+      "compilerCallReceipt": "calls/android-amd64-4687/receipt.json",
+      "embeddedBuildInfoPath": "native-go-build-info-amd64.txt",
+      "embeddedBuildInfoSha256": "d2a78f8bb1d5aad0aa58e1c98f183dfee0e678f76d4c9c503956cbbfea1788c5",
+      "inlineGoBuildInfoMatchesRetainedRecord": true,
+      "goVersion": "go1.25.5",
+      "vcsModified": true
+    }
+  ],
+  "compilerCallsVerified": 2,
+  "perAbiCompilerSourceFilesVerified": [
+    13,
+    13
+  ],
+  "retainedWorkSourceFilesVerified": 266,
+  "retainedSuffixCounts": {
+    ".h": 126,
+    ".java": 5,
+    ".go": 68,
+    ".c": 67
+  },
+  "generatedArchiveSha256": "f8695a0b39b775332aef482b0960d8f321c00c5240e217aedb5bbbc16f1aef53",
+  "generatedArchiveFiles": 305,
+  "generatedArchiveByteEqualReceiptsAndParentBundle": true,
+  "parentSourceArchiveSha256": "0997ed34055da8aa2eb100c8325f894bd304fdeccc085bc4e41c456df795f0d0",
+  "parentSourceArchiveFiles": 1221,
+  "allGzipTarSafePathsAndCrcVerified": true,
+  "applicationGitArchiveCommitAndEveryBlobVerified": true,
+  "applicationFiles": 404,
+  "resolvedLocksMatchBothCompilerCalls": false,
+  "parentGoSumSupersetOfCompilerInput": true,
+  "parentGoSumSha256": "5c1ea76c7baef91f26272de6eb75039fd3c6129cf95714d0140b8f45a58b35fd",
+  "compilerGoSumSha256": "078d61e2440f053464c3597418b8c3412f528bf9338485e444e37f28ec9bb312",
+  "parentGoSumAdditionalLines": 380,
+  "originalModuleSourceZipCount": 405,
+  "originalModuleSourceZipEntries": 55988,
+  "allModuleZipCrcSha256AndCanonicalGoSumsVerified": true,
+  "actualLinkedModuleCountByAbi": {
+    "jni/arm64-v8a/libgojni.so": 72,
+    "jni/x86_64/libgojni.so": 72
+  },
+  "ndkRevision": "30.0.16248370",
+  "fullAndroidJobLog": {
+    "bytes": 126347,
+    "sha256": "f71be99eae56ddc838ddaefe294d8dc8433c33cd0a29c38fd5d38a4be0b27c18"
+  },
+  "oldSignedApkCorrespondenceProven": false,
+  "completeCorrespondingSourceProven": false,
+  "reproducibleBuildProven": false,
+  "productAdopted": false,
+  "localProductExecuted": false,
+  "scope": "Static complete original artifact/ZIP/gzip/tar/ELF/Go inline build metadata/git object/module checksum inspection. Android component only, not old signed APK, Apple success, native runtime, complete SDK sources/licenses, reproducibility or commercial release.",
+  "unmodifiedManifestSha256": "68e0d211d76bb0874763ccffcb423e64e319c228e51da56d0b7b97d7abedc3c0",
+  "outerLockCorrectionPendingNewBuild": true
+}

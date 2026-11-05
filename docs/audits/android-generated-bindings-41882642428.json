@@ -1,0 +1,1600 @@
+{
+  "schemaVersion": 1,
+  "run": "41882642428",
+  "testedGitCommit": "6b83a382510b0f0602161a1a77d8568a9105c368",
+  "platform": "android",
+  "goVersion": "go version go1.25.5 linux/amd64",
+  "tools": {
+    "gomobile": {
+      "sha256": "57c387d92f957ec18801ba30470a32773e38ac8cb22a0f138ce35a17081ec638",
+      "embeddedBuildInfoPath": "gomobile-build-info.txt",
+      "embeddedBuildInfoSha256": "629b25d7e39bf9f11e86e4b2a6b70207cc118ed97b83429f3d02305936e14b80"
+    },
+    "gobind": {
+      "sha256": "c21f0c986c197f2545088054e5f82854b6626f7e097091a2f5f2a744aa0576d0",
+      "embeddedBuildInfoPath": "gobind-build-info.txt",
+      "embeddedBuildInfoSha256": "eb2fdd13119947df11831d31d81fb2da28d711c20c73c2833d8d0f8bc6caf769"
+    }
+  },
+  "ndkSourcePropertiesSha256": "e73b7dc557cea2da9212c09ee1795434957d62e63b7550eef69fd1887a355d94",
+  "componentAar": {
+    "bytes": 50954130,
+    "sha256": "e156c8874c5ba0ae477a451562061e34cb0878d1a611dda1bb4a5087470fbb25",
+    "classesJarSha256": "18a1782fb70f0b6ac38605e7771bddcd9e678d704e0eb7d195868a8ad6e83c75",
+    "nativeLibraries": [
+      {
+        "path": "jni/arm64-v8a/libgojni.so",
+        "bytes": 52283720,
+        "sha256": "58af60d1bfe47f9fc291ae5c40f7db9843a5a27f12aa7ead9163186d53b848a8",
+        "elfMachine": 183,
+        "compilerCallReceipt": "calls/android-arm64-4686/receipt.json",
+        "embeddedBuildInfoPath": "native-go-build-info-arm64.txt",
+        "embeddedBuildInfoSha256": "b159a747dffa07f90d6d20ae20e0398ef64a76cd11399a216d7d8fe98061b04a"
+      },
+      {
+        "path": "jni/x86_64/libgojni.so",
+        "bytes": 55500248,
+        "sha256": "662d8bf54e45328d5870c354d4288290eb3b0c6e8be69c9a24b92e3634badbf1",
+        "elfMachine": 62,
+        "compilerCallReceipt": "calls/android-amd64-4687/receipt.json",
+        "embeddedBuildInfoPath": "native-go-build-info-amd64.txt",
+        "embeddedBuildInfoSha256": "d2a78f8bb1d5aad0aa58e1c98f183dfee0e678f76d4c9c503956cbbfea1788c5"
+      }
+    ]
+  },
+  "compilerCalls": [
+    {
+      "receipt": "calls/android-amd64-4687/receipt.json",
+      "startedAt": "2026-11-04T18:02:09.665459+00:00",
+      "run": "41882642428",
+      "workflowSha": "6b83a382510b0f0602161a1a77d8568a9105c368",
+      "goos": "android",
+      "goarch": "amd64",
+      "sourceDirectory": "build/amd64/libgojni",
+      "arguments": [
+        "build",
+        "-tags",
+        "with_quic,with_utls",
+        "-v",
+        "-trimpath",
+        "-work",
+        "-buildmode=c-shared",
+        "-o=/home/runner/work/_temp/lyco-binding-capture-android/work/bind/gomobile-work-3557008598/android/src/main/jniLibs/x86_64/libgojni.so",
+        "."
+      ],
+      "sourceFiles": [
+        {
+          "path": "go_lycotunnelmain.go",
+          "bytes": 2267,
+          "sha256": "48c15ca541b4fbd03d52fe63da026022872a5de0e446abb8dca31aa39c305a6e"
+        },
+        {
+          "path": "go_main.go",
+          "bytes": 868,
+          "sha256": "6c554a19db78ec974218aab6d1585cdd167563315f530cb8d5ab03eeb14997f7"
+        },
+        {
+          "path": "lycotunnel.h",
+          "bytes": 170,
+          "sha256": "cf24337bb7ac93e38740e22a8daf1c666cf793ae950d34c7c99b146f617a6027"
+        },
+        {
+          "path": "lycotunnel_android.c",
+          "bytes": 2584,
+          "sha256": "565b747788431cf41af1db0057d9b2d872840515ec6b96f3ba7e693d008a011c"
+        },
+        {
+          "path": "lycotunnel_android.h",
+          "bytes": 381,
+          "sha256": "0f34d4ef5892b11e201f3edb7133cc3ef36c33f7fa2a509694a1c307400b523a"
+        },
+        {
+          "path": "seq.go",
+          "bytes": 1261,
+          "sha256": "36c794dacee52dafc86b04a286c4f29509693b4f7e40f70d7d9d6aa6db243edc"
+        },
+        {
+          "path": "seq.h",
+          "bytes": 156,
+          "sha256": "da2cf07e2ce44f161fe212bc3cd4fc8d4a1ac2d450b51c9dd290c7e845406c90"
+        },
+        {
+          "path": "seq_android.c",
+          "bytes": 11490,
+          "sha256": "3c18382fa7a7172733db541d3ffcc00cc5b80e2fa225c93e000c388a8dcb6b4f"
+        },
+        {
+          "path": "seq_android.go",
+          "bytes": 2799,
+          "sha256": "e251858b0019c4689712cfe9dca9a30a6f938f1c52f28d39861b4400e820f74a"
+        },
+        {
+          "path": "seq_android.h",
+          "bytes": 2839,
+          "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+        },
+        {
+          "path": "universe.h",
+          "bytes": 166,
+          "sha256": "48ee13c5afc157fc6ff145eed8a99c78aabf67bb47030994af9b8671c59191c3"
+        },
+        {
+          "path": "universe_android.c",
+          "bytes": 1384,
+          "sha256": "bb73d439c8f570307e59fd4082c137cf78830dcf63d34793df298b6d18a4bc91"
+        },
+        {
+          "path": "universe_android.h",
+          "bytes": 354,
+          "sha256": "b6cde02bbcd38ae03a92e00d74fb4a27a719b5438a53f7b32c0c378897ecc8b0"
+        }
+      ],
+      "resolvedCoreLocks": {
+        "go.mod": "1258e7bd432c72e45cf6f35c0d84e0160a1cbbf24e761291f45faab113af612f",
+        "go.sum": "078d61e2440f053464c3597418b8c3412f528bf9338485e444e37f28ec9bb312"
+      },
+      "wrapperSha256": "8fa1c4db2dc0237b12110f20fce094812926f91214364f1de7acea36b4ae071c",
+      "selectedCompiler": "/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android28-clang",
+      "outputPath": "bind/gomobile-work-3557008598/android/src/main/jniLibs/x86_64/libgojni.so",
+      "exitCode": 0,
+      "inputsUnchanged": true,
+      "finishedAt": "2026-11-04T18:04:06.966129+00:00",
+      "output": {
+        "bytes": 55500248,
+        "sha256": "662d8bf54e45328d5870c354d4288290eb3b0c6e8be69c9a24b92e3634badbf1",
+        "elfMachine": 62
+      }
+    },
+    {
+      "receipt": "calls/android-arm64-4686/receipt.json",
+      "startedAt": "2026-11-04T18:02:09.666195+00:00",
+      "run": "41882642428",
+      "workflowSha": "6b83a382510b0f0602161a1a77d8568a9105c368",
+      "goos": "android",
+      "goarch": "arm64",
+      "sourceDirectory": "build/arm64/libgojni",
+      "arguments": [
+        "build",
+        "-tags",
+        "with_quic,with_utls",
+        "-v",
+        "-trimpath",
+        "-work",
+        "-buildmode=c-shared",
+        "-o=/home/runner/work/_temp/lyco-binding-capture-android/work/bind/gomobile-work-3557008598/android/src/main/jniLibs/arm64-v8a/libgojni.so",
+        "."
+      ],
+      "sourceFiles": [
+        {
+          "path": "go_lycotunnelmain.go",
+          "bytes": 2267,
+          "sha256": "48c15ca541b4fbd03d52fe63da026022872a5de0e446abb8dca31aa39c305a6e"
+        },
+        {
+          "path": "go_main.go",
+          "bytes": 868,
+          "sha256": "6c554a19db78ec974218aab6d1585cdd167563315f530cb8d5ab03eeb14997f7"
+        },
+        {
+          "path": "lycotunnel.h",
+          "bytes": 170,
+          "sha256": "cf24337bb7ac93e38740e22a8daf1c666cf793ae950d34c7c99b146f617a6027"
+        },
+        {
+          "path": "lycotunnel_android.c",
+          "bytes": 2584,
+          "sha256": "565b747788431cf41af1db0057d9b2d872840515ec6b96f3ba7e693d008a011c"
+        },
+        {
+          "path": "lycotunnel_android.h",
+          "bytes": 381,
+          "sha256": "0f34d4ef5892b11e201f3edb7133cc3ef36c33f7fa2a509694a1c307400b523a"
+        },
+        {
+          "path": "seq.go",
+          "bytes": 1261,
+          "sha256": "36c794dacee52dafc86b04a286c4f29509693b4f7e40f70d7d9d6aa6db243edc"
+        },
+        {
+          "path": "seq.h",
+          "bytes": 156,
+          "sha256": "da2cf07e2ce44f161fe212bc3cd4fc8d4a1ac2d450b51c9dd290c7e845406c90"
+        },
+        {
+          "path": "seq_android.c",
+          "bytes": 11490,
+          "sha256": "3c18382fa7a7172733db541d3ffcc00cc5b80e2fa225c93e000c388a8dcb6b4f"
+        },
+        {
+          "path": "seq_android.go",
+          "bytes": 2799,
+          "sha256": "e251858b0019c4689712cfe9dca9a30a6f938f1c52f28d39861b4400e820f74a"
+        },
+        {
+          "path": "seq_android.h",
+          "bytes": 2839,
+          "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+        },
+        {
+          "path": "universe.h",
+          "bytes": 166,
+          "sha256": "48ee13c5afc157fc6ff145eed8a99c78aabf67bb47030994af9b8671c59191c3"
+        },
+        {
+          "path": "universe_android.c",
+          "bytes": 1384,
+          "sha256": "bb73d439c8f570307e59fd4082c137cf78830dcf63d34793df298b6d18a4bc91"
+        },
+        {
+          "path": "universe_android.h",
+          "bytes": 354,
+          "sha256": "b6cde02bbcd38ae03a92e00d74fb4a27a719b5438a53f7b32c0c378897ecc8b0"
+        }
+      ],
+      "resolvedCoreLocks": {
+        "go.mod": "1258e7bd432c72e45cf6f35c0d84e0160a1cbbf24e761291f45faab113af612f",
+        "go.sum": "078d61e2440f053464c3597418b8c3412f528bf9338485e444e37f28ec9bb312"
+      },
+      "wrapperSha256": "8fa1c4db2dc0237b12110f20fce094812926f91214364f1de7acea36b4ae071c",
+      "selectedCompiler": "/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android28-clang",
+      "outputPath": "bind/gomobile-work-3557008598/android/src/main/jniLibs/arm64-v8a/libgojni.so",
+      "exitCode": 0,
+      "inputsUnchanged": true,
+      "finishedAt": "2026-11-04T18:04:07.486266+00:00",
+      "output": {
+        "bytes": 52283720,
+        "sha256": "58af60d1bfe47f9fc291ae5c40f7db9843a5a27f12aa7ead9163186d53b848a8",
+        "elfMachine": 183
+      }
+    }
+  ],
+  "retainedWorkSourceFiles": [
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/android/src/main/jniLibs/arm64-v8a/libgojni.h",
+      "bytes": 3311,
+      "sha256": "e90ab6aaf1c92b8b9092a3180a1994ad18ece2766fbbf2ee6b69405e796ad86d"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/android/src/main/jniLibs/x86_64/libgojni.h",
+      "bytes": 3311,
+      "sha256": "7da432de47827e51c37da3ae02b2a64ee642a1eb15b3323878b0b511c91ae5ff"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/java/go/Seq.java",
+      "bytes": 11129,
+      "sha256": "1f5fb7742c3a20fb1eb661c317084b2d1d0d16fed16e84c700c34006cde2b3ca"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/java/go/Universe.java",
+      "bytes": 911,
+      "sha256": "4b8fdd7d8e5f1b4e3a23aa9f916e6e5247655f106bc0bb777db77e41b2abb72b"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/java/go/error.java",
+      "bytes": 253,
+      "sha256": "59483a6320db1257448b907253109507a49d3bb4461bf8b0c60ef7f8c14d6b91"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/java/top/lain42/lycotunnel/Lycotunnel.java",
+      "bytes": 853,
+      "sha256": "b5beca1c5d17c48124693d650dd3ca6fc1060c25829d567fa50a89bd9aab4d0b"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/java/top/lain42/lycotunnel/Session.java",
+      "bytes": 1449,
+      "sha256": "82c2fb9b168e9ba7040c74382b45b54fea00eeb23563ffdd20f45d0e85095c3a"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/go_lycotunnelmain.go",
+      "bytes": 2267,
+      "sha256": "48c15ca541b4fbd03d52fe63da026022872a5de0e446abb8dca31aa39c305a6e"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/go_main.go",
+      "bytes": 868,
+      "sha256": "6c554a19db78ec974218aab6d1585cdd167563315f530cb8d5ab03eeb14997f7"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/lycotunnel.h",
+      "bytes": 170,
+      "sha256": "cf24337bb7ac93e38740e22a8daf1c666cf793ae950d34c7c99b146f617a6027"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/lycotunnel_android.c",
+      "bytes": 2584,
+      "sha256": "565b747788431cf41af1db0057d9b2d872840515ec6b96f3ba7e693d008a011c"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/lycotunnel_android.h",
+      "bytes": 381,
+      "sha256": "0f34d4ef5892b11e201f3edb7133cc3ef36c33f7fa2a509694a1c307400b523a"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/seq.go",
+      "bytes": 1261,
+      "sha256": "36c794dacee52dafc86b04a286c4f29509693b4f7e40f70d7d9d6aa6db243edc"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/seq.h",
+      "bytes": 156,
+      "sha256": "da2cf07e2ce44f161fe212bc3cd4fc8d4a1ac2d450b51c9dd290c7e845406c90"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/seq_android.c",
+      "bytes": 11490,
+      "sha256": "3c18382fa7a7172733db541d3ffcc00cc5b80e2fa225c93e000c388a8dcb6b4f"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/seq_android.go",
+      "bytes": 2799,
+      "sha256": "e251858b0019c4689712cfe9dca9a30a6f938f1c52f28d39861b4400e820f74a"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/seq_android.h",
+      "bytes": 2839,
+      "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/universe.h",
+      "bytes": 166,
+      "sha256": "48ee13c5afc157fc6ff145eed8a99c78aabf67bb47030994af9b8671c59191c3"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/universe_android.c",
+      "bytes": 1384,
+      "sha256": "bb73d439c8f570307e59fd4082c137cf78830dcf63d34793df298b6d18a4bc91"
+    },
+    {
+      "path": "retained-work/bind/gomobile-work-3557008598/src/gobind/universe_android.h",
+      "bytes": 354,
+      "sha256": "b6cde02bbcd38ae03a92e00d74fb4a27a719b5438a53f7b32c0c378897ecc8b0"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/_cgo_export.c",
+      "bytes": 6090,
+      "sha256": "8d0cbd58e35763944141b2274dfd5d86ae7da0c4a95bc9be366b1fb5884c9bbc"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/_cgo_export.h",
+      "bytes": 3311,
+      "sha256": "e90ab6aaf1c92b8b9092a3180a1994ad18ece2766fbbf2ee6b69405e796ad86d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/_cgo_gotypes.go",
+      "bytes": 8394,
+      "sha256": "0f05378014941436195090756e964d277963af467d3a3ae915c02c4db1dfe9c5"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/_cgo_import.go",
+      "bytes": 762,
+      "sha256": "ac37e016296ae026a9d2b15b264f5ce699e856b34766a45f82009a787ea3fe00"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/_cgo_main.c",
+      "bytes": 1438,
+      "sha256": "e55003571f85f8d3f48f1e42b05657c6b9ec760c96675cd95d1a8206744c6a0e"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/go_lycotunnelmain.cgo1.go",
+      "bytes": 3204,
+      "sha256": "def5177e1b79dec60011ef36df1b4fb47ff010eb7db480a2b49ac12e5a4911ce"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/go_lycotunnelmain.cgo2.c",
+      "bytes": 2193,
+      "sha256": "7775dac305d83a7d65812eb75ac6cbbdf4482158e5c4409aff22339cde057021"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/go_main.cgo1.go",
+      "bytes": 1167,
+      "sha256": "d587f53f9cea43efcb8efa2cf2258a8fbd9fa99a8eea3a2bd8db16ab0315b11d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/go_main.cgo2.c",
+      "bytes": 2662,
+      "sha256": "25c8f1513239f4e261216d82482d9e1021a4ccda9ee7af4af17d96a108b61ddc"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/lycotunnel_GOOS.h",
+      "bytes": 381,
+      "sha256": "0f34d4ef5892b11e201f3edb7133cc3ef36c33f7fa2a509694a1c307400b523a"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/seq.cgo1.go",
+      "bytes": 1594,
+      "sha256": "48c057b91e8772c41f9f8957c781a1381d3f94ab3eb13cad0dccb8c207342ea2"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/seq.cgo2.c",
+      "bytes": 2618,
+      "sha256": "57f00e095ff91d33e25460375758d64158dd0c571dee4700d07b69bf6fba15f7"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/seq_GOOS.h",
+      "bytes": 2839,
+      "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/seq_android.cgo1.go",
+      "bytes": 4008,
+      "sha256": "9a9c5bda56193455e28d76131afa291be811b4e37c2f1d7c444d41da2ef95dcb"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/seq_android.cgo2.c",
+      "bytes": 2389,
+      "sha256": "7aee447a41caca177b6d18266aede0c87927b8196fbd0df8b4f9dec53fea638c"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b001/universe_GOOS.h",
+      "bytes": 354,
+      "sha256": "b6cde02bbcd38ae03a92e00d74fb4a27a719b5438a53f7b32c0c378897ecc8b0"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b004/go_asm.h",
+      "bytes": 1565,
+      "sha256": "ac0b844adc963651796401ccd75ed2b002925b14a03fedb5708e530067aaa68c"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b005/go_asm.h",
+      "bytes": 7526,
+      "sha256": "4ca908dc03540efa68e69ebb0665f043b73759bdd843565b59db79ccf97f05a7"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b009/go_asm.h",
+      "bytes": 78486,
+      "sha256": "3c8d2f5dc1c82995fc9036a1825ab8fda28a33f22c5196ab8a2c6f9b9833d948"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b009/tls_GOARCH.h",
+      "bytes": 1124,
+      "sha256": "4a05646e67b5154afa82605427c1176c1b113023297ff5d9cbd9755a6c79fe57"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b010/go_asm.h",
+      "bytes": 375,
+      "sha256": "bb71483b5e736d4f8d02c845b1df298c626787ae62a853778873a7c60ae4cfdc"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b011/go_asm.h",
+      "bytes": 545,
+      "sha256": "43c02571fb87e6fb47d357721b5c93f785f6940494ba2cf5c14de000caf60445"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b013/go_asm.h",
+      "bytes": 352,
+      "sha256": "6bffdb66a64491b04eaecd865142470139eb747a5b6cb52d7d8b8587f243e7fa"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b019/go_asm.h",
+      "bytes": 727,
+      "sha256": "71ac9265d6ad3acd07e300d38b58e4d1d5709276d26a3a3ce4584a7fc66d8f54"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b023/go_asm.h",
+      "bytes": 1083,
+      "sha256": "1cff274abf776320ffff92d3b626199e2e725d194a28a357ef34f6737a753bee"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b030/go_asm.h",
+      "bytes": 2206,
+      "sha256": "7ed7df460a6076202eca17a8ab976f6d1ee10cc1b12fdfaa1865c10956671592"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b035/go_asm.h",
+      "bytes": 5774,
+      "sha256": "160b292b4e587436b6d655126d74efba849ea5c69a54e218bf7c7c4261c944c9"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b038/go_asm.h",
+      "bytes": 2119,
+      "sha256": "09b954ccbd75b3e472cccb1e17576cd35cbae283e99dd1eec9027dfa717a80f5"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b044/go_asm.h",
+      "bytes": 466,
+      "sha256": "a38604aff5c2cd1f6508d11b4666e971c52757512a8054e9ed2eedcf4aad47fb"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b057/go_asm.h",
+      "bytes": 74371,
+      "sha256": "ca3771b2ae2bc1454fa49700d2d3ccff485c735ec8c6212d0aab1cb109d90dc5"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b070/go_asm.h",
+      "bytes": 775,
+      "sha256": "c06e59d9145505a9a4a6973c524b938c806cf633f0c5042d5f22098cf192ed1c"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b077/go_asm.h",
+      "bytes": 968,
+      "sha256": "2c69398804237328d3545872835ad70ddf6d0eb78707d7af7f0fbf69a2e31fd9"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b081/go_asm.h",
+      "bytes": 768,
+      "sha256": "bdb6306525dc16a87150be5da02fb6423a53be4d4bb3d01f5956fdf9a8b1d5c3"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b082/go_asm.h",
+      "bytes": 53,
+      "sha256": "fa07add87ffc322e3152fe3d01a546ef701ac7b5d833bacbd86a8f141c6c9476"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b083/go_asm.h",
+      "bytes": 1896,
+      "sha256": "0c30fdc0005e9fa0fb63c23cdfcbb750a24e0160367a910415cd5437dd1f17b8"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b084/go_asm.h",
+      "bytes": 1190,
+      "sha256": "22b8b70854d69dcee0553f1e3ddd618baaacdd10cfc926983ec01807b4d9f16d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b092/go_asm.h",
+      "bytes": 50,
+      "sha256": "dd321cecedb3225ccea918e8c5eb116696a0e3661d9170d0aa496d22290aa615"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b093/go_asm.h",
+      "bytes": 1603,
+      "sha256": "064aaa3f8ef201d9042e42644931d5e3518755f7adab4b9e3e59ce9db589328f"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b108/go_asm.h",
+      "bytes": 331,
+      "sha256": "c62d8228d76df01a0462cbc8b63ea8fea18b6c275a598e32b354391ded3d37fe"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b115/go_asm.h",
+      "bytes": 738,
+      "sha256": "332d6c8c460c092d55f10b652c1a82f690134131118df5e0fe2214a427128b73"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b122/go_asm.h",
+      "bytes": 353,
+      "sha256": "f353ddc76fe11035acdc9df73f0fafe75527753e25ddfc6db513ed80143b006e"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b143/go_asm.h",
+      "bytes": 797,
+      "sha256": "42680b0d173b047a46cdf0b883af6b9e49eda181483e5bdcdcad363c3522a8ab"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b146/go_asm.h",
+      "bytes": 478,
+      "sha256": "c371e93bcfb679b104a382d3b6217208457828dde5064254966886cd309a064c"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b150/go_asm.h",
+      "bytes": 561,
+      "sha256": "1036d5f8adf51b24f3d1166ba9ca63c5888ecceb7dfa0830f7d28bc9b19e5c96"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/_cgo_export.c",
+      "bytes": 980,
+      "sha256": "a049f95b5f9f8c130aa37735e50a8e8fb23b3c175e7ccf891cf5d28e686846c2"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/_cgo_export.h",
+      "bytes": 1882,
+      "sha256": "808de85620fb72362c0601ee854944ca069462be410772f73700425f89605f9a"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/_cgo_gotypes.go",
+      "bytes": 8449,
+      "sha256": "5dded975cf945ac24aa1775ad08f7237110332b197c5fa0607cca3d563516af5"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/_cgo_import.go",
+      "bytes": 766,
+      "sha256": "9f7d2520ab6bfb93fd090ad1e1a2207fc572457f0d9105cb567767da3ed4fe42"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_android.cgo1.go",
+      "bytes": 433,
+      "sha256": "50bc65bbb9e6c553711e42fef78953d4965ad47a025de449df863fdd03e2bd15"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_android.cgo2.c",
+      "bytes": 2089,
+      "sha256": "6040772b54cfd973da7f19c6bd89000d29a3c67b7d9a8ab2cc0026736b317c56"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_resold.cgo1.go",
+      "bytes": 929,
+      "sha256": "e67782bdfc1b34ea6c487d0beeaa7f227ebb6ddc3adfd919ddfcf3a47429ace4"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_resold.cgo2.c",
+      "bytes": 3537,
+      "sha256": "38c35b6ddd8c46b6fc7b85d35e929ffe8bfa697f49750b0a0668aef7951540d8"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_socknew.cgo1.go",
+      "bytes": 1021,
+      "sha256": "9a1f51de21e7829b620108a5fa6eda6c75cdcdfb8cd222458be6edec5d8154c2"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_socknew.cgo2.c",
+      "bytes": 2143,
+      "sha256": "eca01c69329ac5d459c0ba038e9d14e4de93a72271c4153b4e9e548659b330d8"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_unix_cgo.cgo1.go",
+      "bytes": 4058,
+      "sha256": "a627e19ef21925ffd17d2fed08581469f1129b27b95b6868c5ab5e73cd0cae0d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_unix_cgo.cgo2.c",
+      "bytes": 4682,
+      "sha256": "245fdf08457fb2d9b857023e37407bc96fb67860c1166cc32f473dea1b238974"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_unix_cgo_res.cgo1.go",
+      "bytes": 1166,
+      "sha256": "5735b64019657c7a78aa8bf42b56a7fc29107b3de14ec9c94a1dd6a5054b6a4b"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b159/cgo_unix_cgo_res.cgo2.c",
+      "bytes": 2832,
+      "sha256": "5cfc10d257d34b44b25aded6b18703c3f9c0b5da983ed8b89ad2c3a9279587cf"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/_cgo_export.h",
+      "bytes": 1890,
+      "sha256": "27e9f18640e4e91fa6ca492ac7157ac49fc3aa8d404a878afac0ee62a82e58ae"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/_cgo_gotypes.go",
+      "bytes": 886,
+      "sha256": "3af5941484077ec0564391ee723502420fa468826a2c6464804a0e76930c24ce"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/_cgo_import.go",
+      "bytes": 3408,
+      "sha256": "a49d620868b9b69d42f7e9f3f59d5923c30d5ad03255b334438eb5a4d7c34241"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/_cgo_main.c",
+      "bytes": 487,
+      "sha256": "0c085f9048305b6067b2cbb00a0fe300fc7b98a73a84122d9650407deba2ec49"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/abi_GOARCH.h",
+      "bytes": 1531,
+      "sha256": "ea02dbdbe31f446716c290bbeb5b98f940ab71c1756c5a7da68711ef73e2b3ec"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/cgo.cgo1.go",
+      "bytes": 1309,
+      "sha256": "10bbf247d5d80bc53693978124602e2635f3dcaf265225b9899a8566951d57cb"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/cgo.cgo2.c",
+      "bytes": 2280,
+      "sha256": "af7cf0a60781459417d8111f8f09b687a89bf00694a1e60cae7fe8e10cf3e055"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b165/go_asm.h",
+      "bytes": 77,
+      "sha256": "6e7966500e80b483aa88ea86294ce4147fd7c6119dd698bff14f27a887f125b4"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b195/go_asm.h",
+      "bytes": 426639,
+      "sha256": "10eac9ac3028636e6a3287d4e46b4779fcd07a6b73a76ace63d6dcaf23e0541b"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/_cgo_export.h",
+      "bytes": 1926,
+      "sha256": "a79d9587c0bfa7dad45ef045b55c629506feb6d637f14b3977cf4525a8a8eded"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/_cgo_gotypes.go",
+      "bytes": 2692,
+      "sha256": "fc8f58f78cc268f0dd7506f280e5e7faaf56ad1fd40b065c12969aa63b3ec918"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/_cgo_import.go",
+      "bytes": 404,
+      "sha256": "627f8db5316f7728ad753cc3e5fdd9f212c545906f14bfc12b6091000eda8a90"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/system_android.cgo1.go",
+      "bytes": 1159,
+      "sha256": "44c006ec48690ce16a16789128f0d5183ab955ea7fd9a9f4d4403ebefbdd832b"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b282/system_android.cgo2.c",
+      "bytes": 2952,
+      "sha256": "7ccda8297e36560eb7d56eb4e64971607bec5bf087c3df2c605c2b1a3bd9d52f"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/_cgo_export.h",
+      "bytes": 1918,
+      "sha256": "9a2af4f4e3754a3bfcb5b195a0adf290b6c8ffaaa10371b0dbd03e5ab58967c7"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/_cgo_gotypes.go",
+      "bytes": 1573,
+      "sha256": "9c9b247287dc4116b196c00c479c0eb792060c3d8f3ca6264d113945481a02e8"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/_cgo_import.go",
+      "bytes": 292,
+      "sha256": "a8bfedf1d74f53e989eff64067efd50474dc6c995abf8f693795bfe77b50fca1"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/jni_android.cgo1.go",
+      "bytes": 348,
+      "sha256": "6e4d092f4424b2bd8c54182a0c1378d0916d801beb66188465916b3b2a5e9161"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b283/jni_android.cgo2.c",
+      "bytes": 2580,
+      "sha256": "770dae5e947a57472e483b1579b3e89164a9da0004a13664384b102b5d919ff8"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b320/go_asm.h",
+      "bytes": 648,
+      "sha256": "5c4dae232d6ebc5177624eb7188136338e70ea44432b388debf24fc97f409b2f"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b327/go_asm.h",
+      "bytes": 17018,
+      "sha256": "6e2b5e06e59fc62fd64ce4fc7c7424b4ff8cf424141f55ad67fad75cfff1f23f"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b333/go_asm.h",
+      "bytes": 493,
+      "sha256": "d0f8683e924551945104239fb0a8c359bb1a474ebc38ef18e391f998c30af9cd"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b337/go_asm.h",
+      "bytes": 545,
+      "sha256": "43c02571fb87e6fb47d357721b5c93f785f6940494ba2cf5c14de000caf60445"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b345/go_asm.h",
+      "bytes": 797,
+      "sha256": "42680b0d173b047a46cdf0b883af6b9e49eda181483e5bdcdcad363c3522a8ab"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b350/go_asm.h",
+      "bytes": 1309,
+      "sha256": "c0d740dc406de2ac04660aac1dc90a95d3e247f72d60b935b04c9fb54d7a9b24"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b408/go_asm.h",
+      "bytes": 329,
+      "sha256": "97e50e092c1372bdf83ede653cd07cc777bcbcc6a3695d1944f56bc4817ca269"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/_cgo_export.h",
+      "bytes": 1915,
+      "sha256": "2e2e43b56f201db357bc21de6f25434bf61082430d9f20f91bd81b123db5823d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/_cgo_gotypes.go",
+      "bytes": 2888,
+      "sha256": "10bb34de2d031b6f38dcdbbd0c4d3bb8e0c12dea8894842cacbdd3790efbd15a"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/_cgo_import.go",
+      "bytes": 408,
+      "sha256": "b01de10532b2a564539d91292aba84aa9b2a18434ec57cbc198c05c2af0517c5"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/tz_android.cgo1.go",
+      "bytes": 1072,
+      "sha256": "a7c290c2eef5ad941f2ab2e9a9bd7562bdbf557f6848629dfa4832b479a0c7ae"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b446/tz_android.cgo2.c",
+      "bytes": 3059,
+      "sha256": "53f7a8019be72d163b1912749e940e0b41608f953f1df59d5d575f11bad2b81a"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b532/go_asm.h",
+      "bytes": 14530,
+      "sha256": "2a47df19f9e5e68dd7709ec3d80bfb882d16f62f69ed7c0a29fab59a55f5248f"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b575/go_asm.h",
+      "bytes": 5607,
+      "sha256": "d5861ef27c2d819aebf5d6bc0dffe7c871706b09d0df25be1b2c0038fe53bf74"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_export.c",
+      "bytes": 1187,
+      "sha256": "affaba074349afc04728e8d5a203d6b6c4d8195f95434358637a0424b4cde855"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_export.h",
+      "bytes": 2048,
+      "sha256": "e8fcdabc1c6c36fb54cc2b3ffde8b83a2de0f6a41dcf9fba900c2d8474822878"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_gotypes.go",
+      "bytes": 10970,
+      "sha256": "e47937637f26806aa61cb4423818656b818d6559ce08809dde3871981738911b"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_import.go",
+      "bytes": 451,
+      "sha256": "4caf2f00a429ed8c88ed8e905511ee69c5c6d482a06b7a48daf914f8805d75f1"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_install.h",
+      "bytes": 2048,
+      "sha256": "e8fcdabc1c6c36fb54cc2b3ffde8b83a2de0f6a41dcf9fba900c2d8474822878"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/_cgo_main.c",
+      "bytes": 752,
+      "sha256": "f658e60ead133a9697db9f8a73f59099f22d2571be46306af95d6782bbe1206b"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/context_android.cgo1.go",
+      "bytes": 716,
+      "sha256": "7ddef781d0f089a03ed10258b03662d4eb59f7604efbb29d05f74d54cb660a94"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/context_android.cgo2.c",
+      "bytes": 2121,
+      "sha256": "747d158945133ad8a374206953c13d33af0b318d0ab10d703afc606b3f767294"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b718/seq_GOOS.h",
+      "bytes": 2839,
+      "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/_cgo_export.h",
+      "bytes": 1927,
+      "sha256": "74d22d6a9b0197d8a5ceaae30e2fd5cf5b875fb7ec821660b8876222584cd15d"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/_cgo_gotypes.go",
+      "bytes": 13245,
+      "sha256": "45a35bd89b85a9cdac272f312067e4a9cd06608935915e31e41b37452a031a09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/_cgo_import.go",
+      "bytes": 348,
+      "sha256": "d0ae5c3b9202451f944a02bc0169ef2805a23fa9ea69269bfcb0c4070f8126d2"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/ctx_android.cgo1.go",
+      "bytes": 4117,
+      "sha256": "f2c487bc4041eb064aa81c6b11c5b97bea7bbef5bbd916575203024c72e611a6"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/ctx_android.cgo2.c",
+      "bytes": 4647,
+      "sha256": "9c3ac9a7878d9c96eaa1b637ec4f041782f8319b02ff46840e7f15e6958fa61c"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/mobileinit.cgo1.go",
+      "bytes": 573,
+      "sha256": "458549555cbfa25c620c6a7f4112bc34741909f86ce72f0d456ff60d716c147e"
+    },
+    {
+      "path": "retained-work/go/go-build1101410695/b719/mobileinit.cgo2.c",
+      "bytes": 1969,
+      "sha256": "b173eafee2fd2463fadda34786c5e47b155a228399e842dd226ae85d18f8bbb0"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/_cgo_export.c",
+      "bytes": 6090,
+      "sha256": "5744e3e41f95619cbd11dcb81ffc8bf51abcebaeb90832293819a1429df0cb38"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/_cgo_export.h",
+      "bytes": 3311,
+      "sha256": "7da432de47827e51c37da3ae02b2a64ee642a1eb15b3323878b0b511c91ae5ff"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/_cgo_gotypes.go",
+      "bytes": 8393,
+      "sha256": "444f0196913651f2e77af553115753ea2c16bf15fcb669ae03e3ffcd1e0b7a75"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/_cgo_import.go",
+      "bytes": 762,
+      "sha256": "ac37e016296ae026a9d2b15b264f5ce699e856b34766a45f82009a787ea3fe00"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/_cgo_main.c",
+      "bytes": 1438,
+      "sha256": "df7061a64a3692e98bcc8c16275e36d7199707b6e4475f0ccfb433ce51ab0f1d"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/go_lycotunnelmain.cgo1.go",
+      "bytes": 3204,
+      "sha256": "16e09146d7177f0c53e6f6eb14b43345b92106e4cea31f5d547899f004d658e9"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/go_lycotunnelmain.cgo2.c",
+      "bytes": 2193,
+      "sha256": "74adc0885321f8379955caef5dba5a82835b0747780f63b0b1060f6badcb3bbd"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/go_main.cgo1.go",
+      "bytes": 1167,
+      "sha256": "e9437b41c273c3a0d50e10995ca314dff1dc8419b87aec37a48be54b69bcea36"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/go_main.cgo2.c",
+      "bytes": 2662,
+      "sha256": "f5a9dd383edd84d5bae1432d60d94c4e56a5c3a117906a98690522d47271cc65"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/lycotunnel_GOOS.h",
+      "bytes": 381,
+      "sha256": "0f34d4ef5892b11e201f3edb7133cc3ef36c33f7fa2a509694a1c307400b523a"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/seq.cgo1.go",
+      "bytes": 1594,
+      "sha256": "b3257c07fe62b45736115ad505848fee8b69fcec76021c497f1cd27d318014c2"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/seq.cgo2.c",
+      "bytes": 2618,
+      "sha256": "5ffda9f14d8ae99407a83feacdae335b25d43834701c68787cc4049eb885d0f5"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/seq_GOOS.h",
+      "bytes": 2839,
+      "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/seq_android.cgo1.go",
+      "bytes": 4008,
+      "sha256": "b61c128a53cdc3679de9279f68bf0173161958dd2aa9543be79abb75295aa2f3"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/seq_android.cgo2.c",
+      "bytes": 2389,
+      "sha256": "9a091ea6f00406c3333712671aa53a9a19dad17b05a4477d010243c5faac86fe"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b001/universe_GOOS.h",
+      "bytes": 354,
+      "sha256": "b6cde02bbcd38ae03a92e00d74fb4a27a719b5438a53f7b32c0c378897ecc8b0"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b004/go_asm.h",
+      "bytes": 1565,
+      "sha256": "ac0b844adc963651796401ccd75ed2b002925b14a03fedb5708e530067aaa68c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b005/go_asm.h",
+      "bytes": 7524,
+      "sha256": "043ad171319c257d9ff59e3b3f58d726680af01da4300dd6cccbac0e81ce02dd"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b009/asm_GOARCH.h",
+      "bytes": 631,
+      "sha256": "85fc2d5bb80e6db36cef4da5e5c02278d0dcaa6103e5660629b4b713cff15d54"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b009/go_asm.h",
+      "bytes": 80196,
+      "sha256": "93e553508c874387a7a651de206fb7d88a0430d0aaccaa5fe70a65c406cdbeda"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b010/go_asm.h",
+      "bytes": 368,
+      "sha256": "7ecc42d89c45c3c23f58a6c9a6cf2e485fb7a64938b0e09d7ef375ea6ea8b604"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b011/go_asm.h",
+      "bytes": 921,
+      "sha256": "cad9e431145b07677659356628bf1845ab5691d0d223c3a2944d7acc7f027783"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b013/go_asm.h",
+      "bytes": 351,
+      "sha256": "607ee190721ab7df61405fd6528ea3d719ec1729cd08a425e32b2a09ea912c5c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b019/go_asm.h",
+      "bytes": 687,
+      "sha256": "6dbf5572d8adef97bee92a68e481222c17aa7b03918b90e4271a178a83785adf"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b023/go_asm.h",
+      "bytes": 1059,
+      "sha256": "453fe3780d0f63472de5ae8862f221b7d544c877cf1c45288aa1d5f51a812baa"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b030/go_asm.h",
+      "bytes": 2204,
+      "sha256": "13dd9010a2224c118bee004eefe1eb74d6d23609cef7fcb283b62514daa35f1a"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b035/go_asm.h",
+      "bytes": 5774,
+      "sha256": "160b292b4e587436b6d655126d74efba849ea5c69a54e218bf7c7c4261c944c9"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b038/go_asm.h",
+      "bytes": 2119,
+      "sha256": "11b065b5b91811e4b0086335e2e243219b64f3abcbc35c6a256910cb760fdfba"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b044/go_asm.h",
+      "bytes": 466,
+      "sha256": "a38604aff5c2cd1f6508d11b4666e971c52757512a8054e9ed2eedcf4aad47fb"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b057/go_asm.h",
+      "bytes": 69902,
+      "sha256": "d1e076c5f85b96bf48a21d0356819a339e30ddf4d4b65d647bb619d4d8ea8b0c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b070/go_asm.h",
+      "bytes": 775,
+      "sha256": "c06e59d9145505a9a4a6973c524b938c806cf633f0c5042d5f22098cf192ed1c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b077/go_asm.h",
+      "bytes": 968,
+      "sha256": "2c69398804237328d3545872835ad70ddf6d0eb78707d7af7f0fbf69a2e31fd9"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b081/go_asm.h",
+      "bytes": 768,
+      "sha256": "bdb6306525dc16a87150be5da02fb6423a53be4d4bb3d01f5956fdf9a8b1d5c3"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b082/go_asm.h",
+      "bytes": 53,
+      "sha256": "fa07add87ffc322e3152fe3d01a546ef701ac7b5d833bacbd86a8f141c6c9476"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b083/go_asm.h",
+      "bytes": 1896,
+      "sha256": "0c30fdc0005e9fa0fb63c23cdfcbb750a24e0160367a910415cd5437dd1f17b8"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b084/go_asm.h",
+      "bytes": 1190,
+      "sha256": "22b8b70854d69dcee0553f1e3ddd618baaacdd10cfc926983ec01807b4d9f16d"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b092/go_asm.h",
+      "bytes": 50,
+      "sha256": "dd321cecedb3225ccea918e8c5eb116696a0e3661d9170d0aa496d22290aa615"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b093/go_asm.h",
+      "bytes": 1603,
+      "sha256": "064aaa3f8ef201d9042e42644931d5e3518755f7adab4b9e3e59ce9db589328f"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b108/go_asm.h",
+      "bytes": 394,
+      "sha256": "8fc7f107bfc7f93b9d027cdc56cbc75a56c3b547c0609f82263ccaa759b69447"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b115/go_asm.h",
+      "bytes": 738,
+      "sha256": "332d6c8c460c092d55f10b652c1a82f690134131118df5e0fe2214a427128b73"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b117/go_asm.h",
+      "bytes": 297,
+      "sha256": "3b4b05cc98e45a40a52e52d83110b4e5e6a66a3beb999e140e2bda3c48197c82"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b122/go_asm.h",
+      "bytes": 353,
+      "sha256": "f353ddc76fe11035acdc9df73f0fafe75527753e25ddfc6db513ed80143b006e"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b142/go_asm.h",
+      "bytes": 301,
+      "sha256": "2cfdb00efe03c06e55394d5f7a80adff3402c55f46e53a115248de665debc734"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b145/go_asm.h",
+      "bytes": 721,
+      "sha256": "a51f1a77d13ba76f1bd6025317237a41327c2636b2c35e99567ddf31f7b4494b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b146/go_asm.h",
+      "bytes": 472,
+      "sha256": "42266400bcf9f1ef66ae7fdfd5dfa61cbf385cc0384d6178355f91c5147aa038"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b147/go_asm.h",
+      "bytes": 478,
+      "sha256": "c371e93bcfb679b104a382d3b6217208457828dde5064254966886cd309a064c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b151/go_asm.h",
+      "bytes": 561,
+      "sha256": "1036d5f8adf51b24f3d1166ba9ca63c5888ecceb7dfa0830f7d28bc9b19e5c96"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/_cgo_export.c",
+      "bytes": 980,
+      "sha256": "a049f95b5f9f8c130aa37735e50a8e8fb23b3c175e7ccf891cf5d28e686846c2"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/_cgo_export.h",
+      "bytes": 1882,
+      "sha256": "808de85620fb72362c0601ee854944ca069462be410772f73700425f89605f9a"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/_cgo_gotypes.go",
+      "bytes": 8448,
+      "sha256": "ab0be13104cb9690a90c0b1b7ba3ccb9d5f6bb41fea89539861d086239bfbe6c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/_cgo_import.go",
+      "bytes": 766,
+      "sha256": "9f7d2520ab6bfb93fd090ad1e1a2207fc572457f0d9105cb567767da3ed4fe42"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_android.cgo1.go",
+      "bytes": 433,
+      "sha256": "50bc65bbb9e6c553711e42fef78953d4965ad47a025de449df863fdd03e2bd15"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_android.cgo2.c",
+      "bytes": 2089,
+      "sha256": "6040772b54cfd973da7f19c6bd89000d29a3c67b7d9a8ab2cc0026736b317c56"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_resold.cgo1.go",
+      "bytes": 929,
+      "sha256": "e67782bdfc1b34ea6c487d0beeaa7f227ebb6ddc3adfd919ddfcf3a47429ace4"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_resold.cgo2.c",
+      "bytes": 3537,
+      "sha256": "38c35b6ddd8c46b6fc7b85d35e929ffe8bfa697f49750b0a0668aef7951540d8"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_socknew.cgo1.go",
+      "bytes": 1021,
+      "sha256": "9a1f51de21e7829b620108a5fa6eda6c75cdcdfb8cd222458be6edec5d8154c2"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_socknew.cgo2.c",
+      "bytes": 2143,
+      "sha256": "eca01c69329ac5d459c0ba038e9d14e4de93a72271c4153b4e9e548659b330d8"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_unix_cgo.cgo1.go",
+      "bytes": 4058,
+      "sha256": "a627e19ef21925ffd17d2fed08581469f1129b27b95b6868c5ab5e73cd0cae0d"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_unix_cgo.cgo2.c",
+      "bytes": 4682,
+      "sha256": "245fdf08457fb2d9b857023e37407bc96fb67860c1166cc32f473dea1b238974"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_unix_cgo_res.cgo1.go",
+      "bytes": 1166,
+      "sha256": "5735b64019657c7a78aa8bf42b56a7fc29107b3de14ec9c94a1dd6a5054b6a4b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b160/cgo_unix_cgo_res.cgo2.c",
+      "bytes": 2832,
+      "sha256": "5cfc10d257d34b44b25aded6b18703c3f9c0b5da983ed8b89ad2c3a9279587cf"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/_cgo_export.h",
+      "bytes": 1890,
+      "sha256": "27e9f18640e4e91fa6ca492ac7157ac49fc3aa8d404a878afac0ee62a82e58ae"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/_cgo_gotypes.go",
+      "bytes": 886,
+      "sha256": "3af5941484077ec0564391ee723502420fa468826a2c6464804a0e76930c24ce"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/_cgo_import.go",
+      "bytes": 3408,
+      "sha256": "1d5580d6bde8534e4ab8b8a11fc7773f7027407d7775acb36ef63518ac64a62e"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/_cgo_main.c",
+      "bytes": 487,
+      "sha256": "0c085f9048305b6067b2cbb00a0fe300fc7b98a73a84122d9650407deba2ec49"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/abi_GOARCH.h",
+      "bytes": 2795,
+      "sha256": "7832f3b0a3d91852a53705f3df6d16d69e1e785cfd1d733ee33229411cd26717"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/cgo.cgo1.go",
+      "bytes": 1309,
+      "sha256": "10bbf247d5d80bc53693978124602e2635f3dcaf265225b9899a8566951d57cb"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/cgo.cgo2.c",
+      "bytes": 2280,
+      "sha256": "af7cf0a60781459417d8111f8f09b687a89bf00694a1e60cae7fe8e10cf3e055"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b166/go_asm.h",
+      "bytes": 77,
+      "sha256": "6e7966500e80b483aa88ea86294ce4147fd7c6119dd698bff14f27a887f125b4"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b196/go_asm.h",
+      "bytes": 430053,
+      "sha256": "4b7527f302e71b457e0a9ff4e31e2ae02fbc2a8a4df8c34e651866bd5c3210f1"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b214/go_asm.h",
+      "bytes": 57,
+      "sha256": "792c44e080d0c1ed04a48d3fd0cec4fa0aa8e638f805eb0b979ad31d08cdb83c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b215/go_asm.h",
+      "bytes": 472,
+      "sha256": "42266400bcf9f1ef66ae7fdfd5dfa61cbf385cc0384d6178355f91c5147aa038"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/_cgo_export.h",
+      "bytes": 1926,
+      "sha256": "a79d9587c0bfa7dad45ef045b55c629506feb6d637f14b3977cf4525a8a8eded"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/_cgo_gotypes.go",
+      "bytes": 2692,
+      "sha256": "fc8f58f78cc268f0dd7506f280e5e7faaf56ad1fd40b065c12969aa63b3ec918"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/_cgo_import.go",
+      "bytes": 404,
+      "sha256": "627f8db5316f7728ad753cc3e5fdd9f212c545906f14bfc12b6091000eda8a90"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/system_android.cgo1.go",
+      "bytes": 1159,
+      "sha256": "44c006ec48690ce16a16789128f0d5183ab955ea7fd9a9f4d4403ebefbdd832b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b285/system_android.cgo2.c",
+      "bytes": 2952,
+      "sha256": "7ccda8297e36560eb7d56eb4e64971607bec5bf087c3df2c605c2b1a3bd9d52f"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/_cgo_export.h",
+      "bytes": 1918,
+      "sha256": "9a2af4f4e3754a3bfcb5b195a0adf290b6c8ffaaa10371b0dbd03e5ab58967c7"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/_cgo_gotypes.go",
+      "bytes": 1573,
+      "sha256": "9c9b247287dc4116b196c00c479c0eb792060c3d8f3ca6264d113945481a02e8"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/_cgo_import.go",
+      "bytes": 292,
+      "sha256": "a8bfedf1d74f53e989eff64067efd50474dc6c995abf8f693795bfe77b50fca1"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/jni_android.cgo1.go",
+      "bytes": 348,
+      "sha256": "6e4d092f4424b2bd8c54182a0c1378d0916d801beb66188465916b3b2a5e9161"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b286/jni_android.cgo2.c",
+      "bytes": 2580,
+      "sha256": "770dae5e947a57472e483b1579b3e89164a9da0004a13664384b102b5d919ff8"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b323/go_asm.h",
+      "bytes": 648,
+      "sha256": "5c4dae232d6ebc5177624eb7188136338e70ea44432b388debf24fc97f409b2f"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b330/go_asm.h",
+      "bytes": 17018,
+      "sha256": "6e2b5e06e59fc62fd64ce4fc7c7424b4ff8cf424141f55ad67fad75cfff1f23f"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b332/go_asm.h",
+      "bytes": 2511,
+      "sha256": "59c5e519f33332674b67f896eebd368bdd3e645f0a109679647ea8538b42a7a6"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b334/go_asm.h",
+      "bytes": 54,
+      "sha256": "6e19e289c0b2e5ce16073787539ea8ce5e45df542e545fbd53983f398a7af44b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b337/go_asm.h",
+      "bytes": 493,
+      "sha256": "d0f8683e924551945104239fb0a8c359bb1a474ebc38ef18e391f998c30af9cd"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b341/go_asm.h",
+      "bytes": 921,
+      "sha256": "cad9e431145b07677659356628bf1845ab5691d0d223c3a2944d7acc7f027783"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b348/go_asm.h",
+      "bytes": 301,
+      "sha256": "2cfdb00efe03c06e55394d5f7a80adff3402c55f46e53a115248de665debc734"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b351/go_asm.h",
+      "bytes": 721,
+      "sha256": "a51f1a77d13ba76f1bd6025317237a41327c2636b2c35e99567ddf31f7b4494b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b411/go_asm.h",
+      "bytes": 329,
+      "sha256": "97e50e092c1372bdf83ede653cd07cc777bcbcc6a3695d1944f56bc4817ca269"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b425/go_asm.h",
+      "bytes": 208,
+      "sha256": "e01af2a4e012bfeae06ec8b7d0af8d5cd4ee229f6463d301cf24fc9d963b69b0"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b426/go_asm.h",
+      "bytes": 752,
+      "sha256": "ef7ad2c776fed5a997c8f2acd0dd4510a995a302d6784a928a7f3a1ef75ba56c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/_cgo_export.h",
+      "bytes": 1915,
+      "sha256": "2e2e43b56f201db357bc21de6f25434bf61082430d9f20f91bd81b123db5823d"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/_cgo_gotypes.go",
+      "bytes": 2887,
+      "sha256": "89234bb5a6e5b605fee32cf45af49c02581d96595659d679485590eee1d5d9ca"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/_cgo_import.go",
+      "bytes": 408,
+      "sha256": "b01de10532b2a564539d91292aba84aa9b2a18434ec57cbc198c05c2af0517c5"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/tz_android.cgo1.go",
+      "bytes": 1072,
+      "sha256": "a7c290c2eef5ad941f2ab2e9a9bd7562bdbf557f6848629dfa4832b479a0c7ae"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b449/tz_android.cgo2.c",
+      "bytes": 3059,
+      "sha256": "53f7a8019be72d163b1912749e940e0b41608f953f1df59d5d575f11bad2b81a"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b534/go_asm.h",
+      "bytes": 488,
+      "sha256": "6455ec82827370b7573e7b70fbb461cd0c812dc0b30aae07daae00fdaeece2b0"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b535/go_asm.h",
+      "bytes": 10947,
+      "sha256": "b9f3af9e00de852146d103aee97c26c37c6b857c2c014253500d0b6268ecd388"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b578/go_asm.h",
+      "bytes": 5607,
+      "sha256": "d5861ef27c2d819aebf5d6bc0dffe7c871706b09d0df25be1b2c0038fe53bf74"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b711/go_asm.h",
+      "bytes": 61,
+      "sha256": "a3f93636f7f6e74297c276b0ab7f9dfbd010586916b9aea634987cbc06a51efb"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b713/go_asm.h",
+      "bytes": 56,
+      "sha256": "9fb1961184fe636e1bacb9cd43027bf5d2049cd5e865be4606a20207ba60be0b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_export.c",
+      "bytes": 1187,
+      "sha256": "affaba074349afc04728e8d5a203d6b6c4d8195f95434358637a0424b4cde855"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_export.h",
+      "bytes": 2048,
+      "sha256": "e8fcdabc1c6c36fb54cc2b3ffde8b83a2de0f6a41dcf9fba900c2d8474822878"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_gotypes.go",
+      "bytes": 10705,
+      "sha256": "96861f3480e9f9df396d70669b4a9f0f00aafd2520109d91b1febc8c18576e18"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_import.go",
+      "bytes": 451,
+      "sha256": "4caf2f00a429ed8c88ed8e905511ee69c5c6d482a06b7a48daf914f8805d75f1"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_install.h",
+      "bytes": 2048,
+      "sha256": "e8fcdabc1c6c36fb54cc2b3ffde8b83a2de0f6a41dcf9fba900c2d8474822878"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/_cgo_main.c",
+      "bytes": 752,
+      "sha256": "f658e60ead133a9697db9f8a73f59099f22d2571be46306af95d6782bbe1206b"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/context_android.cgo1.go",
+      "bytes": 716,
+      "sha256": "7ddef781d0f089a03ed10258b03662d4eb59f7604efbb29d05f74d54cb660a94"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/context_android.cgo2.c",
+      "bytes": 2121,
+      "sha256": "747d158945133ad8a374206953c13d33af0b318d0ab10d703afc606b3f767294"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b721/seq_GOOS.h",
+      "bytes": 2839,
+      "sha256": "2f4388126dcfad153597e8075ff25e34a96951ed500fd26d0f29d5af7356b772"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/_cgo_export.c",
+      "bytes": 674,
+      "sha256": "0a598fff3e70bd9f91e0bdd45610538d9d8293acdaa2be15b578772cd010c361"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/_cgo_export.h",
+      "bytes": 1927,
+      "sha256": "74d22d6a9b0197d8a5ceaae30e2fd5cf5b875fb7ec821660b8876222584cd15d"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/_cgo_gotypes.go",
+      "bytes": 12980,
+      "sha256": "8acc0f7e64bb3cb5edfded542e6cebfa5856717fea0507127f783dba45070446"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/_cgo_import.go",
+      "bytes": 348,
+      "sha256": "d0ae5c3b9202451f944a02bc0169ef2805a23fa9ea69269bfcb0c4070f8126d2"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/_cgo_main.c",
+      "bytes": 680,
+      "sha256": "1a0ff290163cd3808dbbdcfc36acc100c11cfc1b80638072dba29e3491fa3c09"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/ctx_android.cgo1.go",
+      "bytes": 4117,
+      "sha256": "f2c487bc4041eb064aa81c6b11c5b97bea7bbef5bbd916575203024c72e611a6"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/ctx_android.cgo2.c",
+      "bytes": 4647,
+      "sha256": "9c3ac9a7878d9c96eaa1b637ec4f041782f8319b02ff46840e7f15e6958fa61c"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/mobileinit.cgo1.go",
+      "bytes": 573,
+      "sha256": "458549555cbfa25c620c6a7f4112bc34741909f86ce72f0d456ff60d716c147e"
+    },
+    {
+      "path": "retained-work/go/go-build844742155/b722/mobileinit.cgo2.c",
+      "bytes": 1969,
+      "sha256": "b173eafee2fd2463fadda34786c5e47b155a228399e842dd226ae85d18f8bbb0"
+    }
+  ],
+  "retainedSuffixCounts": {
+    ".h": 126,
+    ".java": 5,
+    ".go": 68,
+    ".c": 67
+  },
+  "resolvedCoreLocks": {
+    "go.mod": "1258e7bd432c72e45cf6f35c0d84e0160a1cbbf24e761291f45faab113af612f",
+    "go.sum": "078d61e2440f053464c3597418b8c3412f528bf9338485e444e37f28ec9bb312"
+  },
+  "actualInputsUnchangedDuringCompile": true,
+  "actualCompilerOutputsEqualPackagedLibraries": true,
+  "oldSignedApkCorrespondenceProven": false,
+  "completeCorrespondingSourceProven": false,
+  "reproducibleBuildProven": false,
+  "productAdopted": false,
+  "scope": "Opt-in Android component build: exact generated per-ABI compiler inputs, retained Java/Cgo source, pinned tool identities and actual AAR bytes. Not the older signed APK, a reproduction proof, all SDK/NDK sources/licenses or release approval."
+}
