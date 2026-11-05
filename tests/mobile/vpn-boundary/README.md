@@ -53,5 +53,39 @@ nine-context privacy acceptance or a VPN fix. The result explicitly leaves
 selected upstream/TURN functionality, IPv6 packet behavior, permission-revocation
 fail-closed behavior, old data/key migration, product adoption and release
 unproven. Even a clean result here requires the unchanged full functional and
-negative controls on an actual integrated product. No runtime result existed
-when this diagnostic was first prepared.
+negative controls on an actual integrated product.
+
+## Actual bounded measurement
+
+[41951459953](https://github.com/lilyco-42/lyco-browser/actions/runs/41951459953)
+completed on source `40891fe172116c6cd3b39ad524e9fb4a828b86b7` using API35
+WebView Chrome/124.0.6367.219. The complete original 156961-byte archive has
+SHA-256 `b3a3fd06511c68dd498ed55188bd37ce87da5b83d79057bfe8d2c55f7988f620`;
+size/SHA/CRC, all eight source-file hashes, actual probe APK and raw observations
+were independently checked. The
+[unmodified result](../../../docs/audits/android-vpn-boundary-41951459953.json),
+[original events/SDP/stats and STUN observations](../../../docs/audits/android-vpn-boundary-41951459953.network.json)
+and [source verification](../../../docs/audits/android-vpn-boundary-41951459953.source.json)
+are retained.
+
+Each of the three contexts sent six STUN requests into the actual TUN; the
+owned receiver saw zero during VPN. Before and after VPN each context produced
+a real STUN response and corresponding native server-reflexive candidate.
+Actual consent UI and active/descriptor/network states were observed, followed
+by verified descriptor closure and restored after-controls. The disposable app
+was uninstalled and signing material removed.
+
+During the bounded eight-second gathering window, original events/SDP/stats
+still expose configured TUN addresses `192.0.2.2` and `2001:db8::2`; none matched
+the emulator's observed physical interface addresses. These virtual addresses
+must not be described as physical-IP leaks. They do fail the unchanged numeric
+host-address criterion. Gathering reached the deadline, not completion, during
+capture/discard. This proves neither future absence of leaks nor selected
+proxy/TURN functionality. Measurement success is not privacy acceptance, product
+adoption, migration or release. The Gecko storage and ARM64 paths remain open.
+
+Earlier terminal attempts are retained: `41950656045` failed Java lambda
+compilation before runtime, and `41950959525` failed the original after-stop
+state check because `stopService` did not close the system-bound VPN descriptor.
+The explicit stop action now closes that descriptor before waiting for the
+same unchanged network-state and after-positive checks.
