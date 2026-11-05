@@ -1,0 +1,94 @@
+name: Gecko source and actual Expo product dependency compatibility
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tests/mobile/engine/product-compat/**', '.github/workflows/gecko-product-compat.yml']
+  workflow_dispatch:
+    inputs:
+      inspect:
+        description: 'Run unchanged product AAR metadata gate with validated source engine; retain any failure'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: lyco-gecko-product-compat-v1-${{ github.event_name }}
+  cancel-in-progress: false
+jobs:
+  preparation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Parse and retain exact compatibility source inputs
+        run: |
+          python3 -m py_compile tests/mobile/engine/product-compat/prepare.py
+          python3 tests/mobile/engine/product-compat/prepare.py source
+          bash -n tests/mobile/engine/download-source-engine.sh
+      - name: Retain original source and preparation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-gecko-product-compat-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-product-compat/
+          if-no-files-found: error
+          retention-days: 7
+  metadata:
+    needs: preparation
+    if: github.event_name == 'workflow_dispatch' && inputs.inspect
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17'}
+      - name: Copy only tracked product source to disposable runner directory
+        run: |
+          python3 tests/mobile/engine/product-compat/prepare.py source
+          python3 tests/mobile/engine/product-compat/prepare.py stage
+      - name: Obtain exact previously validated source engine with unchanged verifier
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LYCO_SOURCE_ENGINE_RUN: '41940576338'
+        run: bash tests/mobile/engine/download-source-engine.sh
+      - name: Install exact original product lock
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
+        run: npm ci --no-audit --no-fund
+      - name: Generate original product native project
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
+        run: npx expo prebuild --clean --platform android --non-interactive
+      - name: Add source dependency only in private module copy and retain actual toolchain
+        run: python3 tests/mobile/engine/product-compat/prepare.py adapt
+      - name: Check original product AAR metadata gates without suppression
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal/android
+        run: |
+          set +e
+          chmod +x gradlew
+          ./gradlew :app:checkReleaseAarMetadata --no-daemon --stacktrace --console=plain \
+            --init-script "$GITHUB_WORKSPACE/tests/mobile/engine/product-compat/inspect.gradle" \
+            2>&1 | tee "$RUNNER_TEMP/lyco-gecko-product-compat/gradle-metadata.log"
+          actual_status=${PIPESTATUS[0]}
+          echo "$actual_status" > "$RUNNER_TEMP/lyco-gecko-product-compat/gradle-exit-code.txt"
+          exit "$actual_status"
+      - name: Preserve actual outcome without converting a failed gate into success
+        if: always()
+        run: python3 tests/mobile/engine/product-compat/prepare.py collect
+      - name: Retain original configuration, complete task log and outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-gecko-product-compat-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-product-compat/
+          if-no-files-found: error
+          retention-days: 7
