@@ -1,0 +1,91 @@
+name: ARM64 storage and RTC source engine archive (not product adoption)
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tests/mobile/engine/source-storage-arm64/**', '.github/workflows/gecko-storage-arm64.yml']
+  workflow_dispatch:
+    inputs:
+      compile:
+        description: 'Compile the distinct ARM64 storage-policy archive after source preflight'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: lyco-storage-arm64-v1-${{ github.event_name }}
+  cancel-in-progress: false
+jobs:
+  preparation:
+    name: Prepare exact ARM64 storage sources only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Derive and parse exact source adaptation in genuine Actions
+        run: |
+          python3 -m py_compile tests/mobile/engine/source-storage-arm64/prepare.py
+          python3 tests/mobile/engine/source-storage-arm64/prepare.py
+          python3 -m py_compile "$RUNNER_TEMP/lyco-gecko-storage-arm64-prepare.py" "$RUNNER_TEMP/lyco-gecko-storage-arm64-verify.py"
+          bash -n "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-engine.sh"
+      - name: Preserve complete actual source preparation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-storage-arm64-preparation-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          if-no-files-found: error
+          retention-days: 7
+  native-engine:
+    needs: preparation
+    if: github.event_name == 'workflow_dispatch' && inputs.compile
+    name: Compile actual storage and RTC patch · ARM64 archive only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '21'}
+      - name: Derive the same preflight-verified source adaptation
+        run: python3 tests/mobile/engine/source-storage-arm64/prepare.py
+      - name: Prepare disposable build host disk
+        run: |
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-before.txt"
+          free -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/memory.txt"
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-after.txt"
+          test "$(df --output=avail -B1 "$RUNNER_TEMP" | tail -1)" -gt 45000000000
+      - name: Validate unchanged build host resource containment
+        run: python3 "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-host.py" --check
+      - name: Preserve exact adaptation and real host preflight
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-storage-arm64-host-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Compile the distinct ARM64 storage-policy source engine
+        run: python3 "$RUNNER_TEMP/lyco-gecko-storage-recipe/build-host.py"
+      - name: Verify actual AArch64 ELF and unchanged storage and RTC sources
+        run: python3 "$RUNNER_TEMP/lyco-gecko-storage-arm64-verify.py"
+      - name: Retain the compiled archive without product adoption
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-built-gecko-storage-arm64-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-output/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Preserve original source and compiler observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-storage-arm64-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          if-no-files-found: warn
+          retention-days: 7

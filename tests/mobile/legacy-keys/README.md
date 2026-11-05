@@ -35,7 +35,18 @@ Original and generated fixture sources, exact transformations, hashes and
 added scripts are retained before device execution. No preparation, parsing,
 build or runtime command is executed locally.
 
-This gate is prepared, not yet validated. It does not establish Gecko adoption,
+The genuine [source preflight 42066948510](https://github.com/lilyco-42/lyco-browser/actions/runs/42066948510)
+passed. Its full 31041-byte original ZIP (SHA-256
+`4559c08ca962119b86140dea444fda41d81ef343267c2e397a26d47c4fc8641c`),
+CRC, full log, eight original pins, four added files and all nine exact
+replacements reconstructing four generated files were independently checked.
+The actual merge commit includes source `4cf92d7`; this is Actions preparation
+and Python/JS/shell syntax, not native key preservation. See the [original receipt](../../../docs/audits/android-legacy-key-preflight-42066948510.json)
+and [provenance](../../../docs/audits/android-legacy-key-preflight-42066948510.source.json).
+One actual native validation [42067379466](https://github.com/lilyco-42/lyco-browser/actions/runs/42067379466)
+uses unchanged signed candidate `41964719754`. Its fixture, source and signing
+gates have passed; the device matrix is in progress. No key-preservation result
+is claimed before the original device reports and artifacts are verified. It does not establish Gecko adoption,
 generic WebView-to-Gecko key migration, ARM64, power-loss durability, product
 RTC, real payments, iOS, signing/distribution or five-platform readiness. A
 successful old/current retention result must not replace those requirements.
