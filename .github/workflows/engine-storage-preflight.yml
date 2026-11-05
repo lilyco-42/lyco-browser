@@ -2,7 +2,7 @@ name: Native storage probe source preflight
 on:
   pull_request:
     branches: [main]
-    paths: ['tests/mobile/engine/**', '.github/workflows/engine-storage-preflight.yml', '.github/workflows/build-universal.yml']
+    paths: ['tests/mobile/engine/**', 'scripts/bind-android-core-source.py', '.github/workflows/engine-storage-preflight.yml', '.github/workflows/build-universal.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
       - name: Parse probe sources without running fixtures or downloading an engine
         run: |
           python3 -m py_compile tests/mobile/engine/storage/fixture.py tests/mobile/engine/storage/run-storage.py tests/mobile/engine/storage/assert-storage.py tests/mobile/engine/storage/run-matrix.py
+          python3 -m py_compile scripts/bind-android-core-source.py
           bash -n tests/mobile/engine/download-source-engine.sh
           node --check tests/mobile/engine/storage/page.js
           python3 - <<'PY'
@@ -37,6 +38,7 @@ jobs:
           paths = [path, Path('tests/mobile/engine/app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java')]
           paths += [Path('tests/mobile/engine/storage') / n for n in ['fixture.py', 'run-storage.py', 'assert-storage.py', 'run-matrix.py', 'page.js']]
           paths += [Path('.github/workflows') / n for n in ['build-universal.yml', 'engine-storage-preflight.yml']]
+          paths += [Path('scripts/bind-android-core-source.py')]
           commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
           assert commit == os.environ['GITHUB_SHA']
           record = {'run': os.environ['GITHUB_RUN_ID'], 'testedCommit': commit,

@@ -159,10 +159,14 @@ jobs:
           retention-days: 7
       - name: Build and integrate the Android subscription core from source
         working-directory: mobile/core
+        env:
+          LYCO_CAPTURE_GENERATED_SOURCES: 'true'
         run: |
+          python3 -m py_compile capture-go-build.py retain-generated.py bundle-source.py ../../scripts/bind-android-core-source.py
           bash build-native.sh android
           go test -tags with_quic,with_utls -count=1 ./...
           python3 install-android.py
+          python3 bundle-source.py
       - run: npx expo prebuild --clean --platform android --non-interactive
       - name: Prepare private signing key for an explicitly dispatched candidate
         if: github.event_name == 'workflow_dispatch' && inputs.signed_android
@@ -211,6 +215,8 @@ jobs:
           python3 scripts/verify-built-version.py android "$RUNNER_TEMP/ANDROID-PACKAGE.txt" "$RUNNER_TEMP/ANDROID-VERSION-PROVENANCE.json"
           cd "$RUNNER_TEMP"
           sha256sum LYCO-Browser-Android-preview.apk ANDROID-SIGNATURE-PROVENANCE.json ANDROID-VERSION-PROVENANCE.json > ANDROID-SHA256SUMS.txt
+      - name: Bind retained actual compiler inputs to this APK network core
+        run: python3 ../../scripts/bind-android-core-source.py
       - name: Bind actual Android build source map to the packaged bundle
         run: |
           set -euo pipefail
@@ -274,6 +280,25 @@ jobs:
       - name: Remove private signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/lyco-release.p12"
+      - name: Retain original Android core source and compiler receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-android-core-source-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-tunnel.aar
+            ${{ runner.temp }}/lyco-tunnel-bindings.txt
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz.sha256
+            ${{ runner.temp }}/lyco-generated-bindings-android.tar.gz
+            ${{ runner.temp }}/lyco-generated-bindings-android.tar.gz.sha256
+            ${{ runner.temp }}/lyco-binding-capture-android/published/
+            ${{ runner.temp }}/ANDROID-CORE-SOURCE-PROVENANCE.json
+            ${{ runner.temp }}/ANDROID-CORE-SOURCE-SHA256SUMS.txt
+            apps/universal/android/app/build/intermediates/stripped_native_libs/release/stripReleaseDebugSymbols/out/lib/arm64-v8a/libgojni.so
+            apps/universal/android/app/build/intermediates/stripped_native_libs/release/stripReleaseDebugSymbols/out/lib/x86_64/libgojni.so
+          if-no-files-found: warn
+          retention-days: 7
       - name: Retain Android candidate for owner review
         if: github.event_name == 'pull_request' || inputs.signed_android
         uses: actions/upload-artifact@v4
