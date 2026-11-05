@@ -1,0 +1,56 @@
+name: Native storage probe source preflight
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tests/mobile/engine/**', '.github/workflows/engine-storage-preflight.yml', '.github/workflows/build-universal.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: storage-probe-source-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  syntax:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Parse probe sources without running fixtures or downloading an engine
+        run: |
+          python3 -m py_compile tests/mobile/engine/storage/fixture.py tests/mobile/engine/storage/run-storage.py tests/mobile/engine/storage/assert-storage.py tests/mobile/engine/storage/run-matrix.py
+          bash -n tests/mobile/engine/download-source-engine.sh
+          node --check tests/mobile/engine/storage/page.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast, hashlib, json, os, re, subprocess
+          assert os.environ['GITHUB_ACTIONS'] == 'true'
+          path = Path('tests/mobile/engine/download-source-engine.sh')
+          blocks = re.findall(r"<<'PY'\n(.*?)\nPY", path.read_text(), re.S)
+          assert len(blocks) == 3
+          for block in blocks:
+              ast.parse(block)
+          paths = [path, Path('tests/mobile/engine/app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java')]
+          paths += [Path('tests/mobile/engine/storage') / n for n in ['fixture.py', 'run-storage.py', 'assert-storage.py', 'run-matrix.py', 'page.js']]
+          paths += [Path('.github/workflows') / n for n in ['build-universal.yml', 'engine-storage-preflight.yml']]
+          commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert commit == os.environ['GITHUB_SHA']
+          record = {'run': os.environ['GITHUB_RUN_ID'], 'testedCommit': commit,
+                    'pythonSyntaxPassed': True, 'shellSyntaxPassed': True, 'javaScriptSyntaxPassed': True,
+                    'embeddedPythonBlocksParsed': len(blocks),
+                    'sourceFiles': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+                    'javaCompiled': False, 'engineDownloaded': False, 'nativeRuntimeTested': False,
+                    'scope': 'Genuine Actions source syntax only. No helper/fixture execution, Java compile, source engine artifact, native storage, privacy, migration or release proof.'}
+          Path(os.environ['RUNNER_TEMP'], 'STORAGE-SYNTAX.json').write_text(json.dumps(record, indent=2) + '\n')
+          PY
+      - name: Retain the actual syntax receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-storage-source-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/STORAGE-SYNTAX.json
+          if-no-files-found: error
+          retention-days: 7

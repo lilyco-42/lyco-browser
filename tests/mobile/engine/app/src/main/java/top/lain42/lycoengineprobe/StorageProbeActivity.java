@@ -48,7 +48,9 @@ public final class StorageProbeActivity extends Activity {
                     && !"33333333-3333-4333-8333-333333333333".equals(id)
                     && !"44444444-4444-4444-8444-444444444444".equals(id)
                     && !"55555555-5555-4555-8555-555555555555".equals(id)
-                    && !"66666666-6666-4666-8666-666666666666".equals(id)) {
+                    && !"66666666-6666-4666-8666-666666666666".equals(id)
+                    && !"77777777-7777-4777-8777-777777777777".equals(id)
+                    && !"88888888-8888-4888-8888-888888888888".equals(id)) {
                 throw new IllegalArgumentException("Only owned CI UUIDs are accepted");
             }
             File base = new File(getNoBackupFilesDir().getCanonicalFile(), "lyco-gecko-data-v1");
@@ -80,7 +82,11 @@ public final class StorageProbeActivity extends Activity {
                 || "44444444-4444-4444-8444-444444444444".equals(id);
             boolean eagerCookie = "55555555-5555-4555-8555-555555555555".equals(id)
                 || "66666666-6666-4666-8666-666666666666".equals(id);
-            if (!(graceful ? "graceful" : (eagerCookie ? "eager-cookie" : "abrupt")).equals(closeMode)) {
+            boolean eagerStorage = "77777777-7777-4777-8777-777777777777".equals(id)
+                || "88888888-8888-4888-8888-888888888888".equals(id);
+            String expectedMode = graceful ? "graceful" : (eagerStorage ? "eager-storage"
+                : (eagerCookie ? "eager-cookie" : "abrupt"));
+            if (!expectedMode.equals(closeMode)) {
                 throw new IllegalArgumentException("Owned UUID and shutdown comparison mode must match");
             }
             String url = getIntent().getDataString();
@@ -99,10 +105,12 @@ public final class StorageProbeActivity extends Activity {
             // Only the normal-close comparison requests full shutdown; the
             // original abrupt-stop profiles retain the engine's default.
             if (graceful) prefs.put("toolkit.shutdown.fastShutdownStage", 0);
-            if (eagerCookie) prefs.put("network.cookie.db.flushIntervalMs", 0);
+            if (eagerCookie || eagerStorage) prefs.put("network.cookie.db.flushIntervalMs", 0);
+            if (eagerStorage) prefs.put("dom.storage.database.flushIntervalMs", 0);
             Log.i("LYCO_STORAGE_CONFIG", "Requested closeMode=" + closeMode
                 + " fastShutdownStage=" + (graceful ? "0" : "default")
-                + " cookieFlushIntervalMs=" + (eagerCookie ? "0" : "default") + " phase=" + phase);
+                + " cookieFlushIntervalMs=" + (eagerCookie || eagerStorage ? "0" : "default")
+                + " localStorageFlushIntervalMs=" + (eagerStorage ? "0" : "default") + " phase=" + phase);
             File config = new File(getFilesDir(), "owned-storage-config.json");
             Files.write(config.toPath(), new JSONObject().put("prefs", prefs).toString().getBytes(StandardCharsets.UTF_8));
             GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder()

@@ -664,8 +664,12 @@ jobs:
           SOURCE_ENGINE: ${{ inputs.native_engine_source_run }}
         run: |
           test "$SIGNED" = false && test "$IOS" = false && test -z "$PAID" && test -z "$NETWORK"
-          if [[ "$STORAGE" == true ]]; then test "$SOURCE_ENGINE" = 41772782539; fi
-          if [[ "$COOKIE_FLUSH" == true ]]; then test "$STORAGE" = true; fi
+          if [[ "$STORAGE" == true ]]; then
+            test "$SOURCE_ENGINE" = 41772782539 || test "$SOURCE_ENGINE" = 41940576338
+          fi
+          if [[ "$COOKIE_FLUSH" == true ]]; then
+            test "$STORAGE" = true && test "$SOURCE_ENGINE" = 41772782539
+          fi
       - uses: actions/setup-java@v4
         with: {distribution: 'temurin', java-version: '17'}
       - uses: actions/setup-python@v5
@@ -714,14 +718,14 @@ jobs:
         if: ${{ inputs.native_engine_storage }}
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          LYCO_STORAGE_CLOSE_MODE: ${{ inputs.native_engine_cookie_flush && 'eager-cookie' || '' }}
+          LYCO_STORAGE_CLOSE_MODE: ${{ inputs.native_engine_source_run == '41940576338' && 'eager-storage' || (inputs.native_engine_cookie_flush && 'eager-cookie' || '') }}
         with:
           api-level: 35
           target: default
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
-          script: ${{ inputs.native_engine_cookie_flush && 'python3 tests/mobile/engine/storage/run-storage.py' || 'python3 tests/mobile/engine/storage/run-matrix.py' }}
+          script: ${{ (inputs.native_engine_source_run == '41940576338' || inputs.native_engine_cookie_flush) && 'python3 tests/mobile/engine/storage/run-storage.py' || 'python3 tests/mobile/engine/storage/run-matrix.py' }}
       - name: Preserve original experiment binary, native observations and counterexamples
         if: always()
         uses: actions/upload-artifact@v4

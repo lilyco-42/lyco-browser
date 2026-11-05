@@ -1,6 +1,6 @@
 # Cold Gecko profiles before product integration
 
-This separate genuine-Actions capability run consumes only successful source
+The original separate genuine-Actions capability run consumes only successful source
 build 41772782539, whose independent RTC/TURN/context/loopback experiment already
 passed in 41810285687. It does not rerun or replace those unchanged 29 checks.
 The product, its retained signature, original WebView profile roots and data are
@@ -45,6 +45,50 @@ only. It does not prove WebView-to-Gecko migration, portability of non-exportabl
 keys across engines, ARM64 runtime, a complete product bridge, real customer
 routes, all-network privacy, iOS, licensing/source delivery or commercial release.
 All original product requirements and legacy data remain required.
+
+## New database-timer consumer
+
+Source build [41940576338](https://github.com/lilyco-42/lyco-browser/actions/runs/41940576338)
+is compiling the separate production LSNG database-timer preference. Its
+consumer is prepared but must not be dispatched until that exact build succeeds
+and the complete original compiled/evidence archives are independently checked.
+The consumer also rejects a non-successful producer, requires the exact producer
+commit and all eight unchanged source-build files, checks the complete artifact
+size/SHA/CRC, the original RTC source/patch, the declared storage policy and all
+thirteen actual x86_64 ELF library bytes against producer records. It preserves
+the original Maven dependency graph and non-debuggable APK library-byte gates.
+
+Once those conditions hold, dispatch `native_engine_probe=true`,
+`native_engine_source_run=41940576338`, `native_engine_storage=true`; leave
+`native_engine_cookie_flush=false` and all other build/consumer inputs empty or
+false. This exact producer selects `eager-storage`, using only owned UUIDs
+77777777-7777-4777-8777-777777777777 and
+88888888-8888-4888-8888-888888888888. Native startup requests both the existing
+cookie timer and the new database timer at zero. The upstream 5000ms default,
+snapshot/transaction/storage format and keys remain unchanged in the engine.
+Every original nine-phase data/key/clear/proxy assertion and all twelve actual
+force-stop/process-absence gates remain required. The new mode requests no
+graceful shutdown and never uses a flush sleep or read-phase regeneration.
+
+Native request log receipts are collected only after complete process absence,
+so recording them cannot prolong the pre-force-stop write window. All nine real
+request logs, the actual source-built policy and requested values are required;
+runtime preference readback is not claimed. A pass would establish only the
+observed abrupt-reopen behavior with those explicit timer requests, not a
+synchronous disk fence, I/O/performance acceptability, old WebView migration or
+product adoption. The old failed abrupt/default matrix and the normal-close and
+cookie-only comparisons stay available with their original producer and gates.
+The new binary also needs its own full RTC/TURN/negative controls; the older
+binary's passing 29 checks do not cover a changed native archive.
+
+The separate source preflight workflow runs real Actions Python/shell/JavaScript
+syntax checks, including all embedded downloader Python blocks. Its receipt
+does not compile Java, download an engine, execute a fixture or prove storage.
+Java compilation and the complete runtime matrix remain behind the successful
+producer/archive gate. No preparation, syntax check or runtime helper runs
+locally.
+
+## Original buffer and shutdown comparisons
 
 The first run [41813877950](https://github.com/lilyco-42/lyco-browser/actions/runs/41813877950)
 completed all nine original observations and failed three strict reopen checks:

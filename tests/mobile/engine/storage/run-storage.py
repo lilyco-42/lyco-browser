@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 mode = os.environ['LYCO_STORAGE_CLOSE_MODE']
-assert mode in ['abrupt', 'graceful', 'eager-cookie']
+assert mode in ['abrupt', 'graceful', 'eager-cookie', 'eager-storage']
 base = Path(os.environ['RUNNER_TEMP']) / 'lyco-mobile-network'
 root = base / ('storage-' + mode)
 root.mkdir()
@@ -25,6 +25,8 @@ if mode == 'graceful':
     ids = {'A': '33333333-3333-4333-8333-333333333333', 'B': '44444444-4444-4444-8444-444444444444'}
 elif mode == 'eager-cookie':
     ids = {'A': '55555555-5555-4555-8555-555555555555', 'B': '66666666-6666-4666-8666-666666666666'}
+elif mode == 'eager-storage':
+    ids = {'A': '77777777-7777-4777-8777-777777777777', 'B': '88888888-8888-4888-8888-888888888888'}
 processes = []
 active_phase = None
 
@@ -58,6 +60,9 @@ def stop(label):
             break
         assert time.monotonic() < deadline, 'Native engine processes did not stop'
         time.sleep(.25)
+    if mode == 'eager-storage' and closed_phase is not None:
+        with (root / (label + '-config-logcat.txt')).open('w') as output:
+            subprocess.run(['adb', 'logcat', '-d', '-v', 'threadtime', '-s', 'LYCO_STORAGE_CONFIG:I', '*:S'], stdout=output, check=True)
     processes.append({'before': label, 'forceStopCompleted': True, 'remainingPackageProcesses': remaining,
                       'closeMode': mode, 'closedPhase': closed_phase,
                       'nativeShutdownCallbackObserved': acknowledged})
@@ -102,7 +107,8 @@ source_files = [here / name for name in ['page.js', 'fixture.py', 'run-storage.p
 source_files += [here.parent / 'app/src/main/java/top/lain42/lycoengineprobe/StorageProbeActivity.java', here.parent / 'app/src/main/AndroidManifest.xml']
 (root / 'storage-source.json').write_text(json.dumps({'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
     'closeMode': mode, 'requestedFastShutdownStage': 0 if mode == 'graceful' else None,
-    'requestedCookieFlushIntervalMs': 0 if mode == 'eager-cookie' else None,
+    'requestedCookieFlushIntervalMs': 0 if mode in ['eager-cookie', 'eager-storage'] else None,
+    'requestedLocalStorageFlushIntervalMs': 0 if mode == 'eager-storage' else None,
     'preferenceReadbackProven': False,
     'files': [{'path': str(p.relative_to(Path(os.environ['GITHUB_WORKSPACE']))), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_files]}, indent=2) + '\n')
 fixture_log = (root / 'storage-fixture.log').open('w')
