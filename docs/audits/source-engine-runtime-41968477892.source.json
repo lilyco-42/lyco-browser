@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-11-05T04:57:27.972710+00:00",
+  "run": 41968477892,
+  "job": 127050930001,
+  "source": "6e07ad6a5d0c4c096cb1090cc778aeae3ec3f6d5",
+  "status": "completed",
+  "conclusion": "success",
+  "artifactId": 13389435100,
+  "originalZipBytes": 101122883,
+  "originalZipSha256": "836d47faa6ffc351a0e3f69d395b4a70c158b145196aea371c95e4fb0dc2fc77",
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "fullJobLogBytes": 245571,
+  "fullJobLogSha256": "52ed6abf243e4ebe9e8e1fd520376791dd0e6a26334242c453ffdd3f164a18f9",
+  "apkBytes": 223967423,
+  "apkSha256": "93211d47f245639caed563f10f4b570d9efe33556f24e5b5063a45490d75bcbf",
+  "sourceEngineRun": 41940576338,
+  "sourceAarSha256": "a141db25e9a2c3c8091f4b7c83e21f1d38ddd2b9a0ce43b1c1cb1433d824d016",
+  "all13PackagedNativeLibrariesByteEqualSourceAar": true,
+  "pomDependenciesUnchanged": true,
+  "samePomAsIndependentlyVerifiedStorageConsumer": true,
+  "nativeChecksPassed": 29,
+  "applicableCasesPerPhase": {
+    "control": 9,
+    "lyco": 9,
+    "stopped": 9,
+    "control-after": 9
+  },
+  "rawNetworkCounts": {
+    "control": {
+      "udpStunPackets": 36,
+      "turnConnections": 9,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    },
+    "lyco": {
+      "udpStunPackets": 0,
+      "turnConnections": 18,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    },
+    "stopped": {
+      "udpStunPackets": 0,
+      "turnConnections": 0,
+      "acknowledgedPeerMessages": 0,
+      "loopbackRequests": 0
+    },
+    "control-after": {
+      "udpStunPackets": 9,
+      "turnConnections": 9,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    }
+  },
+  "rawEventsSdpStatsTurnLoopbackAndTransportIndependentlyRechecked": true,
+  "rawStunTransactionResponsesVerified": true,
+  "engineCapabilityOnly": true,
+  "productAdopted": false,
+  "productApkPassed": false,
+  "arm64Proven": false,
+  "performanceProven": false,
+  "oldWebViewStorageOrNonExportableKeyMigrationProven": false,
+  "scope": "Standalone non-debuggable GeckoView experiment, NOT the LYCO product APK or a migration. Same-engine before/after controls; ten real first-script/frame/config cases, raw events/SDP/localStats, actual owned TURN TCP datachannel, three actual loopback HTTP targets and stopped-route negatives. Native public configFilePath only, no page policy or RTC observation rewriting. No product adoption, independent-storage migration, all-platform release, customer egress or iOS proof."
+}

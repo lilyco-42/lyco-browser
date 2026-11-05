@@ -18,10 +18,31 @@ retain the defaults and limits.
 
 The isolated runtime consumer
 [41966583355](https://github.com/lilyco-42/lyco-browser/actions/runs/41966583355)
-has been dispatched once with the unchanged nine-phase data/key/clear/proxy and
-twelve abrupt process-stop gates. Runtime durability, full changed-binary RTC,
-ARM64, old-profile/key migration and adoption remain unproven. Do not repeat
-the completed source build or infer persistence from compilation.
+completed all 58 original checks. The full 97883371-byte ZIP, SHA-256
+`0878a7d2513d7766e1364210e6b0522b820053077bdc59847bc87c1a0a17a714`,
+CRC, all thirteen APK libraries against this exact AAR and original source
+receipts were independently verified. All nine data/key/clear/proxy phases and
+twelve abrupt process stops were checked: Cookie, localStorage, IDB and the
+original non-exportable key/ciphertext survive reopens; clearing A leaves B
+intact until its own clear. No graceful shutdown, state replay or replacement
+read-stage keys were used. Both timer preferences were requested at zero;
+runtime preference readback remains unproven. The [unmodified result](../../../../docs/audits/gecko-storage-eager-41966583355.json)
+and [independent provenance](../../../../docs/audits/gecko-storage-eager-41966583355.source.json)
+cover one standalone x86_64/API35 lifecycle matrix, not synchronous power-loss
+durability, performance, ARM64, old-profile/key migration or product adoption.
+The separate same-new-engine full RTC run
+[41968477892](https://github.com/lilyco-42/lyco-browser/actions/runs/41968477892)
+passed all 29 original checks. Its full 101122883-byte ZIP (SHA-256
+`836d47faa6ffc351a0e3f69d395b4a70c158b145196aea371c95e4fb0dc2fc77`),
+CRC, 245571-byte decoded log, all thirteen APK libraries against this exact AAR
+and original events/SDP/stats/network were independently checked. Nine applicable
+contexts completed real TURN, healthy/stopped direct STUN was zero, before/after
+direct controls received 36/9 packets; three loopback targets used the selected
+route and stopped without fallback. See the [unmodified result](../../../../docs/audits/source-engine-runtime-41968477892.json)
+and [provenance](../../../../docs/audits/source-engine-runtime-41968477892.source.json).
+Storage and RTC use separate experiment APKs of the same AAR, not one product
+acceptance. ARM64, performance, product bridge and old WebView data/key
+preservation remain open. Do not repeat either completed dispatch.
 
 The original combined storage gate is still failed. In genuine run
 [41875833193](https://github.com/lilyco-42/lyco-browser/actions/runs/41875833193),
@@ -70,8 +91,7 @@ Before the long compiler, the job retains all original/generated recipe files,
 exact transformations, hashes and the actual unchanged host preflight. After
 compilation it retains the actual two modified storage sources, applied patch,
 original logs, compiler config, full AAR/CRC, all thirteen x86_64 ELF identities
-and actual Maven publication bytes. Compile output is not runtime proof. A
-future consumer must separately verify every original archive and run the
+and actual Maven publication bytes. Compile output is not runtime proof. The consumers above separately verify every original archive and run the
 unchanged abrupt data/key gate with explicit requested policy, then test
 privacy and all original before/after/stopped controls on the changed native
 binary. Old passing RTC results cannot establish the new binary's behavior.

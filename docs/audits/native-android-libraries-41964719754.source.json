@@ -1,0 +1,37 @@
+{
+  "verifiedAt": "2026-11-05T04:46:54.851352+00:00",
+  "analyzerRun": 41968101082,
+  "sourceRun": 41964719754,
+  "sourceCommit": "4304fb196a86de40927b9597057019bc918cdf2b",
+  "artifact": {
+    "id": 13388746217,
+    "bytes": 2401285,
+    "sha256": "b37be1f2fcdc7c88766e51c96e6e236b9afae134591022dee30d12633357fe04"
+  },
+  "originalSizeShaCrcSafePathsVerified": true,
+  "nestedOriginalArchivesByteEqualVerifiedProducer": true,
+  "all32ActualApkElfSizesHashesMachinesVerified": true,
+  "both72GoDependencyGraphsMatchOfflineCatalog": true,
+  "sourceCount": 603,
+  "packageCount": 28,
+  "unmappedPackages": 0,
+  "originalNoticeGaps": [
+    {
+      "id": "node_modules/jimp-compact",
+      "reason": "No original notice file found"
+    },
+    {
+      "id": "node_modules/structured-headers",
+      "reason": "No original notice file found"
+    },
+    {
+      "id": "node_modules/tr46",
+      "reason": "No original notice file found"
+    }
+  ],
+  "apkSha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+  "completeLicenseMappingProven": false,
+  "completeCorrespondingSourceProven": false,
+  "privacyPaymentMigrationOrReleaseProof": false,
+  "decodedLogSha256": "2b80dcbac87e0998e67277a1f5da9e75e32a16ae233306a1a91a79e95ab399ec"
+}

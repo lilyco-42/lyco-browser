@@ -1,0 +1,483 @@
+{
+  "passed": true,
+  "closeMode": "eager-storage",
+  "checks": {
+    "all-nine-original-reports": true,
+    "all-nine-actual-page-requests": true,
+    "a-empty-real-origin-and-WebCrypto": true,
+    "a-empty-actual-cookie-ls-idb": true,
+    "a-empty-no-read-rekey": true,
+    "a-empty-no-key-after-isolation-or-clear": true,
+    "a-empty-actual-selected-upstream": true,
+    "a-seed-real-origin-and-WebCrypto": true,
+    "a-seed-actual-cookie-ls-idb": true,
+    "a-seed-no-read-rekey": true,
+    "a-seed-actual-nonexportable-key-usable": true,
+    "a-seed-actual-selected-upstream": true,
+    "b-empty-real-origin-and-WebCrypto": true,
+    "b-empty-actual-cookie-ls-idb": true,
+    "b-empty-no-read-rekey": true,
+    "b-empty-no-key-after-isolation-or-clear": true,
+    "b-empty-actual-selected-upstream": true,
+    "b-seed-real-origin-and-WebCrypto": true,
+    "b-seed-actual-cookie-ls-idb": true,
+    "b-seed-no-read-rekey": true,
+    "b-seed-actual-nonexportable-key-usable": true,
+    "b-seed-actual-selected-upstream": true,
+    "a-reopen-real-origin-and-WebCrypto": true,
+    "a-reopen-actual-cookie-ls-idb": true,
+    "a-reopen-no-read-rekey": true,
+    "a-reopen-actual-nonexportable-key-usable": true,
+    "a-reopen-actual-selected-upstream": true,
+    "b-reopen-real-origin-and-WebCrypto": true,
+    "b-reopen-actual-cookie-ls-idb": true,
+    "b-reopen-no-read-rekey": true,
+    "b-reopen-actual-nonexportable-key-usable": true,
+    "b-reopen-actual-selected-upstream": true,
+    "a-cleared-real-origin-and-WebCrypto": true,
+    "a-cleared-actual-cookie-ls-idb": true,
+    "a-cleared-no-read-rekey": true,
+    "a-cleared-no-key-after-isolation-or-clear": true,
+    "a-cleared-actual-selected-upstream": true,
+    "b-after-clear-a-real-origin-and-WebCrypto": true,
+    "b-after-clear-a-actual-cookie-ls-idb": true,
+    "b-after-clear-a-no-read-rekey": true,
+    "b-after-clear-a-actual-nonexportable-key-usable": true,
+    "b-after-clear-a-actual-selected-upstream": true,
+    "b-cleared-real-origin-and-WebCrypto": true,
+    "b-cleared-actual-cookie-ls-idb": true,
+    "b-cleared-no-read-rekey": true,
+    "b-cleared-no-key-after-isolation-or-clear": true,
+    "b-cleared-actual-selected-upstream": true,
+    "A-identical-encrypted-record-after-process-restart": true,
+    "B-identical-encrypted-record-after-restart-and-clear-A": true,
+    "A-and-B-independent-encrypted-records": true,
+    "actual-complete-process-close-before-every-step": true,
+    "clear-a-native-root-removal-completed": true,
+    "clear-b-native-root-removal-completed": true,
+    "same-verified-source-built-native-engine": true,
+    "actual-compiled-production-LSNG-timer-policy": true,
+    "explicit-timer-requests-without-claiming-readback": true,
+    "all-nine-real-native-policy-request-logs": true,
+    "original-abrupt-process-stop-semantics": true
+  },
+  "observations": [
+    {
+      "observation": {
+        "phase": "a-empty",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": null,
+        "localStorage": null,
+        "indexedDB": null,
+        "hasKey": false,
+        "extractable": null,
+        "exportRejected": false,
+        "roundTripOk": false,
+        "ciphertextSha256": null
+      },
+      "route": "selected",
+      "originalBodySha256": "5047755969664001f3b5db17fcc915dffc82861a5b043918661e6830f15da14c"
+    },
+    {
+      "observation": {
+        "phase": "a-seed",
+        "action": "seed",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": true,
+        "errors": [],
+        "cookie": "A",
+        "localStorage": "A",
+        "indexedDB": "A",
+        "hasKey": true,
+        "extractable": false,
+        "exportRejected": true,
+        "roundTripOk": true,
+        "ciphertextSha256": "254c021efec88c4f271eb54d7b74678d1ff23c2ca19b257f4bc77fe0ab508ecc",
+        "exportError": "InvalidAccessError"
+      },
+      "route": "selected",
+      "originalBodySha256": "52dadd27210c35575bd2a4cc452d1fb3fed71bd564a8339385626df60b86e61a"
+    },
+    {
+      "observation": {
+        "phase": "b-empty",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": null,
+        "localStorage": null,
+        "indexedDB": null,
+        "hasKey": false,
+        "extractable": null,
+        "exportRejected": false,
+        "roundTripOk": false,
+        "ciphertextSha256": null
+      },
+      "route": "selected",
+      "originalBodySha256": "1a612ace2bab6c80b9f8f26b4a9a210427d875e94fb40eba08b7895c5d2b8ccc"
+    },
+    {
+      "observation": {
+        "phase": "b-seed",
+        "action": "seed",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": true,
+        "errors": [],
+        "cookie": "B",
+        "localStorage": "B",
+        "indexedDB": "B",
+        "hasKey": true,
+        "extractable": false,
+        "exportRejected": true,
+        "roundTripOk": true,
+        "ciphertextSha256": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+        "exportError": "InvalidAccessError"
+      },
+      "route": "selected",
+      "originalBodySha256": "9e79ffe0fabbb375b9503fd6374de7b07379a8f62766c0871e9d505037a06d1a"
+    },
+    {
+      "observation": {
+        "phase": "a-reopen",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": "A",
+        "localStorage": "A",
+        "indexedDB": "A",
+        "hasKey": true,
+        "extractable": false,
+        "exportRejected": true,
+        "roundTripOk": true,
+        "ciphertextSha256": "254c021efec88c4f271eb54d7b74678d1ff23c2ca19b257f4bc77fe0ab508ecc",
+        "exportError": "InvalidAccessError"
+      },
+      "route": "selected",
+      "originalBodySha256": "8a70ecbbf2e9966dde5b29564a413749b72c6a12dd12a0965ae780cf5b87c98f"
+    },
+    {
+      "observation": {
+        "phase": "b-reopen",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": "B",
+        "localStorage": "B",
+        "indexedDB": "B",
+        "hasKey": true,
+        "extractable": false,
+        "exportRejected": true,
+        "roundTripOk": true,
+        "ciphertextSha256": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+        "exportError": "InvalidAccessError"
+      },
+      "route": "selected",
+      "originalBodySha256": "9e6838f1b071925b0fe446413f427f57c3040ac2657a5f6721e46495bc69faf9"
+    },
+    {
+      "observation": {
+        "phase": "a-cleared",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": null,
+        "localStorage": null,
+        "indexedDB": null,
+        "hasKey": false,
+        "extractable": null,
+        "exportRejected": false,
+        "roundTripOk": false,
+        "ciphertextSha256": null
+      },
+      "route": "selected",
+      "originalBodySha256": "3c356d87f1c5ea103796ff2ece45f5e97b041fce8046e487c5fb2e38c7f98a83"
+    },
+    {
+      "observation": {
+        "phase": "b-after-clear-a",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": "B",
+        "localStorage": "B",
+        "indexedDB": "B",
+        "hasKey": true,
+        "extractable": false,
+        "exportRejected": true,
+        "roundTripOk": true,
+        "ciphertextSha256": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+        "exportError": "InvalidAccessError"
+      },
+      "route": "selected",
+      "originalBodySha256": "64e22328780a0ed810af89955d8fd8eff55351c0d3ca2eb9a1e7798edf867686"
+    },
+    {
+      "observation": {
+        "phase": "b-cleared",
+        "action": "read",
+        "origin": "http://localhost:18080",
+        "secureContext": true,
+        "generatedKey": false,
+        "errors": [],
+        "cookie": null,
+        "localStorage": null,
+        "indexedDB": null,
+        "hasKey": false,
+        "extractable": null,
+        "exportRejected": false,
+        "roundTripOk": false,
+        "ciphertextSha256": null
+      },
+      "route": "selected",
+      "originalBodySha256": "cd8a293945d93f215d7311f978e0d47107b60e78ab3eef3c43866736a0e8535a"
+    }
+  ],
+  "encryptedRecordSha256": {
+    "a-empty": null,
+    "a-seed": "254c021efec88c4f271eb54d7b74678d1ff23c2ca19b257f4bc77fe0ab508ecc",
+    "b-empty": null,
+    "b-seed": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+    "a-reopen": "254c021efec88c4f271eb54d7b74678d1ff23c2ca19b257f4bc77fe0ab508ecc",
+    "b-reopen": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+    "a-cleared": null,
+    "b-after-clear-a": "3dbd53c6c917fa90400e8ed0e0062a024c3bd0550cf268ceafb198f3c597b4ab",
+    "b-cleared": null
+  },
+  "candidate": {
+    "source": "e87560077f16b8254fdbc7330aa46072c393d368",
+    "run": "41966583355",
+    "sha256": "2b865deb4359f1b45bb7fcfd178b5d0304a57c0d0278215d51d5a023a3c0d9e5",
+    "notProductAPK": true,
+    "engine": "GeckoView 159.0 source-built native route experiment",
+    "targetSdk": 36,
+    "minSdk": 28,
+    "debuggable": false,
+    "pagePolicyScript": false,
+    "nativePolicy": "public configFilePath / media.peerconnection.ice.proxy_only",
+    "signing": "disposable CI experiment key, not the owner product certificate",
+    "scope": "Native capability experiment only, no environment migration or product adoption",
+    "sourceEngineBuild": {
+      "source": "937bde85220b19a1433ff772b5f0b1a17238b4fc",
+      "run": "41940576338",
+      "upstreamGitRevision": "9a2dc53c369c7ae5172018b35988e1d2ffeff402",
+      "upstreamTag": "FIREFOX_159_0_RELEASE",
+      "publishedMavenHgRevision": "5add844c26613d7e4d84c799d6e23cf987b1240d",
+      "originalAffectedFileSha256": "918068eebc2080e170de43acbf3d10c3643f7fe8a82102548e38025622129988",
+      "appliedPatchSha256": "499192920a5ff49468f43004771176844341c666e27c15e330fe949ce8c91cb3",
+      "patchedFileSha256": "c6d2bc5c2478612d393fdf7d664dbdb2225b3631ec2a6321eb88107493389764",
+      "aarSha256": "a141db25e9a2c3c8091f4b7c83e21f1d38ddd2b9a0ce43b1c1cb1433d824d016",
+      "aarBytes": 91628401,
+      "abi": "x86_64",
+      "gradlePublicationVariant": "debug",
+      "nativeOptimized": true,
+      "nativeDebugSymbols": false,
+      "publishedAarByteMatch": true,
+      "publishedAarPaths": [
+        "obj-lyco/gradle/maven/org/mozilla/geckoview/geckoview-default-omni/159.0.20261105002822-SNAPSHOT/geckoview-default-omni-159.0.20261105002822-20261105.035737-1.aar",
+        "obj-lyco/gradle/maven/org/mozilla/geckoview/geckoview-default-omni/159.0.20261105002822-SNAPSHOT/geckoview-default-omni-159.0.20261105002822-20261105.040227-2.aar"
+      ],
+      "compilerConfigSha256": "9a6f4121cb8745bc57598eaa5c39db62d77bbd31f542ace8d95ef7ed63cd9ba6",
+      "compiledNativeCode": true,
+      "artifactBuild": false,
+      "productAdopted": false,
+      "storageFlushPolicy": {
+        "prefName": "dom.storage.database.flushIntervalMs",
+        "defaultDelayMs": 5000,
+        "originalSourceSha256": {
+          "dom/localstorage/ActorsParent.cpp": "0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5",
+          "modules/libpref/init/StaticPrefList.yaml": "d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330"
+        },
+        "patchedSourceSha256": {
+          "dom/localstorage/ActorsParent.cpp": "492a133abda69287bc0d9a4ed458013cbee83aba4649755cb90f357fa1b184d6",
+          "modules/libpref/init/StaticPrefList.yaml": "2b84754052ee706f524f8f0c8f636ce695b0a604fb398fd85a6d644beec9eccf"
+        },
+        "appliedPatchSha256": "85b220f4cba7e5e16ca898b19e7fe90a459744e351d2458da43e70207b7231e1",
+        "synchronousDiskFenceProven": false,
+        "nativeRuntimeProven": false
+      },
+      "scope": "Actual optimized source-built storage-policy archive only; default5000ms retained. No runtime durability, ARM64, migration, product adoption or release proof",
+      "storageRecipe": {
+        "run": "41940576338",
+        "source": "937bde85220b19a1433ff772b5f0b1a17238b4fc",
+        "baseRecipeCommit": "69110444d0742c231f55f0b1ccd489fa9fac2bdb",
+        "baseCompiledRun": 41772782539,
+        "normalCloseReference": 41873067393,
+        "cookieBufferReference": 41875833193,
+        "baseRecipeSha256": {
+          ".github/workflows/build-gecko-experiment.yml": "8a96177594e5756c146a89740cce2858d13a65e8d4b5922dac410c416cab4000",
+          "tests/mobile/engine/source/build-engine.sh": "976db526d07f8c69a28495c214321b332030365ec298c3e1133b981deb6612d0",
+          "tests/mobile/engine/source/build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+          "tests/mobile/engine/source/proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8",
+          "tests/mobile/engine/source-storage/database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b"
+        },
+        "generatedRecipeSha256": {
+          "database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b",
+          "build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+          "build-engine.sh": "545c38f56e47f6d2ea9ab7c4c050963553456309a74bf9a42e98e4f25c9cc0ad",
+          "proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8"
+        },
+        "replacements": [
+          {
+            "before": "git apply \"$root/proxy-default-address.patch\"\n",
+            "after": "git apply \"$root/proxy-default-address.patch\"\nprintf '%s  %s\\n' \\\n  0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5 dom/localstorage/ActorsParent.cpp \\\n  d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330 modules/libpref/init/StaticPrefList.yaml | sha256sum --check\ngit apply --check \"$root/database-flush-delay.patch\"\ngit apply \"$root/database-flush-delay.patch\"\n",
+            "count": 1
+          },
+          {
+            "before": "run_phase format ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n",
+            "after": "run_phase format ./mach format --skip-android dom/media/webrtc/jsapi/PeerConnectionImpl.cpp dom/localstorage/ActorsParent.cpp modules/libpref/init/StaticPrefList.yaml\n",
+            "count": 1
+          },
+          {
+            "before": "cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp \"$evidence/PeerConnectionImpl.cpp\"\n",
+            "after": "cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp \"$evidence/PeerConnectionImpl.cpp\"\ngit diff -- dom/localstorage/ActorsParent.cpp modules/libpref/init/StaticPrefList.yaml > \"$evidence/storage-applied.patch\"\ncp dom/localstorage/ActorsParent.cpp \"$evidence/ActorsParent.cpp\"\ncp modules/libpref/init/StaticPrefList.yaml \"$evidence/StaticPrefList.yaml\"\n",
+            "count": 1
+          },
+          {
+            "before": "test \"$(git diff --name-only)\" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n",
+            "after": "python3 - \"$evidence/changed-files.txt\" <<'PY_CHANGED'\nfrom pathlib import Path\nimport sys\nchanged = Path(sys.argv[1]).read_text().splitlines()\nassert len(changed) == 3 and set(changed) == {\n    'dom/media/webrtc/jsapi/PeerConnectionImpl.cpp',\n    'dom/localstorage/ActorsParent.cpp', 'modules/libpref/init/StaticPrefList.yaml'}\nPY_CHANGED\n",
+            "count": 1
+          },
+          {
+            "before": "       'compiledNativeCode':True,'artifactBuild':False,'productAdopted':False,\n",
+            "after": "       'compiledNativeCode':True,'artifactBuild':False,'productAdopted':False,\n       'storageFlushPolicy':{\n           'prefName':'dom.storage.database.flushIntervalMs','defaultDelayMs':5000,\n           'originalSourceSha256':{\n               'dom/localstorage/ActorsParent.cpp':'0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5',\n               'modules/libpref/init/StaticPrefList.yaml':'d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330'},\n           'patchedSourceSha256':{\n               'dom/localstorage/ActorsParent.cpp':digest(evidence/'ActorsParent.cpp'),\n               'modules/libpref/init/StaticPrefList.yaml':digest(evidence/'StaticPrefList.yaml')},\n           'appliedPatchSha256':digest(evidence/'storage-applied.patch'),\n           'synchronousDiskFenceProven':False,'nativeRuntimeProven':False},\n",
+            "count": 1
+          }
+        ],
+        "architecture": "x86_64",
+        "storagePreference": "dom.storage.database.flushIntervalMs",
+        "defaultDelayMs": 5000,
+        "upstreamChangedFiles": [
+          "dom/media/webrtc/jsapi/PeerConnectionImpl.cpp",
+          "dom/localstorage/ActorsParent.cpp",
+          "modules/libpref/init/StaticPrefList.yaml"
+        ],
+        "baseFilesModified": false,
+        "routePatchChanged": false,
+        "resourcePolicyChanged": false,
+        "nativeOptimizationChanged": false,
+        "storageFormatChanged": false,
+        "synchronousDiskFenceProven": false,
+        "nativeRuntimeProven": false,
+        "productAdopted": false
+      },
+      "nativeLibraries": [
+        {
+          "path": "jni/x86_64/libclearkey.so",
+          "bytes": 142816,
+          "sha256": "bd3be044b44caaebeda7853b9f587e1cbfc017e95f378882f64a0f2da6cebc55",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libcrashhelper.so",
+          "bytes": 940704,
+          "sha256": "4914da2f00351271ce362ab9b5837cda70a3af4fec26b570c9edb0feaf8da5c5",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libcrashtools.so",
+          "bytes": 3349312,
+          "sha256": "681c6da9f8a5933e52da587f323bdc84e0bb4c5ad0aad375aa0c08bd55ef56b7",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libfreebl3.so",
+          "bytes": 1200136,
+          "sha256": "f8692bbbd386e5a90bc61a85fcfa5bce33ad8e41bb8903ebeaec15c586a320a5",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libgkcodecs.so",
+          "bytes": 9417872,
+          "sha256": "f34ae2fd723a527b8d9879f2f05c42353d2d1ffa318172db911c6982379f0d9d",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/liblgpllibs.so",
+          "bytes": 179296,
+          "sha256": "4dd7bfdf084e59f18edcb546f464957433d9fe1bf98689e24de51d76c2c66b6e",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libmozavcodec.so",
+          "bytes": 4091192,
+          "sha256": "d22cdf3ec78df47c8a98feb05ab2091c59254bf460f707c3845dbfdf1688221d",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libmozavutil.so",
+          "bytes": 603552,
+          "sha256": "428029398c925a5db80333247c8a6ab74935a91dfd00c6c7477531ba08d8ecbd",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libmozglue.so",
+          "bytes": 1285232,
+          "sha256": "c7019d2a14e27be9ff39937b37f1395033903e7bba5eba7710ee34b455329f1c",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libnss3.so",
+          "bytes": 2987432,
+          "sha256": "ce6fae26de98fef0f1bba7cc7dd19a037ef7a073f22dd982ee62841e555ece5a",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libplugin-container.so",
+          "bytes": 4584,
+          "sha256": "2bc44761f7e4c46fca7a707138764873e40e668357c867f13868024f8fd63315",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libsoftokn3.so",
+          "bytes": 363064,
+          "sha256": "fc239f804d579836ceefa493d434ac220be970ec073548c56a6da087ec956240",
+          "elfClass": 64,
+          "elfMachine": 62
+        },
+        {
+          "path": "jni/x86_64/libxul.so",
+          "bytes": 173024512,
+          "sha256": "829b7a1e472c968d443b4232449d621a7826ef068346249f1acb3a08de7d34b4",
+          "elfClass": 64,
+          "elfMachine": 62
+        }
+      ],
+      "actualElfArchitectureVerified": true,
+      "storageRuntimeProven": false,
+      "synchronousDiskFenceProven": false
+    },
+    "packagedNativeLibrariesMatchSourceAar": true
+  },
+  "scope": "Genuine API35 non-debuggable x86_64 Gecko capability only: cold per-UUID profile roots, same-origin Cookie/localStorage/IndexedDB, actual non-exportable AES-GCM CryptoKey persistence and exact root clearing. No product adoption, WebView migration, ARM64 runtime, customer credential/key export, all-network or release proof.",
+  "productAdopted": false,
+  "webViewMigrationProven": false,
+  "arm64RuntimeProven": false,
+  "privateStorageOrKeyMaterialExported": false
+}

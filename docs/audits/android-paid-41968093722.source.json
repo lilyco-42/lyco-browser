@@ -1,0 +1,74 @@
+{
+  "verifiedAt": "2026-11-05T04:52:39.869387+00:00",
+  "run": 41968093722,
+  "job": 127049793243,
+  "sourceRun": 41964719754,
+  "analyzerSource": "6e07ad6a5d0c4c096cb1090cc778aeae3ec3f6d5",
+  "candidate": {
+    "run": 41964719754,
+    "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "runtime_source_diff": "empty",
+    "signed_certificate": "retained-owner-certificate",
+    "apk_modified": false
+  },
+  "artifacts": [
+    {
+      "id": 13388772946,
+      "bytes": 1952650,
+      "sha256": "7a65285514673e88b47386299b677d8d8ce796758bc1a02abd9ed325c9c70ee4"
+    },
+    {
+      "id": 13388436997,
+      "bytes": 47772208,
+      "sha256": "d6994cdf0c54cdcfdde39fa52c51b35db027a2faa4d4ad5275568c12abf3aef4"
+    }
+  ],
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "allSixLegacyFilesOriginalSizeAndHashVerified": true,
+  "originalChecks": 14,
+  "actualJUnitFlows": 15,
+  "zeroFailuresErrorsSkips": true,
+  "rawSevenPlusOneStorageRouteReportsRecomputed": true,
+  "originalMetadataUpgradeDowngradeFinalReceiptsEqual": true,
+  "oldApkSaveActuallyDisabled": true,
+  "searchCancelAndInvalidEditNoNewOrigin": true,
+  "rawTextCommandRecords": [
+    {
+      "file": "paid-edit-details-save-debug/paid-edit-details/commands.json",
+      "assertStatus": "COMPLETED",
+      "copyStatus": "COMPLETED",
+      "condition": "${maestro.copiedText === VALUE}",
+      "actualEvaluatedValue": "true"
+    },
+    {
+      "file": "paid-edit-details-save-debug/paid-edit-details/commands.json",
+      "assertStatus": "COMPLETED",
+      "copyStatus": "COMPLETED",
+      "condition": "${maestro.copiedText === VALUE}",
+      "actualEvaluatedValue": "true"
+    },
+    {
+      "file": "paid-edit-details-restore-debug/paid-edit-details/commands.json",
+      "assertStatus": "COMPLETED",
+      "copyStatus": "COMPLETED",
+      "condition": "${maestro.copiedText === VALUE}",
+      "actualEvaluatedValue": "true"
+    },
+    {
+      "file": "paid-edit-details-restore-debug/paid-edit-details/commands.json",
+      "assertStatus": "COMPLETED",
+      "copyStatus": "COMPLETED",
+      "condition": "${maestro.copiedText === VALUE}",
+      "actualEvaluatedValue": "true"
+    }
+  ],
+  "sourceAndSignatureMatchProducer": true,
+  "decodedLogSha256": "5d0ad9073f4842aefcd8ff99df969fc2fec60b3fee94ead777481c049b912eae",
+  "realPayments": false,
+  "rtcOrRealCustomerEgressOrIosOrReleaseProof": false,
+  "privateDatabaseExported": false,
+  "fourFullFieldCopyAndEqualityAssertionsVerified": true,
+  "privateMetadataProofLimit": "Only original runner-produced hashes/structured receipts retained; private database contents not exported or independently reconstructed.",
+  "allSixLegacyFilesByteEqualPreviouslyVerifiedHistoricalOriginals": true
+}
