@@ -59,7 +59,9 @@ public final class PacketVpnService extends VpnService {
                 .addAllowedApplication(getPackageName()).setBlocking(false).establish();
             if (descriptor == null) throw new IllegalStateException("VPN establish returned null");
             synchronized (LOCK) { tunnel = descriptor; active = true; }
-            Thread reader = new Thread(() -> readPackets(descriptor), "owned-tun-reader");
+            Thread reader = new Thread(new Runnable() {
+                @Override public void run() { readPackets(descriptor); }
+            }, "owned-tun-reader");
             reader.setDaemon(true);
             reader.start();
         } catch (Exception exception) {
