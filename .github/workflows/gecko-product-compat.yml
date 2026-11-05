@@ -37,6 +37,7 @@ jobs:
         with:
           name: lyco-gecko-product-compat-source-${{ github.run_id }}
           path: ${{ runner.temp }}/lyco-gecko-product-compat/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
   metadata:
@@ -93,5 +94,6 @@ jobs:
         with:
           name: lyco-gecko-product-compat-evidence-${{ github.run_id }}
           path: ${{ runner.temp }}/lyco-gecko-product-compat/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
