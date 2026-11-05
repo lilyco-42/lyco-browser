@@ -1,5 +1,8 @@
 name: Gecko source and actual Expo product dependency compatibility
 on:
+  push:
+    branches: ['ci/gecko-product-compat-*']
+    paths: ['tests/mobile/engine/product-compat/**', '.github/workflows/gecko-product-compat.yml']
   pull_request:
     branches: [main]
     paths: ['tests/mobile/engine/product-compat/**', '.github/workflows/gecko-product-compat.yml']
