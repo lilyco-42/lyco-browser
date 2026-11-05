@@ -69,12 +69,17 @@ def page(phase):
         time.sleep(.2)
 
 
-def literal(value):
+def canonical_address(value):
+    if not isinstance(value, str):
+        return None
     try:
-        ipaddress.ip_address(value)
-        return isinstance(value, str)
-    except (ValueError, TypeError):
-        return False
+        return str(ipaddress.ip_address(value[1:-1] if value.startswith('[') and value.endswith(']') else value))
+    except ValueError:
+        return None
+
+
+def literal(value):
+    return canonical_address(value) is not None
 
 
 try:
@@ -133,7 +138,9 @@ try:
                 found.append({'source': 'original-stats', 'address': value, 'candidateType': row.get('candidateType')})
         addresses[observation['name']] = found
     physical = {a['local'] for row in json.loads((root / 'initial-addresses.json').read_text()) for a in row.get('addr_info', []) if a.get('scope') != 'host'}
-    physical_found = {n: [a for a in values if a['address'] in physical] for n, values in addresses.items()}
+    physical = {canonical_address(a) for a in physical}
+    physical_found = {n: [a for a in values if canonical_address(a['address']) in physical] for n, values in addresses.items()}
+    virtual_found = {n: [a for a in values if canonical_address(a['address']) in {'192.0.2.2', '2001:db8::2'}] for n, values in addresses.items()}
     counts = {n: vpn_state['stunDestinationPorts'].get(str(data['ports']['vpn'][n]), 0) for n in cases}
     vpn_received = [r for r in data['stun'] if r['phase'] == 'vpn' and r['validStun']]
     result = {'experimentCompleted': True, 'candidate': candidate, 'controlStunCounts': control_counts,
@@ -141,6 +148,7 @@ try:
               'capturedStunPacketsByContext': counts, 'receivedStunPacketsWithVpn': len(vpn_received),
               'packetInterceptionProvenForTheseContexts': all(v > 0 for v in counts.values()) and not vpn_received,
               'originalNumericAddressObservations': addresses, 'physicalInterfaceAddressesObserved': physical_found,
+              'vpnInterfaceAddressesObserved': virtual_found,
               'rawAddressGatePassedForTheseThreeContexts': not any(addresses.values()),
               'upstreamForwarding': False, 'turnFunctionalPositiveProven': False,
               'permissionRevocationFailClosedProven': False, 'ipv6PacketBoundaryProven': False,

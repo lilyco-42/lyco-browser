@@ -57,7 +57,7 @@ public final class ProbeActivity extends Activity {
             if (permission == null) startForegroundService(new Intent(this, PacketVpnService.class));
             else startActivityForResult(permission, 17);
         } else if ("stop-vpn".equals(action)) {
-            stopService(new Intent(this, PacketVpnService.class));
+            startService(new Intent(this, PacketVpnService.class).setAction(PacketVpnService.STOP));
         }
     }
 

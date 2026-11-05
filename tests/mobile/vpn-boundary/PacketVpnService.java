@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 /** Captures/discards owned packets; never forwards or protects an outbound socket. */
 public final class PacketVpnService extends VpnService {
+    static final String STOP = "top.lain42.lycovpnboundary.STOP";
     private static final Object LOCK = new Object();
     private static volatile boolean active;
     private static ParcelFileDescriptor tunnel;
@@ -45,6 +46,12 @@ public final class PacketVpnService extends VpnService {
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && STOP.equals(intent.getAction())) {
+            closeTunnel();
+            stopForeground(STOP_FOREGROUND_REMOVE);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         if (active) return START_NOT_STICKY;
         try {
             if (prepare(this) != null) throw new IllegalStateException("VPN consent missing");
