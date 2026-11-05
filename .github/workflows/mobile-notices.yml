@@ -17,6 +17,10 @@ on:
         description: Retain exact module sources and notice originals from a successful APK native metadata audit
         type: string
         default: ''
+      native_go_component:
+        description: Verify original offline notices against a successful actual Android core component
+        type: string
+        default: ''
       go_toolchain_source:
         description: Retain pinned official Go compiler/runtime/standard-library sources without building targets
         type: boolean
@@ -25,7 +29,7 @@ permissions:
   contents: read
 jobs:
   offline-notices:
-    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin && !inputs.go_toolchain_source }}
+    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin && !inputs.native_go_component && !inputs.go_toolchain_source }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -61,6 +65,35 @@ jobs:
             apps/universal/third-party/npm-notice-supplements.json
             ${{ runner.temp }}/lyco-npm-notice-evidence
           if-no-files-found: error
+          retention-days: 7
+
+  native-go-component:
+    if: ${{ inputs.native_go_component != '' }}
+    name: Bind original offline notices to the actually compiled core tree
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions: {contents: read, actions: read}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NATIVE_GO_COMPONENT: ${{ inputs.native_go_component }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Verify original archives, actual ELF graphs, locks and verbatim notice bytes
+        run: |
+          python3 -m py_compile scripts/collect-go-notice-core-binding.py
+          python3 scripts/collect-go-notice-core-binding.py "$NATIVE_GO_COMPONENT"
+      - name: Retain the actual review and generated source descriptor
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-go-notice-core-binding-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-go-notice-binding/evidence/
+          if-no-files-found: warn
           retention-days: 7
 
   go-toolchain-source:
