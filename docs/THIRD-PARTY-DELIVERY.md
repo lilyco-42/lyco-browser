@@ -2,7 +2,11 @@
 
 新增的 Android 核心组件源码留存已有真实 [Actions 41882642428](https://github.com/lilyco-42/lyco-browser/actions/runs/41882642428) 的局部成功证据：两种架构的实际 Go 编译输入各 13 份及原锁文件均保留，编译前后输入未变，实际输出与 AAR 两份 ELF 库逐字节一致；另保存 266 份 Java/Go/Cgo 工作源码、工具原始构建信息和实际 NDK 修订。完整组件 ZIP 808543847 字节、SHA-256 `390085da933cd3950edc26374f560e5bd4dbca6cf710b34ac1e63068b9c2696b`，完整收据 ZIP 589699 字节、SHA-256 `21f905b06d66efa04934075e83a5f2214cc2fc58774491e4562072d597ce88c4`，均已独立大小/SHA/CRC 核验。两份实际 ELF 的内嵌 Go 信息与原始记录一致，`vcs.modified=true` 保留。父源码包包含真实受测合并提交 `6b83a382510b0f0602161a1a77d8568a9105c368` 的全部 404 份受跟踪文件、405 个依赖原始 ZIP；全部内层 CRC、逐文件 SHA 以及 Go 模块和 go.mod 校验和均核对。见[未修改原始清单](audits/android-generated-bindings-41882642428.json)和[独立核验记录](audits/android-generated-bindings-41882642428.source.json)。
 
-核验同时发现外层 `go.sum` 在下载绑定工具依赖后增加 380 条校验记录，与实际编译时的摘要不同；原始编译锁仍在嵌套生成源码包中，两种架构一致，外层也保留原有全部行。打包修正改为直接复制原始编译锁并核对两种架构，尚待新构建证明，不能追认旧档案外层锁完全一致。该次 Android 工作通过，Apple 工作取消、整体工作流失败，不算全平台通过。仅 Android 组件任务启用，产品默认构建不启用，原 Go/代理运行与平台构建门槛保留。具体实现和限制见[核心源码留存](../mobile/core/README.md#generated-binding-inputs)。这些证据不证明旧 `4dc38db` 签名 APK 的生成源码、可重现构建、Apple/全部 SDK/NDK 源码与许可或完整商业交付。原三项 npm 原文缺口及其他依赖审查保留。
+核验同时发现外层 `go.sum` 在下载绑定工具依赖后增加 380 条校验记录，与实际编译时的摘要不同；原始编译锁仍在嵌套生成源码包中，两种架构一致，外层也保留原有全部行。打包修正改为直接复制原始编译锁并核对两种架构，不能追认旧档案外层锁完全一致。该次 Android 工作通过，Apple 工作取消、整体工作流失败，不算全平台通过。
+
+修正后的 [41941420955](https://github.com/lilyco-42/lyco-browser/actions/runs/41941420955) 组件构建已成功。完整组件 ZIP 808532959 字节、SHA-256 `b23a8c9072045ae703ae75ee71efa680e5c6a3ab4dbbcdb30e50e2a30e9871d6`，收据 ZIP 589957 字节、SHA-256 `d0d2006a043f0843ceeadd0fae94d844a38a9719f7e20535d5ea80a9f941c779`，均完整大小/SHA/CRC 核验。对这份变化后的产物重新核验实际库和两份编译收据、266 份工作源码、嵌套归档、全部 406 份受测合并提交文件，以及 405 个模块 ZIP 的 55988 条目 CRC、SHA 和 Go 校验和；外层两份锁文件现与两种架构的实际编译输入逐字节一致，额外校验行为零。真实受测合并提交为 `798999b09f1d389d0cdd374312c2066223db9010`，不冒充 PR 头提交。[未修改的新清单](audits/android-generated-bindings-41941420955.json)和[独立核验记录](audits/android-generated-bindings-41941420955.source.json)保留原件关系。该次 Apple 组件工作也通过，但没有启用 Apple 生成源码收集，未据此验证其全部原件、安装包或运行行为。
+
+仅 Android 组件任务启用生成源码收集，产品默认构建不启用，原 Go/代理运行与平台构建门槛保留。具体实现和限制见[核心源码留存](../mobile/core/README.md#generated-binding-inputs)。这些证据不证明旧 `4dc38db` 签名 APK 的生成源码、可重现构建、Apple/全部 SDK/NDK 源码与许可或完整商业交付。原三项 npm 原文缺口及其他依赖审查保留。
 
 ## 已有授权与交付范围
 

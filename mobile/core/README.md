@@ -82,10 +82,20 @@ after binding-tool dependency downloads. Both actual compiler locks survived
 unchanged inside the generated tar, and the outer file retained every original
 line, but its digest differed. The corrected opt-in source bundler now copies
 the captured compiler locks, requiring both architectures to agree. This
-packaging correction still needs a new genuine build and full original proof;
-the first archive is not retrospectively marked as an exact outer-lock match.
-The Android job succeeded; the overall run failed with Apple cancelled, so it
-is not an all-platform pass.
+packaging correction passed genuine
+[41941420955](https://github.com/lilyco-42/lyco-browser/actions/runs/41941420955).
+Both complete original ZIPs, all nested archives, both actual ELF/compiler
+receipts, the 406-file tested merge tree and all 405 original module ZIPs were
+independently checked again for this changed output. Both outer locks now
+byte-match both compiler inputs, with zero additional checksum lines. The
+[new unmodified manifest](../../docs/audits/android-generated-bindings-41941420955.json)
+and [independent source record](../../docs/audits/android-generated-bindings-41941420955.source.json)
+bind those exact bytes. The first archive is not retrospectively marked as an
+exact outer-lock match.
+In the first run Android succeeded but the overall run failed with Apple
+cancelled, so that is not an all-platform pass. The newer component workflow succeeded including
+Apple, but Apple generated-source capture is disabled and its runtime and full
+source delivery remain separate requirements.
 It does not establish correspondence to the older signed APK, all SDK/NDK
 source delivery, license clearance, bit-for-bit reproduction, Apple capture or
 commercial release. Original routing/build gates remain required. No local
