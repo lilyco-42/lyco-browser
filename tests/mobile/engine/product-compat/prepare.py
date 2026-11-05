@@ -102,13 +102,6 @@ elif phase == 'adapt':
     # Dependency and repository only. No compile SDK override, suppression,
     # acceptance change, native entry point or modification of the source AAR.
     addition = '''
-repositories {
-  maven {
-    url uri(System.getenv('LYCO_ENGINE_MAVEN_ROOT'))
-    content { includeModule 'top.lain42.experimental', 'geckoview-source' }
-  }
-  maven { url 'https://maven.mozilla.org/maven2' }
-}
 dependencies {
   implementation 'top.lain42.experimental:geckoview-source:159.0-route-experiment'
 }
@@ -116,12 +109,32 @@ dependencies {
     module.write_bytes(original + addition.encode())
     (evidence / 'module-build.original.gradle').write_bytes(original)
     (evidence / 'module-build.adapted.gradle').write_bytes(module.read_bytes())
+    # A library's repositories do not define the consuming app's repository
+    # set. Register only this exact local coordinate for every product project.
+    root_build = stage / 'apps/universal/android/build.gradle'
+    original_root = root_build.read_bytes()
+    repository_addition = '''
+allprojects {
+  repositories {
+    maven {
+      url uri(System.getenv('LYCO_ENGINE_MAVEN_ROOT'))
+      content { includeModule 'top.lain42.experimental', 'geckoview-source' }
+    }
+  }
+}
+'''
+    root_build.write_bytes(original_root + repository_addition.encode())
+    (evidence / 'root-build.original.gradle').write_bytes(original_root)
+    (evidence / 'root-build.adapted.gradle').write_bytes(root_build.read_bytes())
     (evidence / 'ADAPTATION.json').write_text(json.dumps({
         'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
         'originalPins': pins, 'afterPrebuildInputHashes': generated_inputs,
-        'onlyCustomProductFileAdapted': str(module.relative_to(stage)),
+        'customNativeBuildFilesAdapted': [str(module.relative_to(stage)), str(root_build.relative_to(stage))],
         'appendedText': addition, 'originalModuleSha256': hashlib.sha256(original).hexdigest(),
         'adaptedModuleSha256': digest(module), 'sourceEngineRun': 41940576338,
+        'rootRepositoryAppendedText': repository_addition,
+        'originalGeneratedRootSha256': hashlib.sha256(original_root).hexdigest(),
+        'adaptedGeneratedRootSha256': digest(root_build),
         'sourceEngineAarSha256': digest(engine), 'sourceEngineAarBytes': engine.stat().st_size,
         'compileSdkOverridden': False, 'versionChecksSuppressed': False,
         'productRuntimeChanged': False, 'originalWebviewRootOrProfileSchemaChanged': False,

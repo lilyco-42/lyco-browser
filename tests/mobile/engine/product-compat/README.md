@@ -11,7 +11,10 @@ Only a manually dispatched `inspect=true` runs the dependency gate. It uses the
 unchanged source downloader/verifier and only producer `41940576338`, then
 copies Git-tracked product source to a disposable runner directory, installs
 the original lock and runs ordinary Expo prebuild. It appends the source-engine
-Maven dependency/repositories only to that private native module copy.
+Maven dependency only to that private native module copy. The generated private
+root build registers a local repository filtered to exactly that coordinate for
+all projects, including the consuming app; both original and appended bytes
+are retained. No other dependency can resolve from that local repository.
 
 The task is the actual product's `:app:checkReleaseAarMetadata`. Its exit code
 remains the job outcome; an incompatible dependency must fail. SDK checks,
