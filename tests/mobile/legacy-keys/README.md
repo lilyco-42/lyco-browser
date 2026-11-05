@@ -44,9 +44,24 @@ The actual merge commit includes source `4cf92d7`; this is Actions preparation
 and Python/JS/shell syntax, not native key preservation. See the [original receipt](../../../docs/audits/android-legacy-key-preflight-42066948510.json)
 and [provenance](../../../docs/audits/android-legacy-key-preflight-42066948510.source.json).
 One actual native validation [42067379466](https://github.com/lilyco-42/lyco-browser/actions/runs/42067379466)
-uses unchanged signed candidate `41964719754`. Its fixture, source and signing
-gates have passed; the device matrix is in progress. No key-preservation result
-is claimed before the original device reports and artifacts are verified. It does not establish Gecko adoption,
+passed on the API35 emulator using unchanged signed candidate `41964719754`.
+All eight raw website key reports match the original result: only the two
+authorized seed pages generated keys; the six read pages used the original
+non-extractable AES-256 keys, rejected export and decrypted the same ciphertext.
+The original fourteen checks and fifteen native UI flows also passed, including
+four full-text field comparisons and upgrade/downgrade/return receipts.
+
+The full 1897959-byte evidence ZIP (SHA-256
+`0f161a4f9d302807eb9eae070e292e2df25ffb9dbab4368a466b8c54f2c07603`),
+31041-byte device preparation, all six historical fixture files, CRCs and full
+134728-byte log were independently checked. All thirteen device preparation
+files equal the verified preparatory originals. See the [unmodified result](../../../docs/audits/android-legacy-keys-42067379466.json)
+and [provenance](../../../docs/audits/android-legacy-keys-42067379466.source.json).
+Private database contents were removed on the runner; their contents were not
+exported or independently reconstructed from the structured hash receipts.
+
+This proves scoped old/current WebView key retention, not physical-device
+acceptance. It does not establish Gecko adoption,
 generic WebView-to-Gecko key migration, ARM64, power-loss durability, product
 RTC, real payments, iOS, signing/distribution or five-platform readiness. A
 successful old/current retention result must not replace those requirements.

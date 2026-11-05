@@ -22,7 +22,22 @@ part of this workflow. Compilation is opt-in only after real PR preparation
 and syntax originals are verified; no original workflow or queued run is
 cancelled, replaced or replayed.
 
-The code is prepared, not yet validated. The final archive, actual ARM64
+The genuine [PR preflight 42069972627](https://github.com/lilyco-42/lyco-browser/actions/runs/42069972627)
+passed preparation and Python/shell parsing. Its complete 34882-byte ZIP
+(SHA-256 `e01b30d6a2bd5d026161da2ba74929a23adf642c76d68d9cbfc4a8d389f6169c`),
+all eighteen files, four original pins, generated recipes, exact transforms,
+CRC and full log were independently checked. See the [unmodified receipt](../../../../docs/audits/gecko-storage-arm64-preflight-42069972627.json)
+and [provenance](../../../../docs/audits/gecko-storage-arm64-preflight-42069972627.source.json).
+
+The distinct actual build [42070649430](https://github.com/lilyco-42/lyco-browser/actions/runs/42070649430)
+is compiling source `643be4f`. Its complete host-check and preparation originals
+were independently checked: all eighteen preparation files match the compile
+host; the fifteen non-JSON files equal the verified PR originals, and the three
+recipe objects differ only in actual run/source identifiers. The unchanged
+non-root resource/credential check exited zero. This check-only result does not
+prove the compiler's final resource use or successful native compilation.
+
+The final archive, actual ARM64
 runtime, old WebView data/key preservation, product bridge, performance,
 license delivery and five-platform signing/distribution remain separate
 requirements. No default installer or product engine is changed.
