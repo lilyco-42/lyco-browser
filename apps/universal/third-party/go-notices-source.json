@@ -7,11 +7,21 @@
   "originalArchiveBytes": 79106033,
   "originalArchiveSha256": "89c8b0c333c14b522c20c5c667f519768d7d9aee31f65847369fb30d6f508f84",
   "catalogSha256": "8dd661c87580366993b73a5304c97576c16d52abea90254e9a4f974744976b75",
-  "coreSourceTree": "be42ced6350d9ed83ae5d71d632386e844cd17f9",
+  "coreSourceTree": "22e63f5e223f6466858f77be9516a3c2c680e0e4",
   "moduleCount": 72,
   "noticeFiles": 104,
   "completeOriginalArchiveSizeShaCrcVerified": true,
   "noticeBytesMatchOriginalModuleZips": true,
   "completeLicenseClearanceProven": false,
-  "scope": "Android observed Go dependency originals; excludes Go standard library, NDK/cgo, generated bindings and other native libraries"
+  "scope": "Android observed Go dependency originals; excludes Go standard library, NDK/cgo, generated bindings and other native libraries",
+  "currentCoreBindingReview": {
+    "run": "41945034941",
+    "producerRun": 41942598583,
+    "producerHead": "85c652cde5d5e936025c36b18b1e9f1459d74a03",
+    "testedMergeCommit": "513e7a327e6f5e8764a60ab03d297342a0eb27bf",
+    "coreSourceTree": "22e63f5e223f6466858f77be9516a3c2c680e0e4",
+    "reviewSha256": "653750395cdbde9d69ea89c012129a7d806be7073d115cbc5e2cb3c5b8d15976",
+    "actualModuleGraphsAndOriginalNoticeBytesVerified": true,
+    "currentSignedApkCorrespondenceProven": false
+  }
 }
