@@ -1,0 +1,2305 @@
+{
+  "platform": "linux",
+  "source": "a90f20c7cea206782e0cacf81388bc7281d15067",
+  "checks": [
+    "packaged-and-running-product-version-matches-shared-manifest",
+    "native-diagnostics-panel-real-empty-state-themes-and-keyboard-close",
+    "native-official-subscription-help-both-locales-and-themes",
+    "packaged-ofl-ui-font-loaded-and-distinct-chinese-glyphs",
+    "native-login",
+    "native-long-term-proxy-plan-labels-and-compatible-entitlement",
+    "two-real-managed-environments",
+    "real-mihomo-core-http-positive-control",
+    "a-first-proxied-storage",
+    "b-first-proxied-storage",
+    "a-reopen-proxied-storage",
+    "native-failed-upstream-no-direct-http-websocket-or-tls-connection",
+    "native-webrtc-peer-connection-no-literal-ip-or-direct-stun-packets",
+    "unmanaged-native-http-websocket-tls-direct-positive-controls",
+    "native-per-workspace-selected-upstreams-reopen-failure-and-route-change",
+    "native-logout"
+  ],
+  "observations": [
+    {
+      "phase": "a-first",
+      "before": {
+        "cookie": null,
+        "local": null
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A"
+      },
+      "proxied": true
+    },
+    {
+      "phase": "b-first",
+      "before": {
+        "cookie": null,
+        "local": null
+      },
+      "after": {
+        "cookie": "B",
+        "local": "B"
+      },
+      "proxied": true
+    },
+    {
+      "phase": "a-reopen",
+      "before": {
+        "cookie": "A",
+        "local": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A"
+      },
+      "proxied": true
+    }
+  ],
+  "proxyRequests": [],
+  "fixturePorts": {
+    "origin": 43813,
+    "proxy": 37845,
+    "geo": 45635
+  },
+  "product": {
+    "version": "1.0.25",
+    "build": 2,
+    "channel": "internal-preview",
+    "runningVersion": "1.0.25"
+  },
+  "diagnosticsPanel": {
+    "emptyState": true,
+    "layouts": [
+      {
+        "locale": "zh-CN",
+        "mode": "dark",
+        "viewport": 1280,
+        "panel": {
+          "left": 360,
+          "right": 920,
+          "top": 75.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 302.53125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 302.53125,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 352.625,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 352.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 560.1875,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 560.1875,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 610.28125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 610.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "zh-CN",
+        "mode": "light",
+        "viewport": 1280,
+        "panel": {
+          "left": 360,
+          "right": 920,
+          "top": 75.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 302.53125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 302.53125,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 352.625,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 352.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 560.1875,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 560.1875,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 610.28125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 610.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "dark",
+        "viewport": 1280,
+        "panel": {
+          "left": 360,
+          "right": 920,
+          "top": 52.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 279.390625,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 279.390625,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 329.484375,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 329.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 580.234375,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 580.234375,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 630.328125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 630.328125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "light",
+        "viewport": 1280,
+        "panel": {
+          "left": 360,
+          "right": 920,
+          "top": 52.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 279.390625,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 279.390625,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 329.484375,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 329.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 385,
+            "right": 635,
+            "top": 580.234375,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 580.234375,
+            "width": 250
+          },
+          {
+            "left": 385,
+            "right": 635,
+            "top": 630.328125,
+            "width": 250
+          },
+          {
+            "left": 645,
+            "right": 895,
+            "top": 630.328125,
+            "width": 250
+          }
+        ]
+      }
+    ]
+  },
+  "uiCjk": {
+    "loaded": [
+      {
+        "family": "LYCO UI CJK",
+        "status": "loaded"
+      }
+    ],
+    "computed": "\"LYCO UI CJK\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "glyphs": [
+      {
+        "char": "代",
+        "hash": 2090719556,
+        "ink": 347
+      },
+      {
+        "char": "理",
+        "hash": 507191396,
+        "ink": 481
+      },
+      {
+        "char": "订",
+        "hash": 3562809397,
+        "ink": 296
+      },
+      {
+        "char": "阅",
+        "hash": 2714363786,
+        "ink": 471
+      },
+      {
+        "char": "环",
+        "hash": 358615214,
+        "ink": 357
+      },
+      {
+        "char": "境",
+        "hash": 3748261711,
+        "ink": 468
+      }
+    ]
+  },
+  "connectTargets": [
+    "127.0.0.1:43813",
+    "ip-api.com:80",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "127.0.0.1:43813",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "127.0.0.1:43813",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "ip-api.com:80",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "www.gstatic.com:443",
+    "update.googleapis.com:443",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "update.googleapis.com:443",
+    "127.0.0.1:43813",
+    "www.google.com:443",
+    "127.0.0.1:43813",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "ip-api.com:80",
+    "update.googleapis.com:443",
+    "accounts.google.com:443",
+    "update.googleapis.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "update.googleapis.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "127.0.0.1:43813",
+    "update.googleapis.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "update.googleapis.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "ip-api.com:80",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "update.googleapis.com:443",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "clients2.google.com:80",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "clients2.google.com:80",
+    "www.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "update.googleapis.com:443",
+    "127.0.0.1:43813",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "update.googleapis.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "accounts.google.com:443",
+    "clients2.google.com:80",
+    "accounts.google.com:443",
+    "www.google.com:443",
+    "www.gstatic.com:443",
+    "www.google.com:443",
+    "127.0.0.1:33813",
+    "127.0.0.1:33813",
+    "127.0.0.1:43211",
+    "127.0.0.1:43211"
+  ],
+  "geoRequests": 4,
+  "webrtcAudit": {
+    "udpPort": 38790,
+    "udpPackets": 0,
+    "rtc": {
+      "completed": true,
+      "blocked": false,
+      "ipCandidate": false,
+      "candidateCount": 0
+    },
+    "pageProxied": true,
+    "reportProxied": true
+  },
+  "failedProxyAudit": {
+    "live": {
+      "http": {
+        "attempted": true,
+        "ok": true
+      },
+      "https": {
+        "attempted": true,
+        "ok": false
+      },
+      "ws": {
+        "attempted": true,
+        "ok": true
+      }
+    },
+    "closed": {
+      "http": {
+        "attempted": true,
+        "ok": false
+      },
+      "https": {
+        "attempted": true,
+        "ok": false
+      },
+      "ws": {
+        "attempted": true,
+        "ok": false
+      }
+    },
+    "requests": [
+      {
+        "phase": "live",
+        "kind": "websocket",
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "kind": "http",
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "kind": "http",
+        "proxied": false
+      }
+    ],
+    "tlsConnections": [
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 5,
+        "clientHello": true,
+        "proxied": false
+      }
+    ]
+  },
+  "unmanagedProxyControl": {
+    "results": {
+      "http": {
+        "attempted": true,
+        "ok": true
+      },
+      "https": {
+        "attempted": true,
+        "ok": false
+      },
+      "ws": {
+        "attempted": true,
+        "ok": true
+      }
+    },
+    "requests": [
+      {
+        "phase": "live",
+        "kind": "websocket",
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "kind": "http",
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "kind": "http",
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "kind": "websocket",
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "kind": "http",
+        "proxied": false
+      }
+    ],
+    "tlsConnections": [
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 5,
+        "clientHello": true,
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "bytes": 1995,
+        "clientHello": true,
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "bytes": 1995,
+        "clientHello": true,
+        "proxied": false
+      }
+    ]
+  },
+  "workspaceRoutes": {
+    "observations": [
+      {
+        "phase": "selected-A-first",
+        "before": {
+          "cookie": null,
+          "local": null
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-first",
+        "before": {
+          "cookie": null,
+          "local": null
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-reopen",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-entry-stopped",
+        "before": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-entry-recovered",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-A-stopped",
+        "before": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-changed-to-B",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "B"
+      }
+    ],
+    "pageRequests": [
+      {
+        "phase": "selected-A-first",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-first",
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-reopen",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-entry-stopped",
+        "route": "B"
+      },
+      {
+        "phase": "selected-entry-recovered",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-A-stopped",
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-changed-to-B",
+        "route": "B"
+      }
+    ],
+    "checks": [
+      "actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory",
+      "actual-workbench-selected-node-controls-and-safe-catalog",
+      "owned-route-bindings-visible-in-environment-list-with-direct-management-entry",
+      "two-real-selected-routes-with-isolated-storage-and-persisted-reopen",
+      "real-entry-hop-loss-no-direct-egress-and-recovery-with-original-storage",
+      "selected-A-loss-no-fallback-or-direct-while-native-B-remains-usable",
+      "real-route-change-stops-only-A-and-preserves-its-existing-storage"
+    ],
+    "catalogueEntries": 1252,
+    "directChecks": [
+      {
+        "key": "native-direct-control",
+        "route": "direct"
+      }
+    ],
+    "proxyProbes": [
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:37063",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:37063",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "clients2.google.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "www.gstatic.com:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "accounts.google.com:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "www.google.com:443",
+        "authorized": true,
+        "viaEntry": null
+      }
+    ],
+    "entryProbes": [
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      }
+    ]
+  },
+  "failedProxyConnections": {
+    "requests": [
+      {
+        "phase": "live",
+        "kind": "websocket",
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "kind": "http",
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "kind": "http",
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "kind": "websocket",
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "kind": "http",
+        "proxied": false
+      }
+    ],
+    "tlsConnections": [
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "bytes": 1931,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 5,
+        "clientHello": true,
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "bytes": 1995,
+        "clientHello": true,
+        "proxied": false
+      },
+      {
+        "phase": "unmanaged-browser",
+        "bytes": 1995,
+        "clientHello": true,
+        "proxied": false
+      }
+    ]
+  },
+  "coreStartup": [
+    {
+      "pid": 3677,
+      "outputBytes": 64155,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 4494,
+      "outputBytes": 19225,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 4502,
+      "outputBytes": 30578,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 4859,
+      "outputBytes": 29021,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 5024,
+      "outputBytes": 12625,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
+}

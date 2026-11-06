@@ -1,0 +1,41 @@
+{
+  "run": 42248691411,
+  "job": 128000714903,
+  "sourceHead": "7a3763697daa5e95f1d3b5a6410ee8267159f30b",
+  "testedSource": "a90f20c7cea206782e0cacf81388bc7281d15067",
+  "artifact": 13520850141,
+  "zipBytes": 1403276,
+  "zipSha256": "6bb3043572c24fbefbb38c60bd52e9c1a841199916d79091d066bafcc573cae4",
+  "zipSizeShaCrcSafePathsVerified": true,
+  "checks": [
+    "packaged-and-running-product-version-matches-shared-manifest",
+    "native-diagnostics-panel-real-empty-state-themes-and-keyboard-close",
+    "native-official-subscription-help-both-locales-and-themes",
+    "packaged-ofl-ui-font-loaded-and-distinct-chinese-glyphs",
+    "native-login",
+    "native-long-term-proxy-plan-labels-and-compatible-entitlement",
+    "two-real-managed-environments",
+    "real-mihomo-core-http-positive-control",
+    "a-first-proxied-storage",
+    "b-first-proxied-storage",
+    "a-reopen-proxied-storage",
+    "native-failed-upstream-no-direct-http-websocket-or-tls-connection",
+    "native-webrtc-peer-connection-no-literal-ip-or-direct-stun-packets",
+    "unmanaged-native-http-websocket-tls-direct-positive-controls",
+    "native-per-workspace-selected-upstreams-reopen-failure-and-route-change",
+    "native-logout"
+  ],
+  "workspaceChecks": [
+    "actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory",
+    "actual-workbench-selected-node-controls-and-safe-catalog",
+    "owned-route-bindings-visible-in-environment-list-with-direct-management-entry",
+    "two-real-selected-routes-with-isolated-storage-and-persisted-reopen",
+    "real-entry-hop-loss-no-direct-egress-and-recovery-with-original-storage",
+    "selected-A-loss-no-fallback-or-direct-while-native-B-remains-usable",
+    "real-route-change-stops-only-A-and-preserves-its-existing-storage"
+  ],
+  "failure": null,
+  "scope": "Actual packaged linux CI runtime gates only, not owner signing, real payments, full fingerprint certification, all-platform or commercial release.",
+  "fullLogBytes": 127309,
+  "fullLogSha256": "4eb19b33cfb5b686d866733bce2674ff16e2739079f10f89f2a98914acd61160"
+}

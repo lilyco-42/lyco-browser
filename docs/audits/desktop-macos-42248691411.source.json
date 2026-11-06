@@ -1,0 +1,34 @@
+{
+  "run": 42248691411,
+  "job": 128000715003,
+  "sourceHead": "7a3763697daa5e95f1d3b5a6410ee8267159f30b",
+  "testedSource": "a90f20c7cea206782e0cacf81388bc7281d15067",
+  "artifact": 13520215868,
+  "zipBytes": 1050415,
+  "zipSha256": "014e4418f5f79493b1cd19727d472fdc5c38301cfe34b8eaa94febd3ed673a15",
+  "zipSizeShaCrcSafePathsVerified": true,
+  "checks": [
+    "packaged-and-running-product-version-matches-shared-manifest",
+    "native-diagnostics-panel-real-empty-state-themes-and-keyboard-close",
+    "native-official-subscription-help-both-locales-and-themes",
+    "packaged-ofl-ui-font-loaded-and-distinct-chinese-glyphs",
+    "native-login",
+    "native-long-term-proxy-plan-labels-and-compatible-entitlement",
+    "two-real-managed-environments",
+    "real-mihomo-core-http-positive-control",
+    "a-first-proxied-storage",
+    "b-first-proxied-storage",
+    "a-reopen-proxied-storage",
+    "native-failed-upstream-no-direct-http-websocket-or-tls-connection",
+    "native-webrtc-peer-connection-no-literal-ip-or-direct-stun-packets",
+    "unmanaged-native-http-websocket-tls-direct-positive-controls"
+  ],
+  "workspaceChecks": [
+    "actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory",
+    "actual-workbench-selected-node-controls-and-safe-catalog",
+    "owned-route-bindings-visible-in-environment-list-with-direct-management-entry"
+  ],
+  "failure": "page.evaluate: Error: Error invoking remote method 'profiles:start': Error: 内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置\n    at verifyNativeWorkspaceRoutes (/Users/runner/work/lyco-browser/lyco-browser/lyco/tests/native-workspace-routes.mjs:111:15)\n    at async file:///Users/runner/work/lyco-browser/lyco-browser/lyco/tests/native-unix-workspaces.mjs:217:2",
+  "scope": "Actual packaged macos CI runtime gates only, not owner signing, real payments, full fingerprint certification, all-platform or commercial release.",
+  "fullLogSha256": "b587d6a8f34193704e656cd88360de2ac5c3f4123ad73cd0384d7c5c56b701f4"
+}
