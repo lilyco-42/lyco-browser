@@ -6,5 +6,7 @@
   "fullZipCrcAndSafePathsVerified": true,
   "allSourceFilesMatchCommittedBytes": true,
   "fileCount": 13,
-  "scope": "Real Actions source preflight only; actual native compile not yet dispatched"
+  "scope": "Real Actions source preflight only; actual native compile not yet dispatched",
+  "fullJobLogBytes": 16330,
+  "fullJobLogSha256": "985c1d1e1222674b7e08136855fcd8a35fb88e14b837e17ad1dde3b7791598ce"
 }
