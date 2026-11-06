@@ -17,8 +17,17 @@
 b1 的 Windows 同样在该启动校验处有效失败，已完成 21 项，见[原件](audits/desktop-native-42251467514.json)与[来源](audits/desktop-native-42251467514.source.json)。
 它与更早 7a 的浏览器请求未观察到失败不同，均不能写为直连泄漏或已修复。
 独立 `9b9bf22` 仅消除 Windows 双击整单元格可能误点线路按钮的测试歧义，
-[42253699237](https://github.com/lilyco-42/lyco-browser/actions/runs/42253699237) 已在成品预检失败，具体原件正在核对；
+[42253699237](https://github.com/lilyco-42/lyco-browser/actions/runs/42253699237) 已完成27项，
+三次实际命中名称、托管浏览器请求、回环不绕行、RTC测量及上游失效负向检查通过；
+之后直连正向对照的新环境在硬件校验处失败，见[原件](audits/desktop-name-launch-42253699237.json)和
+[来源](audits/desktop-name-launch-42253699237.source.json)。完整2421998字节ZIP/SHA/CRC与全日志已另验。
+因此名称选择器已经实际执行，但整个成品门禁、安装器及正式发行仍未通过；
 真实请求、失效上游负向及硬件拒绝门槛保留，没有更改产品运行时。
+
+各模块平台修正的[源码预检42255748357](https://github.com/lilyco-42/lyco-browser/actions/runs/42255748357)
+已通过，完整82871字节源码ZIP与13项原文/全日志另验；
+[42256011051](https://github.com/lilyco-42/lyco-browser/actions/runs/42256011051)
+现以 `8784c91` 执行新的实际编译，尚无通过结论。原失败完整保留，不重放未修改的任务。
 
 SDK58＋真实 API37.2 副本 [42250336449](https://github.com/lilyco-42/lyco-browser/actions/runs/42250336449) 已通过原始依赖检查，解决前两轮实际 SDK/AGP 和小版本不匹配。完整 350937 字节证据 ZIP、70799 字节源码 ZIP、逐文件回执、两阶段依赖锁、原平台属性及私有副本精确追加均另验，见[原始结果](audits/gecko-product-api372-42250336449.json)与[来源](audits/gecko-product-api372-42250336449.source.json)。实际 app 为 android-37.2 / AGP9.2.1 / Gradle9.4.1，min28、target36 保持；原 `:app:checkReleaseAarMetadata` 执行且退出零，没有抑制检查或改写 AAR 元数据。这只证明依赖兼容，尚需携原 Go 绑定完成 Kotlin/APK 编译、产品桥接、旧数据/原密钥保留及完整隐私运行验收。下方失败记录保留各自实际范围。
 

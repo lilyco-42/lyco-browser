@@ -1,0 +1,12 @@
+{
+  "run": 42255748357,
+  "source": "8784c91d3d25215d5bb31abaa316f924a7f4cf86",
+  "artifact": 13523295717,
+  "bytes": 82871,
+  "sha256": "260a180c7a193c8fda9e0960529a1659b1b838300b715dbf726efe6138a3c44f",
+  "wholeZipShaCrcSafePathsVerified": true,
+  "all13SourceFilesMatchCommit": true,
+  "scope": "Real Actions source parse only; module platform correction still needs actual metadata and native compile.",
+  "fullJobLogBytes": 16332,
+  "fullJobLogSha256": "39013299f2b4707ff33ac2191817d5d85106c13b1edebc01e4ec5f623b14949d"
+}

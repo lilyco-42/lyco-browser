@@ -1,0 +1,32 @@
+{
+  "run": 42253699237,
+  "job": 128015246098,
+  "source": "9b9bf224ebe136df89355b17c362939d195db4c9",
+  "reportCommit": "9b9bf224ebe136df89355b17c362939d195db4c9",
+  "artifact": 13521867146,
+  "archiveBytes": 2421998,
+  "archiveSha256": "483da2591c55f65bc2e56b0c05a7dd640f7a614c30ef4e9423b8e9f6d1f174ce",
+  "wholeZipSizeShaCrcSafePathsVerified": true,
+  "fullJobLogBytes": 219260,
+  "fullJobLogSha256": "6397b6554eef42e2a578cd2c771c63a080233db435f74920c138abc6bbf45e6b",
+  "checks": 27,
+  "failure": "page.evaluate: Error: Error invoking remote method 'profiles:start': Error: 内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置\n    at D:\\a\\lyco-browser\\lyco-browser\\lyco\\tests\\native-workspaces.mjs:426:13",
+  "doubleClickLaunchTargets": [
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    },
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    },
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    }
+  ],
+  "scope": "Actual three name-target launches and managed route/negative gates passed,27checks; hardware refused later unmanaged-network positive control. Not full desktop acceptance/installer/release proof."
+}

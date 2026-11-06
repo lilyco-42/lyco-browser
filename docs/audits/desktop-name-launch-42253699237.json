@@ -1,0 +1,3718 @@
+{
+  "commit": "9b9bf224ebe136df89355b17c362939d195db4c9",
+  "binary": "D:\\a\\lyco-browser\\lyco-browser\\upstream\\Browserapp\\node_modules\\desktop-shell\\dist\\electron.exe",
+  "fixtureBilling": true,
+  "realPayments": 0,
+  "proxyRequests": [
+    {
+      "path": "/mihomo-probe",
+      "proxied": true
+    },
+    {
+      "path": "/browser-probe",
+      "proxied": true
+    },
+    {
+      "path": "/favicon.ico",
+      "proxied": true
+    },
+    {
+      "path": "/direct-loopback-canary",
+      "proxied": false
+    },
+    {
+      "path": "/loopback-probe",
+      "proxied": true
+    },
+    {
+      "path": "/favicon.ico",
+      "proxied": true
+    },
+    {
+      "path": "/webrtc-probe",
+      "proxied": true
+    },
+    {
+      "path": "/favicon.ico",
+      "proxied": true
+    },
+    {
+      "path": "/webrtc-report",
+      "proxied": true
+    }
+  ],
+  "checks": [
+    "unconfigured-host-browser-font-positive-control",
+    "packaged-and-running-product-version-matches-shared-manifest",
+    "real-native-group-create-and-current-group-dialog-defaults",
+    "packaged-ofl-ui-font-loaded-and-distinct-chinese-glyphs",
+    "localized-panel-survives-upstream-language-switch",
+    "native-account-onboarding-real-routes-layout-and-color-modes",
+    "native-diagnostics-panel-real-empty-state-themes-and-keyboard-close",
+    "native-official-subscription-help-both-locales-and-themes",
+    "actual-packaged-uda-desktop-appearance-and-manual-override",
+    "native-login-valid-entitlement",
+    "native-long-term-proxy-plan-labels-and-compatible-entitlement",
+    "concurrent-connect-same-core-port",
+    "real-main-process-extension-handoff-no-account-secrets",
+    "compact-columns-retain-expanded-details",
+    "native-compact-columns-fit-at-1024-and-1440-without-overlap",
+    "native-workbench-follows-existing-dark-and-light-theme",
+    "real-batch-create-two-environments-persists-selected-group",
+    "native-bulk-selection-counts-survive-locales-and-selection-changes",
+    "native-bulk-toolbar-fits-and-opens-existing-preferences",
+    "packaged-native-login-create-profile",
+    "actual-bundled-mihomo-http-routing",
+    "native-per-workspace-selected-upstreams-reopen-failure-and-route-change",
+    "real-bundled-chromium-via-managed-proxy",
+    "double-click-environment-starts-real-managed-browser",
+    "real-bundled-chromium-managed-loopback-cannot-bypass-mihomo",
+    "native-webrtc-ice-udp-zero-direct-packets",
+    "native-failed-upstream-no-direct-http-websocket-or-tls-connection"
+  ],
+  "stage": "unmanaged-native-network-control",
+  "stageAt": "2026-11-06T16:45:06.901Z",
+  "profileAudit": {
+    "parserFrames": {},
+    "concurrent": {}
+  },
+  "workbenchFontControl": {
+    "family": "LYCO Audit Control 20261021",
+    "local": "loaded",
+    "fallback": [
+      140.75,
+      128,
+      80.359375
+    ],
+    "requested": [
+      152.90625,
+      128,
+      78.984375
+    ]
+  },
+  "hostFontControl": {
+    "family": "LYCO Audit Control 20261021",
+    "local": "loaded",
+    "fallback": [
+      140.75,
+      128,
+      80.359375
+    ],
+    "requested": [
+      152.90625,
+      128,
+      78.984375
+    ],
+    "layout": {
+      "family": "LYCO Audit Control 20261021",
+      "canvas": {
+        "fallback": [
+          140.75,
+          128,
+          80.359375
+        ],
+        "requested": [
+          152.90625,
+          128,
+          78.984375
+        ]
+      },
+      "dom": {
+        "fallback": [
+          140.75,
+          128,
+          80.359375
+        ],
+        "requested": [
+          152.90625,
+          128,
+          78.984375
+        ]
+      },
+      "face": {
+        "api": true,
+        "local": "loaded"
+      }
+    },
+    "positive": true,
+    "baseline": "unconfigured-msedge",
+    "version": "156.0.4314.58"
+  },
+  "product": {
+    "version": "1.0.25",
+    "build": 2,
+    "channel": "internal-preview",
+    "runningVersion": "1.0.25"
+  },
+  "uiCjk": {
+    "loaded": [
+      {
+        "family": "LYCO UI CJK",
+        "status": "loaded"
+      }
+    ],
+    "computed": "\"LYCO UI CJK\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "glyphs": [
+      {
+        "char": "代",
+        "hash": 4227043448,
+        "ink": 405
+      },
+      {
+        "char": "理",
+        "hash": 3103418346,
+        "ink": 553
+      },
+      {
+        "char": "订",
+        "hash": 935430013,
+        "ink": 342
+      },
+      {
+        "char": "阅",
+        "hash": 299865693,
+        "ink": 528
+      },
+      {
+        "char": "环",
+        "hash": 1227774190,
+        "ink": 387
+      },
+      {
+        "char": "境",
+        "hash": 2400638095,
+        "ink": 528
+      }
+    ]
+  },
+  "accountPanel": {
+    "realNavigationRoutes": true,
+    "layouts": [
+      {
+        "mode": "light",
+        "width": 900,
+        "viewport": 900,
+        "panel": {
+          "left": 184,
+          "right": 873,
+          "width": 689,
+          "height": 1906.171875
+        },
+        "clientWidth": 689,
+        "scrollWidth": 689,
+        "cards": [
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 480.375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 726.9375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 208.875
+          }
+        ],
+        "fields": [
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 748,
+            "width": 523,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "light",
+        "width": 1024,
+        "viewport": 1024,
+        "panel": {
+          "left": 204,
+          "right": 993,
+          "width": 789,
+          "height": 1387.578125
+        },
+        "clientWidth": 789,
+        "scrollWidth": 789,
+        "cards": [
+          {
+            "left": 228,
+            "right": 589.5,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 607.5,
+            "right": 969,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 228,
+            "right": 969,
+            "width": 741,
+            "height": 186.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 630.5,
+            "right": 862,
+            "width": 231.5,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "panel": {
+          "left": 232.5,
+          "right": 1392.5,
+          "width": 1160,
+          "height": 1283.203125
+        },
+        "clientWidth": 1160,
+        "scrollWidth": 1160,
+        "cards": [
+          {
+            "left": 256.5,
+            "right": 803.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 821.5,
+            "right": 1368.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 256.5,
+            "right": 1368.5,
+            "width": 1112,
+            "height": 126.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 844.5,
+            "right": 1261.5,
+            "width": 417,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "dark",
+        "width": 900,
+        "viewport": 900,
+        "panel": {
+          "left": 184,
+          "right": 873,
+          "width": 689,
+          "height": 1906.171875
+        },
+        "clientWidth": 689,
+        "scrollWidth": 689,
+        "cards": [
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 480.375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 726.9375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 208.875
+          }
+        ],
+        "fields": [
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 748,
+            "width": 523,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      },
+      {
+        "mode": "dark",
+        "width": 1024,
+        "viewport": 1024,
+        "panel": {
+          "left": 204,
+          "right": 993,
+          "width": 789,
+          "height": 1387.578125
+        },
+        "clientWidth": 789,
+        "scrollWidth": 789,
+        "cards": [
+          {
+            "left": 228,
+            "right": 589.5,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 607.5,
+            "right": 969,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 228,
+            "right": 969,
+            "width": 741,
+            "height": 186.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 630.5,
+            "right": 862,
+            "width": 231.5,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      },
+      {
+        "mode": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "panel": {
+          "left": 232.5,
+          "right": 1392.5,
+          "width": 1160,
+          "height": 1283.203125
+        },
+        "clientWidth": 1160,
+        "scrollWidth": 1160,
+        "cards": [
+          {
+            "left": 256.5,
+            "right": 803.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 821.5,
+            "right": 1368.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 256.5,
+            "right": 1368.5,
+            "width": 1112,
+            "height": 126.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 844.5,
+            "right": 1261.5,
+            "width": 417,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      }
+    ],
+    "surfaces": {
+      "light": "rgb(247, 250, 249)",
+      "dark": "rgb(18, 28, 32)"
+    }
+  },
+  "diagnosticsPanel": {
+    "emptyState": true,
+    "layouts": [
+      {
+        "locale": "zh-CN",
+        "mode": "dark",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 45.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 322.625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 322.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 580.28125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 580.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "zh-CN",
+        "mode": "light",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 45.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 322.625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 322.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 580.28125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 580.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "dark",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 22.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 299.484375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 299.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 600.328125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 600.328125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "light",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 22.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 299.484375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 299.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 600.328125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 600.328125,
+            "width": 250
+          }
+        ]
+      }
+    ]
+  },
+  "desktopAppearance": {
+    "actual": {
+      "state": "ready",
+      "sdk": "UniDesktop/SDK",
+      "revision": "a74bd2cf372efad2407d6be4b57739e682cf1d9a",
+      "theme": "light",
+      "accent": [
+        0,
+        120,
+        215,
+        255
+      ],
+      "capabilities": {
+        "detectTheme": true,
+        "readAccent": true
+      }
+    },
+    "helperSha256": "3a2a6198500d8a10a9ecb9cdc56424d1f3edb277e1aacb1c6dab367f5a1f6c40",
+    "autoThemeMatches": true,
+    "manualThemePreserved": true,
+    "noticesPackaged": true
+  },
+  "compactLayouts": [
+    {
+      "viewport": 1024,
+      "card": {
+        "left": 384,
+        "right": 993,
+        "width": 609
+      },
+      "clientWidth": 607,
+      "scrollWidth": 607,
+      "headers": [
+        {
+          "left": 386,
+          "right": 422,
+          "width": 36
+        },
+        {
+          "left": 422,
+          "right": 625,
+          "width": 203
+        },
+        {
+          "left": 625,
+          "right": 765,
+          "width": 140
+        },
+        {
+          "left": 765,
+          "right": 843,
+          "width": 78
+        },
+        {
+          "left": 843,
+          "right": 991,
+          "width": 148
+        }
+      ],
+      "cells": [
+        {
+          "left": 386,
+          "right": 422,
+          "width": 36
+        },
+        {
+          "left": 422,
+          "right": 625,
+          "width": 203
+        },
+        {
+          "left": 625,
+          "right": 765,
+          "width": 140
+        },
+        {
+          "left": 765,
+          "right": 843,
+          "width": 78
+        },
+        {
+          "left": 843,
+          "right": 991,
+          "width": 148
+        }
+      ]
+    },
+    {
+      "viewport": 1440,
+      "card": {
+        "left": 402,
+        "right": 1403,
+        "width": 1001
+      },
+      "clientWidth": 999,
+      "scrollWidth": 999,
+      "headers": [
+        {
+          "left": 404,
+          "right": 440,
+          "width": 36
+        },
+        {
+          "left": 440,
+          "right": 1035,
+          "width": 595
+        },
+        {
+          "left": 1035,
+          "right": 1175,
+          "width": 140
+        },
+        {
+          "left": 1175,
+          "right": 1253,
+          "width": 78
+        },
+        {
+          "left": 1253,
+          "right": 1401,
+          "width": 148
+        }
+      ],
+      "cells": [
+        {
+          "left": 404,
+          "right": 440,
+          "width": 36
+        },
+        {
+          "left": 440,
+          "right": 1035,
+          "width": 595
+        },
+        {
+          "left": 1035,
+          "right": 1175,
+          "width": 140
+        },
+        {
+          "left": 1175,
+          "right": 1253,
+          "width": 78
+        },
+        {
+          "left": 1253,
+          "right": 1401,
+          "width": 148
+        }
+      ]
+    }
+  ],
+  "userDataPath": "C:\\Users\\runneradmin\\AppData\\Roaming\\openbrowser",
+  "bulkLayouts": [
+    {
+      "viewport": 1024,
+      "clientWidth": 586,
+      "scrollWidth": 586,
+      "bounds": {
+        "left": 397,
+        "right": 983,
+        "top": 260,
+        "bottom": 331
+      },
+      "controls": [
+        {
+          "left": 397,
+          "right": 686,
+          "top": 260,
+          "bottom": 288
+        },
+        {
+          "left": 694,
+          "right": 983,
+          "top": 260,
+          "bottom": 288
+        },
+        {
+          "left": 397,
+          "right": 686,
+          "top": 299,
+          "bottom": 327
+        },
+        {
+          "left": 694,
+          "right": 983,
+          "top": 296,
+          "bottom": 330
+        }
+      ]
+    },
+    {
+      "viewport": 1440,
+      "clientWidth": 978,
+      "scrollWidth": 978,
+      "bounds": {
+        "left": 415,
+        "right": 1393,
+        "top": 216,
+        "bottom": 251
+      },
+      "controls": [
+        {
+          "left": 415,
+          "right": 653.5,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 661.5,
+          "right": 900,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 908,
+          "right": 1146.5,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 1154.5,
+          "right": 1393,
+          "top": 216,
+          "bottom": 250
+        }
+      ]
+    }
+  ],
+  "workspaceRoutes": {
+    "observations": [
+      {
+        "phase": "selected-A-first",
+        "before": {
+          "cookie": null,
+          "local": null
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-first",
+        "before": {
+          "cookie": null,
+          "local": null
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-reopen",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-entry-stopped",
+        "before": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-entry-recovered",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-A-stopped",
+        "before": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "after": {
+          "cookie": "B",
+          "local": "B"
+        },
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-changed-to-B",
+        "before": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "after": {
+          "cookie": "A",
+          "local": "A"
+        },
+        "route": "B"
+      }
+    ],
+    "pageRequests": [
+      {
+        "phase": "selected-A-first",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-first",
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-reopen",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-entry-stopped",
+        "route": "B"
+      },
+      {
+        "phase": "selected-entry-recovered",
+        "route": "A"
+      },
+      {
+        "phase": "selected-B-after-A-stopped",
+        "route": "B"
+      },
+      {
+        "phase": "selected-A-changed-to-B",
+        "route": "B"
+      }
+    ],
+    "checks": [
+      "actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory",
+      "actual-workbench-selected-node-controls-and-safe-catalog",
+      "owned-route-bindings-visible-in-environment-list-with-direct-management-entry",
+      "two-real-selected-routes-with-isolated-storage-and-persisted-reopen",
+      "real-entry-hop-loss-no-direct-egress-and-recovery-with-original-storage",
+      "selected-A-loss-no-fallback-or-direct-while-native-B-remains-usable",
+      "real-route-change-stops-only-A-and-preserves-its-existing-storage"
+    ],
+    "catalogueEntries": 1252,
+    "directChecks": [
+      {
+        "key": "native-direct-control",
+        "route": "direct"
+      }
+    ],
+    "proxyProbes": [
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "127.0.0.1:52851",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      },
+      {
+        "route": "B",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": null
+      }
+    ],
+    "entryProbes": [
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": false
+      }
+    ]
+  },
+  "doubleClickLaunchTargets": [
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    },
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    },
+    {
+      "profileId": "f1d8a0d0-0122-40d6-a105-6126a3bcecf9",
+      "insideName": true,
+      "interactive": false
+    }
+  ],
+  "geoProbeRequests": 3,
+  "loopbackDirectControl": true,
+  "webrtcAudit": {
+    "completed": true,
+    "blocked": false,
+    "candidateCount": 0,
+    "directUdpPackets": 0
+  },
+  "failedProxyAudit": {
+    "live": {
+      "http": {
+        "attempted": true,
+        "ok": true
+      },
+      "https": {
+        "attempted": true,
+        "ok": false
+      },
+      "ws": {
+        "attempted": true,
+        "ok": true
+      }
+    },
+    "closed": {
+      "http": {
+        "attempted": true,
+        "ok": false
+      },
+      "https": {
+        "attempted": true,
+        "ok": false
+      },
+      "ws": {
+        "attempted": true,
+        "ok": false
+      }
+    },
+    "requests": [
+      {
+        "phase": "live",
+        "kind": "websocket",
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "kind": "http",
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "kind": "http",
+        "proxied": false
+      }
+    ],
+    "tlsConnections": [
+      {
+        "phase": "live",
+        "bytes": 1797,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "bytes": 1701,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 5,
+        "clientHello": true,
+        "proxied": false
+      }
+    ]
+  },
+  "failure": "page.evaluate: Error: Error invoking remote method 'profiles:start': Error: 内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置\n    at D:\\a\\lyco-browser\\lyco-browser\\lyco\\tests\\native-workspaces.mjs:426:13",
+  "feedback": "线路已保存，下次启动时生效",
+  "state": {
+    "username": "ci-owner-a",
+    "logged_in": true,
+    "entitled": true,
+    "expires_at": "2099-01-01T00:00:00Z",
+    "plan_name": "代理月卡",
+    "connected": true,
+    "port": 52839,
+    "has_core": true
+  },
+  "browserFailures": [
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false
+    }
+  ],
+  "failedProxyConnections": {
+    "requests": [
+      {
+        "phase": "live",
+        "kind": "websocket",
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "kind": "http",
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "kind": "http",
+        "proxied": false
+      }
+    ],
+    "tlsConnections": [
+      {
+        "phase": "live",
+        "bytes": 1797,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "live",
+        "bytes": 1701,
+        "clientHello": true,
+        "proxied": true
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 5,
+        "clientHello": true,
+        "proxied": false
+      },
+      {
+        "phase": "direct-control",
+        "bytes": 1701,
+        "clientHello": true,
+        "proxied": true
+      }
+    ]
+  },
+  "coreStartup": [
+    {
+      "pid": 6688,
+      "outputBytes": 15142,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": null
+    },
+    {
+      "pid": 2052,
+      "outputBytes": 3706,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 4408,
+      "outputBytes": 3706,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 5576,
+      "outputBytes": 10426,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 5060,
+      "outputBytes": 3706,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    }
+  ],
+  "targetTrace": [
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983273013,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 2,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 2,
+      "startedAt": 1793983273013,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "other",
+      "session": 3,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "page-config",
+      "session": 2,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 2,
+      "startedAt": 1793983273015,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 2,
+      "startedAt": 1793983273017,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 2,
+      "startedAt": 1793983273018,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 2,
+      "startedAt": 1793983273027,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 2,
+      "startedAt": 1793983273028,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 2,
+      "startedAt": 1793983273033,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 128
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 2,
+      "startedAt": 1793983273161,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983277636,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "other",
+      "session": 5,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 6,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 6,
+      "startedAt": 1793983277637,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "page-config",
+      "session": 6,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 6,
+      "startedAt": 1793983277638,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 6,
+      "startedAt": 1793983277639,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 6,
+      "startedAt": 1793983277640,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 6,
+      "startedAt": 1793983277648,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 6,
+      "startedAt": 1793983277649,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 6,
+      "startedAt": 1793983277652,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 144
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 6,
+      "startedAt": 1793983277796,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983306106,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 8,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 8,
+      "startedAt": 1793983306107,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "page-config",
+      "session": 8,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 8,
+      "startedAt": 1793983306107,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 3
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 8,
+      "startedAt": 1793983306110,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 8,
+      "startedAt": 1793983306110,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 8,
+      "startedAt": 1793983306119,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 8,
+      "startedAt": 1793983306120,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 8,
+      "startedAt": 1793983306125,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 147
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 8,
+      "startedAt": 1793983306272,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983342634,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 10,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 10,
+      "startedAt": 1793983342634,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "page-config",
+      "session": 10,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 10,
+      "startedAt": 1793983342635,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 10,
+      "startedAt": 1793983342637,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 10,
+      "startedAt": 1793983342637,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 10,
+      "startedAt": 1793983342645,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 10,
+      "startedAt": 1793983342646,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 10,
+      "startedAt": 1793983342650,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 141
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 10,
+      "startedAt": 1793983342791,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983396106,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 12,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 12,
+      "startedAt": 1793983396106,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "other",
+      "session": 13,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "page-config",
+      "session": 12,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 12,
+      "startedAt": 1793983396107,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 12,
+      "startedAt": 1793983396109,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 12,
+      "startedAt": 1793983396109,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 12,
+      "startedAt": 1793983396118,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 12,
+      "startedAt": 1793983396119,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 12,
+      "startedAt": 1793983396124,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 136
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 12,
+      "startedAt": 1793983396260,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983437116,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 15,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 15,
+      "startedAt": 1793983437117,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "page-config",
+      "session": 15,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 15,
+      "startedAt": 1793983437118,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 15,
+      "startedAt": 1793983437119,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 15,
+      "startedAt": 1793983437120,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 15,
+      "startedAt": 1793983437128,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 15,
+      "startedAt": 1793983437129,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 15,
+      "startedAt": 1793983437132,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 131
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 15,
+      "startedAt": 1793983437263,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "worker-setup",
+      "nativeIdentity": true
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": null,
+      "startedAt": 1793983477828,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "attached",
+      "type": "page",
+      "session": 17,
+      "parent": null,
+      "waiting": false
+    },
+    {
+      "kind": "command",
+      "method": "Target.setAutoAttach",
+      "session": 17,
+      "startedAt": 1793983477828,
+      "done": true,
+      "failed": false,
+      "pause": true,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "page-config",
+      "session": 17,
+      "currentLanguage": true,
+      "declaredLanguage": true,
+      "declaredCores": false,
+      "declaredMemory": false,
+      "declaredTimezone": true
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 17,
+      "startedAt": 1793983477829,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 17,
+      "startedAt": 1793983477831,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 17,
+      "startedAt": 1793983477831,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Page.enable",
+      "session": 17,
+      "startedAt": 1793983477840,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Runtime.enable",
+      "session": 17,
+      "startedAt": 1793983477841,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Page.addScriptToEvaluateOnNewDocument",
+      "session": 17,
+      "startedAt": 1793983477844,
+      "done": true,
+      "failed": false,
+      "immediate": true,
+      "elapsedMs": 148
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 17,
+      "startedAt": 1793983477992,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    }
+  ],
+  "nativeIdentityCalls": [
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 1,
+      "method": "Wayfern.getFingerprint",
+      "startedAt": 1793983271854,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 1,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983271914,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 1,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983271919,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 2,
+      "startedAt": 1793983273015,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 2,
+      "startedAt": 1793983273017,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 2,
+      "startedAt": 1793983273161,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 4,
+      "method": "Wayfern.getFingerprint",
+      "startedAt": 1793983277130,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 4,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983277178,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 4,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983277182,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 3
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 6,
+      "startedAt": 1793983277638,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 6,
+      "startedAt": 1793983277639,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 6,
+      "startedAt": 1793983277796,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 7,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983305637,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 5
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 7,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983305642,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 8,
+      "startedAt": 1793983306107,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 3
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 8,
+      "startedAt": 1793983306110,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 8,
+      "startedAt": 1793983306272,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 9,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983342178,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 9,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983342182,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 24
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 10,
+      "startedAt": 1793983342635,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 10,
+      "startedAt": 1793983342637,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 10,
+      "startedAt": 1793983342791,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 11,
+      "method": "Wayfern.getFingerprint",
+      "startedAt": 1793983395629,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 11,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983395683,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 5
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 11,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983395688,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 3
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 12,
+      "startedAt": 1793983396107,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 12,
+      "startedAt": 1793983396109,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 12,
+      "startedAt": 1793983396260,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 14,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983436639,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 14,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983436643,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 28
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 15,
+      "startedAt": 1793983437118,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 15,
+      "startedAt": 1793983437119,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 15,
+      "startedAt": 1793983437263,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 16,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983477400,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 8
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 16,
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "startedAt": 1793983477408,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 6
+    },
+    {
+      "kind": "command",
+      "method": "Wayfern.setFingerprint",
+      "session": 17,
+      "startedAt": 1793983477829,
+      "done": true,
+      "failed": false,
+      "requestMatchesDocument": {
+        "hardwareConcurrency": true,
+        "deviceMemory": true
+      },
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": true,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 2
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 17,
+      "startedAt": 1793983477831,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 0
+    },
+    {
+      "kind": "command",
+      "method": "Emulation.setHardwareConcurrencyOverride",
+      "session": 17,
+      "startedAt": 1793983477992,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 18,
+      "method": "Wayfern.getFingerprint",
+      "startedAt": 1793983509148,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        }
+      },
+      "elapsedMs": 3
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 18,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793983509212,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": false,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 4
+    }
+  ],
+  "startupReadiness": [
+    {
+      "startedAt": 1793983270857,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 960
+    },
+    {
+      "startedAt": 1793983276294,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 826
+    },
+    {
+      "startedAt": 1793983305183,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 435
+    },
+    {
+      "startedAt": 1793983341833,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 286
+    },
+    {
+      "startedAt": 1793983394844,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 777
+    },
+    {
+      "startedAt": 1793983436265,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 360
+    },
+    {
+      "startedAt": 1793983477017,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 364
+    },
+    {
+      "startedAt": 1793983508225,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 914
+    }
+  ]
+}
