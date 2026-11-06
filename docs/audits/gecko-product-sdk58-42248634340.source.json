@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-11-06T16:08:38.062187+00:00",
+  "run": 42248634340,
+  "job": 127997531257,
+  "source": "7a3763697daa5e95f1d3b5a6410ee8267159f30b",
+  "artifactId": 13517829840,
+  "zipBytes": 345759,
+  "zipSha256": "adb8d4b906f83d7e9c6f03498e189aad5247fccba92e198bc448b046136860eb",
+  "sourceArtifactId": 13518658427,
+  "sourceZipBytes": 70274,
+  "sourceZipSha256": "3d0b7fee5caf5d580cd9a3ca81a367c8ee7570c4a45d8a32aebede8a60b8c718",
+  "fullSizeShaCrcSafePathsAllReceiptsVerified": true,
+  "allOriginalPinsAndCommittedSourcesVerified": true,
+  "bothCompleteSdkLocksAndActualInstalledVersionsVerified": {
+    "57": {
+      "expo": "57.0.32",
+      "react-native": "0.86.3",
+      "react": "19.2.3",
+      "expo-modules-core": "57.0.25"
+    },
+    "58": {
+      "expo": "58.0.23",
+      "react-native": "0.88.1",
+      "react": "19.3.0",
+      "expo-modules-core": "58.0.30"
+    }
+  },
+  "originalAppJsonAndOtherTrackedProductFilesUnchangedScope": "Original app.json byte checked; other tracked files guarded by genuine runner assertions, source/output receipt retained.",
+  "actualGradleModel": {
+    "gradleVersion": "9.4.1",
+    "androidGradlePluginVersion": "9.2.1",
+    "compileSdk": 37,
+    "minSdk": "28",
+    "targetSdk": "36",
+    "projectNames": [
+      ":",
+      ":app",
+      ":expo",
+      ":expo-constants",
+      ":expo-dom-webview",
+      ":expo-log-box",
+      ":expo-modules-core",
+      ":lyco-mobile-browser",
+      ":react-native-async-storage_async-storage",
+      ":react-native-safe-area-context"
+    ],
+    "task": ":app:checkReleaseAarMetadata",
+    "scope": "Actual configured product model, not native compilation or runtime"
+  },
+  "actualTaskObserved": true,
+  "exit": 1,
+  "failure": "Exactly one metadata issue: engine requiresAPI37.2;actualconsumerandroid-37.0. Previous SDK36/AGP8.12/core5issues resolved in candidate but full gate still fails.",
+  "privateRootModuleAppendsAndOriginalEngineBindingVerified": true,
+  "fullLogBytes": 90126,
+  "fullLogSha256": "8ee59e6055ec6bef5afa3b6d1b3d50f74cafba2a2c7e42204ecf4e6c117a8f63",
+  "productAdopted": false,
+  "scope": "Actual incremental toolchain upgrades and original metadata gate only, not native compile/runtime/privacy/oldkeysmigration/release."
+}

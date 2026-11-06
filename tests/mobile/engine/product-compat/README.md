@@ -46,7 +46,7 @@ this latest failure really reached the original metadata task.
 
 The optional manual `toolchain=sdk58` candidate follows the
 [official incremental upgrade guidance](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/):
-install the original lock, then upgrade SDK56 to exact Expo57.0.0 and58.0.0,
+install the original lock, then request Expo57.0.0 and58.0.0,
 running each SDK's ordinary dependency checks. Complete candidate manifests,
 locks and actual installed versions are retained at both steps; all other
 tracked product files must remain unchanged. There are no forced peer installs,
@@ -55,6 +55,26 @@ the original metadata task run after these upgrades, retaining any failure.
 Partial final manifests/locks survive an early failed upgrade. The default
 remains the current product. This optional path is prepared, not yet validated;
 SDK58's documented SDK37 does not prove the AAR's minor37.2 requirement.
+
+Actual [42248634340](https://github.com/lilyco-42/lyco-browser/actions/runs/42248634340)
+completed both upgrades and ordinary dependency checks. CLI `--fix` resolved
+installed Expo57.0.32/RN0.86.3 and Expo58.0.23/RN0.88.1, rather than leaving the
+requested initial patch versions installed. Both complete candidate locks and
+actual version receipts are retained. The original metadata task executed and
+failed with one remaining issue: engine API37.2 versus generated android-37.0.
+Actual AGP9.2.1/Gradle9.4.1, all source/receipt hashes, root/module appends and
+complete 345759-byte evidence ZIP were independently checked; see the
+[unmodified result](../../../../docs/audits/gecko-product-sdk58-42248634340.json)
+and [provenance](../../../../docs/audits/gecko-product-sdk58-42248634340.source.json).
+
+The additional explicit `compile_platform=37.2` option requires `toolchain=sdk58`.
+It installs the real `platforms;android-37.2` SDK and records its original
+properties/install log. Only the generated private app and owned module receive
+the public `compileSdk { version = release(37) { minorApiLevel = 2 } }` setting;
+original/adapted bytes and exact additions are retained. Target/minimum SDK,
+dependency metadata and version checks are unchanged. SDK default checks remain
+available for comparison. This next platform option is prepared, not yet
+validated; installation, DSL and metadata failures must remain failures.
 
 Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions

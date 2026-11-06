@@ -14,6 +14,7 @@ gradle.projectsEvaluated {
         gradleVersion: gradle.gradleVersion,
         androidGradlePluginVersion: version,
         compileSdk: android.compileSdk,
+        compileSdkHash: android.compileSdkVersion,
         minSdk: android.defaultConfig.minSdk?.toString(),
         targetSdk: android.defaultConfig.targetSdk?.toString(),
         projectNames: gradle.rootProject.allprojects.collect { it.path }.sort(),

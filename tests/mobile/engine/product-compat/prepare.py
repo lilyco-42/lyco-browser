@@ -16,6 +16,11 @@ if os.environ.get('GITHUB_ACTIONS') != 'true':
 assert '/.github/workflows/gecko-product-compat.yml@' in os.environ['GITHUB_WORKFLOW_REF']
 assert sys.argv[1:] in (['source'], ['stage'], ['toolchain'], ['adapt'], ['collect'])
 phase = sys.argv[1]
+inputs = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text()).get('inputs', {}) or {}
+compile_platform = inputs.get('compile_platform', 'generated')
+assert compile_platform in ('generated', '37.2')
+if compile_platform == '37.2':
+    assert inputs.get('toolchain') == 'sdk58'
 root = Path(os.environ['GITHUB_WORKSPACE']).resolve()
 temporary = Path(os.environ['RUNNER_TEMP']).resolve()
 evidence = temporary / 'lyco-gecko-product-compat'
@@ -132,13 +137,19 @@ elif phase == 'adapt':
     (evidence / 'source-engine-aar-metadata.properties').write_bytes(metadata)
     module = stage / 'apps/universal/modules/lyco-mobile-browser/android/build.gradle'
     original = module.read_bytes()
-    # Dependency and repository only. No compile SDK override, suppression,
-    # acceptance change, native entry point or modification of the source AAR.
+    # Default: dependency/repository only. The explicit SDK58/API37.2 path
+    # changes the consumer platform, never the source AAR or version checks.
     addition = '''
 dependencies {
   implementation 'top.lain42.experimental:geckoview-source:159.0-route-experiment'
 }
 '''
+    platform_addition = '''
+android {
+  compileSdk { version = release(37) { minorApiLevel = 2 } }
+}
+''' if compile_platform == '37.2' else ''
+    addition += platform_addition
     module.write_bytes(original + addition.encode())
     (evidence / 'module-build.original.gradle').write_bytes(original)
     (evidence / 'module-build.adapted.gradle').write_bytes(module.read_bytes())
@@ -159,17 +170,27 @@ allprojects {
     root_build.write_bytes(original_root + repository_addition.encode())
     (evidence / 'root-build.original.gradle').write_bytes(original_root)
     (evidence / 'root-build.adapted.gradle').write_bytes(root_build.read_bytes())
+    app_build = stage / 'apps/universal/android/app/build.gradle'
+    app_original = app_build.read_bytes()
+    app_build.write_bytes(app_original + platform_addition.encode())
+    (evidence / 'app-build.original.gradle').write_bytes(app_original)
+    (evidence / 'app-build.adapted.gradle').write_bytes(app_build.read_bytes())
     (evidence / 'ADAPTATION.json').write_text(json.dumps({
         'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
         'originalPins': pins, 'afterPrebuildInputHashes': generated_inputs,
-        'customNativeBuildFilesAdapted': [str(module.relative_to(stage)), str(root_build.relative_to(stage))],
+        'customNativeBuildFilesAdapted': [str(module.relative_to(stage)), str(root_build.relative_to(stage))]
+                                      + ([str(app_build.relative_to(stage))] if platform_addition else []),
         'appendedText': addition, 'originalModuleSha256': hashlib.sha256(original).hexdigest(),
         'adaptedModuleSha256': digest(module), 'sourceEngineRun': 41940576338,
         'rootRepositoryAppendedText': repository_addition,
         'originalGeneratedRootSha256': hashlib.sha256(original_root).hexdigest(),
         'adaptedGeneratedRootSha256': digest(root_build),
         'sourceEngineAarSha256': digest(engine), 'sourceEngineAarBytes': engine.stat().st_size,
-        'compileSdkOverridden': False, 'versionChecksSuppressed': False,
+        'compileSdkOverridden': bool(platform_addition), 'versionChecksSuppressed': False,
+        'requestedCompilePlatform': compile_platform,
+        'appPlatformAppendedText': platform_addition,
+        'originalGeneratedAppSha256': hashlib.sha256(app_original).hexdigest(),
+        'adaptedGeneratedAppSha256': digest(app_build),
         'productRuntimeChanged': False, 'originalWebviewRootOrProfileSchemaChanged': False,
         'scope': 'Actual current Expo product dependency metadata gate in disposable copy; not bridge/runtime adoption',
     }, indent=2) + '\n')
@@ -220,7 +241,8 @@ elif phase == 'collect':
         'metadataGatePassed': exit_code == 0 and task_observed,
         'gradleInvocationCompleted': exit_code is not None, 'metadataTaskObservedInLog': task_observed,
         'compiledProduct': False, 'runtimeProven': False, 'productAdopted': False,
-        'requestedToolchain': json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text()).get('inputs', {}).get('toolchain', 'current'),
+        'requestedToolchain': inputs.get('toolchain', 'current'),
+        'requestedCompilePlatform': compile_platform,
         'incrementalSdkCheckpoints': [name for name in ['sdk-57', 'sdk-58']
                                       if (evidence / name / 'VERSIONS.json').is_file()],
         'sourceEngineRun': 41940576338, 'originalProductPins': pins,

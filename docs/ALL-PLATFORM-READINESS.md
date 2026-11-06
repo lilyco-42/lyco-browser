@@ -1,5 +1,7 @@
 # 五平台商业发行进度
 
+SDK 升级副本 [42248634340](https://github.com/lilyco-42/lyco-browser/actions/runs/42248634340) 已完成两步升级和正常依赖检查，实际版本为 Expo57.0.32/RN0.86.3、Expo58.0.23/RN0.88.1；CLI 自动修复后并非请求的初始补丁版本。完整两阶段依赖锁、版本与源码回执及 345759 字节原始证据 ZIP 已另验，见[原始结果](audits/gecko-product-sdk58-42248634340.json)与[来源](audits/gecko-product-sdk58-42248634340.source.json)。原任务有效失败从五项缩小为一项：引擎要求 37.2，生成工程使用 android-37.0。下一步仅在副本安装真实 37.2 编译平台并保留原检查；未证明完整产品兼容、原生编译或内核接入。
+
 产品实际依赖检查 [42247213570](https://github.com/lilyco-42/lyco-browser/actions/runs/42247213570) 已执行原始 `:app:checkReleaseAarMetadata` 并有效失败：当前 SDK36/AGP8.12.0 不满足新引擎及 AndroidX core/core-ktx 的 SDK37、AGP9.1.0 要求。完整原始 ZIP、逐文件回执摘要、私有副本精确追加、源码绑定及日志另验，见[原始结果](audits/gecko-product-compat-42247213570.json)与[来源](audits/gecko-product-compat-42247213570.source.json)。这是实际版本不兼容证据，先前观察器/仓库设置提前中断的两轮不能替代它。下一步在运行器副本按官方路径逐级升级 SDK57/58 并重新检查，保留候选锁和失败；不修改原产品、旧数据或放宽发行门槛。
 
 旧环境非导出密钥保留检查 [42067379466](https://github.com/lilyco-42/lyco-browser/actions/runs/42067379466) 已在 API35 模拟器通过：使用实际历史安装包和未修改的当前签名包 `41964719754`，八次网站观察中只有两个授权页面生成密钥，六次重读均使用原不可导出 AES-256 密钥、拒绝导出并解密相同密文。原 14 项综合检查和 15 个原生流程全部通过。完整 1897959 字节原始证据 ZIP/SHA/CRC、31041 字节设备准备、六份历史文件、四次全文核对及完整日志另行核验，见[未修改结果](audits/android-legacy-keys-42067379466.json)及[来源](audits/android-legacy-keys-42067379466.source.json)。私有数据库内容未导出或独立重建；这是旧版与当前 WebView 的保留证明，尚非 Gecko 跨内核迁移、真机、产品 RTC 或发行通过。原产品、存储根和所有验收门槛保持，详见[检查范围](../tests/mobile/legacy-keys/README.md)。

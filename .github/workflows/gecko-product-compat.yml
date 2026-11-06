@@ -17,6 +17,11 @@ on:
         type: choice
         options: [current, sdk58]
         default: current
+      compile_platform:
+        description: 'Generated SDK default or real Android37.2 in the SDK58 disposable candidate'
+        type: choice
+        options: [generated, '37.2']
+        default: generated
 permissions:
   contents: read
 concurrency:
@@ -91,6 +96,16 @@ jobs:
       - name: Generate original product native project
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
         run: npx expo prebuild --clean --platform android --non-interactive
+      - name: Install real API37.2 platform for explicitly selected candidate
+        if: inputs.compile_platform == '37.2'
+        run: |
+          test '${{ inputs.toolchain }}' = sdk58
+          sdkmanager_path="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -print -quit)"
+          test -n "$sdkmanager_path"
+          "$sdkmanager_path" --sdk_root="$ANDROID_HOME" 'platforms;android-37.2' \
+            2>&1 | tee "$RUNNER_TEMP/lyco-gecko-product-compat/sdk-platform-install.log"
+          cp "$ANDROID_HOME/platforms/android-37.2/source.properties" \
+            "$RUNNER_TEMP/lyco-gecko-product-compat/sdk-platform-source.properties"
       - name: Add source dependency only in private module copy and retain actual toolchain
         run: python3 tests/mobile/engine/product-compat/prepare.py adapt
       - name: Check original product AAR metadata gates without suppression

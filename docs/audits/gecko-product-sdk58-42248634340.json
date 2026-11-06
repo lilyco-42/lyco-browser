@@ -1,0 +1,280 @@
+{
+  "checkedAt": "2026-11-06T16:06:39.500618+00:00",
+  "source": "7a3763697daa5e95f1d3b5a6410ee8267159f30b",
+  "run": "42248634340",
+  "task": ":app:checkReleaseAarMetadata",
+  "actualGradleExitCode": 1,
+  "metadataGatePassed": false,
+  "gradleInvocationCompleted": true,
+  "metadataTaskObservedInLog": true,
+  "compiledProduct": false,
+  "runtimeProven": false,
+  "productAdopted": false,
+  "requestedToolchain": "sdk58",
+  "incrementalSdkCheckpoints": [
+    "sdk-57",
+    "sdk-58"
+  ],
+  "sourceEngineRun": 41940576338,
+  "originalProductPins": {
+    "apps/universal/modules/lyco-mobile-browser/android/build.gradle": "2e8f9ee1db5cbdcc2075d71c940d9cbf042c3e6bbafda0730c9768c26b26304c",
+    "apps/universal/app.json": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf",
+    "apps/universal/package.json": "7a19a1a085c3f5bc146127ebdbd73a3bb9de2989e7ca7709770475d539863d60",
+    "apps/universal/package-lock.json": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6",
+    "tests/mobile/engine/download-source-engine.sh": "c74cc1910d02c97514603a19a3f45ccfbe70b46a36d50114c52178d82f4e6414"
+  },
+  "originalProductPinsStillEqual": true,
+  "files": [
+    {
+      "path": "ADAPTATION.json",
+      "bytes": 2624,
+      "sha256": "54b9dc8b2a3b3fa905344781cc4bf08b4caf3137214f8404849069758a455957"
+    },
+    {
+      "path": "SOURCE.json",
+      "bytes": 1246,
+      "sha256": "f8acd0b9b89dfcda9968e5a274d5c9bea27072dac9cf8d2f62e398695a4e2c2f"
+    },
+    {
+      "path": "STAGED-INPUTS.json",
+      "bytes": 750,
+      "sha256": "aea470687544f861ea0e1e47f5fd6119cc794d69627b7f6653ea2e3d5959142a"
+    },
+    {
+      "path": "actual-gradle-model.json",
+      "bytes": 580,
+      "sha256": "df14a7e9daae8e9fb53236efc42c63264be502ade813ca3d69111721c9ee48fe"
+    },
+    {
+      "path": "after-prebuild/apps/universal/app.json",
+      "bytes": 1166,
+      "sha256": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf"
+    },
+    {
+      "path": "after-prebuild/apps/universal/modules/lyco-mobile-browser/android/build.gradle",
+      "bytes": 409,
+      "sha256": "2e8f9ee1db5cbdcc2075d71c940d9cbf042c3e6bbafda0730c9768c26b26304c"
+    },
+    {
+      "path": "after-prebuild/apps/universal/package-lock.json",
+      "bytes": 254362,
+      "sha256": "70366b5db43fec2c8b267cfd41d5fbb58ea6c14e1b99bb5ec7b469266e77e284"
+    },
+    {
+      "path": "after-prebuild/apps/universal/package.json",
+      "bytes": 845,
+      "sha256": "143b3edb2be283a12553f2c204930a9c23ad318295399586ebd83727a7f80fb5"
+    },
+    {
+      "path": "after-prebuild/tests/mobile/engine/download-source-engine.sh",
+      "bytes": 8692,
+      "sha256": "c74cc1910d02c97514603a19a3f45ccfbe70b46a36d50114c52178d82f4e6414"
+    },
+    {
+      "path": "candidate-final/app.json",
+      "bytes": 1166,
+      "sha256": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf"
+    },
+    {
+      "path": "candidate-final/package-lock.json",
+      "bytes": 254362,
+      "sha256": "70366b5db43fec2c8b267cfd41d5fbb58ea6c14e1b99bb5ec7b469266e77e284"
+    },
+    {
+      "path": "candidate-final/package.json",
+      "bytes": 845,
+      "sha256": "143b3edb2be283a12553f2c204930a9c23ad318295399586ebd83727a7f80fb5"
+    },
+    {
+      "path": "generated-android/app/build.gradle",
+      "bytes": 8216,
+      "sha256": "e95dfcbbedf27595fe89030880c749ddc58318d128b65939a89f7341c5e287aa"
+    },
+    {
+      "path": "generated-android/build.gradle",
+      "bytes": 884,
+      "sha256": "4995ada70bf2f225865a8e9164660d36d3d69cb3c0814cf44b0a3e4d714d2251"
+    },
+    {
+      "path": "generated-android/gradle/wrapper/gradle-wrapper.properties",
+      "bytes": 252,
+      "sha256": "70fa201501995e6f45c0c475def71093f8115849344c48322ca997cfddba8534"
+    },
+    {
+      "path": "generated-android/gradle.properties",
+      "bytes": 3378,
+      "sha256": "8b38c275439c205dbcd62128a2fc6a4c193886dc617d0af773f4e70a9ff57d3d"
+    },
+    {
+      "path": "generated-android/settings.gradle",
+      "bytes": 1265,
+      "sha256": "334a5692fa658ce33e74fa6f199154d4c970617535d22d1005b813d069ccfdbf"
+    },
+    {
+      "path": "gradle-exit-code.txt",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "gradle-metadata.log",
+      "bytes": 32084,
+      "sha256": "560a3c4158f6e5815ae4722096b7657e4be51281d8261059c1ae6bd93c10bc2a"
+    },
+    {
+      "path": "inspect.gradle",
+      "bytes": 1298,
+      "sha256": "4520fee40d5f0d1329ff9370c5bd999e8ce29f21a88b4ab558a42f8c470d87bc"
+    },
+    {
+      "path": "installed/@react-native/gradle-plugin/gradle/libs.versions.toml",
+      "bytes": 854,
+      "sha256": "c7a028cdee90f490de9493ca9de92b61b994844836161871091c340c568f109e"
+    },
+    {
+      "path": "installed/@react-native/gradle-plugin/package.json",
+      "bytes": 955,
+      "sha256": "ff035d23e287b434ed64932d7965cd9662e768ecce7f7bf3517086f2cab4d1e3"
+    },
+    {
+      "path": "installed/expo/package.json",
+      "bytes": 8153,
+      "sha256": "6d461bcd4e874be6b30583b13480fb28e74d9fa2732acba593640415693643f6"
+    },
+    {
+      "path": "installed/expo-modules-core/package.json",
+      "bytes": 2846,
+      "sha256": "37f280f153bd97aab338c92512a4ca570edbe001c2a51c1758838bbb7624b7cc"
+    },
+    {
+      "path": "installed/react-native/package.json",
+      "bytes": 6286,
+      "sha256": "3f2bf69ed883e97a295b1de43f5a2d75d112ab45495153360c2fb521023c7f3f"
+    },
+    {
+      "path": "module-build.adapted.gradle",
+      "bytes": 510,
+      "sha256": "c36f6f4659720b3381da96b9b03b77f0c6ac65d6193d1f20548064fa083693c8"
+    },
+    {
+      "path": "module-build.original.gradle",
+      "bytes": 409,
+      "sha256": "2e8f9ee1db5cbdcc2075d71c940d9cbf042c3e6bbafda0730c9768c26b26304c"
+    },
+    {
+      "path": "root-build.adapted.gradle",
+      "bytes": 884,
+      "sha256": "4995ada70bf2f225865a8e9164660d36d3d69cb3c0814cf44b0a3e4d714d2251"
+    },
+    {
+      "path": "root-build.original.gradle",
+      "bytes": 695,
+      "sha256": "75a5f5c454dde7aa9b2f5ba030dd8c82606b778acd037156057b111a0616b344"
+    },
+    {
+      "path": "sdk-57/VERSIONS.json",
+      "bytes": 367,
+      "sha256": "e1944bab43b99ef624dbac9b957e576f24a090bf4e79e8e526745e37b1ecb9d1"
+    },
+    {
+      "path": "sdk-57/app.json",
+      "bytes": 1166,
+      "sha256": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf"
+    },
+    {
+      "path": "sdk-57/package-lock.json",
+      "bytes": 242927,
+      "sha256": "37ebea886e46703ff2cc36b6268aeb9abb727df14bf1d9c2806f0b7588438a66"
+    },
+    {
+      "path": "sdk-57/package.json",
+      "bytes": 843,
+      "sha256": "aeacfa4c980068a718bf29ab8a11f7b4c4db3574e98f21665f0e56e7b2125fde"
+    },
+    {
+      "path": "sdk-58/VERSIONS.json",
+      "bytes": 367,
+      "sha256": "cf5db33ac2be1eff57d1aef5a8228f549e75e0bd25dab503061b409137e29a0a"
+    },
+    {
+      "path": "sdk-58/app.json",
+      "bytes": 1166,
+      "sha256": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf"
+    },
+    {
+      "path": "sdk-58/package-lock.json",
+      "bytes": 254362,
+      "sha256": "70366b5db43fec2c8b267cfd41d5fbb58ea6c14e1b99bb5ec7b469266e77e284"
+    },
+    {
+      "path": "sdk-58/package.json",
+      "bytes": 845,
+      "sha256": "143b3edb2be283a12553f2c204930a9c23ad318295399586ebd83727a7f80fb5"
+    },
+    {
+      "path": "source/.github/workflows/gecko-product-compat.yml",
+      "bytes": 5407,
+      "sha256": "03aa421519d33fcde67b20fb42f56cd4b3d8a024c5a8331ebba1f34748b6a356"
+    },
+    {
+      "path": "source/apps/universal/app.json",
+      "bytes": 1166,
+      "sha256": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf"
+    },
+    {
+      "path": "source/apps/universal/modules/lyco-mobile-browser/android/build.gradle",
+      "bytes": 409,
+      "sha256": "2e8f9ee1db5cbdcc2075d71c940d9cbf042c3e6bbafda0730c9768c26b26304c"
+    },
+    {
+      "path": "source/apps/universal/package-lock.json",
+      "bytes": 242564,
+      "sha256": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6"
+    },
+    {
+      "path": "source/apps/universal/package.json",
+      "bytes": 841,
+      "sha256": "7a19a1a085c3f5bc146127ebdbd73a3bb9de2989e7ca7709770475d539863d60"
+    },
+    {
+      "path": "source/tests/mobile/engine/download-source-engine.sh",
+      "bytes": 8692,
+      "sha256": "c74cc1910d02c97514603a19a3f45ccfbe70b46a36d50114c52178d82f4e6414"
+    },
+    {
+      "path": "source/tests/mobile/engine/product-compat/inspect.gradle",
+      "bytes": 1298,
+      "sha256": "4520fee40d5f0d1329ff9370c5bd999e8ce29f21a88b4ab558a42f8c470d87bc"
+    },
+    {
+      "path": "source/tests/mobile/engine/product-compat/prepare.py",
+      "bytes": 12855,
+      "sha256": "aef45c8a19bd790151dbe96c7abc3893c08be45a963febe0ad183bb4d3efa935"
+    },
+    {
+      "path": "source-engine-aar-metadata.properties",
+      "bytes": 178,
+      "sha256": "b196cfaaf1fd0272b016a910b948bf4c633198d911fd4f044ce6a84e2b1eef6f"
+    },
+    {
+      "path": "source-engine-artifact.json",
+      "bytes": 843,
+      "sha256": "9eab3ee0017d71de6b97da8a6e67649db8c55dc715f3337f0206e48ea1fbe0e7"
+    },
+    {
+      "path": "source-engine-build.json",
+      "bytes": 10114,
+      "sha256": "4760746efd4077fa0576fb065547569b1ce246b4b11dbb34ceca5335a7370d2d"
+    },
+    {
+      "path": "source-engine-consumer.pom",
+      "bytes": 3581,
+      "sha256": "8b7b22203897bd79a0a63d6f74eb400371c2ac918333c64271c638caf44dae74"
+    },
+    {
+      "path": "source-engine-original.pom",
+      "bytes": 3917,
+      "sha256": "760b60b556283f897c7258b04bf314f9c02cc5de26845d569c6d7a42d99d8c76"
+    }
+  ],
+  "scope": "Original product dependency metadata task only. Preserve actual failure; no skipped/suppressed gate, native compilation, installed APK, migration or release proof."
+}
