@@ -112,16 +112,6 @@ jobs:
           node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs ../../tests/mobile-rtc-policy.test.mjs
           cd "$GITHUB_WORKSPACE/apps/universal"
           node scripts/verify-go-notices.mjs
-      - name: Build actual unchanged Go binding sources for this candidate
-        if: inputs.compile_product
-        working-directory: mobile/core
-        env:
-          LYCO_CAPTURE_GENERATED_SOURCES: 'true'
-        run: |
-          bash build-native.sh android
-          go test -tags with_quic,with_utls -count=1 ./...
-          python3 "$LYCO_PRODUCT_COMPAT_ROOT/mobile/core/install-android.py"
-          python3 bundle-source.py
       - name: Generate original product native project
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
         run: npx expo prebuild --clean --platform android --non-interactive
@@ -148,6 +138,16 @@ jobs:
           actual_status=${PIPESTATUS[0]}
           echo "$actual_status" > "$RUNNER_TEMP/lyco-gecko-product-compat/gradle-exit-code.txt"
           exit "$actual_status"
+      - name: Build actual unchanged Go binding sources for this candidate
+        if: inputs.compile_product
+        working-directory: mobile/core
+        env:
+          LYCO_CAPTURE_GENERATED_SOURCES: 'true'
+        run: |
+          bash build-native.sh android
+          go test -tags with_quic,with_utls -count=1 ./...
+          python3 "$LYCO_PRODUCT_COMPAT_ROOT/mobile/core/install-android.py"
+          python3 bundle-source.py
       - name: Compile actual x86_64 product with source-built bindings and Gecko dependency
         if: inputs.compile_product
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal/android

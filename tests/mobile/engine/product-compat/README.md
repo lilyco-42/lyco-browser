@@ -116,12 +116,27 @@ and [provenance](../../../../docs/audits/gecko-product-native-42253279149.source
 The explicit compile candidate now appends a root callback through public
 [`finalizeDsl`](https://developer.android.com/reference/tools/gradle-api/9.2/com/android/build/api/variant/AndroidComponentsExtension)
 for ordinary Android application/library projects, selecting the real37.2
-platform after each module's own defaults. Before/after SDK/min/target receipts
+platform after each module's own defaults. Registration is prepended before
+the original root source applies Expo/React root plugins, which can eagerly
+evaluate children. Original root bytes and both exact preamble/repository append
+are retained. Before/after SDK/min/target receipts
 and the actual model of every Android module are retained; min/target must not
 change, all actual compile platforms must match37.2. No third-party source,
 AAR metadata or metadata task is rewritten/skipped. The default metadata-only
 path keeps its previous behavior. This correction still requires real build
 verification and does not itself establish compatibility or adoption.
+
+The first ordering attempt
+[42256011051](https://github.com/lilyco-42/lyco-browser/actions/runs/42256011051)
+failed in root configuration because the callback was appended after those
+root plugins: `finalizeDsl` was too late. The original metadata task did not
+execute, so this is an adaptation-ordering failure. Complete367559-byte evidence,
+82871-byte source ZIP, all13 sources/receipts/exact additions and full job log
+were independently checked; see [result](../../../../docs/audits/gecko-modules-ordering-42256011051.json)
+and [provenance](../../../../docs/audits/gecko-modules-ordering-42256011051.source.json).
+Original metadata now precedes the expensive unchanged Go build, so configuration
+failures stop early; every actual native compile still receives a fresh original
+Go build/test/capture/install/source bundle. No task or version check is skipped.
 
 Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions

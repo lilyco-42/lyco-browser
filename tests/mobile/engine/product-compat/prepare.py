@@ -187,7 +187,7 @@ allprojects {
     # its metadata gate but the real native build exposed :expo at SDK37.0.
     # Finalize each ordinary Android module's DSL through the public AGP API,
     # after its own defaults and before variants/tasks. Never skip its checks.
-    project_platform_addition = '''
+    project_platform_preamble = '''
 subprojects { candidateProject ->
   ['com.android.application', 'com.android.library'].each { pluginId ->
     candidateProject.pluginManager.withPlugin(pluginId) {
@@ -211,8 +211,9 @@ subprojects { candidateProject ->
   }
 }
 ''' if compile_requested else ''
-    repository_addition += project_platform_addition
-    root_build.write_bytes(original_root + repository_addition.encode())
+    # Expo's root plugin can eagerly evaluate/finalize children. Register the
+    # public callbacks before that original plugin executes, not after it.
+    root_build.write_bytes(project_platform_preamble.encode() + original_root + repository_addition.encode())
     (evidence / 'root-build.original.gradle').write_bytes(original_root)
     (evidence / 'root-build.adapted.gradle').write_bytes(root_build.read_bytes())
     app_build = stage / 'apps/universal/android/app/build.gradle'
@@ -228,7 +229,7 @@ subprojects { candidateProject ->
         'appendedText': addition, 'originalModuleSha256': hashlib.sha256(original).hexdigest(),
         'adaptedModuleSha256': digest(module), 'sourceEngineRun': 41940576338,
         'rootRepositoryAppendedText': repository_addition,
-        'allAndroidModulePlatformAppendedText': project_platform_addition,
+        'rootPlatformPrependedText': project_platform_preamble,
         'originalGeneratedRootSha256': hashlib.sha256(original_root).hexdigest(),
         'adaptedGeneratedRootSha256': digest(root_build),
         'sourceEngineAarSha256': digest(engine), 'sourceEngineAarBytes': engine.stat().st_size,

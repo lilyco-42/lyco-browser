@@ -1,0 +1,18 @@
+{
+  "run": 42256011051,
+  "job": 128023366048,
+  "source": "8784c91d3d25215d5bb31abaa316f924a7f4cf86",
+  "sourceArtifact": 13523021407,
+  "sourceBytes": 82871,
+  "sourceSha256": "21be4ff6c99252f6c86d93a92e79a0a7498ec5c7899221339e05d1fe2626d56a",
+  "evidenceArtifact": 13522817683,
+  "evidenceBytes": 367559,
+  "evidenceSha256": "4dda44b8d960cdcfc93d1cda6d5054aba850a0b205a7c56ed223fb40109afe7e",
+  "wholeZipSizeShaCrcSafePathsVerified": true,
+  "all13CommittedSourceBytesVerified": true,
+  "allResultFileReceiptsAnd3ExactAppendsVerified": true,
+  "fullJobLogBytes": 242337,
+  "fullJobLogSha256": "690f46552c8dddd709f0c354d7f5a254ae12ef3dbfe67bc582067d2afc028650",
+  "failure": "Own root configuration: finalizeDsl registered after Expo root plugin had finalized child DSL; original metadata task not executed.",
+  "scope": "Adaptation ordering failure, not another executed AAR metadata dependency failure or Kotlin/APK result. Native input ZIP not separately downloaded."
+}
