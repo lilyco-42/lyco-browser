@@ -14,7 +14,7 @@ import zipfile
 if os.environ.get('GITHUB_ACTIONS') != 'true':
     raise SystemExit('Genuine Actions required')
 assert '/.github/workflows/gecko-product-compat.yml@' in os.environ['GITHUB_WORKFLOW_REF']
-assert sys.argv[1:] in (['source'], ['stage'], ['adapt'], ['collect'])
+assert sys.argv[1:] in (['source'], ['stage'], ['toolchain'], ['adapt'], ['collect'])
 phase = sys.argv[1]
 root = Path(os.environ['GITHUB_WORKSPACE']).resolve()
 temporary = Path(os.environ['RUNNER_TEMP']).resolve()
@@ -75,6 +75,39 @@ elif phase == 'stage':
     }, indent=2) + '\n')
     with Path(os.environ['GITHUB_ENV']).open('a') as environment:
         environment.write('LYCO_PRODUCT_COMPAT_ROOT=' + str(stage) + '\n')
+elif phase == 'toolchain':
+    # Only an explicit optional workflow path upgrades the disposable copy.
+    # Keep complete lock/manifests at both official incremental SDK steps.
+    expected = os.environ['LYCO_TOOLCHAIN_STAGE']
+    assert expected in ('57', '58')
+    product = stage / 'apps/universal'
+    installed = {}
+    for name in ['expo', 'react-native', 'react', 'expo-modules-core']:
+        package = product / 'node_modules' / name / 'package.json'
+        value = json.loads(package.read_text())
+        installed[name] = value['version']
+    assert installed['expo'].split('.')[0] == expected
+    checkpoint = evidence / ('sdk-' + expected)
+    checkpoint.mkdir()
+    for name in ['package.json', 'package-lock.json', 'app.json']:
+        shutil.copyfile(product / name, checkpoint / name)
+    for name, original in pins.items():
+        if name not in ('apps/universal/package.json', 'apps/universal/package-lock.json'):
+            assert digest(stage / name) == original, 'Upgrade altered protected input: ' + name
+    # An SDK upgrade may update dependency/configuration files, never our
+    # browser module, profile storage, page scripts or other product sources.
+    tracked = subprocess.check_output(['git', 'ls-files', 'apps/universal'],
+                                      cwd=root, text=True).splitlines()
+    allowed = {'apps/universal/package.json', 'apps/universal/package-lock.json'}
+    for name in tracked:
+        if name not in allowed:
+            assert (stage / name).read_bytes() == (root / name).read_bytes(), name
+    (checkpoint / 'VERSIONS.json').write_text(json.dumps({
+        'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
+        'stage': expected, 'installed': installed,
+        'allOtherTrackedProductFilesUnchanged': True,
+        'scope': 'Disposable candidate dependencies only; not product adoption or runtime',
+    }, indent=2) + '\n')
 elif phase == 'adapt':
     assert stage.is_dir()
     # Expo prebuild can generate script entries in package.json. Preserve those
@@ -158,6 +191,13 @@ allprojects {
     shutil.copyfile(root / 'tests/mobile/engine/product-compat/inspect.gradle',
                     evidence / 'inspect.gradle')
 elif phase == 'collect':
+    if stage.is_dir():
+        final = evidence / 'candidate-final'
+        final.mkdir(exist_ok=True)
+        for name in ['package.json', 'package-lock.json', 'app.json']:
+            candidate = stage / 'apps/universal' / name
+            if candidate.is_file():
+                shutil.copyfile(candidate, final / name)
     receipt = evidence / 'gradle-exit-code.txt'
     exit_code = int(receipt.read_text()) if receipt.is_file() else None
     log = evidence / 'gradle-metadata.log'
@@ -180,6 +220,9 @@ elif phase == 'collect':
         'metadataGatePassed': exit_code == 0 and task_observed,
         'gradleInvocationCompleted': exit_code is not None, 'metadataTaskObservedInLog': task_observed,
         'compiledProduct': False, 'runtimeProven': False, 'productAdopted': False,
+        'requestedToolchain': json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text()).get('inputs', {}).get('toolchain', 'current'),
+        'incrementalSdkCheckpoints': [name for name in ['sdk-57', 'sdk-58']
+                                      if (evidence / name / 'VERSIONS.json').is_file()],
         'sourceEngineRun': 41940576338, 'originalProductPins': pins,
         'originalProductPinsStillEqual': all(digest(root / name) == value for name, value in pins.items()),
         'files': inventory,

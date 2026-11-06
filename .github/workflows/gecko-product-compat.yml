@@ -12,6 +12,11 @@ on:
         description: 'Run unchanged product AAR metadata gate with validated source engine; retain any failure'
         type: boolean
         default: false
+      toolchain:
+        description: 'Current product or incremental SDK57 then SDK58 candidate in disposable copy only'
+        type: choice
+        options: [current, sdk58]
+        default: current
 permissions:
   contents: read
 concurrency:
@@ -69,6 +74,20 @@ jobs:
       - name: Install exact original product lock
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
         run: npm ci --no-audit --no-fund
+      - name: Upgrade disposable copy to SDK57 and retain candidate lock
+        if: inputs.toolchain == 'sdk58'
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
+        run: |
+          npx expo install expo@57.0.0 --fix --npm
+          npx expo install --check
+          LYCO_TOOLCHAIN_STAGE=57 python3 "$GITHUB_WORKSPACE/tests/mobile/engine/product-compat/prepare.py" toolchain
+      - name: Upgrade disposable copy to SDK58 and retain candidate lock
+        if: inputs.toolchain == 'sdk58'
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
+        run: |
+          npx expo install expo@58.0.0 --fix --npm
+          npx expo install --check
+          LYCO_TOOLCHAIN_STAGE=58 python3 "$GITHUB_WORKSPACE/tests/mobile/engine/product-compat/prepare.py" toolchain
       - name: Generate original product native project
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
         run: npx expo prebuild --clean --platform android --non-interactive

@@ -30,14 +30,24 @@ CRC and full log were independently checked. See the [unmodified receipt](../../
 and [provenance](../../../../docs/audits/gecko-storage-arm64-preflight-42069972627.source.json).
 
 The distinct actual build [42070649430](https://github.com/lilyco-42/lyco-browser/actions/runs/42070649430)
-is compiling source `643be4f`. Its complete host-check and preparation originals
-were independently checked: all eighteen preparation files match the compile
-host; the fifteen non-JSON files equal the verified PR originals, and the three
-recipe objects differ only in actual run/source identifiers. The unchanged
-non-root resource/credential check exited zero. This check-only result does not
-prove the compiler's final resource use or successful native compilation.
+completed source `643be4f` successfully. The complete compiled ZIP (85927053
+bytes, SHA-256 `eb31dc638b105bd3b5e44d33364c0fe63c1bad087ed98f5c086a042537b945cb`)
+and evidence ZIP (411832 bytes, SHA-256
+`5c7a737a5c95fef7b45bffdf01522d8bee621e1cd7a77b46b76b74819c41f04a`)
+were independently checked for size, SHA, CRC and safe paths. The actual AAR is
+85915921 bytes, SHA-256
+`a4c3829a81265f18555e526fbe84f23ff824c7e85c510cad9bd4092b9d13eb30`.
+All thirteen original library sizes/hashes and AArch64 ELF machine 183 match
+the retained result. All eighteen preparation files equal final evidence;
+storage, architecture and verifier transformations were reconstructed as data,
+without executing the helpers. Three changed upstream source hashes, optimized
+compiler configuration, nine completed phases and actual host exit zero were
+also checked. The complete 1078199-byte job log is retained. Maven publication
+equality is supported by runner assertions/logs/receipts; duplicate published
+AAR files were not exported for an independent byte comparison. See the
+[unmodified result](../../../../docs/audits/gecko-storage-arm64-42070649430.json)
+and [independent provenance](../../../../docs/audits/gecko-storage-arm64-42070649430.source.json).
 
-The final archive, actual ARM64
-runtime, old WebView data/key preservation, product bridge, performance,
+Actual ARM64 runtime, old WebView data/key preservation, product bridge, performance,
 license delivery and five-platform signing/distribution remain separate
 requirements. No default installer or product engine is changed.

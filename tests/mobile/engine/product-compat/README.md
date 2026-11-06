@@ -32,7 +32,30 @@ product, engine or old profiles; no upstream code is copied here. See the
 [Android tool requirements](https://developer.android.com/build/releases/about-agp)
 and [Expo SDK matrix](https://docs.expo.dev/versions/latest/).
 
-The initial source is prepared, not yet validated. Compatibility is only a
-prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
+The actual original-product check
+[42247213570](https://github.com/lilyco-42/lyco-browser/actions/runs/42247213570)
+executed `:app:checkReleaseAarMetadata` and failed with five dependency issues:
+the source engine requires SDK37; AndroidX core/core-ktx 1.19.1 requires SDK37
+and AGP9.1.0. Actual product configuration was SDK36/AGP8.12.0/Gradle9.3.1.
+Complete original source/evidence ZIPs, all receipt hashes, exact private module
+and root appends, source pins and full job log were independently checked.
+See the [unmodified result](../../../../docs/audits/gecko-product-compat-42247213570.json)
+and [provenance](../../../../docs/audits/gecko-product-compat-42247213570.source.json).
+The two earlier observer/repository preparation failures remain recorded;
+this latest failure really reached the original metadata task.
+
+The optional manual `toolchain=sdk58` candidate follows the
+[official incremental upgrade guidance](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/):
+install the original lock, then upgrade SDK56 to exact Expo57.0.0 and58.0.0,
+running each SDK's ordinary dependency checks. Complete candidate manifests,
+locks and actual installed versions are retained at both steps; all other
+tracked product files must remain unchanged. There are no forced peer installs,
+SDK/minor check suppressions or AAR metadata rewrites. Native generation and
+the original metadata task run after these upgrades, retaining any failure.
+Partial final manifests/locks survive an early failed upgrade. The default
+remains the current product. This optional path is prepared, not yet validated;
+SDK58's documented SDK37 does not prove the AAR's minor37.2 requirement.
+
+Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions
 remain required.
