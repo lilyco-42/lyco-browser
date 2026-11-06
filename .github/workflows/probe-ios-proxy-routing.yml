@@ -5,6 +5,7 @@ on:
     paths:
       - 'tests/mobile/ios-proxy-probe.swift'
       - 'tests/mobile/run-ios-proxy-probe.sh'
+      - 'tests/mobile/ios-probe-launch.py'
       - 'tests/mobile/proxy-probe-fixture.py'
       - 'tests/mobile/h2-relay-fixture.mjs'
       - '.github/workflows/probe-ios-proxy-routing.yml'
@@ -27,6 +28,10 @@ jobs:
         with: {distribution: 'temurin', java-version: '17'}
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
+      - name: Parse bounded startup diagnostics on the real runner
+        run: |
+          python3 -m py_compile tests/mobile/ios-probe-launch.py
+          bash -n tests/mobile/run-ios-proxy-probe.sh
       - name: Build the actual pinned Apple core for the isolated application
         working-directory: mobile/core
         run: bash build-native.sh apple

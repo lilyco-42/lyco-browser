@@ -148,7 +148,7 @@ PY
 done
 node "$root/h2-relay-fixture.mjs" "$evidence" "$relay_private" --check
 stage 'Launch minimal application' | tee -a "$evidence/stages.txt"
-xcrun simctl launch "$device" top.lain42.lycoproxyprobe > "$evidence/launch.txt"
+python3 "$root/ios-probe-launch.py"
 # Extra relay and certificate-negative cases retain 6s each. Simulator preparation
 # has its own step; no original per-request budget or assertion is relaxed.
 for attempt in $(seq 1 360); do
