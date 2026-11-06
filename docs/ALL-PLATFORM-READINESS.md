@@ -27,7 +27,21 @@ b1 的 Windows 同样在该启动校验处有效失败，已完成 21 项，见[
 各模块平台修正的[源码预检42255748357](https://github.com/lilyco-42/lyco-browser/actions/runs/42255748357)
 已通过，完整82871字节源码ZIP与13项原文/全日志另验；
 [42256011051](https://github.com/lilyco-42/lyco-browser/actions/runs/42256011051)
-现以 `8784c91` 执行新的实际编译，尚无通过结论。原失败完整保留，不重放未修改的任务。
+以 `8784c91` 执行后在配置阶段失败：钩子注册晚于 Expo 根插件，原元数据任务尚未执行。
+完整原件见[结果](audits/gecko-modules-ordering-42256011051.json)与[来源](audits/gecko-modules-ordering-42256011051.source.json)。
+后续 `2d20e3f` 将注册前置，保留根文件原文及精确前缀/仓库后缀，并让元数据先于 Go 编译；
+[源码预检42257502851](https://github.com/lilyco-42/lyco-browser/actions/runs/42257502851)
+的82941字节ZIP、13份源码与全日志另验，
+[42257959025](https://github.com/lilyco-42/lyco-browser/actions/runs/42257959025) 正在实际验证，尚无通过结论。
+原失败完整保留，不重放未修改的任务。
+
+iOS 独立探针 [42251467696](https://github.com/lilyco-42/lyco-browser/actions/runs/42251467696)
+完成编译、开机和安装，但原单次启动命令在七分钟步骤时限内未返回输出；没有PID或48场景结果。
+完整3154818字节ZIP/SHA/CRC、全日志和截图另验，见[准备原件](audits/ios-launch-timeout-42251467696.json)与
+[范围说明](audits/ios-launch-timeout-42251467696.source.json)。只有宿主Node中继对照，不能当原生代理结果。
+`c8073cb` 仅为同一个启动命令增加60秒限时、原始输出/退出/PID回执及限时日志；
+没有重启、擦除或重试模拟器，Swift、夹具和Go输入未变，原48场景/6秒单项/7分钟门禁及严格信任保留。
+[42258237487](https://github.com/lilyco-42/lyco-browser/actions/runs/42258237487) 已排队，尚非运行、代理修复或发行通过。
 
 SDK58＋真实 API37.2 副本 [42250336449](https://github.com/lilyco-42/lyco-browser/actions/runs/42250336449) 已通过原始依赖检查，解决前两轮实际 SDK/AGP 和小版本不匹配。完整 350937 字节证据 ZIP、70799 字节源码 ZIP、逐文件回执、两阶段依赖锁、原平台属性及私有副本精确追加均另验，见[原始结果](audits/gecko-product-api372-42250336449.json)与[来源](audits/gecko-product-api372-42250336449.source.json)。实际 app 为 android-37.2 / AGP9.2.1 / Gradle9.4.1，min28、target36 保持；原 `:app:checkReleaseAarMetadata` 执行且退出零，没有抑制检查或改写 AAR 元数据。这只证明依赖兼容，尚需携原 Go 绑定完成 Kotlin/APK 编译、产品桥接、旧数据/原密钥保留及完整隐私运行验收。下方失败记录保留各自实际范围。
 

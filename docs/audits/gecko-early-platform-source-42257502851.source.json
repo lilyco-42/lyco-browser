@@ -1,0 +1,12 @@
+{
+  "run": 42257502851,
+  "artifact": 13522304327,
+  "source": "2d20e3fda0ac5f32856b72d9eeda40814915b536",
+  "bytes": 82941,
+  "sha256": "1eff9fcb78763f8e0095cf3ae80785e68621f39c2a1ad7bbea0f70794be2564d",
+  "wholeArchiveSizeShaCrcSafePathsVerified": true,
+  "all13CommittedSourcesMatch": true,
+  "scope": "Real Actions source preflight only; early SDK callback actual configuration/native compile still unproven.",
+  "fullJobLogBytes": 16330,
+  "fullJobLogSha256": "c4dde3f1303ce85544be1887e5127f6718f1311cd834d7c06e5d85a304f7cdd3"
+}

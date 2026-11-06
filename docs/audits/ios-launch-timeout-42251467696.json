@@ -1,0 +1,9 @@
+{
+  "run": "42251467696",
+  "source": "738944d1afcdddf0b9eef19faeacb1794652f373",
+  "device": "7EFC6246-6BDB-4FD4-AE32-9345E3B28BD8",
+  "executableSha256": "3940fa83815a07e50f79a6a8da1217d047ef5ac25b0f614e1d68ad122cee1efe",
+  "relayAnchorSha256": "6c1b725d56beec0d6f7e5d0cfda9909c0f5f3c93d3bbbe575747124cc2f639fc",
+  "globalTrustModified": false,
+  "privateKeysInArtifact": false
+}

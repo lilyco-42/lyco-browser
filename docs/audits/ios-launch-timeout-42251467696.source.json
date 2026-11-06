@@ -1,0 +1,23 @@
+{
+  "run": 42251467696,
+  "job": 128007371660,
+  "head": "b1ae8309f0fbdd7eb77ce08730b758016baea25b",
+  "testedMerge": "738944d1afcdddf0b9eef19faeacb1794652f373",
+  "artifact": 13523286847,
+  "bytes": 3154818,
+  "sha256": "74851c624815945198410535cf375b04bbfec010b7a1d884f5cc184f0befc45a",
+  "wholeZipSizeShaCrcSafePathsVerified": true,
+  "fullJobLogBytes": 222223,
+  "fullJobLogSha256": "2ad610fed0191ccd0bb8bb4af392f8977d452549eb0598e4dd9141a723820ec8",
+  "runStepTimedOutSeconds": 420,
+  "launchStdoutBytes": 0,
+  "resultsJsonPresent": false,
+  "observedNetwork": [
+    {
+      "case": "relay-fixture-control",
+      "viaProxy": true
+    }
+  ],
+  "screenshot": "Home screen with probe icon; no foreground probe UI observed at collection",
+  "scope": "Simulator preparation and owned Node relay control only. Bare simctl launch did not return observable output before step timeout; no48native cases, native proxy result or root cause established. No retries or runtime adoption."
+}
