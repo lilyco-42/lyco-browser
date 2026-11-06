@@ -328,7 +328,23 @@ try {
  await checkpoint('managed-browser-probe');
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;
  await page.evaluate(({profile,target})=>window.adoptLycoProfile({...profile,startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,target});
- await page.locator(`#profile-table tr[data-profile-id="${profile.id}"] .col-name`).dblclick();
+ // The name cell also contains a route-management button. Clicking its
+ // geometric centre can manage the route instead of starting the browser.
+ // Exercise the real name text and retain the actual hit target; never call
+ // the start API here or relax the real traffic/negative-control assertions.
+ const startByName=async id=>{
+  const name=page.locator(`#profile-table tr[data-profile-id="${id}"] .col-name .env-identity-text strong`);
+  await name.waitFor({state:'visible'});await name.scrollIntoViewIfNeeded();
+  const hit=await name.evaluate(node=>{
+   const box=node.getBoundingClientRect(),target=document.elementFromPoint(box.x+box.width/2,box.y+box.height/2);
+   return {profileId:target?.closest('tr[data-profile-id]')?.dataset.profileId,
+    insideName:node.contains(target),interactive:Boolean(target?.closest('button,a,input,select,textarea'))};
+  });
+  (report.doubleClickLaunchTargets||=[]).push(hit);
+  assert.equal(hit.profileId,id);assert.equal(hit.insideName,true);assert.equal(hit.interactive,false);
+  await name.dblclick();
+ };
+ await startByName(profile.id);
  const deadline=Date.now()+30000;
  while(Date.now()<deadline&&!report.proxyRequests.some(r=>r.path==='/browser-probe'))await new Promise(r=>setTimeout(r,250));
  assert.ok(report.proxyRequests.some(r=>r.path==='/browser-probe'&&r.proxied),'Real bundled Chromium traffic must pass through the managed proxy');
@@ -353,7 +369,7 @@ try {
   advanced:{startUrls:target},
   privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false},
  }),{profile,target:loopbackTarget});
- await page.locator('#profile-table tr[data-profile-id="'+profile.id+'"] .col-name').dblclick();
+ await startByName(profile.id);
  const loopbackDeadline=Date.now()+30000;
  while(Date.now()<loopbackDeadline&&!report.proxyRequests.some(row=>row.path==='/loopback-probe'))
   await new Promise(resolve=>setTimeout(resolve,250));
@@ -372,7 +388,7 @@ try {
   advanced:{startUrls:target},
   privacy:{...profile.privacy,langFromIp:false,timezoneFromIp:false,geoFromIp:false,webrtc:'proxy'},
  }),{profile,target:rtcTarget});
- await page.locator('#profile-table tr[data-profile-id="'+profile.id+'"] .col-name').dblclick();
+ await startByName(profile.id);
  const rtcDeadline=Date.now()+22000;
  while(Date.now()<rtcDeadline&&!privacyProbe.snapshot().rtc)
   await new Promise(resolve=>setTimeout(resolve,150));
