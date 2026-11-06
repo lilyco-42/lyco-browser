@@ -1,0 +1,25 @@
+{
+  "run": 42253279149,
+  "source": "be8f90eb97202964ddf5e89d2505a74bd2c6b169",
+  "job": 128013809322,
+  "evidenceArtifact": 13521553877,
+  "evidenceBytes": 371289,
+  "evidenceSha256": "bc840a492a8eb644bbcc61322545158703650a5c11e5d2e076307116f2abee38",
+  "sourceArtifact": 13521203342,
+  "sourceBytes": 82085,
+  "sourceSha256": "65568b25cd84829492802082a8e3a350f4dc722348082fe52b74bbfc1a666468",
+  "fullZipSizeShaCrcSafePathsVerified": true,
+  "allResultFileReceiptsVerified": true,
+  "all13OriginalSourceBytesMatchCommit": true,
+  "allThreeGeneratedGradleAppendsVerified": true,
+  "fullJobLogBytes": 290978,
+  "fullJobLogSha256": "11ee74caa47b54cacdc4587d100ce49fd53a8880bee33dcce4926b559954b786",
+  "failure": "Actual native assembleRelease failed at :expo:checkReleaseAarMetadata: own module and Gecko require37.2, Expo uses37.0; app-only metadata passed. No Kotlin/APK success.",
+  "nativeArtifact": {
+    "id": 13522800812,
+    "bytes": 809302008,
+    "sha256": "25136c7c7d42fa22a9c3a70428149c14d47f99bfc7b1000f4329ceae26df44f7",
+    "fullBytesIndependentlyDownloaded": false
+  },
+  "scope": "Actual failed product native task; no APK, runtime, bridge adoption, migration or release proof."
+}

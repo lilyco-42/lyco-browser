@@ -102,6 +102,27 @@ The original WebView runtime remains in this compile candidate alongside the
 Gecko dependency. This is no engine bridge, ARM64 runtime, owner-signed release
 or old-profile/key migration proof. The product defaults remain unchanged.
 
+Actual [42253279149](https://github.com/lilyco-42/lyco-browser/actions/runs/42253279149)
+passed original types/policy checks, actual Go build/capture/install/source bundle
+and app metadata. Native `:app:assembleRelease` then failed at
+`:expo:checkReleaseAarMetadata`: Expo's SDK37.0 cannot consume the owned module
+and source Gecko requiring37.2. Complete 371289-byte evidence ZIP,82085-byte
+source ZIP, all file receipts/source pins/exact appends and full job log were
+independently checked; the separate809302008-byte native input artifact has not
+been downloaded independently and provides no APK proof. See the
+[original result](../../../../docs/audits/gecko-product-native-42253279149.json)
+and [provenance](../../../../docs/audits/gecko-product-native-42253279149.source.json).
+
+The explicit compile candidate now appends a root callback through public
+[`finalizeDsl`](https://developer.android.com/reference/tools/gradle-api/9.2/com/android/build/api/variant/AndroidComponentsExtension)
+for ordinary Android application/library projects, selecting the real37.2
+platform after each module's own defaults. Before/after SDK/min/target receipts
+and the actual model of every Android module are retained; min/target must not
+change, all actual compile platforms must match37.2. No third-party source,
+AAR metadata or metadata task is rewritten/skipped. The default metadata-only
+path keeps its previous behavior. This correction still requires real build
+verification and does not itself establish compatibility or adoption.
+
 Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions
 remain required.

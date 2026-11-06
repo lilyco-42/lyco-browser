@@ -95,6 +95,7 @@ elif phase == 'stage':
     }, indent=2) + '\n')
     with Path(os.environ['GITHUB_ENV']).open('a') as environment:
         environment.write('LYCO_PRODUCT_COMPAT_ROOT=' + str(stage) + '\n')
+        environment.write('LYCO_PRODUCT_COMPILE_REQUESTED=' + str(compile_requested).lower() + '\n')
 elif phase == 'toolchain':
     # Only an explicit optional workflow path upgrades the disposable copy.
     # Keep complete lock/manifests at both official incremental SDK steps.
@@ -182,6 +183,35 @@ allprojects {
   }
 }
 '''
+    # Expo itself consumes the owned module. App-only SDK configuration passed
+    # its metadata gate but the real native build exposed :expo at SDK37.0.
+    # Finalize each ordinary Android module's DSL through the public AGP API,
+    # after its own defaults and before variants/tasks. Never skip its checks.
+    project_platform_addition = '''
+subprojects { candidateProject ->
+  ['com.android.application', 'com.android.library'].each { pluginId ->
+    candidateProject.pluginManager.withPlugin(pluginId) {
+      candidateProject.extensions.getByName('androidComponents').finalizeDsl { androidDsl ->
+        def before = [compileSdkHash: androidDsl.compileSdkVersion,
+                      minSdk: androidDsl.defaultConfig.minSdk?.toString(),
+                      targetSdk: androidDsl.defaultConfig.targetSdk?.toString()]
+        androidDsl.compileSdk {
+          version = release(37) { minorApiLevel = 2 }
+        }
+        def after = [compileSdkHash: androidDsl.compileSdkVersion,
+                     minSdk: androidDsl.defaultConfig.minSdk?.toString(),
+                     targetSdk: androidDsl.defaultConfig.targetSdk?.toString()]
+        assert before.minSdk == after.minSdk && before.targetSdk == after.targetSdk
+        def receipt = new File(System.getenv('RUNNER_TEMP'),
+            'lyco-gecko-product-compat/module-platform-changes.jsonl')
+        receipt << groovy.json.JsonOutput.toJson([project: candidateProject.path,
+            before: before, after: after]) + '\\n'
+      }
+    }
+  }
+}
+''' if compile_requested else ''
+    repository_addition += project_platform_addition
     root_build.write_bytes(original_root + repository_addition.encode())
     (evidence / 'root-build.original.gradle').write_bytes(original_root)
     (evidence / 'root-build.adapted.gradle').write_bytes(root_build.read_bytes())
@@ -198,6 +228,7 @@ allprojects {
         'appendedText': addition, 'originalModuleSha256': hashlib.sha256(original).hexdigest(),
         'adaptedModuleSha256': digest(module), 'sourceEngineRun': 41940576338,
         'rootRepositoryAppendedText': repository_addition,
+        'allAndroidModulePlatformAppendedText': project_platform_addition,
         'originalGeneratedRootSha256': hashlib.sha256(original_root).hexdigest(),
         'adaptedGeneratedRootSha256': digest(root_build),
         'sourceEngineAarSha256': digest(engine), 'sourceEngineAarBytes': engine.stat().st_size,

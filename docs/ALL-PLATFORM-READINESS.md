@@ -2,7 +2,11 @@
 
 后续原生编译候选 [42253279149](https://github.com/lilyco-42/lyco-browser/actions/runs/42253279149)
 使用 `be8f90e` 的独立流程，显式 SDK58/API37.2、原类型/策略检查及真实 Go 源码绑定；
-16:38 UTC 已通过这些前置步骤，正在生成原生工程，尚无 APK 编译通过结论。
+已通过这些前置步骤及原 app 依赖检查；实际 APK 编译有效失败于
+`:expo:checkReleaseAarMetadata`，Expo 模块仍为37.0，不能消费要求37.2的依赖。
+完整371289字节证据ZIP、82085字节源码ZIP、文件回执及全日志已另验，见
+[原始结果](audits/gecko-product-native-42253279149.json)与[来源](audits/gecko-product-native-42253279149.source.json)。
+后续仅在显式编译副本中统一各 Android 模块的真实编译平台，未跳过任何版本检查；仍需实际复验。
 其[源码预检原件](audits/gecko-product-compile-source-42253055602.json)与
 [核验来源](audits/gecko-product-compile-source-42253055602.source.json)已保留。
 此轮仅编译 x86_64 产品副本，原 WebView 运行时与旧数据保持；增加 Gecko 依赖不等于完成桥接。
@@ -13,7 +17,7 @@
 b1 的 Windows 同样在该启动校验处有效失败，已完成 21 项，见[原件](audits/desktop-native-42251467514.json)与[来源](audits/desktop-native-42251467514.source.json)。
 它与更早 7a 的浏览器请求未观察到失败不同，均不能写为直连泄漏或已修复。
 独立 `9b9bf22` 仅消除 Windows 双击整单元格可能误点线路按钮的测试歧义，
-[42253699237](https://github.com/lilyco-42/lyco-browser/actions/runs/42253699237) 正在复验；
+[42253699237](https://github.com/lilyco-42/lyco-browser/actions/runs/42253699237) 已在成品预检失败，具体原件正在核对；
 真实请求、失效上游负向及硬件拒绝门槛保留，没有更改产品运行时。
 
 SDK58＋真实 API37.2 副本 [42250336449](https://github.com/lilyco-42/lyco-browser/actions/runs/42250336449) 已通过原始依赖检查，解决前两轮实际 SDK/AGP 和小版本不匹配。完整 350937 字节证据 ZIP、70799 字节源码 ZIP、逐文件回执、两阶段依赖锁、原平台属性及私有副本精确追加均另验，见[原始结果](audits/gecko-product-api372-42250336449.json)与[来源](audits/gecko-product-api372-42250336449.source.json)。实际 app 为 android-37.2 / AGP9.2.1 / Gradle9.4.1，min28、target36 保持；原 `:app:checkReleaseAarMetadata` 执行且退出零，没有抑制检查或改写 AAR 元数据。这只证明依赖兼容，尚需携原 Go 绑定完成 Kotlin/APK 编译、产品桥接、旧数据/原密钥保留及完整隐私运行验收。下方失败记录保留各自实际范围。

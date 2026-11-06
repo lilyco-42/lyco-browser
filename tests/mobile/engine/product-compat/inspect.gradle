@@ -9,6 +9,14 @@ gradle.projectsEvaluated {
     def version = plugin.class.classLoader.loadClass('com.android.Version')
         .getField('ANDROID_GRADLE_PLUGIN_VERSION').get(null)
     def output = new File(System.getenv('RUNNER_TEMP'), 'lyco-gecko-product-compat/actual-gradle-model.json')
+    def androidProjects = gradle.rootProject.allprojects.findAll {
+        it.extensions.findByName('android') != null
+    }.collect { candidate ->
+        def dsl = candidate.extensions.getByName('android')
+        [path: candidate.path, compileSdkHash: dsl.compileSdkVersion,
+         minSdk: dsl.defaultConfig.minSdk?.toString(),
+         targetSdk: dsl.defaultConfig.targetSdk?.toString()]
+    }.sort { it.path }
     output.parentFile.mkdirs()
     output.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
         gradleVersion: gradle.gradleVersion,
@@ -18,7 +26,13 @@ gradle.projectsEvaluated {
         minSdk: android.defaultConfig.minSdk?.toString(),
         targetSdk: android.defaultConfig.targetSdk?.toString(),
         projectNames: gradle.rootProject.allprojects.collect { it.path }.sort(),
+        androidProjects: androidProjects,
         task: ':app:checkReleaseAarMetadata',
         scope: 'Actual configured product model, not native compilation or runtime'
     ]))
+    if (System.getenv('LYCO_PRODUCT_COMPILE_REQUESTED') == 'true') {
+        assert androidProjects.any { it.path == ':expo' }
+        assert androidProjects.every { it.compileSdkHash == 'android-37.2' } :
+            'Every candidate Android module must use the actual requested platform'
+    }
 }
