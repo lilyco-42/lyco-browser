@@ -1,0 +1,17 @@
+{
+  "run": 42251467514,
+  "job": 128007449919,
+  "source": "b1ae8309f0fbdd7eb77ce08730b758016baea25b",
+  "artifact": 13519948887,
+  "zipBytes": 2416763,
+  "zipSha256": "1b6273d4beaeb2f118e9ba3ef744ad6e3f07451192c1b4557dc1287e119432b3",
+  "zipSizeShaCrcSafePathsVerified": true,
+  "fullJobLogBytes": 218329,
+  "fullJobLogSha256": "8f8b7dfa1b8483d40dcda9288f5e4e014508b32611d26f72af06b77928e59fbd",
+  "reportCommit": "738944d1afcdddf0b9eef19faeacb1794652f373",
+  "stage": "launch-workbench",
+  "checksCompleted": 21,
+  "failure": "page.evaluate: Error: Error invoking remote method 'profiles:start': Error: 内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置\n    at verifyNativeWorkspaceRoutes (D:\\a\\lyco-browser\\lyco-browser\\lyco\\tests\\native-workspace-routes.mjs:111:15)\n    at async file:///D:/a/lyco-browser/lyco-browser/lyco/tests/native-workspaces.mjs:325:2",
+  "conclusion": "VALID FAILURE before real selected workspace navigation: native hardware configuration refused. Different from prior7a managed-browser-probe missing request; not evidence of direct bypass.",
+  "scope": "Actual failed desktop gate, not release, fix or completed installer evidence."
+}

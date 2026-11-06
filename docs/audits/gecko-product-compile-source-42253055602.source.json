@@ -1,0 +1,10 @@
+{
+  "run": 42253055602,
+  "artifact": 13520743634,
+  "archiveBytes": 82085,
+  "archiveSha256": "d89d28dd599ebedc6b070421f711e16ade785414a878122ca6af2d11d1913aea",
+  "fullZipCrcAndSafePathsVerified": true,
+  "allSourceFilesMatchCommittedBytes": true,
+  "fileCount": 13,
+  "scope": "Real Actions source preflight only; actual native compile not yet dispatched"
+}

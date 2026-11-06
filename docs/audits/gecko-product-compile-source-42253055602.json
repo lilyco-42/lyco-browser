@@ -1,0 +1,26 @@
+{
+  "run": "42253055602",
+  "source": "be8f90eb97202964ddf5e89d2505a74bd2c6b169",
+  "originalPins": {
+    "apps/universal/modules/lyco-mobile-browser/android/build.gradle": "2e8f9ee1db5cbdcc2075d71c940d9cbf042c3e6bbafda0730c9768c26b26304c",
+    "apps/universal/app.json": "bae1e6598c92cd196b326653213acd9df7088c61b75903be36c50b6978b534cf",
+    "apps/universal/package.json": "7a19a1a085c3f5bc146127ebdbd73a3bb9de2989e7ca7709770475d539863d60",
+    "apps/universal/package-lock.json": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6",
+    "tests/mobile/engine/download-source-engine.sh": "c74cc1910d02c97514603a19a3f45ccfbe70b46a36d50114c52178d82f4e6414"
+  },
+  "newSources": {
+    "tests/mobile/engine/product-compat/prepare.py": "9811900f2522a9b237af1fb67a920b5cbb658dd05f9a8a2c018434080ed31bf4",
+    "tests/mobile/engine/product-compat/inspect.gradle": "40d8f2bd308fac34a65930132bc80e8c7ef682b185528a205e59e6842b1c96d8",
+    ".github/workflows/gecko-product-compat.yml": "182aa6436146b729db77bfa52e3535097aadf3d5da125563be948f4966a92c87",
+    "mobile/core/build-native.sh": "1f00cfd2f05a0d152fd4436462a7bac3b5af6318392f61f9a7e9db7923c32cb3",
+    "mobile/core/install-android.py": "c6061f47cd64c35c0eff8c8c7ac559315e25666bd0c14b43681ecae8490c9d5b",
+    "mobile/core/bundle-source.py": "0a81f0046085adb6650fe3e29848c07d30337b5ed75b2cadacd85fb2857b09f5",
+    "mobile/core/capture-go-build.py": "8fa1c4db2dc0237b12110f20fce094812926f91214364f1de7acea36b4ae071c",
+    "mobile/core/retain-generated.py": "59f41303d5994f34eeba5c95befe364bfcec96e08b7adc5dd37006d229b7b8d6"
+  },
+  "originalCoreTree": "22e63f5e223f6466858f77be9516a3c2c680e0e4",
+  "scope": "Source integrity and real Actions parsing only; no dependency, native compile or runtime proof",
+  "productChanged": false,
+  "compiled": false,
+  "runtimeProven": false
+}

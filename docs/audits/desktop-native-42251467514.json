@@ -1,0 +1,1371 @@
+{
+  "commit": "738944d1afcdddf0b9eef19faeacb1794652f373",
+  "binary": "D:\\a\\lyco-browser\\lyco-browser\\upstream\\Browserapp\\node_modules\\desktop-shell\\dist\\electron.exe",
+  "fixtureBilling": true,
+  "realPayments": 0,
+  "proxyRequests": [
+    {
+      "path": "/mihomo-probe",
+      "proxied": true
+    }
+  ],
+  "checks": [
+    "unconfigured-host-browser-font-positive-control",
+    "packaged-and-running-product-version-matches-shared-manifest",
+    "real-native-group-create-and-current-group-dialog-defaults",
+    "packaged-ofl-ui-font-loaded-and-distinct-chinese-glyphs",
+    "localized-panel-survives-upstream-language-switch",
+    "native-account-onboarding-real-routes-layout-and-color-modes",
+    "native-diagnostics-panel-real-empty-state-themes-and-keyboard-close",
+    "native-official-subscription-help-both-locales-and-themes",
+    "actual-packaged-uda-desktop-appearance-and-manual-override",
+    "native-login-valid-entitlement",
+    "native-long-term-proxy-plan-labels-and-compatible-entitlement",
+    "concurrent-connect-same-core-port",
+    "real-main-process-extension-handoff-no-account-secrets",
+    "compact-columns-retain-expanded-details",
+    "native-compact-columns-fit-at-1024-and-1440-without-overlap",
+    "native-workbench-follows-existing-dark-and-light-theme",
+    "real-batch-create-two-environments-persists-selected-group",
+    "native-bulk-selection-counts-survive-locales-and-selection-changes",
+    "native-bulk-toolbar-fits-and-opens-existing-preferences",
+    "packaged-native-login-create-profile",
+    "actual-bundled-mihomo-http-routing"
+  ],
+  "stage": "launch-workbench",
+  "stageAt": "2026-11-06T16:27:00.402Z",
+  "profileAudit": {
+    "parserFrames": {},
+    "concurrent": {}
+  },
+  "workbenchFontControl": {
+    "family": "LYCO Audit Control 20261021",
+    "local": "loaded",
+    "fallback": [
+      140.75,
+      128,
+      80.359375
+    ],
+    "requested": [
+      152.90625,
+      128,
+      78.984375
+    ]
+  },
+  "hostFontControl": {
+    "family": "LYCO Audit Control 20261021",
+    "local": "loaded",
+    "fallback": [
+      140.75,
+      128,
+      80.359375
+    ],
+    "requested": [
+      152.90625,
+      128,
+      78.984375
+    ],
+    "layout": {
+      "family": "LYCO Audit Control 20261021",
+      "canvas": {
+        "fallback": [
+          140.75,
+          128,
+          80.359375
+        ],
+        "requested": [
+          152.90625,
+          128,
+          78.984375
+        ]
+      },
+      "dom": {
+        "fallback": [
+          140.75,
+          128,
+          80.359375
+        ],
+        "requested": [
+          152.90625,
+          128,
+          78.984375
+        ]
+      },
+      "face": {
+        "api": true,
+        "local": "loaded"
+      }
+    },
+    "positive": true,
+    "baseline": "unconfigured-msedge",
+    "version": "156.0.4314.58"
+  },
+  "product": {
+    "version": "1.0.25",
+    "build": 2,
+    "channel": "internal-preview",
+    "runningVersion": "1.0.25"
+  },
+  "uiCjk": {
+    "loaded": [
+      {
+        "family": "LYCO UI CJK",
+        "status": "loaded"
+      }
+    ],
+    "computed": "\"LYCO UI CJK\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "glyphs": [
+      {
+        "char": "代",
+        "hash": 4227043448,
+        "ink": 405
+      },
+      {
+        "char": "理",
+        "hash": 3103418346,
+        "ink": 553
+      },
+      {
+        "char": "订",
+        "hash": 935430013,
+        "ink": 342
+      },
+      {
+        "char": "阅",
+        "hash": 299865693,
+        "ink": 528
+      },
+      {
+        "char": "环",
+        "hash": 1227774190,
+        "ink": 387
+      },
+      {
+        "char": "境",
+        "hash": 2400638095,
+        "ink": 528
+      }
+    ]
+  },
+  "accountPanel": {
+    "realNavigationRoutes": true,
+    "layouts": [
+      {
+        "mode": "light",
+        "width": 900,
+        "viewport": 900,
+        "panel": {
+          "left": 184,
+          "right": 873,
+          "width": 689,
+          "height": 1906.171875
+        },
+        "clientWidth": 689,
+        "scrollWidth": 689,
+        "cards": [
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 480.375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 726.9375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 208.875
+          }
+        ],
+        "fields": [
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 748,
+            "width": 523,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "light",
+        "width": 1024,
+        "viewport": 1024,
+        "panel": {
+          "left": 204,
+          "right": 993,
+          "width": 789,
+          "height": 1387.578125
+        },
+        "clientWidth": 789,
+        "scrollWidth": 789,
+        "cards": [
+          {
+            "left": 228,
+            "right": 589.5,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 607.5,
+            "right": 969,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 228,
+            "right": 969,
+            "width": 741,
+            "height": 186.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 630.5,
+            "right": 862,
+            "width": 231.5,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "panel": {
+          "left": 232.5,
+          "right": 1392.5,
+          "width": 1160,
+          "height": 1283.203125
+        },
+        "clientWidth": 1160,
+        "scrollWidth": 1160,
+        "cards": [
+          {
+            "left": 256.5,
+            "right": 803.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 821.5,
+            "right": 1368.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 256.5,
+            "right": 1368.5,
+            "width": 1112,
+            "height": 126.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 844.5,
+            "right": 1261.5,
+            "width": 417,
+            "height": 40
+          }
+        ],
+        "background": "rgb(247, 250, 249)"
+      },
+      {
+        "mode": "dark",
+        "width": 900,
+        "viewport": 900,
+        "panel": {
+          "left": 184,
+          "right": 873,
+          "width": 689,
+          "height": 1906.171875
+        },
+        "clientWidth": 689,
+        "scrollWidth": 689,
+        "cards": [
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 480.375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 726.9375
+          },
+          {
+            "left": 202,
+            "right": 855,
+            "width": 653,
+            "height": 208.875
+          }
+        ],
+        "fields": [
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 832,
+            "width": 607,
+            "height": 42
+          },
+          {
+            "left": 225,
+            "right": 748,
+            "width": 523,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      },
+      {
+        "mode": "dark",
+        "width": 1024,
+        "viewport": 1024,
+        "panel": {
+          "left": 204,
+          "right": 993,
+          "width": 789,
+          "height": 1387.578125
+        },
+        "clientWidth": 789,
+        "scrollWidth": 789,
+        "cards": [
+          {
+            "left": 228,
+            "right": 589.5,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 607.5,
+            "right": 969,
+            "width": 361.5,
+            "height": 793.5
+          },
+          {
+            "left": 228,
+            "right": 969,
+            "width": 741,
+            "height": 186.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 251,
+            "right": 566.5,
+            "width": 315.5,
+            "height": 42
+          },
+          {
+            "left": 630.5,
+            "right": 862,
+            "width": 231.5,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      },
+      {
+        "mode": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "panel": {
+          "left": 232.5,
+          "right": 1392.5,
+          "width": 1160,
+          "height": 1283.203125
+        },
+        "clientWidth": 1160,
+        "scrollWidth": 1160,
+        "cards": [
+          {
+            "left": 256.5,
+            "right": 803.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 821.5,
+            "right": 1368.5,
+            "width": 547,
+            "height": 749.125
+          },
+          {
+            "left": 256.5,
+            "right": 1368.5,
+            "width": 1112,
+            "height": 126.6875
+          }
+        ],
+        "fields": [
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 279.5,
+            "right": 780.5,
+            "width": 501,
+            "height": 42
+          },
+          {
+            "left": 844.5,
+            "right": 1261.5,
+            "width": 417,
+            "height": 40
+          }
+        ],
+        "background": "rgb(18, 28, 32)"
+      }
+    ],
+    "surfaces": {
+      "light": "rgb(247, 250, 249)",
+      "dark": "rgb(18, 28, 32)"
+    }
+  },
+  "diagnosticsPanel": {
+    "emptyState": true,
+    "layouts": [
+      {
+        "locale": "zh-CN",
+        "mode": "dark",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 45.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 322.625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 322.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 580.28125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 580.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "zh-CN",
+        "mode": "light",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 45.53125,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 272.53125,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 322.625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 322.625,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 530.1875,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 580.28125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 580.28125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "dark",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 22.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(18, 28, 32)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 299.484375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 299.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 600.328125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 600.328125,
+            "width": 250
+          }
+        ]
+      },
+      {
+        "locale": "en",
+        "mode": "light",
+        "viewport": 1024,
+        "panel": {
+          "left": 232,
+          "right": 792,
+          "top": 22.390625,
+          "width": 560
+        },
+        "clientWidth": 558,
+        "scrollWidth": 558,
+        "surface": "rgb(255, 255, 255)",
+        "buttons": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 249.390625,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 299.484375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 299.484375,
+            "width": 250
+          }
+        ],
+        "support": [
+          {
+            "left": 257,
+            "right": 507,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 550.234375,
+            "width": 250
+          },
+          {
+            "left": 257,
+            "right": 507,
+            "top": 600.328125,
+            "width": 250
+          },
+          {
+            "left": 517,
+            "right": 767,
+            "top": 600.328125,
+            "width": 250
+          }
+        ]
+      }
+    ]
+  },
+  "desktopAppearance": {
+    "actual": {
+      "state": "ready",
+      "sdk": "UniDesktop/SDK",
+      "revision": "a74bd2cf372efad2407d6be4b57739e682cf1d9a",
+      "theme": "light",
+      "accent": [
+        0,
+        120,
+        215,
+        255
+      ],
+      "capabilities": {
+        "detectTheme": true,
+        "readAccent": true
+      }
+    },
+    "helperSha256": "842efc9afba4607e3d035980781cfcbd6511f26806b23fbf031261266dd3925b",
+    "autoThemeMatches": true,
+    "manualThemePreserved": true,
+    "noticesPackaged": true
+  },
+  "compactLayouts": [
+    {
+      "viewport": 1024,
+      "card": {
+        "left": 384,
+        "right": 993,
+        "width": 609
+      },
+      "clientWidth": 607,
+      "scrollWidth": 607,
+      "headers": [
+        {
+          "left": 386,
+          "right": 422,
+          "width": 36
+        },
+        {
+          "left": 422,
+          "right": 625,
+          "width": 203
+        },
+        {
+          "left": 625,
+          "right": 765,
+          "width": 140
+        },
+        {
+          "left": 765,
+          "right": 843,
+          "width": 78
+        },
+        {
+          "left": 843,
+          "right": 991,
+          "width": 148
+        }
+      ],
+      "cells": [
+        {
+          "left": 386,
+          "right": 422,
+          "width": 36
+        },
+        {
+          "left": 422,
+          "right": 625,
+          "width": 203
+        },
+        {
+          "left": 625,
+          "right": 765,
+          "width": 140
+        },
+        {
+          "left": 765,
+          "right": 843,
+          "width": 78
+        },
+        {
+          "left": 843,
+          "right": 991,
+          "width": 148
+        }
+      ]
+    },
+    {
+      "viewport": 1440,
+      "card": {
+        "left": 402,
+        "right": 1403,
+        "width": 1001
+      },
+      "clientWidth": 999,
+      "scrollWidth": 999,
+      "headers": [
+        {
+          "left": 404,
+          "right": 440,
+          "width": 36
+        },
+        {
+          "left": 440,
+          "right": 1035,
+          "width": 595
+        },
+        {
+          "left": 1035,
+          "right": 1175,
+          "width": 140
+        },
+        {
+          "left": 1175,
+          "right": 1253,
+          "width": 78
+        },
+        {
+          "left": 1253,
+          "right": 1401,
+          "width": 148
+        }
+      ],
+      "cells": [
+        {
+          "left": 404,
+          "right": 440,
+          "width": 36
+        },
+        {
+          "left": 440,
+          "right": 1035,
+          "width": 595
+        },
+        {
+          "left": 1035,
+          "right": 1175,
+          "width": 140
+        },
+        {
+          "left": 1175,
+          "right": 1253,
+          "width": 78
+        },
+        {
+          "left": 1253,
+          "right": 1401,
+          "width": 148
+        }
+      ]
+    }
+  ],
+  "userDataPath": "C:\\Users\\runneradmin\\AppData\\Roaming\\openbrowser",
+  "bulkLayouts": [
+    {
+      "viewport": 1024,
+      "clientWidth": 586,
+      "scrollWidth": 586,
+      "bounds": {
+        "left": 397,
+        "right": 983,
+        "top": 260,
+        "bottom": 331
+      },
+      "controls": [
+        {
+          "left": 397,
+          "right": 686,
+          "top": 260,
+          "bottom": 288
+        },
+        {
+          "left": 694,
+          "right": 983,
+          "top": 260,
+          "bottom": 288
+        },
+        {
+          "left": 397,
+          "right": 686,
+          "top": 299,
+          "bottom": 327
+        },
+        {
+          "left": 694,
+          "right": 983,
+          "top": 296,
+          "bottom": 330
+        }
+      ]
+    },
+    {
+      "viewport": 1440,
+      "clientWidth": 978,
+      "scrollWidth": 978,
+      "bounds": {
+        "left": 415,
+        "right": 1393,
+        "top": 216,
+        "bottom": 251
+      },
+      "controls": [
+        {
+          "left": 415,
+          "right": 653.5,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 661.5,
+          "right": 900,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 908,
+          "right": 1146.5,
+          "top": 219,
+          "bottom": 247
+        },
+        {
+          "left": 1154.5,
+          "right": 1393,
+          "top": 216,
+          "bottom": 250
+        }
+      ]
+    }
+  ],
+  "workspaceRoutes": {
+    "observations": [],
+    "pageRequests": [],
+    "checks": [
+      "actual-catalog-search-zero-results-and-clear-preserve-selection-and-full-directory",
+      "actual-workbench-selected-node-controls-and-safe-catalog",
+      "owned-route-bindings-visible-in-environment-list-with-direct-management-entry"
+    ],
+    "catalogueEntries": 1252,
+    "directChecks": [],
+    "proxyProbes": [
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ip-api.com:80",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      },
+      {
+        "route": "A",
+        "transport": "connect",
+        "target": "ipinfo.io:443",
+        "authorized": true,
+        "viaEntry": true
+      }
+    ],
+    "entryProbes": [
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      },
+      {
+        "authorized": true,
+        "targetIsA": true,
+        "connected": true
+      }
+    ]
+  },
+  "failure": "page.evaluate: Error: Error invoking remote method 'profiles:start': Error: 内核未接受所选硬件或显卡配置，环境未启动；已保存身份不会被重置\n    at verifyNativeWorkspaceRoutes (D:\\a\\lyco-browser\\lyco-browser\\lyco\\tests\\native-workspace-routes.mjs:111:15)\n    at async file:///D:/a/lyco-browser/lyco-browser/lyco/tests/native-workspaces.mjs:325:2",
+  "feedback": "请选择目标线路；保存时会先停止此环境，其他环境不受影响",
+  "state": {
+    "username": "ci-owner-a",
+    "logged_in": true,
+    "entitled": true,
+    "expires_at": "2099-01-01T00:00:00Z",
+    "plan_name": "代理月卡",
+    "connected": true,
+    "port": 60006,
+    "has_core": true
+  },
+  "browserFailures": [
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    },
+    {
+      "running": false,
+      "starting": false
+    }
+  ],
+  "failedProxyConnections": {
+    "requests": [],
+    "tlsConnections": []
+  },
+  "coreStartup": [
+    {
+      "pid": 4588,
+      "outputBytes": 386,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": null
+    },
+    {
+      "pid": 1940,
+      "outputBytes": 3706,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 4624,
+      "outputBytes": 386,
+      "signals": [
+        "configuration-started",
+        "configuration-ready"
+      ],
+      "exitCode": null,
+      "signal": "SIGTERM"
+    }
+  ],
+  "targetTrace": [],
+  "nativeIdentityCalls": [
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 1,
+      "method": "Wayfern.getFingerprint",
+      "startedAt": 1793982447027,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        }
+      },
+      "elapsedMs": 4
+    },
+    {
+      "kind": "native-call",
+      "transport": "page",
+      "target": 1,
+      "method": "Wayfern.setFingerprint",
+      "startedAt": 1793982447034,
+      "done": true,
+      "failed": false,
+      "receipt": {
+        "readable": true,
+        "shape": {
+          "hardwareConcurrency": "number",
+          "deviceMemory": "number"
+        },
+        "requestedHardware": {
+          "hardwareConcurrency": false,
+          "deviceMemory": true
+        }
+      },
+      "elapsedMs": 6
+    }
+  ],
+  "startupReadiness": [
+    {
+      "startedAt": 1793982445873,
+      "done": true,
+      "failed": false,
+      "elapsedMs": 1095
+    }
+  ]
+}
