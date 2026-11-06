@@ -22,6 +22,10 @@ on:
         type: choice
         options: [generated, '37.2']
         default: generated
+      compile_product:
+        description: 'Compile actual x86_64 product candidate after SDK58/API37.2 gates; no signing or engine adoption'
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -57,7 +61,7 @@ jobs:
       contents: read
       actions: read
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
@@ -67,6 +71,11 @@ jobs:
         with: {node-version: '22'}
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
+      - uses: actions/setup-go@v5
+        if: inputs.compile_product
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: mobile/core/go.sum
       - name: Copy only tracked product source to disposable runner directory
         run: |
           python3 tests/mobile/engine/product-compat/prepare.py source
@@ -93,6 +102,26 @@ jobs:
           npx expo install expo@58.0.0 --fix --npm
           npx expo install --check
           LYCO_TOOLCHAIN_STAGE=58 python3 "$GITHUB_WORKSPACE/tests/mobile/engine/product-compat/prepare.py" toolchain
+      - name: Check unchanged product types and policy tests in candidate toolchain
+        if: inputs.compile_product
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
+        run: |
+          test '${{ inputs.toolchain }}' = sdk58
+          test '${{ inputs.compile_platform }}' = 37.2
+          npx tsc --noEmit
+          node --experimental-strip-types --test ../../tests/mobile-proxy-endpoint.test.mjs ../../tests/mobile-subscription.test.mjs ../../tests/mobile-billing.test.mjs ../../tests/mobile-route-policy.test.mjs ../../tests/mobile-rtc-policy.test.mjs
+          cd "$GITHUB_WORKSPACE/apps/universal"
+          node scripts/verify-go-notices.mjs
+      - name: Build actual unchanged Go binding sources for this candidate
+        if: inputs.compile_product
+        working-directory: mobile/core
+        env:
+          LYCO_CAPTURE_GENERATED_SOURCES: 'true'
+        run: |
+          bash build-native.sh android
+          go test -tags with_quic,with_utls -count=1 ./...
+          python3 "$LYCO_PRODUCT_COMPAT_ROOT/mobile/core/install-android.py"
+          python3 bundle-source.py
       - name: Generate original product native project
         working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal
         run: npx expo prebuild --clean --platform android --non-interactive
@@ -119,6 +148,17 @@ jobs:
           actual_status=${PIPESTATUS[0]}
           echo "$actual_status" > "$RUNNER_TEMP/lyco-gecko-product-compat/gradle-exit-code.txt"
           exit "$actual_status"
+      - name: Compile actual x86_64 product with source-built bindings and Gecko dependency
+        if: inputs.compile_product
+        working-directory: ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal/android
+        run: |
+          set +e
+          ./gradlew :app:assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon --stacktrace --console=plain \
+            --init-script "$GITHUB_WORKSPACE/tests/mobile/engine/product-compat/inspect.gradle" \
+            2>&1 | tee "$RUNNER_TEMP/lyco-gecko-product-compat/gradle-compile.log"
+          actual_status=${PIPESTATUS[0]}
+          echo "$actual_status" > "$RUNNER_TEMP/lyco-gecko-product-compat/compile-exit-code.txt"
+          exit "$actual_status"
       - name: Preserve actual outcome without converting a failed gate into success
         if: always()
         run: python3 tests/mobile/engine/product-compat/prepare.py collect
@@ -130,4 +170,19 @@ jobs:
           path: ${{ runner.temp }}/lyco-gecko-product-compat/
           include-hidden-files: true
           if-no-files-found: error
+          retention-days: 7
+      - name: Retain actual native inputs, corresponding Go source and compiled candidate
+        if: always() && inputs.compile_product
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-gecko-product-native-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-tunnel.aar
+            ${{ runner.temp }}/lyco-tunnel-bindings.txt
+            ${{ runner.temp }}/lyco-mobile-core-source.tar.gz*
+            ${{ runner.temp }}/lyco-generated-bindings-android.tar.gz*
+            ${{ runner.temp }}/lyco-binding-capture-android/published/
+            ${{ env.LYCO_PRODUCT_COMPAT_ROOT }}/apps/universal/android/app/build/outputs/apk/release/
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7

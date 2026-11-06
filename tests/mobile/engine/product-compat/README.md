@@ -21,8 +21,9 @@ remains the job outcome; an incompatible dependency must fail. SDK checks,
 minor SDK checks, plugin requirements and existing acceptance are not disabled.
 Generated Android files, installed plugin catalogues, original/adapted module,
 original source-engine metadata/POM, full Gradle log and actual outcome are
-retained before deciding whether to upgrade the toolchain. There is no APK
-build, signing key, engine entry point, page bridge, migration or runtime claim.
+retained before deciding whether to upgrade the toolchain. The default metadata
+path has no APK build. There is no owner signing key, engine entry point, page
+bridge, migration or runtime claim.
 
 Research considered the MIT `ammarahm-ed/react-native-geckoview` wrapper
 (Gecko106/SDK31) and Apache-2.0 `loopy-lim/yeoyu` (RN0.87.1/Gecko157/SDK37.1),
@@ -89,6 +90,17 @@ and [provenance](../../../../docs/audits/gecko-product-api372-42250336449.source
 This establishes dependency compatibility only. Kotlin/APK compilation,
 original Go binding inputs, installed product bridge, runtime privacy/storage
 and old profile/key handoff remain required before product adoption.
+
+An explicit `compile_product=true` requires `inspect=true`, `toolchain=sdk58`
+and `compile_platform=37.2`. It checks original product types/policies, builds
+the unchanged Go core with the original source-capture and bundle tools, installs
+its actual AAR in the private product copy, then runs the actual
+`:app:assembleRelease` for x86_64. Complete logs, exit codes, generated Go inputs,
+source archives and any resulting APK are retained. The result records actual
+APK/native ELF bytes; an absent/failed compile cannot be reported as success.
+The original WebView runtime remains in this compile candidate alongside the
+Gecko dependency. This is no engine bridge, ARM64 runtime, owner-signed release
+or old-profile/key migration proof. The product defaults remain unchanged.
 
 Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions

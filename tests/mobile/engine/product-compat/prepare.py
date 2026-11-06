@@ -18,9 +18,13 @@ assert sys.argv[1:] in (['source'], ['stage'], ['toolchain'], ['adapt'], ['colle
 phase = sys.argv[1]
 inputs = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text()).get('inputs', {}) or {}
 compile_platform = inputs.get('compile_platform', 'generated')
+compile_requested = inputs.get('compile_product', 'false') in (True, 'true')
 assert compile_platform in ('generated', '37.2')
 if compile_platform == '37.2':
     assert inputs.get('toolchain') == 'sdk58'
+if compile_requested:
+    assert inputs.get('inspect') in (True, 'true')
+    assert inputs.get('toolchain') == 'sdk58' and compile_platform == '37.2'
 root = Path(os.environ['GITHUB_WORKSPACE']).resolve()
 temporary = Path(os.environ['RUNNER_TEMP']).resolve()
 evidence = temporary / 'lyco-gecko-product-compat'
@@ -42,12 +46,18 @@ def digest(path):
 
 for name, expected in pins.items():
     assert digest(root / name) == expected, name
+core_tree = subprocess.check_output(['git', 'rev-parse', 'HEAD:mobile/core'],
+                                    cwd=root, text=True).strip()
+assert core_tree == '22e63f5e223f6466858f77be9516a3c2c680e0e4', 'Original Go core source changed'
 
 if phase == 'source':
     source_files = {name: digest(root / name) for name in [
         'tests/mobile/engine/product-compat/prepare.py',
         'tests/mobile/engine/product-compat/inspect.gradle',
         '.github/workflows/gecko-product-compat.yml',
+        'mobile/core/build-native.sh', 'mobile/core/install-android.py',
+        'mobile/core/bundle-source.py', 'mobile/core/capture-go-build.py',
+        'mobile/core/retain-generated.py',
     ]}
     for name in [*pins, *source_files]:
         target = evidence / 'source' / name
@@ -56,6 +66,7 @@ if phase == 'source':
     (evidence / 'SOURCE.json').write_text(json.dumps({
         'run': os.environ['GITHUB_RUN_ID'], 'source': os.environ['GITHUB_SHA'],
         'originalPins': pins, 'newSources': source_files,
+        'originalCoreTree': core_tree,
         'scope': 'Source integrity and real Actions parsing only; no dependency, native compile or runtime proof',
         'productChanged': False, 'compiled': False, 'runtimeProven': False,
     }, indent=2) + '\n')
@@ -74,6 +85,10 @@ elif phase == 'stage':
     archive.unlink()
     for name, expected in pins.items():
         assert digest(stage / name) == expected
+    core_files = subprocess.check_output(['git', 'ls-files', 'mobile/core'],
+                                        cwd=root, text=True).splitlines()
+    for name in core_files:
+        assert (stage / name).read_bytes() == (root / name).read_bytes(), name
     (evidence / 'STAGED-INPUTS.json').write_text(json.dumps({
         'source': os.environ['GITHUB_SHA'], 'originalPinsCopiedExactly': pins,
         'scope': 'Before npm/Expo generation; generated changes are retained separately',
@@ -224,6 +239,35 @@ elif phase == 'collect':
     log = evidence / 'gradle-metadata.log'
     log_text = log.read_text(errors='replace') if log.is_file() else ''
     task_observed = bool(re.search(r'^> Task :app:checkReleaseAarMetadata(?:\s|$)', log_text, re.M))
+    compile_receipt = evidence / 'compile-exit-code.txt'
+    compile_exit = int(compile_receipt.read_text()) if compile_receipt.is_file() else None
+    compile_log = evidence / 'gradle-compile.log'
+    compile_text = compile_log.read_text(errors='replace') if compile_log.is_file() else ''
+    assemble_observed = bool(re.search(r'^> Task :app:assembleRelease(?:\s|$)', compile_text, re.M))
+    apk_records = []
+    for apk in sorted((stage / 'apps/universal/android/app/build/outputs/apk/release').glob('*.apk')):
+        with zipfile.ZipFile(apk) as packaged:
+            assert packaged.testzip() is None
+            assert 'classes.dex' in packaged.namelist()
+            native_files = [name for name in packaged.namelist() if name.startswith('lib/') and name.endswith('.so')]
+            assert 'lib/x86_64/libgojni.so' in native_files
+            assert 'lib/x86_64/libxul.so' in native_files
+            assert all(name.startswith('lib/x86_64/') for name in native_files)
+            libraries = []
+            for name in native_files:
+                raw = packaged.read(name)
+                assert raw[:6] == b'\x7fELF\x02\x01' and int.from_bytes(raw[18:20], 'little') == 62
+                libraries.append({'path': name, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
+        apk_records.append({'path': str(apk.relative_to(stage)), 'bytes': apk.stat().st_size,
+                            'sha256': digest(apk), 'nativeLibraries': libraries})
+    (evidence / 'NATIVE-COMPILE.json').write_text(json.dumps({
+        'requested': compile_requested, 'source': os.environ['GITHUB_SHA'], 'run': os.environ['GITHUB_RUN_ID'],
+        'originalCoreTree': core_tree, 'actualGradleExitCode': compile_exit,
+        'assembleTaskObserved': assemble_observed, 'apks': apk_records,
+        'compiledCandidate': compile_requested and compile_exit == 0 and assemble_observed and bool(apk_records),
+        'engineBridgeAdopted': False, 'runtimeProven': False, 'ownerReleaseSigned': False,
+        'scope': 'x86_64 compile only, original WebView runtime plus Gecko dependency. No ARM64 runtime, key migration, signing or five-platform release proof.',
+    }, indent=2) + '\n')
     for name in ['source-engine-build.json', 'source-engine-artifact.json',
                  'source-engine-original.pom', 'source-engine-consumer.pom']:
         source = temporary / 'lyco-mobile-network' / name
@@ -241,6 +285,8 @@ elif phase == 'collect':
         'metadataGatePassed': exit_code == 0 and task_observed,
         'gradleInvocationCompleted': exit_code is not None, 'metadataTaskObservedInLog': task_observed,
         'compiledProduct': False, 'runtimeProven': False, 'productAdopted': False,
+        'nativeCompileRequested': compile_requested,
+        'compiledCandidate': compile_requested and compile_exit == 0 and assemble_observed and bool(apk_records),
         'requestedToolchain': inputs.get('toolchain', 'current'),
         'requestedCompilePlatform': compile_platform,
         'incrementalSdkCheckpoints': [name for name in ['sdk-57', 'sdk-58']
@@ -248,5 +294,5 @@ elif phase == 'collect':
         'sourceEngineRun': 41940576338, 'originalProductPins': pins,
         'originalProductPinsStillEqual': all(digest(root / name) == value for name, value in pins.items()),
         'files': inventory,
-        'scope': 'Original product dependency metadata task only. Preserve actual failure; no skipped/suppressed gate, native compilation, installed APK, migration or release proof.',
+        'scope': 'Original dependency gate and optional x86_64 candidate compile. Preserve actual failure; no suppressed gate, installed runtime, engine bridge, migration or release proof.',
     }, indent=2) + '\n')
