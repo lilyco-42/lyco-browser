@@ -30,6 +30,25 @@ jobs:
         with: {node-version: '22'}
       - name: Parse bounded startup diagnostics on the real runner
         run: |
+          python3 - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ['GITHUB_WORKSPACE'])
+          evidence=Path(os.environ['RUNNER_TEMP'])/'lyco-ios-proxy-probe'
+          records=[]
+          for name in ['.github/workflows/probe-ios-proxy-routing.yml',
+                       'tests/mobile/ios-probe-launch.py','tests/mobile/run-ios-proxy-probe.sh',
+                       'tests/mobile/ios-proxy-probe.swift','tests/mobile/proxy-probe-fixture.py',
+                       'tests/mobile/h2-relay-fixture.mjs']:
+              raw=(root/name).read_bytes();target=evidence/'source'/name
+              target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+              records.append({'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
+          (evidence/'SOURCE.json').write_text(json.dumps({
+              'run':os.environ['GITHUB_RUN_ID'],'source':os.environ['GITHUB_SHA'],'files':records,
+              'coreTree':subprocess.check_output(['git','rev-parse','HEAD:mobile/core'],text=True).strip(),
+              'scope':'Original probe and startup diagnostic source only; no runtime acceptance.'
+          },indent=2)+'\n')
+          PY
           python3 -m py_compile tests/mobile/ios-probe-launch.py
           bash -n tests/mobile/run-ios-proxy-probe.sh
       - name: Build the actual pinned Apple core for the isolated application
