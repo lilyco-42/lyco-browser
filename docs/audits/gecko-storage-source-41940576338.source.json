@@ -1,0 +1,44 @@
+{
+  "verifiedAt": "2026-11-05T04:13:46.170909+00:00",
+  "run": 41940576338,
+  "job": 126960031076,
+  "source": "937bde85220b19a1433ff772b5f0b1a17238b4fc",
+  "conclusion": "success",
+  "originals": {
+    "compiled": {
+      "artifactId": 13387241924,
+      "bytes": 91638841,
+      "sha256": "decfdf533fa0f0858d7ede7e518decb4d33d2c92940280303531a48f944b4d36"
+    },
+    "evidence": {
+      "artifactId": 13387057420,
+      "bytes": 395480,
+      "sha256": "caaabf4fb9f65888fec1d733e7904f3e55d121c8a2dc25c31adac5c80a5cb3d7"
+    }
+  },
+  "fullOriginalSizeShaCrcVerified": true,
+  "aarBytes": 91628401,
+  "aarSha256": "a141db25e9a2c3c8091f4b7c83e21f1d38ddd2b9a0ce43b1c1cb1433d824d016",
+  "aarAndClassesJarCrcVerified": true,
+  "allThirteenActualElfBytesHashesArchitectureVerified": true,
+  "allFiveOriginalAndFourGeneratedRecipeHashesVerified": true,
+  "allFiveRecipeReplacementsExactlyReconstructed": true,
+  "threeActualSourceOriginalHashesReconstructedFromRawDiffs": {
+    "dom/localstorage/ActorsParent.cpp": "0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5",
+    "modules/libpref/init/StaticPrefList.yaml": "d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330",
+    "dom/media/webrtc/jsapi/PeerConnectionImpl.cpp": "918068eebc2080e170de43acbf3d10c3643f7fe8a82102548e38025622129988"
+  },
+  "exactThreeChangedSourceFilesVerified": true,
+  "actualCompilerConfigurationVerified": true,
+  "actualHostExitCode": 0,
+  "allNineActualPhasesCompleted": true,
+  "publishedMavenAarMatchRecordedAndCollectorChecked": true,
+  "rawResultSha256": "4760746efd4077fa0576fb065547569b1ce246b4b11dbb34ceca5335a7370d2d",
+  "fullDecodedJobLogBytes": 1089330,
+  "fullDecodedJobLogSha256": "64aaaf71a4807b6ac79ae8080c6598eb41892c8e46dee6bc945eb18b49fd9826",
+  "storageRuntimeProven": false,
+  "synchronousDiskFenceProven": false,
+  "productAdopted": false,
+  "migrationProven": false,
+  "scope": "Successful optimized x86_64 source archive with default5000ms and fixed RTC patch. New storage runtime/full privacy/ARM64/old-key migration/product integration/commercial release not yet proven."
+}

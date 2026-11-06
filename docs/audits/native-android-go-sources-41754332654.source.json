@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-11-04T04:35:26.254387+00:00",
+  "run": 41773750136,
+  "job": 126389206064,
+  "status": "completed",
+  "conclusion": "success",
+  "completedAt": "2026-11-04T04:32:24Z",
+  "collectorSource": "0364a66d9627a1d86c8a5bee872d512131b7e593",
+  "parentNativeAudit": 41772456928,
+  "candidateRun": 41754332654,
+  "candidateSource": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+  "apkSha256": "8bed4c44c56c38f610bd5852910568a22a1d6a52678bbf8681b20a427cd11e99",
+  "artifact": 13295703678,
+  "originalArchiveBytes": 78738800,
+  "originalArchiveSha256": "d603cd940cd6b254e2e0310593dcd03c3f593e40ade7c20cd032571e65ef67b0",
+  "fullOriginalSizeShaCrcVerified": true,
+  "all72ModuleOriginalFileSizesShaAndZipCrcVerified": true,
+  "all104RetainedNoticeBytesMatchOriginalModuleZip": true,
+  "allEmbeddedModuleAndGoModSumsMatchLockedGoSum": true,
+  "originalAuditArchiveByteMatch": true,
+  "trackedApplicationArchiveCommitAndCoreLocksVerified": true,
+  "fullJobLogBytes": 28895,
+  "fullJobLogSha256": "9294096d371e060a29edc507ed6391959761a69c8327da05f65843701ab26f72",
+  "moduleCount": 72,
+  "noticeCandidateFiles": 104,
+  "modulesWithoutFilenameCandidates": [],
+  "nonUtf8NoticeCandidates": [],
+  "trackedApplicationSource": {
+    "commit": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+    "bytes": 2579830,
+    "sha256": "1f0c2aa8cbe3ac343143f94d864f2ba0bb66b9ba5e82c7316c6dadfc7928a9da"
+  },
+  "nativeBuildSettings": [
+    {
+      "library": "lib/arm64-v8a/libgojni.so",
+      "sha256": "685a0b211a793e226e521b1e8e60985374cac5008145282a355648f7ccd12793",
+      "settings": {
+        "-buildmode": "c-shared",
+        "-compiler": "gc",
+        "-tags": "with_quic,with_utls",
+        "-trimpath": "true",
+        "CGO_ENABLED": "1",
+        "GOARCH": "arm64",
+        "GOOS": "android",
+        "GOARM64": "v8.0",
+        "vcs": "git",
+        "vcs.revision": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+        "vcs.time": "2026-11-04T01:28:25Z",
+        "vcs.modified": "true"
+      }
+    },
+    {
+      "library": "lib/x86_64/libgojni.so",
+      "sha256": "dd2316a9aec21654472d9e343fb1ed4dfd3104576448f5c873f205e48c5ccd84",
+      "settings": {
+        "-buildmode": "c-shared",
+        "-compiler": "gc",
+        "-tags": "with_quic,with_utls",
+        "-trimpath": "true",
+        "CGO_ENABLED": "1",
+        "GOARCH": "amd64",
+        "GOOS": "android",
+        "GOAMD64": "v1",
+        "vcs": "git",
+        "vcs.revision": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+        "vcs.time": "2026-11-04T01:28:25Z",
+        "vcs.modified": "true"
+      }
+    }
+  ],
+  "completeLicenseClearanceProven": false,
+  "completeCorrespondingSourceProven": false,
+  "localProductTestsRun": false,
+  "productRuntimeChanged": false,
+  "targetCodeExecuted": false,
+  "limits": [
+    "Does not cover Go standard library, cgo/NDK, generated bindings or other native libraries",
+    "Embedded vcs.modified is retained; generated source and reproducible binary equivalence remain unproven",
+    "Notice filename matches require review; absence of a match does not establish absence of licensing terms"
+  ],
+  "reportSha256": "76b44ea2ec2a8a3ecc8e4e88832be2f362602983ab691edf01f20a2a8b405ffc",
+  "reportCopiedUnmodified": true
+}

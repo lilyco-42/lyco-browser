@@ -1,0 +1,78 @@
+{
+  "run": "42066948510",
+  "source": "2556ca3d7c803fb2c771d78dbe5ff95209acb1c3",
+  "testedCommit": "2556ca3d7c803fb2c771d78dbe5ff95209acb1c3",
+  "originalPins": {
+    "tests/workspace-routing-fixture.mjs": "0faa8ee565c486087f45305c256a34a57ef8428caf03b9ca2e3d722c089b1635",
+    "tests/mobile/paid/fixture.mjs": "47218833693f7970b69566f108cc12e5b6ac641fc05c163a60e2d58c7ca56e12",
+    "tests/mobile/paid/run-paid.sh": "4428660043c161bf7b2f320406ee4a5640e9470b6728c93eadc86b184a6b9767",
+    ".github/workflows/build-universal.yml": "7330987595c6c504ce19a478f4388d02b47f7b0ee097d67c960405ed888faf99",
+    "tests/mobile/paid/assert-evidence.py": "93a3afcdcd92e0446d47d4d8971249b7b34b50922e9d82f0b34618cff169c3fa",
+    "tests/mobile/paid/inspect-edit.py": "f01402a7a8027d29805008c090dd79eb893a9660b23a8c332e6aefaf4b738cec",
+    "tests/mobile/paid/legacy-aaec002.json": "f8ba59c01dd76525518e7d78027ca0b4d743464759d75774a67272c45103cbe0",
+    "tests/mobile/paid/download-legacy.py": "7d036419a72756490d197686d4cdcc100dc48954888ab6c9d06297653e45b410"
+  },
+  "replacements": [
+    {
+      "path": "tests/workspace-routing-fixture.mjs",
+      "before": "visibleStatus=false,cookieMaxAge=600}={})",
+      "after": "visibleStatus=false,cookieMaxAge=600,profileKeyScript=''}={})"
+    },
+    {
+      "path": "tests/workspace-routing-fixture.mjs",
+      "before": "  pageRequests.push({phase,route});",
+      "after": "  const seedNativeKey=Boolean(profileKeyScript)&&((phase==='paid-A'&&pageRequests.length===0&&route==='direct')||(phase==='paid-B'&&pageRequests.every(row=>row.phase!=='paid-B')));\n  pageRequests.push({phase,route});"
+    },
+    {
+      "path": "tests/workspace-routing-fixture.mjs",
+      "before": "   const reported=await fetch('/report'",
+      "after": "   const keyEvidence=await (${profileKeyScript})(owner,phase,${seedNativeKey});\n   const reported=await fetch('/report'"
+    },
+    {
+      "path": "tests/workspace-routing-fixture.mjs",
+      "before": "JSON.stringify({phase,before,after})",
+      "after": "JSON.stringify({phase,before,after,keyEvidence})"
+    },
+    {
+      "path": "tests/mobile/paid/fixture.mjs",
+      "before": "const routes=await createWorkspaceRoutingFixture({browserOriginHost:'10.0.2.2',indexedDB:true,visibleStatus:true,cookieMaxAge:3600});",
+      "after": "const profileKeyScript=await fs.readFile(new URL('../legacy-keys/owned-key.js',import.meta.url),'utf8');\nconst routes=await createWorkspaceRoutingFixture({browserOriginHost:'127.0.0.1',indexedDB:true,visibleStatus:true,cookieMaxAge:3600,profileKeyScript});"
+    },
+    {
+      "path": "tests/mobile/paid/run-paid.sh",
+      "before": "adb wait-for-device\n",
+      "after": "adb wait-for-device\nkey_origin_port=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))[\"originPort\"])' \"$evidence/fixture.json\")\nadb reverse \"tcp:$key_origin_port\" \"tcp:$key_origin_port\"\n"
+    },
+    {
+      "path": "tests/mobile/paid/run-paid.sh",
+      "before": "  adb shell settings put global http_proxy :0 >/dev/null 2>&1 || true\n",
+      "after": "  if [[ -n ${key_origin_port:-} ]]; then adb reverse --remove \"tcp:$key_origin_port\" >/dev/null 2>&1 || true; fi\n  adb shell settings put global http_proxy :0 >/dev/null 2>&1 || true\n"
+    },
+    {
+      "path": "tests/mobile/paid/run-paid.sh",
+      "before": "python3 \"$root/assert-evidence.py\" \"$evidence\"\n",
+      "after": "python3 \"$root/assert-evidence.py\" \"$evidence\"\npython3 \"$root/../legacy-keys/assert-keys.py\" \"$evidence\"\n"
+    },
+    {
+      "path": "tests/mobile/paid/download-legacy.py",
+      "before": "assert current['event'] == 'workflow_dispatch' and current['path'] == run['path']",
+      "after": "assert current['event'] == 'workflow_dispatch' and current['path'] == '.github/workflows/android-legacy-keys.yml'"
+    }
+  ],
+  "generatedSourceSha256": {
+    "tests/mobile/paid/download-legacy.py": "2686dcc63ab3ec2301ae75338eedfbfa8732ae8ea73bc8dd278a28ff2c2fd27d",
+    "tests/mobile/paid/fixture.mjs": "743a39dd23a0e6d8492c42f1e1a01d22a051c5712e2a0a2d86e9c4bf0fd3e0cf",
+    "tests/mobile/paid/run-paid.sh": "f3b0ede55843ede8aa18ba6e0b1ba0068059b4b97ccddcdb92b90386b1afdd2d",
+    "tests/workspace-routing-fixture.mjs": "8996ff01a7f95dbb72b036c9b533b16387f65400190af9b9cab26ceb136c5899"
+  },
+  "addedSourceSha256": {
+    "tests/mobile/legacy-keys/owned-key.js": "4c6a48859f39ba98c51d55be57784011e172d7fb32d25d6b19d5069423612843",
+    "tests/mobile/legacy-keys/README.md": "bae5a9e7490fbaa7f71868c03f922ed6da72d84cbe0c64b525b678a2345af47c",
+    "tests/mobile/legacy-keys/assert-keys.py": "51b461c2a2754bc4144dd21624fdd210b73db5a23c346ddd7e6354d6d596ec62",
+    "tests/mobile/legacy-keys/prepare.py": "765293a5619ab29f0861d59479080e111914cfada187c6a09f38411d77db43f6"
+  },
+  "originalPaidAssertionsByteUnchanged": true,
+  "productOrEngineChanged": false,
+  "nativeRuntimeProven": false,
+  "crossEngineMigrationProven": false
+}

@@ -28,7 +28,7 @@ export async function verifyNativeAccountPanel({page, report, evidence}) {
       const geometry = await page.locator('.lyco-panel-shell').evaluate(panel => {
         const bounds = element => {const box = element.getBoundingClientRect(); return {left: box.left, right: box.right, width: box.width, height: box.height};};
         return {viewport: innerWidth, panel: bounds(panel), clientWidth: panel.clientWidth, scrollWidth: panel.scrollWidth,
-          cards: [...panel.querySelectorAll('.lyco-panel-card')].map(bounds),
+          cards: [...panel.querySelectorAll('.lyco-panel-card:not([hidden])')].map(bounds),
           fields: [...panel.querySelectorAll('input')].map(bounds),
           background: getComputedStyle(panel.querySelector('.lyco-panel-card')).backgroundColor};
       });

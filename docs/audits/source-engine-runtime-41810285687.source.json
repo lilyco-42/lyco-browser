@@ -1,0 +1,74 @@
+{
+  "rawResultSha256": "8d5f40e04cba798276bc1dcaf64b2deb47a70e20b3c42caeca679eac1bec5e6d",
+  "checkedAt": "2026-11-04T09:59:57.693903+00:00",
+  "run": 41810285687,
+  "job": 126507542899,
+  "source": "28a2cd55ef91c51400090e927dad67af1893e6c5",
+  "status": "completed",
+  "conclusion": "success",
+  "artifactId": 13311788318,
+  "originalZipBytes": 101294747,
+  "originalZipSha256": "87645469cf52ab8b0afa214d38ac8bece54a59d66c377c5a015368a2955a9f30",
+  "fullOriginalSizeShaCrcVerified": true,
+  "fullJobLogBytes": 230852,
+  "fullJobLogSha256": "1b0743b7d0102b11653190d196e6abe2f06979c6557192c5f8af954d596946ea",
+  "apkBytes": 223967187,
+  "apkSha256": "dd1d4dafc21196e2bf03e9c82309f11072f82ae509fdd2d8826aae2c6b39a8f9",
+  "sourceEngineRun": 41772782539,
+  "sourceAarSha256": "e0b7c7d00055588b2b2cdb312cb15d560ebdff2d9f2550bb6ab26c6f89af837c",
+  "all13PackagedNativeLibrariesByteEqualSourceAar": true,
+  "pomDependenciesUnchanged": true,
+  "nativeChecksPassed": 29,
+  "caseNames": [
+    "changed-primordials",
+    "cross-origin",
+    "document-default-view",
+    "first-script",
+    "frames-index",
+    "initial-aboutblank",
+    "legacy-constructor",
+    "prototype-constructor",
+    "set-configuration",
+    "srcdoc-nested"
+  ],
+  "applicableCasesPerPhase": {
+    "control": 9,
+    "lyco": 9,
+    "stopped": 9,
+    "control-after": 9
+  },
+  "rawNetworkCounts": {
+    "control": {
+      "udpStunPackets": 9,
+      "turnConnections": 9,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    },
+    "lyco": {
+      "udpStunPackets": 0,
+      "turnConnections": 18,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    },
+    "stopped": {
+      "udpStunPackets": 0,
+      "turnConnections": 0,
+      "acknowledgedPeerMessages": 0,
+      "loopbackRequests": 0
+    },
+    "control-after": {
+      "udpStunPackets": 9,
+      "turnConnections": 9,
+      "acknowledgedPeerMessages": 9,
+      "loopbackRequests": 3
+    }
+  },
+  "rawEventsSdpStatsAndTransportIndependentlyRechecked": true,
+  "engineCapabilityOnly": true,
+  "productAdopted": false,
+  "productApkPassed": false,
+  "arm64Proven": false,
+  "storageMigrationProven": false,
+  "nonExportableCryptoKeyMigrationProven": false,
+  "scope": "Standalone non-debuggable GeckoView experiment, NOT the LYCO product APK or a migration. Same-engine before/after controls; ten real first-script/frame/config cases, raw events/SDP/localStats, actual owned TURN TCP datachannel, three actual loopback HTTP targets and stopped-route negatives. Native public configFilePath only, no page policy or RTC observation rewriting. No product adoption, independent-storage migration, all-platform release, customer egress or iOS proof."
+}

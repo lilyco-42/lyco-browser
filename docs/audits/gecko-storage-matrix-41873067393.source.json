@@ -1,0 +1,60 @@
+{
+  "rawResultSha256": "9c2281e85e4257fa1535307a09adbcca136edb713c1e18602be50a6e98dd1119",
+  "checkedAt": "2026-11-04T17:07:27.234985+00:00",
+  "run": 41873067393,
+  "job": 126725138296,
+  "source": "e4f2191c2a20faa346b7194aa745fcc57c587a0c",
+  "status": "completed",
+  "conclusion": "failure",
+  "artifactId": 13344928587,
+  "originalZipBytes": 98253580,
+  "originalZipSha256": "236dbf15612f19a9c8989daf84a515ed96e137901bc86af7bc9c423f763a7389",
+  "fullOriginalSizeShaCrcVerified": true,
+  "fullJobLogBytes": 110974,
+  "fullJobLogSha256": "0f23310f11f2ad98fe005d6ac02c6c7fe3ab0805eed2e2ce29a301daa912765a",
+  "apkBytes": 223967215,
+  "apkSha256": "6cc5a8a5f3044e40a00dfaa77063d12452d76b2cd033af8af8586b2f1eb3aaca",
+  "all13NativeLibrariesEqualSourceAar": true,
+  "sameOptimizedAar": true,
+  "sourceAarSha256": "e0b7c7d00055588b2b2cdb312cb15d560ebdff2d9f2550bb6ab26c6f89af837c",
+  "variants": {
+    "abrupt": {
+      "passed": false,
+      "failedChecks": [
+        "a-reopen-actual-cookie-ls-idb",
+        "b-reopen-actual-cookie-ls-idb",
+        "b-after-clear-a-actual-cookie-ls-idb"
+      ],
+      "reports": 9,
+      "pageRequests": 9,
+      "processAbsenceReceipts": 12,
+      "realNativeCallbackReceipts": 0,
+      "sourceFilesByteHashesVerified": 7,
+      "requestsViaOwnedSelectedProxy": true,
+      "readPhaseKeyRegeneration": false,
+      "oldCiphertextDecryptsWithOriginalNonexportableKey": true
+    },
+    "graceful": {
+      "passed": true,
+      "failedChecks": [],
+      "reports": 9,
+      "pageRequests": 9,
+      "processAbsenceReceipts": 12,
+      "realNativeCallbackReceipts": 9,
+      "sourceFilesByteHashesVerified": 7,
+      "requestsViaOwnedSelectedProxy": true,
+      "readPhaseKeyRegeneration": false,
+      "oldCiphertextDecryptsWithOriginalNonexportableKey": true
+    }
+  },
+  "actualNormalPersistenceProvenInThisExperiment": true,
+  "storagePassProven": false,
+  "abruptPersistenceProven": false,
+  "requestedGracefulFastShutdownStage": 0,
+  "preferenceReadbackProven": false,
+  "productAdopted": false,
+  "migrationProven": false,
+  "arm64RuntimeProven": false,
+  "disposableSigningCleanupReported": true,
+  "scope": "Independent API35/x86_64 experiment only. Actual native callback and normal-close storage/CryptoKey capability passed; abrupt mode retains original three failures. No all-kill durability, product integration, old WebView key migration or commercial release proof."
+}

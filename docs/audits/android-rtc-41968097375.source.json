@@ -1,0 +1,44 @@
+{
+  "verifiedAt": "2026-11-05T04:48:57.080197+00:00",
+  "run": 41968097375,
+  "job": 127049723170,
+  "sourceRun": 41964719754,
+  "analyzerSource": "6e07ad6a5d0c4c096cb1090cc778aeae3ec3f6d5",
+  "artifact": {
+    "id": 13388039350,
+    "bytes": 343556,
+    "sha256": "76c22f77252a1d7205e21a0479c53ba2285f885c1697e9a7daef2a0b51c2eb6d"
+  },
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "candidate": {
+    "run": 41964719754,
+    "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "runtimeSourceDiff": "empty",
+    "apkModified": false,
+    "certificate": "retained-owner-certificate"
+  },
+  "validProbe": true,
+  "passed": false,
+  "passedChecks": 14,
+  "totalChecks": 23,
+  "rawStunPacketsRecomputed": {
+    "control": 30,
+    "lyco": 4,
+    "stopped": 4,
+    "control-after": 10
+  },
+  "rawStunTransactionAndResponseBytesChecked": true,
+  "both10CaseReportsMatchRawNetwork": true,
+  "sameFourContextsUseAllPolicyAndExposeDeviceIpv4": [
+    "initial-aboutblank",
+    "frames-index",
+    "document-default-view",
+    "srcdoc-nested"
+  ],
+  "stoppedOriginalBeforeRecoveryVerified": true,
+  "sourceAndSigningIdentityMatchesVerifiedProducer": true,
+  "decodedLogSha256": "a6b8c4715c86af51c841a62976deaa425d4407fcb073c6217eda761729fa26f6",
+  "noProductAdoptionOrRelease": true,
+  "limits": "One actual signed WebView/API35 fixture; not all providers, IPv6/DNS or real customer traffic. Failed original gates remain failed."
+}

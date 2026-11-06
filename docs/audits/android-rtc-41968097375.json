@@ -1,0 +1,2696 @@
+{
+  "validProbe": true,
+  "passed": false,
+  "checks": {
+    "control-real-peer-direct-http-and-stun-positive": true,
+    "control-after-real-peer-direct-http-and-stun-positive": true,
+    "actual-product-peer-page-and-report-use-selected-tcp-upstream": true,
+    "actual-stopped-product-peer-completed-and-upstream-stopped": true,
+    "healthy-product-no-direct-stun": false,
+    "stopped-product-no-direct-stun": false,
+    "healthy-product-no-literal-ip-candidate": false,
+    "stopped-product-no-literal-ip-candidate": false,
+    "lyco-all-first-script-frame-and-config-peers-complete": true,
+    "lyco-original-events-sdp-and-stats-no-device-address": false,
+    "lyco-actual-relay-policy-on-every-applicable-peer": false,
+    "stopped-all-first-script-frame-and-config-peers-complete": true,
+    "stopped-original-events-sdp-and-stats-no-device-address": false,
+    "stopped-actual-relay-policy-on-every-applicable-peer": false,
+    "control-real-turn-tcp-datachannel-positive": true,
+    "control-after-real-turn-tcp-datachannel-positive": true,
+    "healthy-real-turn-tcp-datachannel-via-selected-upstream": true,
+    "healthy-and-stopped-no-direct-turn-tcp": true,
+    "stopped-real-turn-peer-complete-without-traffic-or-data-ack": true,
+    "control-actual-turn-datachannel-in-every-applicable-context": true,
+    "control-after-actual-turn-datachannel-in-every-applicable-context": true,
+    "lyco-actual-turn-datachannel-in-every-applicable-context": false,
+    "stopped-real-turn-peer-completes-in-every-applicable-context": true
+  },
+  "udpStunPackets": {
+    "control": 30,
+    "lyco": 4,
+    "stopped": 4,
+    "control-after": 10
+  },
+  "productHealthy": {
+    "phase": "lyco",
+    "completed": true,
+    "apiPresent": true,
+    "offerCreated": true,
+    "blocked": false,
+    "literalIP": true,
+    "cases": [
+      {
+        "case": "first-script",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 4316046081929326514 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:tQ2c\r\na=ice-pwd:35HYGf82jR+vOSv1HF0CjzSU\r\na=ice-options:trickle\r\na=fingerprint:sha-256 61:22:FD:7B:97:14:B6:85:7C:1D:F5:C7:FD:26:1F:24:0C:6F:AE:F2:12:43:0A:C5:59:4C:F1:AE:33:6F:65:A8\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "first-script",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:1852681730 1 udp 16785407 127.0.0.1 40035 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag LaRj network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IeoK7/Bfs",
+              "timestamp": 1793853135175.447,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "1852681730",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40035,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "LaRj"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 8114433336908451036 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40035 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1852681730 1 udp 16785407 127.0.0.1 40035 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:LaRj\r\na=ice-pwd:M4J/J8xlXrWsCW71KgnqUo18\r\na=ice-options:trickle\r\na=fingerprint:sha-256 6F:C9:8D:A4:93:71:E5:58:35:59:90:47:08:E6:DF:DF:D1:71:A1:FA:E1:CE:B1:F6:C3:07:E5:C7:8C:5D:B5:06\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "initial-aboutblank",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:513841638 1 udp 2113937151 10.0.2.16 40201 typ host generation 0 ufrag bG+Z network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:318251569 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 48431 typ host generation 0 ufrag bG+Z network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:2500767689 1 udp 1677729535 127.0.0.1 36097 typ srflx raddr 10.0.2.16 rport 40201 generation 0 ufrag bG+Z network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 48431,
+            "url": "stun:10.0.2.2:41808",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "IDYmfbxYS",
+            "timestamp": 1793853134430.888,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "2500767689",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 36097,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 40201,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:41808",
+            "usernameFragment": "bG+Z"
+          },
+          {
+            "id": "IjldDI267",
+            "timestamp": 1793853134430.888,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "318251569",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 48431,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "bG+Z"
+          },
+          {
+            "id": "IlL+vPDFp",
+            "timestamp": 1793853134430.888,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "1526319586",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "bG+Z"
+          },
+          {
+            "id": "IlmK1IajN",
+            "timestamp": 1793853134430.888,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "513841638",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 40201,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "bG+Z"
+          },
+          {
+            "id": "IzntFG21R",
+            "timestamp": 1793853134430.888,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "1607871769",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "bG+Z"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 8947676688090608433 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 36097 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:513841638 1 udp 2113937151 10.0.2.16 40201 typ host generation 0 network-cost 999\r\na=candidate:318251569 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 48431 typ host generation 0 network-cost 999\r\na=candidate:2500767689 1 udp 1677729535 127.0.0.1 36097 typ srflx raddr 10.0.2.16 rport 40201 generation 0 network-cost 999\r\na=ice-ufrag:bG+Z\r\na=ice-pwd:aka+x703dJRrZPxJaJd4PCcf\r\na=ice-options:trickle\r\na=fingerprint:sha-256 57:57:26:BD:13:B2:2C:51:C0:9A:63:A3:95:A0:B6:2B:05:6A:EC:68:BD:C4:B4:1E:60:56:BE:40:DC:4A:DA:AF\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:41808"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "initial-aboutblank",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:3920983987 1 udp 16785407 127.0.0.1 40097 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag 6J1q network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IdIWu+JYQ",
+              "timestamp": 1793853135258.096,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "3920983987",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40097,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "6J1q"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 5454806886693509450 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40097 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3920983987 1 udp 16785407 127.0.0.1 40097 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:6J1q\r\na=ice-pwd:2ZJc2uVdKnXLXLWTAYCaXlYK\r\na=ice-options:trickle\r\na=fingerprint:sha-256 BF:62:7F:F3:C2:78:2D:5A:A7:13:80:82:68:F9:6E:58:98:20:A4:C4:94:09:CB:4C:56:A1:EF:82:FD:5A:62:64\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "frames-index",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:2674166571 1 udp 2113937151 10.0.2.16 58158 typ host generation 0 ufrag OSLj network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:1908696288 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 44207 typ host generation 0 ufrag OSLj network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:2414497393 1 udp 1677729535 127.0.0.1 45857 typ srflx raddr 10.0.2.16 rport 58158 generation 0 ufrag OSLj network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 44207,
+            "url": "stun:10.0.2.2:45858",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "I5YoX708O",
+            "timestamp": 1793853134470.815,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "2674166571",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 58158,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "OSLj"
+          },
+          {
+            "id": "Ia7Pqx+SL",
+            "timestamp": 1793853134470.815,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "1908696288",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 44207,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "OSLj"
+          },
+          {
+            "id": "Id1QsGdgz",
+            "timestamp": 1793853134470.815,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "2414497393",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 45857,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 58158,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:45858",
+            "usernameFragment": "OSLj"
+          },
+          {
+            "id": "IeGRvM/Gp",
+            "timestamp": 1793853134470.815,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "3987346560",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "OSLj"
+          },
+          {
+            "id": "InKuxv/FY",
+            "timestamp": 1793853134470.815,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "3256482887",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "OSLj"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 5397215507928515826 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 45857 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:2674166571 1 udp 2113937151 10.0.2.16 58158 typ host generation 0 network-cost 999\r\na=candidate:1908696288 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 44207 typ host generation 0 network-cost 999\r\na=candidate:2414497393 1 udp 1677729535 127.0.0.1 45857 typ srflx raddr 10.0.2.16 rport 58158 generation 0 network-cost 999\r\na=ice-ufrag:OSLj\r\na=ice-pwd:q8gjXDO7njWSKj7tnSFl3p8+\r\na=ice-options:trickle\r\na=fingerprint:sha-256 29:3F:80:D1:EB:C8:63:04:02:77:8B:F2:A1:A1:55:C7:39:E8:28:03:BF:FD:2B:61:EF:DB:14:0E:14:DB:0E:59\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:45858"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "frames-index",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:3233729172 1 udp 16785407 127.0.0.1 40018 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag kNro network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IybzBwD3e",
+              "timestamp": 1793853135269.863,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "3233729172",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40018,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "kNro"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 7862046881182561629 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40018 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3233729172 1 udp 16785407 127.0.0.1 40018 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:kNro\r\na=ice-pwd:YUZys0BUsRB4di1b25zvQ2h3\r\na=ice-options:trickle\r\na=fingerprint:sha-256 D3:CE:40:B4:07:09:8B:5F:23:49:79:83:49:8C:89:62:0B:8A:40:72:94:BD:1B:4E:F8:61:B2:80:F4:E6:0F:A9\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "document-default-view",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:13669478 1 udp 2113937151 10.0.2.16 57744 typ host generation 0 ufrag 0Xqm network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:4000349101 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 55530 typ host generation 0 ufrag 0Xqm network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:274616636 1 udp 1677729535 127.0.0.1 42874 typ srflx raddr 10.0.2.16 rport 57744 generation 0 ufrag 0Xqm network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 55530,
+            "url": "stun:10.0.2.2:50957",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "IFJY1AhSr",
+            "timestamp": 1793853134471.0151,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "1914571725",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "0Xqm"
+          },
+          {
+            "id": "IXgYSO9An",
+            "timestamp": 1793853134471.0151,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "274616636",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 42874,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 57744,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:50957",
+            "usernameFragment": "0Xqm"
+          },
+          {
+            "id": "IgRkCRcp1",
+            "timestamp": 1793853134471.0151,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "1571676938",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "0Xqm"
+          },
+          {
+            "id": "IhImOpe9e",
+            "timestamp": 1793853134471.0151,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "13669478",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 57744,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "0Xqm"
+          },
+          {
+            "id": "InKDBdura",
+            "timestamp": 1793853134471.0151,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "4000349101",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 55530,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "0Xqm"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 9056527745429406744 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 42874 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:13669478 1 udp 2113937151 10.0.2.16 57744 typ host generation 0 network-cost 999\r\na=candidate:4000349101 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 55530 typ host generation 0 network-cost 999\r\na=candidate:274616636 1 udp 1677729535 127.0.0.1 42874 typ srflx raddr 10.0.2.16 rport 57744 generation 0 network-cost 999\r\na=ice-ufrag:0Xqm\r\na=ice-pwd:EM/8QK+UA3IlMOvJBYIK+Jgu\r\na=ice-options:trickle\r\na=fingerprint:sha-256 3C:D5:16:5C:E7:1E:EE:06:BD:D6:8C:48:75:9C:C0:B0:F7:51:FE:24:FE:8B:EB:BE:B5:8F:20:61:26:40:E0:51\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:50957"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "document-default-view",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:2174694644 1 udp 16785407 127.0.0.1 40038 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag CRq8 network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "INKGSb8wR",
+              "timestamp": 1793853135460.175,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "2174694644",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40038,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "CRq8"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 4738319468408763426 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40038 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:2174694644 1 udp 16785407 127.0.0.1 40038 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:CRq8\r\na=ice-pwd:14JCWL30ozIjrlakvVu3RvMa\r\na=ice-options:trickle\r\na=fingerprint:sha-256 67:AC:AF:B7:A8:67:29:BB:BA:E2:3D:27:AD:AA:34:FF:26:F6:05:6C:E7:A6:D5:01:76:25:84:1D:E9:59:D2:2A\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "srcdoc-nested",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:59402419 1 udp 2113937151 10.0.2.16 54033 typ host generation 0 ufrag D9BO network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:265474916 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 57278 typ host generation 0 ufrag D9BO network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:2284084892 1 udp 1677729535 127.0.0.1 54642 typ srflx raddr 10.0.2.16 rport 54033 generation 0 ufrag D9BO network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 57278,
+            "url": "stun:10.0.2.2:59218",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "I1nYhSaQ8",
+            "timestamp": 1793853134770.753,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "1123867724",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "D9BO"
+          },
+          {
+            "id": "IBVUXoJOx",
+            "timestamp": 1793853134770.753,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "265474916",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 57278,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "D9BO"
+          },
+          {
+            "id": "IGoIgJJEU",
+            "timestamp": 1793853134770.753,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "2284084892",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 54642,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 54033,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:59218",
+            "usernameFragment": "D9BO"
+          },
+          {
+            "id": "IMCnMOmYP",
+            "timestamp": 1793853134770.753,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "59402419",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 54033,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "D9BO"
+          },
+          {
+            "id": "IeCtPQNPU",
+            "timestamp": 1793853134770.753,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "1205024951",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "D9BO"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 3626819751085482105 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 54642 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:59402419 1 udp 2113937151 10.0.2.16 54033 typ host generation 0 network-cost 999\r\na=candidate:265474916 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 57278 typ host generation 0 network-cost 999\r\na=candidate:2284084892 1 udp 1677729535 127.0.0.1 54642 typ srflx raddr 10.0.2.16 rport 54033 generation 0 network-cost 999\r\na=ice-ufrag:D9BO\r\na=ice-pwd:Epk+7YPGO68z7HAvhQ5nkkj3\r\na=ice-options:trickle\r\na=fingerprint:sha-256 C8:09:06:C4:A6:03:D9:CA:33:30:A3:D2:F9:36:79:AF:66:C1:42:88:99:80:47:EA:14:8A:71:D5:31:D3:48:B2\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:59218"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "srcdoc-nested",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:4074167431 1 udp 16785407 127.0.0.1 40057 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag qxgG network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IskLR6Rfi",
+              "timestamp": 1793853135406.9102,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "4074167431",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40057,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "qxgG"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 5657689251148074576 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40057 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:4074167431 1 udp 16785407 127.0.0.1 40057 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:qxgG\r\na=ice-pwd:uIbZ+ntgVf4BAOww0xNHrs5y\r\na=ice-options:trickle\r\na=fingerprint:sha-256 62:DE:DA:8B:F2:2A:FF:EB:2A:BC:0C:34:38:B7:F5:47:26:49:1C:C6:26:4A:0D:2B:D9:7D:FE:BD:BC:B3:45:2E\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "cross-origin",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 2311504501327914399 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:AwKB\r\na=ice-pwd:ZZvCz2cq0N3gn4kC9gCbsWPI\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4C:23:B3:16:C0:F7:6D:27:0E:B3:10:2A:1D:67:23:3B:06:0B:18:90:C2:C4:B0:4E:E2:6A:8D:3B:84:E1:EE:C0\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "cross-origin",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:249228376 1 udp 16785407 127.0.0.1 40027 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag HzBS network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IA5GcA5n+",
+              "timestamp": 1793853135416.459,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "249228376",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40027,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "HzBS"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 3151806059768399125 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40027 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:249228376 1 udp 16785407 127.0.0.1 40027 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:HzBS\r\na=ice-pwd:0JMgNlDnyK3dszFrufxkfuYb\r\na=ice-options:trickle\r\na=fingerprint:sha-256 F6:29:6B:CE:0D:A6:04:88:A0:72:A0:A9:43:07:8E:A5:AE:71:36:02:8E:3F:40:9F:F2:8D:BB:06:A4:5B:11:A1\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "prototype-constructor",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 2200518298651099825 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:vkiD\r\na=ice-pwd:X//lgrMnGIyn7L6ikt6xgHFh\r\na=ice-options:trickle\r\na=fingerprint:sha-256 0E:49:FB:CD:A3:11:0A:FB:4E:65:F0:0B:DF:10:CE:40:ED:D0:C1:66:FF:93:01:7D:79:88:40:13:C9:83:75:19\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "prototype-constructor",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:382653903 1 udp 16785407 127.0.0.1 40083 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag P4h+ network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "I013+oaou",
+              "timestamp": 1793853135362.095,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "382653903",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40083,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "P4h+"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 5094723240700384911 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40083 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:382653903 1 udp 16785407 127.0.0.1 40083 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:P4h+\r\na=ice-pwd:YNLgPTF+BEnhaZOggLPzMxmm\r\na=ice-options:trickle\r\na=fingerprint:sha-256 2A:07:95:A0:A5:E8:8C:22:B3:FC:90:0F:FB:35:BF:38:22:83:FA:B0:97:C3:05:B6:05:4D:BE:D4:37:91:FA:C8\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "legacy-constructor",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 1351653689973832362 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:MRnS\r\na=ice-pwd:0J7zu0mLcJHzgroDhhQ3f83e\r\na=ice-options:trickle\r\na=fingerprint:sha-256 F7:C8:BB:9A:01:B6:CD:B9:4D:F0:78:0C:F2:7E:E8:06:D0:2A:B3:A1:8A:28:BA:43:5F:ED:0B:3A:0E:BD:74:01\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "legacy-constructor",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:1218132892 1 udp 16785407 127.0.0.1 40025 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag 6lo5 network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IcpcToPO4",
+              "timestamp": 1793853135394.064,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "1218132892",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40025,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "6lo5"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 2068502158118777291 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40025 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1218132892 1 udp 16785407 127.0.0.1 40025 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:6lo5\r\na=ice-pwd:7okcYJuTswLPX+CRa7jitnIJ\r\na=ice-options:trickle\r\na=fingerprint:sha-256 74:98:F1:46:C6:87:B3:E8:88:A8:AA:A5:5B:52:98:43:60:86:A0:2D:BF:1E:2C:0A:2A:97:1C:2B:25:52:18:A6\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "set-configuration",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 8770400632219311707 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:29xW\r\na=ice-pwd:lRQJ8WRj7olxvxFmsdM/Krnj\r\na=ice-options:trickle\r\na=fingerprint:sha-256 62:1D:B7:15:1C:6E:A8:4A:42:5A:06:70:FE:D5:4A:31:20:9B:2D:4B:F4:01:2E:2A:71:35:DA:7E:15:44:7F:3A\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "set-configuration",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:265629482 1 udp 16785407 127.0.0.1 40041 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag GeSP network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "IrR5aHkLP",
+              "timestamp": 1793853135306.602,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "265629482",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40041,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "GeSP"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 2516769840672979909 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40041 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:265629482 1 udp 16785407 127.0.0.1 40041 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:GeSP\r\na=ice-pwd:UHZO+cbQRehAmbHpQFPi9Ril\r\na=ice-options:trickle\r\na=fingerprint:sha-256 08:11:BA:E1:B1:E3:91:72:CC:7D:B3:57:52:45:9B:43:A3:78:B5:E1:82:50:D0:D0:73:07:0B:7D:76:69:CC:E2\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "changed-primordials",
+        "phase": "lyco",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 7724384950982779262 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:DLq+\r\na=ice-pwd:ok17YHXsECnCcKhuYGRm4RlE\r\na=ice-options:trickle\r\na=fingerprint:sha-256 E3:22:D8:63:0F:FC:61:E6:AF:2D:14:C0:8B:1B:B8:5B:66:7A:32:8E:0D:28:40:2D:0F:AA:77:19:20:5A:B5:9D\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "changed-primordials",
+          "phase": "lyco",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [
+            {
+              "raw": "candidate:4100224293 1 udp 16785407 127.0.0.1 40070 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag oREs network-cost 999",
+              "address": "127.0.0.1",
+              "type": "relay",
+              "protocol": "udp"
+            }
+          ],
+          "iceErrors": [],
+          "localStats": [
+            {
+              "id": "Ic1IQdP4+",
+              "timestamp": 1793853135382.799,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "relay",
+              "foundation": "4100224293",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40070,
+              "priority": 16785407,
+              "protocol": "udp",
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "oREs"
+            },
+            {
+              "id": "IsrVYvLJ5",
+              "timestamp": 1793853135382.799,
+              "type": "local-candidate",
+              "address": "127.0.0.1",
+              "candidateType": "prflx",
+              "foundation": "3736454099",
+              "ip": "127.0.0.1",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 35800,
+              "priority": 1845501951,
+              "protocol": "udp",
+              "relatedAddress": "127.0.0.1",
+              "relatedPort": 40070,
+              "relayProtocol": "tcp",
+              "transportId": "T01",
+              "url": "turn:10.0.2.2:46787?transport=tcp",
+              "usernameFragment": "oREs"
+            }
+          ],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 2835821240395930596 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40070 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:4100224293 1 udp 16785407 127.0.0.1 40070 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:oREs\r\na=ice-pwd:8za0k7dlBC+MwGzhAUii7kTt\r\na=ice-options:trickle\r\na=fingerprint:sha-256 B1:CA:33:24:F3:9F:67:93:3C:94:FC:8C:5D:57:16:26:3C:03:AB:78:A3:FA:4E:4A:5E:BD:79:CC:9E:81:B3:EE\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": true,
+          "dataAck": true,
+          "gatheringState": "complete",
+          "connectionState": "connected",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46787?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      }
+    ],
+    "turn": {
+      "case": "first-script",
+      "phase": "lyco",
+      "apiPresent": true,
+      "applicable": true,
+      "offerCreated": true,
+      "blocked": false,
+      "completed": true,
+      "candidates": [
+        {
+          "raw": "candidate:1852681730 1 udp 16785407 127.0.0.1 40035 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag LaRj network-cost 999",
+          "address": "127.0.0.1",
+          "type": "relay",
+          "protocol": "udp"
+        }
+      ],
+      "iceErrors": [],
+      "localStats": [
+        {
+          "id": "IeoK7/Bfs",
+          "timestamp": 1793853135175.447,
+          "type": "local-candidate",
+          "address": "127.0.0.1",
+          "candidateType": "relay",
+          "foundation": "1852681730",
+          "ip": "127.0.0.1",
+          "isRemote": false,
+          "networkType": "unknown",
+          "port": 40035,
+          "priority": 16785407,
+          "protocol": "udp",
+          "relayProtocol": "tcp",
+          "transportId": "T01",
+          "url": "turn:10.0.2.2:46787?transport=tcp",
+          "usernameFragment": "LaRj"
+        }
+      ],
+      "statsCollected": true,
+      "sdp": "v=0\r\no=- 8114433336908451036 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40035 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1852681730 1 udp 16785407 127.0.0.1 40035 typ relay raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:LaRj\r\na=ice-pwd:M4J/J8xlXrWsCW71KgnqUo18\r\na=ice-options:trickle\r\na=fingerprint:sha-256 6F:C9:8D:A4:93:71:E5:58:35:59:90:47:08:E6:DF:DF:D1:71:A1:FA:E1:CE:B1:F6:C3:07:E5:C7:8C:5D:B5:06\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+      "literalIP": true,
+      "dataAck": true,
+      "gatheringState": "complete",
+      "connectionState": "connected",
+      "configuration": {
+        "bundlePolicy": "balanced",
+        "encodedInsertableStreams": false,
+        "iceCandidatePoolSize": 0,
+        "iceServers": [
+          {
+            "credential": "lyco-ci-owned-turn-only",
+            "urls": [
+              "turn:10.0.2.2:46787?transport=tcp"
+            ],
+            "username": "lyco-ci"
+          }
+        ],
+        "iceTransportPolicy": "relay",
+        "rtcpMuxPolicy": "require"
+      }
+    },
+    "loopbacks": []
+  },
+  "productStopped": {
+    "phase": "stopped",
+    "completed": true,
+    "apiPresent": true,
+    "offerCreated": true,
+    "blocked": false,
+    "literalIP": true,
+    "cases": [
+      {
+        "case": "first-script",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 530814572714078193 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:OpM3\r\na=ice-pwd:VvmlOiG66wxbGn5B/yp8lpkM\r\na=ice-options:trickle\r\na=fingerprint:sha-256 9E:DF:F6:4D:36:3C:FB:58:32:B8:33:EA:82:47:5C:7A:1B:1A:44:FD:91:52:55:70:48:44:1C:5E:E2:F9:D5:AA\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "first-script",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 1002877158254923293 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:M/zb\r\na=ice-pwd:gEN51cyy8P9Oj5an1gjeANaG\r\na=ice-options:trickle\r\na=fingerprint:sha-256 FD:4E:F0:DD:28:EA:67:F8:E9:7C:3C:42:84:EE:B7:BE:9B:E1:93:88:83:EA:16:51:B3:0B:E5:5C:08:48:B6:E0\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "initial-aboutblank",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:3438959163 1 udp 2113937151 10.0.2.16 55817 typ host generation 0 ufrag LYvV network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:3231900140 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 54624 typ host generation 0 ufrag LYvV network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:1196715028 1 udp 1677729535 127.0.0.1 42109 typ srflx raddr 10.0.2.16 rport 55817 generation 0 ufrag LYvV network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 54624,
+            "url": "stun:10.0.2.2:38107",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "I+T8p5Bh7",
+            "timestamp": 1793853144663.691,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "2292386367",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "LYvV"
+          },
+          {
+            "id": "IOlXM/+pa",
+            "timestamp": 1793853144663.691,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "1196715028",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 42109,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 55817,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:38107",
+            "usernameFragment": "LYvV"
+          },
+          {
+            "id": "IdOa336lS",
+            "timestamp": 1793853144663.691,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "3438959163",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 55817,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "LYvV"
+          },
+          {
+            "id": "IoXjd3njS",
+            "timestamp": 1793853144663.691,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "2374823620",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "LYvV"
+          },
+          {
+            "id": "Iy0OCjASW",
+            "timestamp": 1793853144663.691,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "3231900140",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 54624,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "LYvV"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 5858575902872801310 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 42109 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3438959163 1 udp 2113937151 10.0.2.16 55817 typ host generation 0 network-cost 999\r\na=candidate:3231900140 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 54624 typ host generation 0 network-cost 999\r\na=candidate:1196715028 1 udp 1677729535 127.0.0.1 42109 typ srflx raddr 10.0.2.16 rport 55817 generation 0 network-cost 999\r\na=ice-ufrag:LYvV\r\na=ice-pwd:/ykxyQ0lnWCUteabqxJqFT87\r\na=ice-options:trickle\r\na=fingerprint:sha-256 69:34:41:8D:B5:31:4F:B5:BC:8C:33:66:B6:1F:E1:C3:EC:1F:68:CE:17:09:8D:F6:69:45:64:04:D7:5B:58:75\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:38107"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "initial-aboutblank",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 2529341483036744770 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:iciW\r\na=ice-pwd:w5FTr9pWS4tPUrThKqMhaXPR\r\na=ice-options:trickle\r\na=fingerprint:sha-256 87:59:EB:DD:1F:06:94:FC:D8:3F:9A:4E:C6:81:88:CE:0F:95:91:01:30:17:19:B7:6E:AD:C0:E7:27:39:C1:93\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "frames-index",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:879322121 1 udp 2113937151 10.0.2.16 44223 typ host generation 0 ufrag qsoQ network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:3670641602 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 60251 typ host generation 0 ufrag qsoQ network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:619159891 1 udp 1677729535 127.0.0.1 40592 typ srflx raddr 10.0.2.16 rport 44223 generation 0 ufrag qsoQ network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 60251,
+            "url": "stun:10.0.2.2:48005",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "I+uywRE2j",
+            "timestamp": 1793853144663.75,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "3670641602",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 60251,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "qsoQ"
+          },
+          {
+            "id": "IFUdrGbjb",
+            "timestamp": 1793853144663.75,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "879322121",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 44223,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "qsoQ"
+          },
+          {
+            "id": "IGLRH4KqN",
+            "timestamp": 1793853144663.75,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "619159891",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 40592,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 44223,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:48005",
+            "usernameFragment": "qsoQ"
+          },
+          {
+            "id": "Ie6ge/VX0",
+            "timestamp": 1793853144663.75,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "1762923365",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "qsoQ"
+          },
+          {
+            "id": "Itv2F3zNm",
+            "timestamp": 1793853144663.75,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "1185414050",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "qsoQ"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 3323116669177555912 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40592 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:879322121 1 udp 2113937151 10.0.2.16 44223 typ host generation 0 network-cost 999\r\na=candidate:3670641602 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 60251 typ host generation 0 network-cost 999\r\na=candidate:619159891 1 udp 1677729535 127.0.0.1 40592 typ srflx raddr 10.0.2.16 rport 44223 generation 0 network-cost 999\r\na=ice-ufrag:qsoQ\r\na=ice-pwd:ph0Amx5pDD8Gu8PlvgA8yg7k\r\na=ice-options:trickle\r\na=fingerprint:sha-256 07:E7:9B:1C:8E:85:E3:D6:32:26:CC:C9:E7:F1:82:70:8A:88:BD:99:A1:19:BE:D8:69:89:DA:CF:63:4B:89:76\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:48005"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "frames-index",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 8391046303736068766 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:BHcZ\r\na=ice-pwd:J1VdKHyCfqjYb2g2pM2/kA3W\r\na=ice-options:trickle\r\na=fingerprint:sha-256 62:45:DC:30:90:FD:72:B3:3D:3E:57:5B:53:13:6C:7E:4C:11:8A:2C:7B:94:57:15:33:86:0F:A8:60:BB:EC:21\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "document-default-view",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:483401071 1 udp 2113937151 10.0.2.16 48583 typ host generation 0 ufrag ekve network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:4067488420 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 42429 typ host generation 0 ufrag ekve network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:207542325 1 udp 1677729535 127.0.0.1 55561 typ srflx raddr 10.0.2.16 rport 48583 generation 0 ufrag ekve network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 42429,
+            "url": "stun:10.0.2.2:32896",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "ICBelTEPj",
+            "timestamp": 1793853144663.812,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "4067488420",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 42429,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "ekve"
+          },
+          {
+            "id": "IIqZIUWDW",
+            "timestamp": 1793853144663.812,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "483401071",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 48583,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "ekve"
+          },
+          {
+            "id": "IScKMQ++p",
+            "timestamp": 1793853144663.812,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "1101883907",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "ekve"
+          },
+          {
+            "id": "IlZ0KJ4gi",
+            "timestamp": 1793853144663.812,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "1847493316",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "ekve"
+          },
+          {
+            "id": "Iys6SBE8w",
+            "timestamp": 1793853144663.812,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "207542325",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 55561,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 48583,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:32896",
+            "usernameFragment": "ekve"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 1691936134433942410 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 55561 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:483401071 1 udp 2113937151 10.0.2.16 48583 typ host generation 0 network-cost 999\r\na=candidate:4067488420 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 42429 typ host generation 0 network-cost 999\r\na=candidate:207542325 1 udp 1677729535 127.0.0.1 55561 typ srflx raddr 10.0.2.16 rport 48583 generation 0 network-cost 999\r\na=ice-ufrag:ekve\r\na=ice-pwd:BFsUzUfZTxIVQpgoYRPmiy8W\r\na=ice-options:trickle\r\na=fingerprint:sha-256 55:74:2A:3E:94:2F:15:F4:0F:96:29:13:55:3F:79:BA:D3:4C:3E:9E:7D:35:3D:2B:26:89:1F:09:50:EC:7C:B0\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:32896"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "document-default-view",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 3138788090131427041 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:5NDi\r\na=ice-pwd:m3tnVoNHCOiBfwnR2J5PHBB+\r\na=ice-options:trickle\r\na=fingerprint:sha-256 64:53:80:81:57:A2:58:78:DF:11:45:80:B5:44:25:2C:8B:08:CB:87:22:77:FF:EC:FB:4E:15:80:CD:B9:96:2A\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "srcdoc-nested",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [
+          {
+            "raw": "candidate:3165707087 1 udp 2113937151 10.0.2.16 60701 typ host generation 0 ufrag Xo39 network-cost 999",
+            "address": "10.0.2.16",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:1376793732 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 36204 typ host generation 0 ufrag Xo39 network-cost 999",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "type": "host",
+            "protocol": "udp"
+          },
+          {
+            "raw": "candidate:2889752085 1 udp 1677729535 127.0.0.1 57264 typ srflx raddr 10.0.2.16 rport 60701 generation 0 ufrag Xo39 network-cost 999",
+            "address": "127.0.0.1",
+            "type": "srflx",
+            "protocol": "udp"
+          }
+        ],
+        "iceErrors": [
+          {
+            "address": "[0:0:0:x:x:x:x:x]",
+            "port": 36204,
+            "url": "stun:10.0.2.2:51200",
+            "errorCode": 701,
+            "errorText": "STUN server address is incompatible."
+          }
+        ],
+        "localStats": [
+          {
+            "id": "I+VBA0lwj",
+            "timestamp": 1793853144664.014,
+            "type": "local-candidate",
+            "address": "0.0.0.0",
+            "candidateType": "host",
+            "foundation": "3464381668",
+            "ip": "0.0.0.0",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509957375,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "Xo39"
+          },
+          {
+            "id": "IGop5gl4G",
+            "timestamp": 1793853144664.014,
+            "type": "local-candidate",
+            "address": "10.0.2.16",
+            "candidateType": "host",
+            "foundation": "3165707087",
+            "ip": "10.0.2.16",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 60701,
+            "priority": 2113937151,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "Xo39"
+          },
+          {
+            "id": "IIKpGXHZS",
+            "timestamp": 1793853144664.014,
+            "type": "local-candidate",
+            "address": "127.0.0.1",
+            "candidateType": "srflx",
+            "foundation": "2889752085",
+            "ip": "127.0.0.1",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 57264,
+            "priority": 1677729535,
+            "protocol": "udp",
+            "relatedAddress": "10.0.2.16",
+            "relatedPort": 60701,
+            "transportId": "T01",
+            "url": "stun:10.0.2.2:51200",
+            "usernameFragment": "Xo39"
+          },
+          {
+            "id": "ILbV25ahL",
+            "timestamp": 1793853144664.014,
+            "type": "local-candidate",
+            "address": "fec0::7c5e:984e:8be6:1e7d",
+            "candidateType": "host",
+            "foundation": "1376793732",
+            "ip": "fec0::7c5e:984e:8be6:1e7d",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 36204,
+            "priority": 2113929727,
+            "protocol": "udp",
+            "transportId": "T01",
+            "usernameFragment": "Xo39"
+          },
+          {
+            "id": "IPLsfbaWL",
+            "timestamp": 1793853144664.014,
+            "type": "local-candidate",
+            "address": "::",
+            "candidateType": "host",
+            "foundation": "3788352547",
+            "ip": "::",
+            "isRemote": false,
+            "networkType": "unknown",
+            "port": 9,
+            "priority": 1509949951,
+            "protocol": "tcp",
+            "tcpType": "active",
+            "transportId": "T01",
+            "usernameFragment": "Xo39"
+          }
+        ],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 2515791118952644635 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 57264 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3165707087 1 udp 2113937151 10.0.2.16 60701 typ host generation 0 network-cost 999\r\na=candidate:1376793732 1 udp 2113929727 fec0::7c5e:984e:8be6:1e7d 36204 typ host generation 0 network-cost 999\r\na=candidate:2889752085 1 udp 1677729535 127.0.0.1 57264 typ srflx raddr 10.0.2.16 rport 60701 generation 0 network-cost 999\r\na=ice-ufrag:Xo39\r\na=ice-pwd:RpflwURi4sDKeL/Utn1IAEIV\r\na=ice-options:trickle\r\na=fingerprint:sha-256 6B:11:DD:BE:6D:30:31:14:10:96:77:06:F1:27:84:E6:7B:61:1C:F0:E0:36:22:29:BD:16:23:F4:32:E2:23:E7\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": true,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [
+            {
+              "credential": "",
+              "urls": [
+                "stun:10.0.2.2:51200"
+              ],
+              "username": ""
+            }
+          ],
+          "iceTransportPolicy": "all",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "srcdoc-nested",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 8567040478044162517 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:ENTM\r\na=ice-pwd:+wylAHuJMbr5VJlGMgddvpu3\r\na=ice-options:trickle\r\na=fingerprint:sha-256 85:B9:6C:C6:92:AF:B5:C8:FD:C0:E7:11:0E:6A:CE:0C:FD:9A:02:5A:07:BC:5C:8A:0B:C0:DB:E1:C2:D4:01:E8\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "cross-origin",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 8485663145319999114 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:2v/c\r\na=ice-pwd:vN5dJmXXJHy3aF0ExhnpBzqQ\r\na=ice-options:trickle\r\na=fingerprint:sha-256 17:EA:75:FB:5A:24:8F:76:7B:FD:10:64:D1:4B:D9:79:B8:76:6D:37:29:6C:05:13:9F:1D:45:19:54:AE:C0:44\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "cross-origin",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 7894397229630871141 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:9tgf\r\na=ice-pwd:T8woPgOGppF69ocvEDza7E/3\r\na=ice-options:trickle\r\na=fingerprint:sha-256 C2:9A:7F:8A:D7:FF:C0:BD:01:CF:EA:22:E5:40:5C:DD:3F:BA:D9:E1:9C:07:A9:87:86:87:73:6C:1A:43:EE:B2\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "prototype-constructor",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 3353376113245578688 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:XJKC\r\na=ice-pwd:AQHp/9zXKC1Wt/ZET+BUU4Q7\r\na=ice-options:trickle\r\na=fingerprint:sha-256 AA:2A:98:82:6F:03:1F:D4:C8:FC:CE:99:7B:EC:7C:0D:A3:2F:C1:62:AE:7A:E1:2C:A1:EE:BA:0F:0F:0E:9A:3E\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "prototype-constructor",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 1308450371752187491 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:nSpx\r\na=ice-pwd:p97DkYlunMTWiWB/bzWxyGAc\r\na=ice-options:trickle\r\na=fingerprint:sha-256 E2:48:9D:75:5D:8C:97:16:EB:82:E7:98:D8:5F:EC:F4:99:A9:5C:41:DB:1F:A0:EB:BA:D6:91:03:4E:41:51:0A\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "legacy-constructor",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 753682307109958062 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:sJ27\r\na=ice-pwd:EKT9Z/mCnIflRs1XfznHK+Gm\r\na=ice-options:trickle\r\na=fingerprint:sha-256 EC:1E:62:EE:58:3E:0D:52:B3:EB:EA:90:32:9B:F9:44:71:38:0C:C4:4E:ED:A5:20:AC:AD:1C:96:D0:D6:7D:3B\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "legacy-constructor",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 6656610048612750327 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:qMhv\r\na=ice-pwd:pZVs/BHKn0AVZ2+Lq6SYe8RC\r\na=ice-options:trickle\r\na=fingerprint:sha-256 ED:03:B1:75:1B:D6:B3:E0:02:42:15:96:CD:FC:2F:C6:2B:A0:C5:55:B9:4F:9A:89:94:35:D1:A6:DB:3D:A5:14\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "set-configuration",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 5316031965669813117 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:98YE\r\na=ice-pwd:pCkklIIEoqqoRphv28uBT4e1\r\na=ice-options:trickle\r\na=fingerprint:sha-256 E9:9F:90:F5:21:40:E6:4C:B3:1A:10:86:E2:E9:15:7D:1F:AC:5C:D1:8A:E9:8A:F7:F0:1C:A6:30:4B:7C:80:FB\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "set-configuration",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 2694533922283997585 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:PAs8\r\na=ice-pwd:8FIQr3sxsfiOg7AIuL4IxQhi\r\na=ice-options:trickle\r\na=fingerprint:sha-256 38:7D:3A:1A:23:34:15:78:FD:73:5F:EA:1F:A6:2C:D4:A0:A1:71:4C:00:24:96:9C:93:65:07:9E:71:64:E1:35\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      },
+      {
+        "case": "changed-primordials",
+        "phase": "stopped",
+        "apiPresent": true,
+        "applicable": true,
+        "offerCreated": true,
+        "blocked": false,
+        "completed": true,
+        "candidates": [],
+        "iceErrors": [],
+        "localStats": [],
+        "statsCollected": true,
+        "sdp": "v=0\r\no=- 274030676812355680 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:oZPH\r\na=ice-pwd:5l+LpdwbRxhDPIeznmTR63QO\r\na=ice-options:trickle\r\na=fingerprint:sha-256 E5:FB:DE:B1:7E:00:6A:47:0D:A8:12:A3:12:3C:64:70:8E:5B:F2:02:EB:97:2D:BD:B6:E6:50:1A:FD:B5:2F:4E\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "literalIP": false,
+        "dataAck": false,
+        "gatheringState": "complete",
+        "connectionState": "new",
+        "configuration": {
+          "bundlePolicy": "balanced",
+          "encodedInsertableStreams": false,
+          "iceCandidatePoolSize": 0,
+          "iceServers": [],
+          "iceTransportPolicy": "relay",
+          "rtcpMuxPolicy": "require"
+        },
+        "turn": {
+          "case": "changed-primordials",
+          "phase": "stopped",
+          "apiPresent": true,
+          "applicable": true,
+          "offerCreated": true,
+          "blocked": false,
+          "completed": true,
+          "candidates": [],
+          "iceErrors": [
+            {
+              "address": null,
+              "port": null,
+              "url": "turn:10.0.2.2:46289?transport=tcp",
+              "errorCode": 701,
+              "errorText": ""
+            }
+          ],
+          "localStats": [],
+          "statsCollected": true,
+          "sdp": "v=0\r\no=- 905505236026470169 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:rBeE\r\na=ice-pwd:EEMul+QXZPrCC83fAXuRyqj8\r\na=ice-options:trickle\r\na=fingerprint:sha-256 AB:FB:78:EC:46:AB:75:3A:37:87:41:9A:AA:C5:47:75:68:2F:9D:6B:62:8F:C7:39:7E:E4:46:BF:33:D6:B3:9F\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "literalIP": false,
+          "dataAck": false,
+          "gatheringState": "complete",
+          "connectionState": "new",
+          "configuration": {
+            "bundlePolicy": "balanced",
+            "encodedInsertableStreams": false,
+            "iceCandidatePoolSize": 0,
+            "iceServers": [
+              {
+                "credential": "lyco-ci-owned-turn-only",
+                "urls": [
+                  "turn:10.0.2.2:46289?transport=tcp"
+                ],
+                "username": "lyco-ci"
+              }
+            ],
+            "iceTransportPolicy": "relay",
+            "rtcpMuxPolicy": "require"
+          }
+        }
+      }
+    ],
+    "turn": {
+      "case": "first-script",
+      "phase": "stopped",
+      "apiPresent": true,
+      "applicable": true,
+      "offerCreated": true,
+      "blocked": false,
+      "completed": true,
+      "candidates": [],
+      "iceErrors": [
+        {
+          "address": null,
+          "port": null,
+          "url": "turn:10.0.2.2:46289?transport=tcp",
+          "errorCode": 701,
+          "errorText": ""
+        }
+      ],
+      "localStats": [],
+      "statsCollected": true,
+      "sdp": "v=0\r\no=- 1002877158254923293 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:M/zb\r\na=ice-pwd:gEN51cyy8P9Oj5an1gjeANaG\r\na=ice-options:trickle\r\na=fingerprint:sha-256 FD:4E:F0:DD:28:EA:67:F8:E9:7C:3C:42:84:EE:B7:BE:9B:E1:93:88:83:EA:16:51:B3:0B:E5:5C:08:48:B6:E0\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+      "literalIP": false,
+      "dataAck": false,
+      "gatheringState": "complete",
+      "connectionState": "new",
+      "configuration": {
+        "bundlePolicy": "balanced",
+        "encodedInsertableStreams": false,
+        "iceCandidatePoolSize": 0,
+        "iceServers": [
+          {
+            "credential": "lyco-ci-owned-turn-only",
+            "urls": [
+              "turn:10.0.2.2:46289?transport=tcp"
+            ],
+            "username": "lyco-ci"
+          }
+        ],
+        "iceTransportPolicy": "relay",
+        "rtcpMuxPolicy": "require"
+      }
+    },
+    "loopbacks": []
+  },
+  "candidate": {
+    "run": 41964719754,
+    "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "runtimeSourceDiff": "empty",
+    "apkModified": false,
+    "certificate": "retained-owner-certificate"
+  },
+  "scope": "Actual signed APK on API35 with same-provider before/after plain WebView controls; 10 first-script/frame/configuration cases, distinct STUN ports, unchanged native candidates/SDP/local-candidate stats, owned coturn TCP and real aiortc datachannel. 4500ms gathering and 18000ms datachannel windows. Original stopped observation retained before recovery-only HTTP upload. No RTC observation injection or product test API. Not all providers, HTTPS/WSS/IPv6/DNS, real customer egress, iOS or a release."
+}

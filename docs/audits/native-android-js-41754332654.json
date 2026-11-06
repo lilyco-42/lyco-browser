@@ -1,0 +1,311 @@
+{
+  "schema": 1,
+  "platform": "android",
+  "sourceRun": "41754332654",
+  "sourceCommit": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+  "analyzerCommit": "bbc2a626ff36388fceb05531247da86734d2b128",
+  "scope": "Original packager source map from the actual signed native APK build, with independently rechecked original archives, APK bundle and signing identity; not a final bytecode line map, all native dependencies or license clearance",
+  "binding": {
+    "sourceRun": "41754332654",
+    "sourceCommit": "82ce7bc9f8232cfa7d5116bfa2f05fbaf522b8f7",
+    "analyzerCommit": "bbc2a626ff36388fceb05531247da86734d2b128",
+    "originals": [
+      {
+        "id": 13288721395,
+        "name": "lyco-android-candidate-41754332654",
+        "size_in_bytes": 47783426,
+        "digest": "sha256:e7578377adaa834922e7b00383d24126c58b4be70538c4aaedc7bb9efa577c69"
+      },
+      {
+        "id": 13288700809,
+        "name": "lyco-native-js-source-android-41754332654",
+        "size_in_bytes": 2101071,
+        "digest": "sha256:4b9b2bbf6f5a75b61cab2271d4967644f36be0eaece70867887afcf7e795de42"
+      },
+      {
+        "id": 13287710506,
+        "name": "lyco-npm-notices-android-41754332654",
+        "size_in_bytes": 168219,
+        "digest": "sha256:41a87680e99bdc99965bcfabbf6386f09852266dd6d9b4a468fa2f32743b01cc"
+      }
+    ],
+    "apkSha256": "8bed4c44c56c38f610bd5852910568a22a1d6a52678bbf8681b20a427cd11e99",
+    "compiledBundleSha256": "60cf14d4abd3f051a69e66138d2af0f40a22aea3445408d949c2d3366fa4b6a0",
+    "packagerMapSha256": "093af05d7bab93ee13b297b1af1609b04268e7011177198881c945db9dbe6eb9",
+    "lockSha256": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6",
+    "noticeSha256": "f73219bbe221c50133074a190b7afb052d2ea554c08de6ad48fb766b017bb4da",
+    "originalSizeShaCrcVerified": true,
+    "actualApkBundleBindingVerified": true,
+    "releaseCertificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae"
+  },
+  "sourceCount": 601,
+  "projectOrSynthetic": 19,
+  "syntheticSources": [
+    "\u0000polyfill:assets-registry",
+    "\u0000polyfill:environment-variables",
+    "\u0000polyfill:external-require"
+  ],
+  "packages": [
+    {
+      "name": "@expo/cli",
+      "sourceCount": 1,
+      "installed": [
+        "56.1.27"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@react-native-async-storage/async-storage",
+      "sourceCount": 6,
+      "installed": [
+        "2.2.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@react-native/assets-registry",
+      "sourceCount": 1,
+      "installed": [
+        "0.85.2"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@react-native/js-polyfills",
+      "sourceCount": 2,
+      "installed": [
+        "0.85.2"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@react-native/normalize-colors",
+      "sourceCount": 1,
+      "installed": [
+        "0.74.89",
+        "0.85.2",
+        "0.85.3"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@react-native/virtualized-lists",
+      "sourceCount": 15,
+      "installed": [
+        "0.85.2"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "@ungap/structured-clone",
+      "sourceCount": 4,
+      "installed": [
+        "1.4.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "abort-controller",
+      "sourceCount": 1,
+      "installed": [
+        "3.0.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "base64-js",
+      "sourceCount": 1,
+      "installed": [
+        "1.5.1"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "event-target-shim",
+      "sourceCount": 1,
+      "installed": [
+        "5.0.1"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "expo",
+      "sourceCount": 39,
+      "installed": [
+        "56.0.24"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "expo-asset",
+      "sourceCount": 12,
+      "installed": [
+        "56.0.25"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "expo-constants",
+      "sourceCount": 3,
+      "installed": [
+        "56.0.27"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "expo-crypto",
+      "sourceCount": 7,
+      "installed": [
+        "56.0.5"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "expo-modules-core",
+      "sourceCount": 33,
+      "installed": [
+        "56.0.27"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "flow-enums-runtime",
+      "sourceCount": 1,
+      "installed": [
+        "0.0.6"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "invariant",
+      "sourceCount": 1,
+      "installed": [
+        "2.2.4"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "memoize-one",
+      "sourceCount": 1,
+      "installed": [
+        "5.2.1",
+        "6.0.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "nullthrows",
+      "sourceCount": 1,
+      "installed": [
+        "1.1.1"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "promise",
+      "sourceCount": 3,
+      "installed": [
+        "7.3.1",
+        "8.3.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "react",
+      "sourceCount": 4,
+      "installed": [
+        "19.2.3"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "react-native",
+      "sourceCount": 429,
+      "installed": [
+        "0.85.2"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "react-native-safe-area-context",
+      "sourceCount": 9,
+      "installed": [
+        "5.7.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "regenerator-runtime",
+      "sourceCount": 1,
+      "installed": [
+        "0.13.11"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "scheduler",
+      "sourceCount": 2,
+      "installed": [
+        "0.27.0"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "stacktrace-parser",
+      "sourceCount": 1,
+      "installed": [
+        "0.1.11"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "whatwg-fetch",
+      "sourceCount": 1,
+      "installed": [
+        "3.6.20"
+      ],
+      "noticeReview": []
+    },
+    {
+      "name": "whatwg-url-minimum",
+      "sourceCount": 1,
+      "installed": [
+        "0.1.2"
+      ],
+      "noticeReview": []
+    }
+  ],
+  "unmappedPackages": [],
+  "reviewTargets": [
+    {
+      "name": "jimp-compact",
+      "sources": [],
+      "observedInPackagerSources": false
+    },
+    {
+      "name": "structured-headers",
+      "sources": [],
+      "observedInPackagerSources": false
+    },
+    {
+      "name": "tr46",
+      "sources": [],
+      "observedInPackagerSources": false
+    }
+  ],
+  "originalInstalledTreeReview": [
+    {
+      "id": "node_modules/jimp-compact",
+      "reason": "No original notice file found"
+    },
+    {
+      "id": "node_modules/structured-headers",
+      "reason": "No original notice file found"
+    },
+    {
+      "id": "node_modules/tr46",
+      "reason": "No original notice file found"
+    }
+  ],
+  "licenseClearanceProven": false
+}

@@ -1,0 +1,29 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    stopApp: false
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "清除环境 mobile-A"
+    direction: DOWN
+- tapOn: "清除环境 mobile-A"
+- tapOn: "清除"
+- extendedWaitUntil:
+    visible: "已清除所选环境的网站数据"
+    timeout: 30000
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-A
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-A"
+    timeout: 30000
+- runFlow: close.yaml
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: mobile-B
+- extendedWaitUntil:
+    visible: "LYCO verified mobile-B"
+    timeout: 30000
+- runFlow: close.yaml

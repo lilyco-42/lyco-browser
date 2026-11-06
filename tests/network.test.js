@@ -14,7 +14,7 @@ test('entitlement strictly requires valid paid-product status, domain and expiry
   assert.equal(extractEntitlement({entitlements:[{...active,product:'rembg_creator'}]}),null);
   assert.equal(extractEntitlement({entitlements:[{...active,expires_at:'2020-01-01T00:00:00Z'}]}),null);
   assert.equal(extractEntitlement({entitlements:[{...active,meta:{sub_url:'https://fake.example/sub/abc'}}]}),null);
-  assert.match(SHOP,/^https:\/\/lain42\.top\/shop\//);
+  assert.equal(SHOP,'https://lain42.top/vpn/#plans');
   assert.match(ACCOUNT,/^https:\/\/lain42\.top\/account\//);
 });
 test('safe Mihomo config never exposes external controller nor LAN listener',()=>{
@@ -30,6 +30,24 @@ test('safe Mihomo config never exposes external controller nor LAN listener',()=
   assert.equal(config.rules.at(-1),'MATCH,PROXY');
   assert.throws(()=>makeConfig({proxies:[], 'proxy-groups':[]},12345));
   assert.throws(()=>makeConfig(source,22));
+});
+test('reserved Mihomo names, duplicate identities and invalid dialer references are refused',()=>{
+ const base=()=>({proxies:[{name:'node',type:'http',server:'127.0.0.1',port:19001}],'proxy-groups':[{name:'PROXY',type:'select',proxies:['node']}]});
+ for(const name of ['GLOBAL','REJECT','REJECT-DROP']){
+  const source=base();source.proxies[0].name=name;source['proxy-groups'][0].proxies=[name];
+  assert.throws(()=>makeConfig(source,18001),/保留名称/);
+ }
+ for(const name of ['DIRECT','REJECT','REJECT-DROP','COMPATIBLE','PASS','PASS-RULE']){
+  const source=base();source['proxy-groups'].push({name,type:'select',proxies:['node']});
+  assert.throws(()=>makeConfig(source,18001),/保留名称/);
+ }
+ const duplicate=base();duplicate.proxies.push({...duplicate.proxies[0]});assert.throws(()=>makeConfig(duplicate,18001),/重复/);
+ const collision=base();collision.proxies[0].name='PROXY';collision['proxy-groups'][0].proxies=['PROXY'];assert.throws(()=>makeConfig(collision,18001),/重复/);
+ for(const reference of [0,false,null,{},[]]){
+  const source=base();source.proxies[0]['dialer-proxy']=reference;assert.throws(()=>makeConfig(source,18001),/链式代理引用无效/);
+ }
+ const global=base();global['proxy-groups'].push({name:'GLOBAL',type:'select',proxies:['node']});
+ assert.ok(makeConfig(global,18001)['proxy-groups'].some(group=>group.name==='GLOBAL'));
 });
 test('login fetches site entitlement and holds JWT privately in main only',async()=>{
   const calls=[];
@@ -54,9 +72,23 @@ test('login fetches site entitlement and holds JWT privately in main only',async
 });
 test('rejects anonymous connection, invalid login and bad core path',async()=>{
  const app=new LycoNetwork({dataDir:__dirname,fetchFn:async()=>{throw Error('must not fetch');}});
- await assert.rejects(()=>app.connect(),/proxy_1m/);
+ await assert.rejects(()=>app.connect(),/代理订阅/);
  await assert.rejects(()=>app.login({username:'hi',password:'a'}));
  assert.throws(()=>app.selectCore('C:\\fake\\other.exe'));
+});
+test('long-term purchase names cross the renderer boundary without subscription secrets',async()=>{
+ for(const [code,label] of [['proxy_3m','代理季卡'],['proxy_4m','代理120天套餐'],['proxy_1y','代理年卡'],['constructor','代理订阅']]){
+  for(const fromMeta of [false,true]){
+   const item={...active,...(fromMeta?{meta:{...active.meta,purchase_product:code}}:{purchase_product:code})};
+   const app=new LycoNetwork({dataDir:__dirname,fetchFn:async url=>new Response(JSON.stringify(url.endsWith('/login')?{token:'CI_PLAN_PRIVATE_TOKEN'}:{username:'CI-plan-owner',entitlements:[item]}))});
+   try{
+    const state=await app.login({username:'CI-plan-owner',password:'CI-plan-password'});
+    assert.equal(state.entitled,true);assert.equal(state.plan_name,label);assert.equal(state.expires_at,active.expires_at);
+    assert.doesNotMatch(JSON.stringify(state),/CI_PLAN_PRIVATE_TOKEN|abcdef098765|sub_url/);
+   }finally{await app.logout()}
+  }
+ }
+ assert.equal(extractEntitlement({entitlements:[{...active,product:'proxy_3m'}]}),null);
 });
 
 test('logout cancels a pending login response instead of reviving the session',async()=>{
@@ -202,4 +234,55 @@ test('unexpected Mihomo exit triggers managed-window shutdown hook',async t=>{
  await done;
  assert.equal(app.status().connected,false);
  assert.equal(app.port,null);
+});
+
+test('a revoked paid entitlement stops both the tracked core and owned-window hook',async t=>{
+ const {app,children}=await lifecycleFixture(t);await app.connect();
+ let stopped=0;app.onAuthorizationLost=()=>{stopped++};
+ app.fetchFn=async()=>new Response(JSON.stringify({username:'sample',entitlements:[]}));
+ const state=await app.validateConnection();
+ assert.equal(state.entitled,false);assert.equal(state.connected,false);
+ assert.equal(children[0].killed,true);assert.equal(stopped,1);
+ assert.equal(app.validationTimer,null);
+});
+
+test('a transient Billing outage retains a verified route only within the five-minute lease',async t=>{
+ const {app,children}=await lifecycleFixture(t);await app.connect();
+ app.fetchFn=async()=>{throw Error('CI-controlled network outage')};
+ await assert.rejects(()=>app.validateConnection(),/outage/);
+ assert.equal(app.status().connected,true);
+ app.lastVerifiedAt=Date.now()-300001;
+ await assert.rejects(()=>app.validateConnection(),/outage/);
+ assert.equal(app.status().connected,false);assert.equal(children[0].killed,true);
+});
+
+test('an authorization rejection closes an active route immediately without an outage grace period',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ let stopped=false;app.onAuthorizationLost=()=>{stopped=true};
+ app.fetchFn=async()=>new Response('{}',{status:403});
+ await assert.rejects(()=>app.validateConnection(),/403/);
+ assert.equal(stopped,true);assert.equal(app.status().logged_in,false);assert.equal(app.status().connected,false);
+});
+
+test('a late outage result cannot invalidate a replacement core',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ const original=app.fetchFn;let release,started;
+ const requested=new Promise(resolve=>{started=resolve});
+ app.fetchFn=()=>{started();return new Promise((_resolve,reject)=>{release=()=>reject(Error('late old outage'))})};
+ const pending=app.validateConnection();const rejection=assert.rejects(pending,/late old outage/);
+ await requested;await app.disconnect();app.fetchFn=original;await app.connect();
+ app.lastVerifiedAt=Date.now()-300001;
+ release();await rejection;
+ assert.equal(app.status().connected,true);assert.equal(app.status().entitled,true);
+});
+test('private workspace subscription fetch cannot survive a session change or expose itself in status',async t=>{
+ const {app}=await lifecycleFixture(t);await app.connect();
+ const authorization={...app.status(),connectionEpoch:app.connectionEpoch};
+ const source=await app.workspaceSubscription(authorization);assert.ok(JSON.parse(source).proxies.length);
+ assert.doesNotMatch(JSON.stringify(app.status()),/CI_ONLY|proxy-groups|server|sub_url/);
+ const original=app.fetchFn;let release,requested;
+ const started=new Promise(resolve=>{requested=resolve});
+ app.fetchFn=async(url,options)=>url.endsWith('/clash')?(requested(),new Promise(resolve=>{release=()=>resolve(new Response(source))})):original(url,options);
+ const pending=app.workspaceSubscription(authorization),rejected=assert.rejects(pending,/账号或连接/);
+ await started;await app.disconnect();release();await rejected;
 });

@@ -1,0 +1,36 @@
+appId: top.lain42.lycobrowser
+---
+- scrollUntilVisible:
+    element: "网络依赖原始声明"
+    direction: DOWN
+- tapOn: "网络依赖原始声明"
+- assertVisible: "72 / 72 个依赖 · 104 份原始声明"
+- tapOn:
+    id: "go-notice-search"
+- inputText: lyco-missing-go-dependency
+- pressKey: Enter
+- assertVisible: "没有匹配的网络依赖。"
+- assertVisible: "0 / 72 个依赖 · 104 份原始声明"
+- tapOn: "清除网络依赖搜索"
+- assertVisible: "72 / 72 个依赖 · 104 份原始声明"
+- tapOn:
+    id: "go-notice-search"
+- inputText: github.com/go-chi/chi/v5
+- pressKey: Enter
+- assertVisible: "1 / 72 个依赖 · 104 份原始声明"
+- tapOn: "github\\.com/go-chi/chi/v5 · v5\\.2\\.5"
+- scrollUntilVisible:
+    element: "(?s).*Copyright \\(c\\) 2015-present Peter Kieltyka.*Google Inc\\..*"
+    direction: DOWN
+- takeScreenshot: original-go-chi-license
+- tapOn: "关闭网络依赖声明"
+- assertVisible: "LYCO Browser"
+- tapOn: "网络依赖原始声明"
+- assertVisible: "72 / 72 个依赖 · 104 份原始声明"
+- back
+- assertVisible: "LYCO Browser"
+- assertNotVisible: "网络依赖声明"
+- tapOn: "网络依赖原始声明"
+- assertVisible: "72 / 72 个依赖 · 104 份原始声明"
+- tapOn: "关闭网络依赖声明"
+- assertVisible: "LYCO Browser"

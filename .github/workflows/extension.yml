@@ -43,6 +43,16 @@ jobs:
             gh release create "$tag" --target "$GITHUB_SHA" --draft --title "Extension acceptance $GITHUB_RUN_ID"
             gh release upload "$tag" "$RUNNER_TEMP/extension-evidence.zip"
           fi
+      - name: Retain accepted feature extension for internal review
+        if: success() && github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-subscription-extension-${{ github.run_id }}
+          path: |
+            dist/LYCO-Subscription-Extension.zip
+            dist/LYCO-Subscription-Extension.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
       - name: Publish only the accepted main-commit extension
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:

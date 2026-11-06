@@ -1,0 +1,32 @@
+appId: top.lain42.lycobrowser
+---
+- runFlow:
+    file: paid-edit-open.yaml
+    env:
+      NAME: ${FROM_NAME}
+- runFlow:
+    file: paid-edit-text.yaml
+    env:
+      FIELD: "修改环境名称"
+      VALUE: ${TO_NAME}
+- scrollUntilVisible:
+    element:
+      id: "修改首页 URL"
+    direction: DOWN
+- runFlow:
+    file: paid-edit-text.yaml
+    env:
+      FIELD: "修改首页 URL"
+      VALUE: ${TO_URL}
+- scrollUntilVisible:
+    element: "保存环境修改"
+    direction: DOWN
+- tapOn: "保存环境修改"
+- assertVisible: "已更新环境名称和首页，网站数据与官网线路保留"
+- assertNotVisible:
+    id: "修改环境名称"
+- scrollUntilVisible:
+    element: "编辑环境 ${TO_NAME}"
+    direction: DOWN
+- assertVisible: "编辑环境 ${TO_NAME}"
+- takeScreenshot: paid-edit-details-saved

@@ -36,6 +36,18 @@ unknown cells, geographic warnings and unavailable tests stay separate.
 
 ## What the tests measure
 
+The source-built mobile core also passed an isolated routing suite at
+`92ddbd7`, [Actions40550598220](https://github.com/lilyco-42/lyco-browser/actions/runs/40550598220).
+Both authenticated HTTP and SOCKS5 listeners reached a real IPv6 origin over
+HTTP, HTTPS with a verified ephemeral CA, and a WSS upgrade with a checked
+handshake and received WebSocket frame. An unresolvable fixture domain reached
+the selected upstream as the original hostname. After stopping that upstream,
+all eight repeated requests failed without additional origin requests; three
+independent direct requests then confirmed the origins remained available.
+This establishes the core's selected-outbound behavior for these cases. It
+does not measure mobile browser routing, all DNS traffic, RTC, customer routes,
+or a device VPN. No certificate verification was disabled.
+
 | Surface | Required evidence | What cannot count as a pass |
 | --- | --- | --- |
 | Browser settings | Actual profile's first-script UA/platform, language/request header, Date/Intl timezone | Changing the host's settings or detector output |

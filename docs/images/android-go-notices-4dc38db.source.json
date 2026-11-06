@@ -1,0 +1,10 @@
+{
+  "sourceRun": 41775491059,
+  "source": "4dc38db6ff5c8380b209b2f35aeb6ff955b27842",
+  "originalArtifact": 13297482505,
+  "originalZipSha256": "9d5a183caf9f392fddaa58d787465617142e86aca815091652b3e49decf02310",
+  "originalPath": "outputs/client-readiness-20261104/41775491059/native/files/go-notices-debug/go-notices/takeScreenshot/original-go-chi-license.png",
+  "sha256": "2e35bbad8808a70f0339b6c76c553d93612b47ab0198b5d93c1a49cf1b96ead5",
+  "copiedUnmodified": true,
+  "scope": "Owned API35 native client acceptance only; no RTC, real customer exit/payment, iOS or store/release proof"
+}

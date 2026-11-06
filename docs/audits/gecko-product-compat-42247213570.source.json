@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-11-06T15:58:51.043683+00:00",
+  "run": 42247213570,
+  "job": 127992566029,
+  "source": "57b6fbf6ec798a4885461708a7e237836f1e8360",
+  "artifactId": 13519731401,
+  "zipBytes": 161952,
+  "zipSha256": "bc13e2c61c5a8a2d5efc398a52b798ba3da90c434e22e7a8976eda7c90b22b0f",
+  "sourceArtifactId": 13517942471,
+  "sourceZipBytes": 69396,
+  "sourceZipSha256": "0b55b132c74ef5ed4ff4f120b1d16ac7ee74c0fdc66d0cc6e220ab0510cbb4d5",
+  "fullSizeShaCrcSafePathsAndAllFileReceiptHashesVerified": true,
+  "all5OriginalPinsAnd3NewSourcesMatchCommittedBytes": true,
+  "privateModuleAndRootExactAppendsReconstructed": true,
+  "originalSourceEngineBindingUnchanged": true,
+  "actualGradleModel": {
+    "gradleVersion": "9.3.1",
+    "androidGradlePluginVersion": "8.12.0",
+    "compileSdk": 36,
+    "minSdk": "28",
+    "targetSdk": "36",
+    "projectNames": [
+      ":",
+      ":app",
+      ":expo",
+      ":expo-constants",
+      ":expo-log-box",
+      ":expo-modules-core",
+      ":lyco-mobile-browser",
+      ":react-native-async-storage_async-storage",
+      ":react-native-safe-area-context"
+    ],
+    "task": ":app:checkReleaseAarMetadata",
+    "scope": "Actual configured product model, not native compilation or runtime"
+  },
+  "actualExitCode": 1,
+  "metadataTaskObserved": true,
+  "gateIssues": 5,
+  "failure": "Original product SDK36 incompatible with source engine requiringSDK37 and androidx.core/core-ktx1.19.1 requiringSDK37/AGP9.1.0. Original task really executed; not preparation error.",
+  "logBytes": 80245,
+  "logSha256": "3281c5ddf7c956114d8afa4a2ef91d642ee62c3686b126449734bf431805181f",
+  "scope": "Valid task-level compatibility failure, no checks suppressed. Not product native compile/runtime/adoption/migration/release proof."
+}

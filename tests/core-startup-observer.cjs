@@ -5,6 +5,8 @@ const SIGNALS = [
   ['configuration-started', /initial configuration/i],
   ['configuration-ready', /initial configuration complete/i],
   ['mixed-listener-ready', /mixed\(http\+socks\).*listening/i],
+  ['address-in-use', /address already in use|only one usage of each socket address|EADDRINUSE/i],
+  ['address-permission', /forbidden by its access permissions|permission denied|EACCES/i],
   ['listener-error', /(?:listen|bind).*(?:error|failed|denied|in use)|(?:error|failed|denied).*listen/i],
   ['geodata-download', /(?:download|initial).*(?:geoip|geosite|mmdb)|(?:geoip|geosite|mmdb).*(?:download|initial)/i],
   ['database-lock', /database.*(?:lock|timeout)|(?:lock|timeout).*database/i],
@@ -27,22 +29,42 @@ function observeCore(child, record) {
   child.once('exit', (code, signal) => { record.exitCode = code; record.signal = signal; });
 }
 
-function installCoreStartupObserver(LycoNetwork) {
+function installCoreStartupObserver(LycoNetwork, WorkspaceRoutes) {
   // Called only by the Actions-gated harness. Its launched application keeps a
   // clean environment without CI/provider variables; do not weaken that policy.
   const records = [];
+  const active = new WeakMap();
+  async function during(network, operation) {
+    let state = active.get(network);
+    if(!state) {
+      const spawn = network.spawnFn;
+      const wrapper = (...spawnArgs) => {
+        const options = {...spawnArgs[2], stdio: ['ignore', 'pipe', 'pipe']};
+        const child = spawn(spawnArgs[0], spawnArgs[1], options);
+        const record = {pid: child.pid ?? null, outputBytes: 0, signals: [], exitCode: null, signal: null};
+        records.push(record); observeCore(child, record); return child;
+      };
+      state = {spawn, wrapper, calls: 0}; active.set(network, state); network.spawnFn = wrapper;
+    }
+    state.calls++;
+    try {return await operation();}
+    finally {
+      if(--state.calls === 0) {
+        if(network.spawnFn === state.wrapper) network.spawnFn = state.spawn;
+        active.delete(network);
+      }
+    }
+  }
   const original = LycoNetwork.prototype.connectOnce;
-  LycoNetwork.prototype.connectOnce = async function (...args) {
-    const spawn = this.spawnFn;
-    this.spawnFn = (...spawnArgs) => {
-      const options = {...spawnArgs[2], stdio: ['ignore', 'pipe', 'pipe']};
-      const child = spawn(spawnArgs[0], spawnArgs[1], options);
-      const record = {pid: child.pid ?? null, outputBytes: 0, signals: [], exitCode: null, signal: null};
-      records.push(record); observeCore(child, record); return child;
-    };
-    try { return await original.apply(this, args); }
-    finally { this.spawnFn = spawn; }
+  LycoNetwork.prototype.connectOnce = function (...args) {
+    return during(this, () => original.apply(this, args));
   };
+  if(WorkspaceRoutes) {
+    const start = WorkspaceRoutes.prototype.start;
+    WorkspaceRoutes.prototype.start = function (...args) {
+      return during(this.network, () => start.apply(this, args));
+    };
+  }
   return records;
 }
 module.exports = {observeCore, installCoreStartupObserver};

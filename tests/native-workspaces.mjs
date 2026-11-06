@@ -1,11 +1,13 @@
 import {_electron as electron, chromium} from 'playwright';
 import http from 'node:http';
 import net from 'node:net';
+import {randomUUID} from 'node:crypto';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseConnection} from '../extensions/lain42/connection.mjs';
 import {createBrowserPrivacyFixture} from './browser-privacy-fixture.mjs';
+import {createProxyFailureProbe} from './proxy-failure-probe.mjs';
 import {createBrowserProfileFixture} from './browser-profile-fixture.mjs';
 import {verifyNativeProfileIsolation} from './native-profile-contract.mjs';
 import {verifyNativeAccountPanel} from './native-account-panel.mjs';
@@ -15,6 +17,8 @@ import {createIndependentAuditFixture} from './independent-fingerprint-audits.mj
 import {protectConnectHandler} from './connect-handler.mjs';
 import {observeHostFontControl, observeFontControlCandidate} from './native-font-observation.mjs';
 import {verifyNativeEgressLocale} from './native-egress-locale-contract.mjs';
+import {verifyWorkbenchUiFont} from './workbench-ui-font.mjs';
+import {verifyNativeWorkspaceRoutes} from './native-workspace-routes.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Only Actions runs native product acceptance');
 const binary=path.resolve(process.argv[2]);
 const appRoot=path.resolve(process.argv[3]);
@@ -23,6 +27,7 @@ const report={commit:process.env.GITHUB_SHA,binary,fixtureBilling:true,realPayme
 const listen=server=>new Promise(resolve=>server.listen(0,'127.0.0.1',()=>resolve(server.address().port)));
 const tunnelPorts=new Set(),tunnelSockets=new Set();
 const privacyProbe=createBrowserPrivacyFixture();await privacyProbe.start();
+const failureProbe=await createProxyFailureProbe();
 const profileProbe=createBrowserProfileFixture();
 const independentAudit=process.env.LYCO_INDEPENDENT_AUDITS==='true'
  ? await createIndependentAuditFixture(process.env.GITHUB_WORKSPACE) : null;
@@ -47,20 +52,24 @@ const geo=http.createServer((_req,res)=>{
  res.end(JSON.stringify(geoResponse));
 });
 const geoPort=await listen(geo);
+let proxyUnavailable=false;
 const proxy=http.createServer((req,res)=>{
+ if(proxyUnavailable){res.writeHead(503).end();return;}
  const url=new URL(req.url);
- if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||url.port!==String(originPort)) {
+ if(!['127.0.0.1','lyco-fixture.invalid'].includes(url.hostname)||![originPort,...failureProbe.ports].includes(Number(url.port))) {
   if(independentAudit){res.writeHead(403);res.end('CI audit external HTTP blocked');return;}
   res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(geoResponse));return;}
  url.hostname='127.0.0.1';
  const upstream=http.request(url,{headers:{...req.headers,'x-ci-proxy':'yes'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res)});
+ upstream.on('socket',socket=>socket.once('connect',()=>failureProbe.markProxyPort(socket.localPort)));
  upstream.on('error',()=>{res.writeHead(502);res.end()});req.pipe(upstream);
 });
 // Mihomo's HTTP adapter uses CONNECT even for HTTP targets. Permit ONLY the
 // ephemeral CI origin, never a general-purpose tunnel or public listener.
 proxy.on('connect',protectConnectHandler((req,socket,head)=>{
+ if(proxyUnavailable){socket.end('HTTP/1.1 502 CI upstream stopped\r\n\r\n');return;}
  const targetPort=req.url==='ip-api.com:80'?geoPort:
-  [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:null;
+  [`127.0.0.1:${originPort}`,`lyco-fixture.invalid:${originPort}`].includes(req.url)?originPort:failureProbe.ports.find(port=>req.url===`127.0.0.1:${port}`);
  if(!targetPort) {
   socket.end('HTTP/1.1 502 CI fixture only\r\n\r\n');return;
  }
@@ -68,6 +77,7 @@ proxy.on('connect',protectConnectHandler((req,socket,head)=>{
  tunnelSockets.add(socket);tunnelSockets.add(upstream);
  upstream.once('connect',()=>{
   const port=upstream.localPort;tunnelPorts.add(port);
+  failureProbe.markProxyPort(port);
   upstream.once('close',()=>tunnelPorts.delete(port));
   socket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
   if(head.length)upstream.write(head);
@@ -78,7 +88,7 @@ proxy.on('connect',protectConnectHandler((req,socket,head)=>{
  upstream.once('close',()=>{tunnelSockets.delete(upstream);socket.destroy()});
 },row=>{(report.tunnelErrors||=[]).length<30&&report.tunnelErrors.push(row)}));
 const proxyPort=await listen(proxy);
-let application;
+let application,kernelConnection;
 try {
  await checkpoint('launch-workbench');
  const cleanEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>/^(PATH|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA|PROGRAMFILES(?:\(X86\))?|COMMONPROGRAMFILES|HOMEDRIVE|HOMEPATH|OS|PROCESSOR_ARCHITECTURE|NUMBER_OF_PROCESSORS)$/i.test(key)));
@@ -103,27 +113,37 @@ try {
   throw error;
  } finally {await hostControlBrowser?.close();}
  report.checks.push('unconfigured-host-browser-font-positive-control');
+ const product=JSON.parse(await fs.readFile(path.join(import.meta.dirname,'../apps/universal/src/product.json'),'utf8'));
+ const bundledProduct=JSON.parse(await fs.readFile(path.join(appRoot,'lyco/product.json'),'utf8'));
+ assert.deepEqual(bundledProduct,product);
+ report.product={...bundledProduct,runningVersion:await application.evaluate(({app})=>app.getVersion())};
+ assert.equal(report.product.runningVersion,product.version,'The actual installed or portable application must expose the shared version');
+ report.checks.push('packaged-and-running-product-version-matches-shared-manifest');
  // Observe the actual installed/portable core without changing product files,
  // timeout, proxy selection or permissions. Raw output/secrets are discarded.
  await application.evaluate((_electron,{appRoot,observer})=>{
   const require=process.mainModule.require.bind(process.mainModule);
   const {LycoNetwork}=require(appRoot+'/lyco/network.js');
-  globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork);
+  globalThis.__lycoCoreStartupEvidence=require(observer).installCoreStartupObserver(LycoNetwork,
+   require(appRoot+'/lyco/workspace-routes.js').LycoWorkspaceRoutes);
   globalThis.__lycoTargetEvidence=require(observer.replace('core-startup-observer.cjs','browser-target-observer.cjs'))
    .installBrowserTargetObserver({BrowserEngine:require(appRoot+'/engine.js').BrowserEngine,cdp:require(appRoot+'/cdp.js')});
   globalThis.__lycoNativeIdentityEvidence=globalThis.__lycoTargetEvidence.nativeCalls;
   globalThis.__lycoStartupReadinessEvidence=globalThis.__lycoTargetEvidence.startupReadiness;
  },{appRoot,observer:path.join(import.meta.dirname,'core-startup-observer.cjs')});
  await application.evaluate(async({shell},port)=>{
-  globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];
+  globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=false;globalThis.__lycoOpened=[];globalThis.__lycoFixturePlan='proxy_1m';
   shell.openExternal=async url=>{globalThis.__lycoOpened.push(url)};
   globalThis.fetch=async(url,options={})=>{
    const root='https://lain42.top/studio/api';
    if(!String(url).startsWith(root+'/'))throw Error('Unexpected fixture host');
    if(url===root+'/login')return new Response(JSON.stringify({token:'CI_FIXTURE_TOKEN'}),{status:200});
    if(options.headers?.Authorization!=='Bearer CI_FIXTURE_TOKEN')return new Response('{}',{status:401});
-   if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
-   if(url===root+'/sub/CIfixture123456/clash')return new Response(JSON.stringify({proxies:[{name:'ci-node',type:'http',server:'127.0.0.1',port}], 'proxy-groups':[{name:'PROXY',type:'select',proxies:['ci-node']}]}),{status:200});
+   if(url===root+'/me')return new Response(JSON.stringify({username:globalThis.__lycoFixtureOwner,entitlements:[{product:'proxy_1m',purchase_product:globalThis.__lycoFixturePlan,status:'active',expires_at:globalThis.__lycoFixtureExpired?'2020-01-01T00:00:00Z':'2099-01-01T00:00:00Z',meta:{sub_url:'https://lain42.top/panel/api/sub/CIfixture123456'}}]}),{status:200});
+   if(url===root+'/sub/CIfixture123456/clash'){
+    const proxies=[{name:'ci-node',type:'http',server:'127.0.0.1',port}];
+    return new Response(JSON.stringify(globalThis.__lycoWorkspaceRouteSubscription||{proxies,'proxy-groups':[{name:'PROXY',type:'select',proxies:proxies.map(node=>node.name)}]}),{status:200});
+   }
    throw Error('Unexpected fixture endpoint');
   };
  },proxyPort);
@@ -143,11 +163,12 @@ try {
  report.checks.push('real-native-group-create-and-current-group-dialog-defaults');
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#view-lyco').waitFor({state:'visible'});
+ await verifyWorkbenchUiFont({page,appRoot,report,evidence});
  // Use the actual upstream translator in both languages; its fallback must
  // not split our complete localized strings into Chinese/English fragments.
  for (const locale of ['zh-CN','en']) {
   assert.equal(await page.evaluate(locale=>window.OpenBrowserI18n.setLocale(locale),locale),locale);
-  assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证月卡');
+  assert.equal(await page.locator('#lyco-login button[type="submit"]').textContent(),'登录并验证订阅');
   assert.equal(await page.locator('#lyco-copy-extension').textContent(),'复制浏览器插件连接码');
   assert.equal(await page.locator('[data-view="lyco"] span').textContent(),'账户与代理');
   assert.equal(await page.locator('#lyco-password').getAttribute('placeholder'),'网站密码');
@@ -160,8 +181,19 @@ try {
  await page.locator('#lyco-username').fill('ci-owner-a');await page.locator('#lyco-password').fill('CI-owned-password');
  await page.locator('#lyco-login button[type="submit"]').click();
  await page.waitForFunction(()=>!document.getElementById('lyco-create-profile').disabled);
- assert.equal(await page.locator('#lyco-account-chip').textContent(),'月卡可用');
+ assert.equal(await page.locator('#lyco-account-chip').textContent(),'代理月卡可用');
  report.checks.push('native-login-valid-entitlement');
+ for(const [code,label] of [['proxy_3m','代理季卡'],['proxy_4m','代理120天套餐'],['proxy_1y','代理年卡']]){
+  await application.evaluate((_electron,code)=>{globalThis.__lycoFixturePlan=code},code);
+  await page.locator('#lyco-refresh').click();
+  await page.waitForFunction(label=>document.getElementById('lyco-account-chip').textContent===label+'可用',label);
+  assert.ok((await page.locator('#lyco-account-status').textContent()).includes('有效'+label));
+  await page.screenshot({path:path.join(evidence,'account-'+code+'.png')});
+ }
+ await application.evaluate(()=>{globalThis.__lycoFixturePlan='proxy_1m'});
+ await page.locator('#lyco-refresh').click();
+ await page.waitForFunction(()=>document.getElementById('lyco-account-chip').textContent==='代理月卡可用');
+ report.checks.push('native-long-term-proxy-plan-labels-and-compatible-entitlement');
  const connections=await page.evaluate(()=>Promise.all([window.ops.lycoConnect(),window.ops.lycoConnect()]));
  assert.equal(connections[0].port,connections[1].port);
  report.checks.push('concurrent-connect-same-core-port');
@@ -290,6 +322,8 @@ try {
  assert.ok(report.proxyRequests.some(row=>row.path==='/mihomo-probe'&&row.proxied));
  report.checks.push('packaged-native-login-create-profile','actual-bundled-mihomo-http-routing');
  await page.screenshot({path:path.join(evidence,'windows-workspace.png')});
+ await verifyNativeWorkspaceRoutes({app:application,page,report,evidence});
+ await page.locator('[data-view="profiles"]').click();
  // Exercise the actual existing engine with the bound profile and bundled browser.
  await checkpoint('managed-browser-probe');
  const target=`http://lyco-fixture.invalid:${originPort}/browser-probe`;
@@ -352,8 +386,36 @@ try {
  report.webrtcAudit={completed:true,blocked:rtcResult.rtc.blocked,
   candidateCount:rtcResult.rtc.candidateCount,directUdpPackets:rtcResult.udpPackets};
  report.checks.push('native-webrtc-ice-udp-zero-direct-packets');
+ await checkpoint('failed-upstream-probe');
+ const sessions=await page.evaluate(()=>window.ops.syncSessions());
+ const session=sessions.find(row=>row.id===profile.id);
+ assert.ok(session?.port,'Managed environment has no debugging session');
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${session.port}`);
+ const kernelPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===rtcTarget);
+ assert.ok(kernelPage,'Managed RTC page is missing');
+ try{
+  report.failedProxyAudit=await failureProbe.audit(kernelPage,async()=>{
+   proxyUnavailable=true;
+   for(const socket of tunnelSockets)socket.destroy();
+  });
+ }finally{proxyUnavailable=false;}
+ report.checks.push('native-failed-upstream-no-direct-http-websocket-or-tls-connection');
  await checkpoint('webrtc-stop');
  await page.evaluate(()=>window.ops.stopProfile(window.__lycoCreated.id));
+ await checkpoint('unmanaged-native-network-control');
+ const directTarget='http://127.0.0.1:'+originPort+'/direct-control-page';
+ const directProfile=await page.evaluate(({profile,id,target})=>window.adoptLycoProfile({...profile,id,name:'CI direct network control',networkMode:'direct',proxy:null,proxyId:null,proxyMeta:{},
+  startUrl:target,platform:{type:'other',startUrl:target},advanced:{startUrls:target},
+  privacy:{...profile.privacy,languageMode:'profile',langFromIp:false,timezoneFromIp:false,geoFromIp:false}}),{profile,id:randomUUID(),target:directTarget});
+ await page.evaluate(profile=>window.ops.startProfile(profile),directProfile);
+ const directSession=(await page.evaluate(()=>window.ops.syncSessions())).find(row=>row.id===directProfile.id);
+ assert.ok(directSession?.port);
+ kernelConnection=await chromium.connectOverCDP(`http://127.0.0.1:${directSession.port}`);
+ const directPage=kernelConnection.contexts().flatMap(context=>context.pages()).find(tab=>tab.url()===directTarget);
+ assert.ok(directPage,'Unmanaged native control page is missing');
+ report.unmanagedProxyControl=await failureProbe.auditUnmanaged(directPage);
+ await page.evaluate(id=>window.ops.stopProfile(id),directProfile.id);
+ report.checks.push('unmanaged-native-http-websocket-tls-direct-positive-controls');
  const profileIsolation=await verifyNativeProfileIsolation({page,profile,originPort,fixture:profileProbe,report,checkpoint,appRoot,
   independentAudit,evidence});
  try {
@@ -369,7 +431,7 @@ try {
  await page.locator('[data-view="lyco"]').click();
  await page.locator('#lyco-buy').click();
  await page.waitForFunction(()=>document.getElementById('lyco-feedback').textContent.includes('已在系统浏览器打开'));
- assert.deepEqual(await application.evaluate(()=>globalThis.__lycoOpened),['https://lain42.top/shop/#proxy_1m']);
+ assert.deepEqual(await application.evaluate(()=>globalThis.__lycoOpened),['https://lain42.top/vpn/#plans']);
  await application.evaluate(()=>{globalThis.__lycoFixtureOwner='ci-owner-b'});
  await assert.rejects(()=>page.evaluate(()=>window.ops.startProfile(window.__lycoCreated)),/另一网站账号/);
  await application.evaluate(()=>{globalThis.__lycoFixtureOwner='ci-owner-a';globalThis.__lycoFixtureExpired=true});
@@ -396,14 +458,17 @@ try {
  }
  throw error;
 } finally {
+ report.failedProxyConnections=failureProbe.snapshot();
  report.profileAudit=profileProbe.snapshot();
  if(application)try{report.coreStartup=await application.evaluate(()=>globalThis.__lycoCoreStartupEvidence||[])}catch{}
  if(application)try{report.targetTrace=await application.evaluate(()=>globalThis.__lycoTargetEvidence||[])}catch{}
  if(application)try{report.nativeIdentityCalls=await application.evaluate(()=>globalThis.__lycoNativeIdentityEvidence||[])}catch{}
  if(application)try{report.startupReadiness=await application.evaluate(()=>globalThis.__lycoStartupReadinessEvidence||[])}catch{}
  if(application){try{const p=await application.firstWindow();await p.evaluate(()=>window.ops.lycoLogout())}catch{}await application.close();}
+ await kernelConnection?.close().catch(()=>{});
  for(const socket of tunnelSockets)socket.destroy();
  await privacyProbe.close();
+ await failureProbe.close();
  origin.closeAllConnections();geo.closeAllConnections();proxy.closeAllConnections();await new Promise(r=>origin.close(r));await new Promise(r=>geo.close(r));await new Promise(r=>proxy.close(r));
  await fs.writeFile(path.join(evidence,'native-workspaces.json'),JSON.stringify(report,null,2));
 }

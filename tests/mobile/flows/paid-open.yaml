@@ -1,0 +1,11 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "打开环境 ${NAME}"
+    direction: DOWN
+- tapOn: "打开环境 ${NAME}"
+- scrollUntilVisible:
+    element: "加载 / 刷新官网线路"
+    direction: UP
+- tapOn: "加载 / 刷新官网线路"

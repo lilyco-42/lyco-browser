@@ -1,0 +1,88 @@
+{
+  "run": "42069972627",
+  "source": "a3004b083236a2abd48b050d1906bfa5b19cd04b",
+  "originalPins": {
+    "tests/mobile/engine/source-storage/prepare.py": "ef99059f732f983354e7314c1bdd14efd540dff3ff25bc54e30a83b168b4086d",
+    "tests/mobile/engine/source-storage/verify-output.py": "d5ca608feb273935cdc43a04c9e1cde31436f636758afe2948650bc795769daa",
+    ".github/workflows/build-gecko-storage.yml": "f2f6dfa2a45985a42dc49c28fceb3ff8cf7afcc45aa2e20c78c9c384ffa7f1f1",
+    "tests/mobile/engine/source-arm64/prepare.py": "9a82f7ec0aafc4fd504b2068135813251dc1e297104e0c354731db71903f2389"
+  },
+  "originalCallerGuard": "assert os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch'\ninputs = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())['inputs']\nassert str(inputs.get('source_engine_build')).lower() == 'true'\nassert str(inputs.get('native_engine_storage')).lower() == 'true'\nassert inputs.get('source_engine_abi', 'x86_64') == 'x86_64'\nassert not inputs.get('native_engine_source_run')\nfor name in ['native_engine_probe', 'signed_android', 'ios_device', 'native_engine_cookie_flush']:\n    assert str(inputs.get(name, 'false')).lower() == 'false'\nfor name in ['paid_routes_candidate', 'network_probe_candidate']:\n    assert not inputs.get(name)\n\n",
+  "derivedCallerGuard": "assert os.environ['GITHUB_EVENT_NAME'] in ('pull_request', 'workflow_dispatch')\nassert '/.github/workflows/gecko-storage-arm64.yml@' in os.environ['GITHUB_WORKFLOW_REF']\n\n",
+  "derivedPrepareSha256": "6db25a94e2bd02c54840a7e85508909ec0c7eabce463d27a23c9d0f8acc1924f",
+  "verifiedX86RecipeHashes": {
+    "build-engine.sh": "545c38f56e47f6d2ea9ab7c4c050963553456309a74bf9a42e98e4f25c9cc0ad",
+    "build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+    "proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8",
+    "database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b"
+  },
+  "architectureReplacements": [
+    {
+      "before": "--target=x86_64-linux-android",
+      "after": "--target=aarch64-linux-android",
+      "count": 1
+    },
+    {
+      "before": "jni/x86_64/",
+      "after": "jni/arm64-v8a/",
+      "count": 2
+    },
+    {
+      "before": "'abi':'x86_64'",
+      "after": "'abi':'arm64-v8a'",
+      "count": 1
+    }
+  ],
+  "generatedRecipeSha256": {
+    "build-engine.sh": "44aabbcd14b2b4bc831ce57ee7244389a418668683dbb4a6d1935c58e31d6030",
+    "build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+    "proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8",
+    "database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b"
+  },
+  "verifierReplacements": [
+    {
+      "before": "meta['abi'] == 'x86_64'",
+      "after": "meta['abi'] == 'arm64-v8a'",
+      "count": 1
+    },
+    {
+      "before": "jni/x86_64/",
+      "after": "jni/arm64-v8a/",
+      "count": 2
+    },
+    {
+      "before": "struct.unpack_from('<H', raw, 18)[0] == 62",
+      "after": "struct.unpack_from('<H', raw, 18)[0] == 183",
+      "count": 1
+    },
+    {
+      "before": "'elfMachine': 62",
+      "after": "'elfMachine': 183",
+      "count": 1
+    },
+    {
+      "before": "actualElfArchitectureVerified=True, storageRuntimeProven=False,",
+      "after": "actualElfArchitectureVerified=True, storageRuntimeProven=False, arm64RuntimeProven=False,",
+      "count": 1
+    },
+    {
+      "before": "No runtime durability, ARM64, migration,",
+      "after": "No ARM64 runtime durability, migration,",
+      "count": 1
+    },
+    {
+      "before": "aar = output / 'geckoview-lyco-default-route-experiment.aar'",
+      "after": "assert recipe['architecture'] == 'arm64-v8a'\nassert policy['appliedPatchSha256'] == '85b220f4cba7e5e16ca898b19e7fe90a459744e351d2458da43e70207b7231e1'\nassert policy['patchedSourceSha256'] == {\n    'dom/localstorage/ActorsParent.cpp': '492a133abda69287bc0d9a4ed458013cbee83aba4649755cb90f357fa1b184d6',\n    'modules/libpref/init/StaticPrefList.yaml': '2b84754052ee706f524f8f0c8f636ce695b0a604fb398fd85a6d644beec9eccf'}\naar = output / 'geckoview-lyco-default-route-experiment.aar'",
+      "count": 1
+    }
+  ],
+  "derivedVerifierSha256": "50c347b4d1fa1cb7dfed2e9d93b732fbdc25d50412a415e1a538d0bd497ba76c",
+  "originalQueuedArm64RunPreserved": 41812206227,
+  "originalFilesModified": false,
+  "storageOrRtcSourcePatchChanged": false,
+  "nativeOptimizationOrResourceGatesChanged": false,
+  "exact13LibraryGateRetained": true,
+  "compiledArchiveProven": false,
+  "arm64RuntimeProven": false,
+  "productAdopted": false
+}

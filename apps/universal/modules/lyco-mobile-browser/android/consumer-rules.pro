@@ -1,0 +1,2 @@
+-keep class go.** { *; }
+-keep class top.lain42.lycotunnel.** { *; }

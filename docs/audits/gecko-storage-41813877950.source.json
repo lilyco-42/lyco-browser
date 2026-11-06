@@ -1,0 +1,32 @@
+{
+  "rawResultSha256": "8e7c0926f08927c9b28fdfb59c6deca7e44215f223afa80cd679a63465a6941a",
+  "checkedAt": "2026-11-04T16:31:18.374508+00:00",
+  "run": 41813877950,
+  "job": 126519610410,
+  "source": "ab307ffec79bfc523be8d5f5d8ea20d2c438858e",
+  "status": "completed",
+  "conclusion": "failure",
+  "artifactId": 13314425297,
+  "originalZipBytes": 97923694,
+  "originalZipSha256": "940e30e4b2d7e91fd9389f12c7df6dfe14ece8ee40b7562b1ef0aa471b02766a",
+  "fullOriginalSizeShaCrcVerified": true,
+  "apkBytes": 223967219,
+  "apkSha256": "26c7e30c2480ce7020c281c2d8311f8147e5a699301f0358d18db2c76160d02c",
+  "all13NativeLibrariesEqualSuccessfulSourceAar": true,
+  "fullJobLogBytes": 88470,
+  "fullJobLogSha256": "b4dfc31ffe2e70b738b874d55263d7929bbe802dd043e41d6bc5ff0d898e3ff7",
+  "originalReports": 9,
+  "allViaSelectedProxy": true,
+  "failedChecks": [
+    "a-reopen-actual-cookie-ls-idb",
+    "b-reopen-actual-cookie-ls-idb",
+    "b-after-clear-a-actual-cookie-ls-idb"
+  ],
+  "indexedDbAndNonExportableKeysRetained": true,
+  "ciphertextDigestUnchangedAcrossReopen": true,
+  "cookieAndLocalStorageAbsentAfterAbruptForceStop": true,
+  "normalShutdownRequestedBeforeForceStop": false,
+  "runtimeStoragePassProven": false,
+  "migrationProven": false,
+  "productAdopted": false
+}

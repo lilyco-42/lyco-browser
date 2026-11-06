@@ -1,0 +1,613 @@
+{
+  "run": "41964719754",
+  "testedGitCommit": "4304fb196a86de40927b9597057019bc918cdf2b",
+  "artifacts": {
+    "LYCO-Browser-Android-preview.apk": {
+      "bytes": 130039995,
+      "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9"
+    },
+    "lyco-tunnel.aar": {
+      "bytes": 50954139,
+      "sha256": "16b4cebd4a7f3f62c0e6197f01298f5d47be7212e022ec5a41f7a6d2a6961838"
+    },
+    "lyco-mobile-core-source.tar.gz": {
+      "bytes": 757030948,
+      "sha256": "49ca56ba04c72abab0a4f90e52453a99fd25c9f37c198c9eed18c5f2e8fd3ddd"
+    },
+    "lyco-generated-bindings-android.tar.gz": {
+      "bytes": 467059,
+      "sha256": "cd5d21384943b50c35c3ce9c25b42f671ac6e5389ee6dc90ddbb5c5d66f4d73e"
+    }
+  },
+  "actualCompilerOutputsMatchInstalledAndMergedLibraries": true,
+  "packagedBytesMatchActualGradleStrippedLibraries": true,
+  "allocatedElfSectionsAndProgramHeadersMatchCompilerOutput": true,
+  "generatedSourcesRetainedAndMatched": true,
+  "bothCompilerAndOuterLocksMatch": true,
+  "nativeLibraries": [
+    {
+      "apkPath": "lib/arm64-v8a/libgojni.so",
+      "compilerOutputSha256": "41e7db6a1991f653814a5612c4cc4dc922186e4c8452f1426bd8f93377b786a2",
+      "compilerOutputBytes": 52283720,
+      "apkSha256": "fc0fe8c6203c09b003e0ace91d6cb2ccd46f085d50286007da3e356c259ddb36",
+      "apkBytes": 36053720,
+      "elfMachine": 183,
+      "compilerCallReceipt": "calls/android-arm64-2940/receipt.json",
+      "actualMergedLibraryMatchesCompiler": true,
+      "actualStrippedLibraryMatchesApk": true,
+      "rawByteIdentical": false,
+      "allocatedElf": {
+        "sections": {
+          ".note.android.ident": {
+            "type": 7,
+            "flags": 2,
+            "address": 568,
+            "bytes": 152,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "52763dbaa9783ade4948aec0ccf68cb260a18098231215490da80151502b865a"
+          },
+          ".note.go.buildid": {
+            "type": 7,
+            "flags": 2,
+            "address": 720,
+            "bytes": 100,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "2b861a8723a9bd371ed16e917a73a9b2a96d29aa61cc349e17caea56969ddd46"
+          },
+          ".note.gnu.build-id": {
+            "type": 7,
+            "flags": 2,
+            "address": 820,
+            "bytes": 36,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "0eeeb57c669ae98707aad3c4d45e0aec610f98dd1ac9310ee24be9afe3cafc25"
+          },
+          ".dynsym": {
+            "type": 11,
+            "flags": 2,
+            "address": 856,
+            "bytes": 4416,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "d2a933a68ca2b6fabccf8ef7b8e523d98a398c1b26113a0fb35b0e28999ac063"
+          },
+          ".gnu.version": {
+            "type": 1879048191,
+            "flags": 2,
+            "address": 5272,
+            "bytes": 368,
+            "alignment": 2,
+            "entityBytes": 2,
+            "sha256": "8d1de6389622b7e5c5830613e5687510b8805084c693214e9517749efb328c3d"
+          },
+          ".gnu.version_r": {
+            "type": 1879048190,
+            "flags": 2,
+            "address": 5640,
+            "bytes": 64,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "da6593edc26787ac0da38ddee861947d55a29cfeed3555709b9aca8fa78c420b"
+          },
+          ".gnu.hash": {
+            "type": 1879048182,
+            "flags": 2,
+            "address": 5704,
+            "bytes": 880,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "bbda1da8000400c30a3f597288ce4b39cf3201972cac5e25ba4e9bf80165bb3f"
+          },
+          ".dynstr": {
+            "type": 3,
+            "flags": 2,
+            "address": 6584,
+            "bytes": 3953,
+            "alignment": 1,
+            "entityBytes": 0,
+            "sha256": "223eec97c4a202e587e6c085ba8734a0efed44ecfd28ea78d17b8d734ec128cf"
+          },
+          ".rela.dyn": {
+            "type": 4,
+            "flags": 2,
+            "address": 10544,
+            "bytes": 24,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "445b6506a1e0cb5baf385aafc8eb606293ce946a506a6409d6d3fb669e0b7e7f"
+          },
+          ".relr.dyn": {
+            "type": 1879047936,
+            "flags": 2,
+            "address": 10568,
+            "bytes": 67784,
+            "alignment": 8,
+            "entityBytes": 8,
+            "sha256": "35f040cfce63a55fa4ae3f4bb88fa57b01c778c5a44c8a78c882571fc5e2e8be"
+          },
+          ".rela.plt": {
+            "type": 4,
+            "flags": 66,
+            "address": 78352,
+            "bytes": 1440,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "78ab9ce0806bddbcea7f0e418d6978ca15088dc9dd04eb517116f2703c3ba4c2"
+          },
+          ".rodata": {
+            "type": 1,
+            "flags": 50,
+            "address": 79808,
+            "bytes": 2969304,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "e5355e4351d6923b2458b23d85f2e793bd521f3c43621fee89a1619003119374"
+          },
+          ".eh_frame_hdr": {
+            "type": 1,
+            "flags": 2,
+            "address": 3049112,
+            "bytes": 900,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "d11ebd876d52c78bb7bacef4f022eaa5a336e68b46aaf7ffd395919cff365da6"
+          },
+          ".eh_frame": {
+            "type": 1,
+            "flags": 2,
+            "address": 3050016,
+            "bytes": 4568,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "2e273cf67154c5765e4d5f282a49c8f072f8f520f4a0da7d7ff658ee7c998a46"
+          },
+          ".text": {
+            "type": 1,
+            "flags": 6,
+            "address": 3054592,
+            "bytes": 15056812,
+            "alignment": 16,
+            "entityBytes": 0,
+            "sha256": "783686fd6e5a44f3227cf2e9664ca409b261ce5f341f47d5c560df1d8ef72acb"
+          },
+          ".plt": {
+            "type": 1,
+            "flags": 536870918,
+            "address": 18111408,
+            "bytes": 992,
+            "alignment": 16,
+            "entityBytes": 0,
+            "sha256": "7d46f7c6b36f192230d3b72731829291a31fb25af6022ddfcdd14de552aa8ca2"
+          },
+          ".data.rel.ro": {
+            "type": 1,
+            "flags": 3,
+            "address": 18128800,
+            "bytes": 17092672,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "a5c183572802ac985ca602a562ae818153fedb72c9d9d8c38f9efd265ff8ecf0"
+          },
+          ".fini_array": {
+            "type": 15,
+            "flags": 3,
+            "address": 35221472,
+            "bytes": 16,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "3240b1bf30d0ce62fbcadaf77c5a7bfdb4e967481dfaeee732dd79f2a7d72f46"
+          },
+          ".init_array": {
+            "type": 14,
+            "flags": 3,
+            "address": 35221488,
+            "bytes": 8,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "0ad0c99607dba27feba72fad599e49d266cc1c8b2019b0b5969be0cd64a4514d"
+          },
+          ".dynamic": {
+            "type": 6,
+            "flags": 3,
+            "address": 35221496,
+            "bytes": 448,
+            "alignment": 8,
+            "entityBytes": 16,
+            "sha256": "c8a9408b5b989ffc4f786d590a7884704a5516093380e5e62c6a76c279982239"
+          },
+          ".got": {
+            "type": 1,
+            "flags": 3,
+            "address": 35221944,
+            "bytes": 144,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "1636ffbe441ac9c549fab679321547f83a71c5818aa13658f46833a448249186"
+          },
+          ".got.plt": {
+            "type": 1,
+            "flags": 3,
+            "address": 35222088,
+            "bytes": 504,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "7448a1c4920364950db378de91f51ca8608b2874495e060932ba0493f42dad14"
+          },
+          ".relro_padding": {
+            "type": 8,
+            "flags": 3,
+            "address": 35222592,
+            "bytes": 3008,
+            "alignment": 1,
+            "entityBytes": 0,
+            "sha256": null
+          },
+          ".go.buildinfo": {
+            "type": 1,
+            "flags": 3,
+            "address": 35238976,
+            "bytes": 7248,
+            "alignment": 16,
+            "entityBytes": 0,
+            "sha256": "4f709406446efa737b4175247a2d04d90d6ad707a299452e568e40d3c9e76152"
+          },
+          ".go.fipsinfo": {
+            "type": 1,
+            "flags": 3,
+            "address": 35246240,
+            "bytes": 120,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "f7c2ba44fdc8f93a5e63d617a4ce41b2e1bf3541640dc9d9dc28a1ccde6d072b"
+          },
+          ".noptrdata": {
+            "type": 1,
+            "flags": 3,
+            "address": 35246368,
+            "bytes": 598433,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "27736aecd5201ac0f8f86064fedc70d86ad8f8acaba8daba83049b8c19a47ce5"
+          },
+          ".data": {
+            "type": 1,
+            "flags": 3,
+            "address": 35844832,
+            "bytes": 238752,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "73c88d50d55e84ce380498e145054d21a288c85ce49a3757a60e3a9da45192b7"
+          },
+          ".bss": {
+            "type": 8,
+            "flags": 3,
+            "address": 36083584,
+            "bytes": 204872,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": null
+          },
+          ".noptrbss": {
+            "type": 8,
+            "flags": 3,
+            "address": 36288480,
+            "bytes": 158720,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": null
+          }
+        },
+        "programHeadersSha256": "80696924d559cc36419a0fc862550a92f3fd59b720336b50f7449d39fa52927c",
+        "fixedHeaderSha256": "47cfb0901bf393deaf575f1e83af0a33ed9e367c00d163d2e1c0071696bc52bf"
+      },
+      "strippingToolIdentityProven": false
+    },
+    {
+      "apkPath": "lib/x86_64/libgojni.so",
+      "compilerOutputSha256": "2e8533e4c521c8b61cc4bd8e817acbce397a82a2b4b1284932f59eb4f16e29df",
+      "compilerOutputBytes": 55500248,
+      "apkSha256": "2917b2e92fe8257616687d79b224bb5ae3fcd4dd9ec7f999976c99a480c51c23",
+      "apkBytes": 38566616,
+      "elfMachine": 62,
+      "compilerCallReceipt": "calls/android-amd64-2939/receipt.json",
+      "actualMergedLibraryMatchesCompiler": true,
+      "actualStrippedLibraryMatchesApk": true,
+      "rawByteIdentical": false,
+      "allocatedElf": {
+        "sections": {
+          ".note.android.ident": {
+            "type": 7,
+            "flags": 2,
+            "address": 568,
+            "bytes": 152,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "52763dbaa9783ade4948aec0ccf68cb260a18098231215490da80151502b865a"
+          },
+          ".note.go.buildid": {
+            "type": 7,
+            "flags": 2,
+            "address": 720,
+            "bytes": 100,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "6e30819b47095115571a79a16c14b7a1ee9baa521e53b480e20c53145f314dde"
+          },
+          ".note.gnu.build-id": {
+            "type": 7,
+            "flags": 2,
+            "address": 820,
+            "bytes": 36,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "6a3bde6666834576ba238127ef665a39733c626c1b44d4b4bf60ced73a35461d"
+          },
+          ".dynsym": {
+            "type": 11,
+            "flags": 2,
+            "address": 856,
+            "bytes": 4416,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "5ac2dd045054a4cfcf233bdfa5284efb10470fd5774eeac336e274cc3f69c9a3"
+          },
+          ".gnu.version": {
+            "type": 1879048191,
+            "flags": 2,
+            "address": 5272,
+            "bytes": 368,
+            "alignment": 2,
+            "entityBytes": 2,
+            "sha256": "8d1de6389622b7e5c5830613e5687510b8805084c693214e9517749efb328c3d"
+          },
+          ".gnu.version_r": {
+            "type": 1879048190,
+            "flags": 2,
+            "address": 5640,
+            "bytes": 64,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "da6593edc26787ac0da38ddee861947d55a29cfeed3555709b9aca8fa78c420b"
+          },
+          ".gnu.hash": {
+            "type": 1879048182,
+            "flags": 2,
+            "address": 5704,
+            "bytes": 880,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "4d6786aab8b1e6f7d5292a803290ca872a5a697363bb6de51ba8ec1ba5950ed7"
+          },
+          ".dynstr": {
+            "type": 3,
+            "flags": 2,
+            "address": 6584,
+            "bytes": 3953,
+            "alignment": 1,
+            "entityBytes": 0,
+            "sha256": "0bd3ae20858146d9eab2095bb3e942f05afdfba86387504930098ce2353b9c42"
+          },
+          ".rela.dyn": {
+            "type": 4,
+            "flags": 2,
+            "address": 10544,
+            "bytes": 24,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "ad27ecc7db48e2541ab61ae1e121ef5591c9f10adf9c237738261c99df220f40"
+          },
+          ".relr.dyn": {
+            "type": 1879047936,
+            "flags": 2,
+            "address": 10568,
+            "bytes": 67792,
+            "alignment": 8,
+            "entityBytes": 8,
+            "sha256": "b0210e558ed9987d484a00b1808fd799239b571ae55848e9c6f57e8a438cc45d"
+          },
+          ".rela.plt": {
+            "type": 4,
+            "flags": 66,
+            "address": 78360,
+            "bytes": 1440,
+            "alignment": 8,
+            "entityBytes": 24,
+            "sha256": "99a6066879a6a1fdc00535644f83ed13ec4f1b493f65271b80633ec223bf82f4"
+          },
+          ".rodata": {
+            "type": 1,
+            "flags": 50,
+            "address": 79808,
+            "bytes": 2990344,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "22d30453c0116fafac14fb15b72f33c0a4f62d0f9c57d80213d39ad5ca4cbf65"
+          },
+          ".eh_frame_hdr": {
+            "type": 1,
+            "flags": 2,
+            "address": 3070152,
+            "bytes": 892,
+            "alignment": 4,
+            "entityBytes": 0,
+            "sha256": "49237deb6b7134c07820201ae8d13c8190bedba3249d1621800561f96cca2f61"
+          },
+          ".eh_frame": {
+            "type": 1,
+            "flags": 2,
+            "address": 3071048,
+            "bytes": 3692,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "2851cc4faefea7746596bf2598a35545dc2fcb5f0b1334b79d27747546e875c6"
+          },
+          ".text": {
+            "type": 1,
+            "flags": 6,
+            "address": 3074752,
+            "bytes": 17217080,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "466a9f8f788c292ab451ad44b9aa83cd473bb679e06827a1c3e69e34a937f470"
+          },
+          ".plt": {
+            "type": 1,
+            "flags": 6,
+            "address": 20291840,
+            "bytes": 976,
+            "alignment": 16,
+            "entityBytes": 0,
+            "sha256": "f8d716b475451f98b2c49a44e82a302ae2b03c08c6bc4c58894287b878bf34fa"
+          },
+          ".data.rel.ro": {
+            "type": 1,
+            "flags": 3,
+            "address": 20309216,
+            "bytes": 17425320,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "6978789502485f1a0c5d220f1a14912522a67bab360d8998b89bf6b48a12adbc"
+          },
+          ".fini_array": {
+            "type": 15,
+            "flags": 3,
+            "address": 37734536,
+            "bytes": 16,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "7a7ea8e5c255ceed14f9f045f17b287db83f9e452a3762f3e135a813abec2d1f"
+          },
+          ".init_array": {
+            "type": 14,
+            "flags": 3,
+            "address": 37734552,
+            "bytes": 8,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "cee858737c4c709c1393fab0dc70b18d256fddbd0aef9ad270ca1697dd3f45a9"
+          },
+          ".dynamic": {
+            "type": 6,
+            "flags": 3,
+            "address": 37734560,
+            "bytes": 448,
+            "alignment": 8,
+            "entityBytes": 16,
+            "sha256": "68a0cfb4ebc9d2711a5d87c55f90815179d5003b96f3eccdb414a19eca8bb888"
+          },
+          ".got": {
+            "type": 1,
+            "flags": 3,
+            "address": 37735008,
+            "bytes": 8,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+          },
+          ".got.plt": {
+            "type": 1,
+            "flags": 3,
+            "address": 37735016,
+            "bytes": 504,
+            "alignment": 8,
+            "entityBytes": 0,
+            "sha256": "d6523f541af6b932e2d8f3ff84877d5c37c2fa61ce5bf98aca4e4c1f23f854aa"
+          },
+          ".relro_padding": {
+            "type": 8,
+            "flags": 3,
+            "address": 37735520,
+            "bytes": 928,
+            "alignment": 1,
+            "entityBytes": 0,
+            "sha256": null
+          },
+          ".go.buildinfo": {
+            "type": 1,
+            "flags": 3,
+            "address": 37751904,
+            "bytes": 7248,
+            "alignment": 16,
+            "entityBytes": 0,
+            "sha256": "fc691438a7a7a03a384865f05cd186fbe884049f0b44639f22eec0adfe54f906"
+          },
+          ".go.fipsinfo": {
+            "type": 1,
+            "flags": 3,
+            "address": 37759168,
+            "bytes": 120,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "87ba8496d9257c9968a8a69fcdd71022c740c27c60407b4c8a05096305aa7ca8"
+          },
+          ".noptrdata": {
+            "type": 1,
+            "flags": 3,
+            "address": 37759296,
+            "bytes": 598401,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "7cf0e6daaa36cd51d6f49ec7e932976b5a482366a190cfa8a924484bab5a0099"
+          },
+          ".data": {
+            "type": 1,
+            "flags": 3,
+            "address": 38357728,
+            "bytes": 238752,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": "9b2d600318ec0a5e03775459251d623edeb3dfd576f6e1d460ac21ffbbe4123d"
+          },
+          ".bss": {
+            "type": 8,
+            "flags": 3,
+            "address": 38596480,
+            "bytes": 178888,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": null
+          },
+          ".noptrbss": {
+            "type": 8,
+            "flags": 3,
+            "address": 38775392,
+            "bytes": 157600,
+            "alignment": 32,
+            "entityBytes": 0,
+            "sha256": null
+          }
+        },
+        "programHeadersSha256": "f01f182004b05f49fd73517fdfa8840f0b7b83314ad66d3b30ca3a74ae81d5ef",
+        "fixedHeaderSha256": "29b6267a61b58e7b81b21a67aff71bbb47a13565ccf0d78f876733e0dee6a79f"
+      },
+      "strippingToolIdentityProven": false
+    }
+  ],
+  "sourceModuleCount": 405,
+  "signatureProvenance": {
+    "commit": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "run": "41964719754",
+    "certificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae",
+    "releaseCertificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae",
+    "releaseIdentityMatches": true,
+    "releaseSigningRequested": true
+  },
+  "versionProvenance": {
+    "commit": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "run": "41964719754",
+    "platform": "android",
+    "identifier": "top.lain42.lycobrowser",
+    "version": "1.0.25",
+    "build": "2",
+    "channel": "internal-preview",
+    "verification": "compiled-native-metadata"
+  },
+  "completeCorrespondingSourceProven": false,
+  "reproducibleBuildProven": false,
+  "allNativeLicensesCleared": false,
+  "browserPrivacyPassed": false,
+  "scope": "Current APK network-core compiler/source/AAR/installed/merged/stripped JNI chain. Actual APK bytes equal Gradle stripped output; allocated ELF sections and program headers equal actual compiler output. Raw byte equality is separately recorded, not assumed. Stripping tool identity, older APK correspondence, all native/SDK/NDK/JavaScript sources, privacy, runtime acceptance and commercial release remain unproven."
+}

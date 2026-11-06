@@ -1,0 +1,21 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: false
+- runFlow:
+    file: paid-login.yaml
+    env:
+      OWNER: ci-owner-a
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- assertVisible: "已保存线路 CI route ${ROUTE}"
+# No radio click: opening must restore the persisted selected node.
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: DOWN
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "LYCO route ${ROUTE} owner A"
+    timeout: 30000

@@ -1,0 +1,174 @@
+{
+  "verifiedAt": "2026-11-05T01:58:22.989865+00:00",
+  "run": 41951459953,
+  "job": 126996180767,
+  "source": "40891fe172116c6cd3b39ad524e9fb4a828b86b7",
+  "ref": "experiment/owned-vpn-boundary-20261105",
+  "runUrl": "https://github.com/lilyco-42/lyco-browser/actions/runs/41951459953",
+  "conclusion": "success",
+  "artifactId": 13380693742,
+  "originalZipBytes": 156961,
+  "originalZipSha256": "b3a3fd06511c68dd498ed55188bd37ce87da5b83d79057bfe8d2c55f7988f620",
+  "fullOriginalZipSizeShaCrcVerified": true,
+  "rawResultSha256": "c7033f5752a4ed8e2f500e3735a979ee7083f4e83698edd5980339b008c55be6",
+  "rawNetworkSha256": "47c55571d217916f8e6e90dd5367cc060dcae39b05a369c4ef74d68ffcf6a6a0",
+  "decodedJobLogSha256": "f8c495563a7d3e2dad897fa13fac9025cb060f66673df209e52dc74719b396a6",
+  "allEightSourceFilesMatchExactGitCommit": true,
+  "actualProbeApk": {
+    "run": "41951459953",
+    "source": "40891fe172116c6cd3b39ad524e9fb4a828b86b7",
+    "event": "workflow_dispatch",
+    "apkSha256": "3e0ad9e4b2ee183c1a3dfafd54a67167e011d0ab42c110e09f642bddf478eb36",
+    "apkBytes": 20877,
+    "sourceFiles": {
+      "build.sh": "0a4fed8314cf9453037d15493ac82ddb734aa744c321b9b545555d8a14853eea",
+      "page.js": "02ede6b188d3354307224eb29e2491815ec7823905dfd926cca50529a74e0b78",
+      "fixture.py": "7340138e42aed8d66db6d4e7f2a6b36439d0c077a7daf93c1d89b351d6fa40f5",
+      "run.py": "2a1199f34d134e2c1e0a0149e14cba3c57759969b5188ac747ceae515392ecec",
+      "ProbeActivity.java": "8fda3c9432386bd87e58951363407f656966add38c8aa8263d6ce025d9119c64",
+      "README.md": "c795c9c8c7777c8503c56fc604c6a3da324faaf8a565cdc5f41a303559ae91d4",
+      "PacketVpnService.java": "ac05bf46bc81d79f6824173e5ed96e96da4341582918474c583c6341f51a378e",
+      "AndroidManifest.xml": "07f93c1038db9818c4aedbb2861f0b148b4b0b02f2eedfadf365d66f8f900a43"
+    },
+    "notProductAPK": true,
+    "debuggable": false,
+    "targetSdk": 36,
+    "minSdk": 28,
+    "pagePolicyScript": false,
+    "upstreamForwarding": false,
+    "productAdopted": false,
+    "scope": "Owned Android SDK-only packet/candidate diagnostic; no product browser, customer data, selected upstream, TURN functional or migration proof."
+  },
+  "apkSignatureSchemeObserved": "v3 true, v2 false; verified by actual runner apksigner; target36/min28",
+  "sameEngineUserAgent": [
+    "Mozilla/5.0 (Linux; Android 15; Android SDK built for x86_64 Build/AE3A.240806.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.219 Mobile Safari/537.36"
+  ],
+  "nativeStates": {
+    "before": {
+      "active": false,
+      "fdValid": false,
+      "transportVpn": false,
+      "packets": 0,
+      "stunPackets": 0,
+      "stunDestinationPorts": {},
+      "revoked": false,
+      "error": "",
+      "upstreamForwarding": false
+    },
+    "vpn-start": {
+      "active": true,
+      "fdValid": true,
+      "transportVpn": true,
+      "packets": 5,
+      "stunPackets": 0,
+      "stunDestinationPorts": {},
+      "revoked": false,
+      "error": "",
+      "upstreamForwarding": false
+    },
+    "vpn-finished": {
+      "active": true,
+      "fdValid": true,
+      "transportVpn": true,
+      "packets": 24,
+      "stunPackets": 18,
+      "stunDestinationPorts": {
+        "50722": 6,
+        "56488": 6,
+        "58676": 6
+      },
+      "revoked": false,
+      "error": "",
+      "upstreamForwarding": false
+    },
+    "after-stop": {
+      "active": false,
+      "fdValid": false,
+      "transportVpn": false,
+      "packets": 24,
+      "stunPackets": 18,
+      "stunDestinationPorts": {
+        "50722": 6,
+        "56488": 6,
+        "58676": 6
+      },
+      "revoked": false,
+      "error": "",
+      "upstreamForwarding": false
+    },
+    "after": {
+      "active": false,
+      "fdValid": false,
+      "transportVpn": false,
+      "packets": 24,
+      "stunPackets": 18,
+      "stunDestinationPorts": {
+        "50722": 6,
+        "56488": 6,
+        "58676": 6
+      },
+      "revoked": false,
+      "error": "",
+      "upstreamForwarding": false
+    }
+  },
+  "actualSystemConsentUiObserved": true,
+  "beforeAfterActualSrflxMatchesRealStunPeer": true,
+  "capturedStunPacketsByContext": {
+    "top": 6,
+    "initial-empty": 6,
+    "nested-empty": 6
+  },
+  "stunPacketsReceivedWithVpn": 0,
+  "rawAddressSetsIndependentlyRecomputed": {
+    "top": [
+      "0.0.0.0",
+      "192.0.2.2",
+      "2001:db8::2",
+      "::"
+    ],
+    "initial-empty": [
+      "0.0.0.0",
+      "192.0.2.2",
+      "2001:db8::2",
+      "::"
+    ],
+    "nested-empty": [
+      "0.0.0.0",
+      "192.0.2.2",
+      "2001:db8::2",
+      "::"
+    ]
+  },
+  "physicalAddressMatches": {
+    "top": [],
+    "initial-empty": [],
+    "nested-empty": []
+  },
+  "privacyGateResult": false,
+  "vpnGatheringWindowMs": 8000,
+  "vpnGatheringCompleted": false,
+  "interpretation": "Completed bounded three-context measurement. Configured TUN IPv4/IPv6 remain visible in original events/SDP/stats; they are not observed physical interface addresses. Same original numeric-address gate is not satisfied. Capture-only drop VPN is not functional selected proxy/TURN. No production adoption or changed original gate.",
+  "systemGrantCleanup": "Owned diagnostic APK uninstalled in finally; both install/uninstall Success in actual job log. Disposable signing directory removed by trap and successful always step; no server credentials or SSH authorization used.",
+  "unproven": [
+    "Original full nine applicable RTC contexts",
+    "Selected upstream/TURN TCP functional positive",
+    "IPv6 packet boundary",
+    "Permission-revocation/crash fail closed",
+    "Per-UUID original data and non-exportable key migration",
+    "Product integration",
+    "All-platform or commercial release"
+  ],
+  "previousTerminalFailures": [
+    {
+      "run": 41950656045,
+      "reason": "Java lambda Android bootclasspath compilation; no runtime"
+    },
+    {
+      "run": 41950959525,
+      "reason": "stopService left system-bound tunnel active; strict after-stop gate failed"
+    }
+  ],
+  "localProductCodeExecuted": false,
+  "productAdopted": false
+}

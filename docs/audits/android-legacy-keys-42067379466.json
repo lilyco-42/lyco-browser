@@ -1,0 +1,222 @@
+{
+  "run": "42067379466",
+  "source": "4cf92d79318208be22d330a5517f924f53bf9a83",
+  "candidate": {
+    "run": 41964719754,
+    "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "runtime_source_diff": "empty",
+    "signed_certificate": "retained-owner-certificate",
+    "apk_modified": false
+  },
+  "originalPaidChecksRetained": 14,
+  "allEightOriginalKeyObservationsPassed": true,
+  "observations": [
+    {
+      "phase": "paid-A",
+      "route": "direct",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": true,
+      "generatedKey": true,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    },
+    {
+      "phase": "paid-A",
+      "route": "A",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    },
+    {
+      "phase": "paid-B",
+      "route": "B",
+      "owner": "B",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": true,
+      "generatedKey": true,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "B",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "0a8317a60df45a931bc7c2f7b8af8566ea3ece6059a6faaabbc102a733da0447"
+    },
+    {
+      "phase": "paid-A-edited",
+      "route": "A",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    },
+    {
+      "phase": "paid-A",
+      "route": "A",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    },
+    {
+      "phase": "paid-B",
+      "route": "B",
+      "owner": "B",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "B",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "0a8317a60df45a931bc7c2f7b8af8566ea3ece6059a6faaabbc102a733da0447"
+    },
+    {
+      "phase": "paid-A",
+      "route": "B",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    },
+    {
+      "phase": "paid-A",
+      "route": "B",
+      "owner": "A",
+      "origin": "http://127.0.0.1:42755",
+      "secureContext": true,
+      "requestedSeed": false,
+      "generatedKey": false,
+      "errors": [],
+      "hasKey": true,
+      "extractable": false,
+      "algorithm": {
+        "name": "AES-GCM",
+        "length": 256
+      },
+      "usages": [
+        "encrypt",
+        "decrypt"
+      ],
+      "storedOwner": "A",
+      "exportRejected": true,
+      "exportError": "InvalidAccessError",
+      "originalCiphertextDecrypted": true,
+      "ciphertextSha256": "e89da1c6cafd3df0373dc8f920876c8742a55a70f0c78ceb49d4a995b9bd253d"
+    }
+  ],
+  "originalResultSha256": "ee11af8291979d33505d3663bc275b285fff973143d2f1ae6ed54705f485c1e3",
+  "keyBytesOrPrivateDatabasesExported": false,
+  "newEngineAdopted": false,
+  "crossEngineMigrationProven": false,
+  "realPayments": false,
+  "scope": "Owned secure-loopback API35 website on actual old/current owner-signed APKs. Old A key seeded only before upgrade; B only on first B page. Original key, export refusal and ciphertext decryption survive original reopens/edit/route switch/downgrade/return-to-current. Not Gecko adoption, generic engine migration, power-loss or a release."
+}

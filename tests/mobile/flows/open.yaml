@@ -1,0 +1,12 @@
+appId: top.lain42.lycobrowser
+---
+- scrollUntilVisible:
+    element: "打开环境 ${NAME}"
+    direction: DOWN
+- tapOn: "打开环境 ${NAME}"
+- tapOn:
+    id: "mobile-proxy"
+- inputText: ${PROXY}
+- pressKey: Enter
+- assertVisible: ${PROXY.split('.').join('\\.')}
+- tapOn: "通过代理打开独立环境"

@@ -1,0 +1,1631 @@
+{
+  "analyzerCommit": "6e07ad6a5d0c4c096cb1090cc778aeae3ec3f6d5",
+  "analyzerRun": "41968101082",
+  "completeCorrespondingSourceProven": false,
+  "completeLicenseMappingProven": false,
+  "embeddedGoBuildInfoCount": 2,
+  "limits": [
+    "Embedded metadata describes the binary; it does not prove a reproducible source-to-binary match",
+    "DT_NEEDED omits statically linked components",
+    "Compiler comments do not establish the complete NDK version",
+    "Missing Go build metadata remains unknown; it does not mean no Go code is present"
+  ],
+  "nativeLibraries": [
+    {
+      "abi": "arm64-v8a",
+      "bytes": 167280,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libreact_codegen_safeareacontext.so",
+        "libfbjni.so",
+        "libjsi.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libappmodules.so",
+      "sha256": "0f1a27268146af2665419d4e69c9987ee96c70035bbd3d420e4e6abf5133ed94"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 1292904,
+      "compilerComments": [
+        "Android (11695104, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/arm64-v8a/libc++_shared.so",
+      "sha256": "3e852764502d06e0cf1080d532ae7c608b7649d946a3a9d7e84e3d4b7d683214"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 1424848,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libandroid.so",
+        "libjsi.so",
+        "libfbjni.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libexpo-modules-core.so",
+      "sha256": "e4ebd140919d9161b3ea848c8a0791c65a1ff06749584dd605399b67745b1ede"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 177000,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libandroid.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libfbjni.so",
+      "sha256": "a9e35ba55d3f956920281f519385f8a72475ee24819799cb08375fdd4cce2b22"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 318992,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libjnigraphics.so",
+        "liblog.so",
+        "libdl.so",
+        "libandroid.so",
+        "libc.so",
+        "libm.so"
+      ],
+      "path": "lib/arm64-v8a/libgifimage.so",
+      "sha256": "9f605249728da7091569772a38a4dde298ed48e1e73fed3da0e4b662ef38715c"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 36053720,
+      "compilerComments": [
+        "Android (14863223, +pgo, +bolt, +lto, +mlgo, based on r584948b) clang version 22.0.1 (https://android.googlesource.com/toolchain/llvm-project 2d65e4108033380e6fe8e08b1f1826cd2bfb0c99)",
+        "",
+        "Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb)",
+        "Linker: LLD 21.0.0 (/mnt/disks/build-disk/src/googleplex-android/llvm-r574158-release/out/llvm-project/llvm 9f872551d3c681d06fd303b36f16ed5c274735eb)"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "embeddedGoBuildInfo": {
+        "GoVersion": "go1.25.5",
+        "Path": "github.com/lilyco-42/lyco-browser/mobile/core/build/arm64/libgojni",
+        "Main": {
+          "Path": "github.com/lilyco-42/lyco-browser/mobile/core",
+          "Version": "(devel)"
+        },
+        "Deps": [
+          {
+            "Path": "github.com/ajg/form",
+            "Version": "v1.5.1",
+            "Sum": "h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU="
+          },
+          {
+            "Path": "github.com/andybalholm/brotli",
+            "Version": "v1.1.0",
+            "Sum": "h1:eLKJA0d02Lf0mVpIDgYnqXcUn0GqVmEFny3VuID1U3M="
+          },
+          {
+            "Path": "github.com/anytls/sing-anytls",
+            "Version": "v0.0.11",
+            "Sum": "h1:w8e9Uj1oP3m4zxkyZDewPk0EcQbvVxb7Nn+rapEx4fc="
+          },
+          {
+            "Path": "github.com/caddyserver/certmagic",
+            "Version": "v0.25.3-0.20260421143802-60d9d8b415d6",
+            "Sum": "h1:LYSB6VgWzKtNrcxElw3c97BP40Oc7bizKxA9K1Vi/5k="
+          },
+          {
+            "Path": "github.com/caddyserver/zerossl",
+            "Version": "v0.1.5",
+            "Sum": "h1:dkvOjBAEEtY6LIGAHei7sw2UgqSD6TrWweXpV7lvEvE="
+          },
+          {
+            "Path": "github.com/coder/websocket",
+            "Version": "v1.8.14",
+            "Sum": "h1:9L0p0iKiNOibykf283eHkKUHHrpG7f65OE3BhhO7v9g="
+          },
+          {
+            "Path": "github.com/cretz/bine",
+            "Version": "v0.2.0",
+            "Sum": "h1:8GiDRGlTgz+o8H9DSnsl+5MeBK4HsExxgl6WgzOCuZo="
+          },
+          {
+            "Path": "github.com/database64128/netx-go",
+            "Version": "v0.1.1",
+            "Sum": "h1:dT5LG7Gs7zFZBthFBbzWE6K8wAHjSNAaK7wCYZT7NzM="
+          },
+          {
+            "Path": "github.com/database64128/tfo-go/v2",
+            "Version": "v2.3.2",
+            "Sum": "h1:UhZMKiMq3swZGUiETkLBDzQnZBPSAeBMClpJGlnJ5Fw="
+          },
+          {
+            "Path": "github.com/florianl/go-nfqueue/v2",
+            "Version": "v2.1.0",
+            "Sum": "h1:Fywt30TY/evxyDySpXjxQ1jsRW7nQbLpOhELqpr4068="
+          },
+          {
+            "Path": "github.com/fsnotify/fsnotify",
+            "Version": "v1.9.0",
+            "Sum": "h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k="
+          },
+          {
+            "Path": "github.com/go-chi/chi/v5",
+            "Version": "v5.2.5",
+            "Sum": "h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug="
+          },
+          {
+            "Path": "github.com/go-chi/render",
+            "Version": "v1.0.3",
+            "Sum": "h1:AsXqd2a1/INaIfUSKq3G5uA8weYx20FOsM7uSoCyyt4="
+          },
+          {
+            "Path": "github.com/gobwas/httphead",
+            "Version": "v0.1.0",
+            "Sum": "h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU="
+          },
+          {
+            "Path": "github.com/gobwas/pool",
+            "Version": "v0.2.1",
+            "Sum": "h1:xfeeEhW7pwmX8nuLVlqbzVc7udMDrwetjEv+TZIz1og="
+          },
+          {
+            "Path": "github.com/godbus/dbus/v5",
+            "Version": "v5.2.2",
+            "Sum": "h1:TUR3TgtSVDmjiXOgAAyaZbYmIeP3DPkld3jgKGV8mXQ="
+          },
+          {
+            "Path": "github.com/gofrs/uuid/v5",
+            "Version": "v5.5.1",
+            "Sum": "h1:z1Ce19/JwNidXpy3tOQc3241lnJLKdKyq/xlNvlD4Ng="
+          },
+          {
+            "Path": "github.com/google/btree",
+            "Version": "v1.1.3",
+            "Sum": "h1:CVpQJjYgC4VbzxeGVHfvZrv1ctoYCAI8vbl07Fcxlyg="
+          },
+          {
+            "Path": "github.com/google/gopacket",
+            "Version": "v1.1.19",
+            "Sum": "h1:ves8RnFZPGiFnTS0uPQStjwru6uO6h+nlr9j6fL7kF8="
+          },
+          {
+            "Path": "github.com/hashicorp/yamux",
+            "Version": "v0.1.2",
+            "Sum": "h1:XtB8kyFOyHXYVFnwT5C3+Bdo8gArse7j2AQ0DA0Uey8="
+          },
+          {
+            "Path": "github.com/huin/goupnp",
+            "Version": "v1.3.0",
+            "Sum": "h1:UvLUlWDNpoUdYzb2TCn+MuTWtcjXKSza2n6CBdQ0xXc="
+          },
+          {
+            "Path": "github.com/jackpal/go-nat-pmp",
+            "Version": "v1.0.2",
+            "Sum": "h1:KzKSgb7qkJvOUTqYl9/Hg/me3pWgBmERKrTGD7BdWus="
+          },
+          {
+            "Path": "github.com/jsimonetti/rtnetlink",
+            "Version": "v1.4.1",
+            "Sum": "h1:JfD4jthWBqZMEffc5RjgmlzpYttAVw1sdnmiNaPO3hE="
+          },
+          {
+            "Path": "github.com/klauspost/compress",
+            "Version": "v1.19.1",
+            "Sum": "h1:VsB4HPswih7mmZ8WleSFQ75c/Ui1M4trX5oAsJnhSlk="
+          },
+          {
+            "Path": "github.com/klauspost/cpuid/v2",
+            "Version": "v2.3.0",
+            "Sum": "h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y="
+          },
+          {
+            "Path": "github.com/koron/go-ssdp",
+            "Version": "v0.0.4",
+            "Sum": "h1:1IDwrghSKYM7yLf7XCzbByg2sJ/JcNOZRXS2jczTwz0="
+          },
+          {
+            "Path": "github.com/libdns/libdns",
+            "Version": "v1.1.1",
+            "Sum": "h1:wPrHrXILoSHKWJKGd0EiAVmiJbFShguILTg9leS/P/U="
+          },
+          {
+            "Path": "github.com/libp2p/go-nat",
+            "Version": "v1.0.1-0.20250821073202-01afc089f138",
+            "Sum": "h1:YohuNPT/1k3VcThCQlBZ43PCPWPfMRS1zcxWBF2SLK8="
+          },
+          {
+            "Path": "github.com/libp2p/go-netroute",
+            "Version": "v0.2.1",
+            "Sum": "h1:V8kVrpD8GK0Riv15/7VN6RbUQ3URNZVosw7H2v9tksU="
+          },
+          {
+            "Path": "github.com/logrusorgru/aurora",
+            "Version": "v2.0.3+incompatible",
+            "Sum": "h1:tOpm7WcpBTn4fjmVfgpQq0EfczGlG91VSDkswnjF5A8="
+          },
+          {
+            "Path": "github.com/mdlayher/netlink",
+            "Version": "v1.11.2",
+            "Sum": "h1:HKh2jqe+omdSWcQ88nrT7INE61B0NXfiSPFdgL4YbNI="
+          },
+          {
+            "Path": "github.com/mdlayher/socket",
+            "Version": "v0.6.0",
+            "Sum": "h1:ScZPaAGyO1icQnbFrhPM8mnXyMu9qukC1K4ZoM2IQKU="
+          },
+          {
+            "Path": "github.com/metacubex/utls",
+            "Version": "v1.8.7",
+            "Sum": "h1:Cp+yWkNTFkSihETgGWq34hlVFds5HpYWVOR1xovUVTs="
+          },
+          {
+            "Path": "github.com/mholt/acmez/v3",
+            "Version": "v3.1.6",
+            "Sum": "h1:eGVQNObP0pBN4sxqrXeg7MYqTOWyoiYpQqITVWlrevk="
+          },
+          {
+            "Path": "github.com/miekg/dns",
+            "Version": "v1.1.72",
+            "Sum": "h1:vhmr+TF2A3tuoGNkLDFK9zi36F2LS+hKTRW0Uf8kbzI="
+          },
+          {
+            "Path": "github.com/quic-go/qpack",
+            "Version": "v0.6.0",
+            "Sum": "h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8="
+          },
+          {
+            "Path": "github.com/sagernet/bbolt",
+            "Version": "v0.0.0-20260915102804-500ee1e84832",
+            "Sum": "h1:KDXMGbzqLmDdKcld0T3wuMuqf1iezZq+DemgtZ/vhtQ="
+          },
+          {
+            "Path": "github.com/sagernet/cors",
+            "Version": "v1.2.1",
+            "Sum": "h1:Cv5Z8y9YSD6Gm+qSpNrL3LO4lD3eQVvbFYJSG7JCMHQ="
+          },
+          {
+            "Path": "github.com/sagernet/fswatch",
+            "Version": "v0.1.2",
+            "Sum": "h1:/TT7k4mkce1qFPxamLO842WjqBgbTBiXP2mlUjp9PFk="
+          },
+          {
+            "Path": "github.com/sagernet/gomobile",
+            "Version": "v0.1.12",
+            "Sum": "h1:XwzjZaclFF96deLqwAgK8gU3w0M2A8qxgDmhV+A0wjg="
+          },
+          {
+            "Path": "github.com/sagernet/netlink",
+            "Version": "v0.0.0-20260814022025-64455d367bbf",
+            "Sum": "h1:b/3rm+KvxzuYRcnMdLq/hmcqX6/2B8k24l6SDHL2Piw="
+          },
+          {
+            "Path": "github.com/sagernet/nftables",
+            "Version": "v0.3.0-mod.4",
+            "Sum": "h1:vnOtcDYeSXv2e5RoRuGH0lrpttQFJ8iC4ICS2nhlDSo="
+          },
+          {
+            "Path": "github.com/sagernet/quic-go",
+            "Version": "v0.61.0-sing-box-mod.12",
+            "Sum": "h1:9/USaaiONHFeqBePb+4C/A0MBM2dmxED49UGBpHLHS4="
+          },
+          {
+            "Path": "github.com/sagernet/sing",
+            "Version": "v0.9.7-0.20261023115459-5dc452e537bf",
+            "Sum": "h1:qWlGERjsI0F1I9e1W5Z/ARk/9KEN7xIas6e2QHEypUM="
+          },
+          {
+            "Path": "github.com/sagernet/sing-box",
+            "Version": "v1.14.4",
+            "Sum": "h1:KV6J8v1zMUu7BZA93nD9HGMmQnNC46VTuYaKEHkP+gA="
+          },
+          {
+            "Path": "github.com/sagernet/sing-mux",
+            "Version": "v0.3.10-0.20260929204512-caf09fe32475",
+            "Sum": "h1:aG0DqHEOjax7DyfE1GTAXZotOg3QGVCz3/8rCSua2kg="
+          },
+          {
+            "Path": "github.com/sagernet/sing-quic",
+            "Version": "v0.7.2-0.20261020082049-7e0a5869a5f4",
+            "Sum": "h1:QuhAb8QW0pKYmSvfj/nK91libunBwVJiWb852yidlxI="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowsocks",
+            "Version": "v0.2.9-0.20260929204512-65740e0f0e3e",
+            "Sum": "h1:LKgE/uuqp/D2kgxYViOz8vf4slaCUfpFywXjtuwD5gU="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowsocks2",
+            "Version": "v0.2.2-0.20260929152114-a69d1086332b",
+            "Sum": "h1:VH65QNqSHat2b+N3Rlzo5Qe44gRmQGwzY5atuy3D0A8="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowtls",
+            "Version": "v0.2.2-0.20260928201441-a9c0127d5c99",
+            "Sum": "h1:l/tdZjaoDp3iqEG4NVrFHtphy1+Qjt9bpWAgNbF8iGg="
+          },
+          {
+            "Path": "github.com/sagernet/sing-snell",
+            "Version": "v0.0.0-20260904135315-bc5a12ac736f",
+            "Sum": "h1:tbTCI+iis5sTmua7a6Q7vebcSRURok/LGgnEafnQAsc="
+          },
+          {
+            "Path": "github.com/sagernet/sing-tun",
+            "Version": "v0.9.7-0.20261023115432-040db71fcd33",
+            "Sum": "h1:0+op+qbxh/M/JsqIG8tkEwPM+5pZtBeicf1ciMxp4OI="
+          },
+          {
+            "Path": "github.com/sagernet/sing-vmess",
+            "Version": "v0.2.9-0.20261019223527-a0c58542bd9d",
+            "Sum": "h1:K93710Sq6/TFl3GVs+NclQ3I+KPXFLluSsUFC0Sm0N8="
+          },
+          {
+            "Path": "github.com/sagernet/smux",
+            "Version": "v1.5.50-sing-box-mod.1",
+            "Sum": "h1:XkJcivBC9V4wBjiGXIXZ229aZCU1hzcbp6kSkkyQ478="
+          },
+          {
+            "Path": "github.com/sagernet/ws",
+            "Version": "v0.0.0-20231204124109-acfe8907c854",
+            "Sum": "h1:6uUiZcDRnZSAegryaUGwPC/Fj13JSHwiTftrXhMmYOc="
+          },
+          {
+            "Path": "github.com/vishvananda/netns",
+            "Version": "v0.0.5",
+            "Sum": "h1:DfiHV+j8bA32MFM7bfEunvT8IAqQ/NzSJHtcmW5zdEY="
+          },
+          {
+            "Path": "github.com/zeebo/blake3",
+            "Version": "v0.2.4",
+            "Sum": "h1:KYQPkhpRtcqh0ssGYcKLG1JYvddkEA8QwCM/yBqhaZI="
+          },
+          {
+            "Path": "go.uber.org/multierr",
+            "Version": "v1.11.0",
+            "Sum": "h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0="
+          },
+          {
+            "Path": "go.uber.org/zap",
+            "Version": "v1.27.1",
+            "Sum": "h1:08RqriUEv8+ArZRYSTXy1LeBScaMpVSTBhCeaZYfMYc="
+          },
+          {
+            "Path": "go.uber.org/zap/exp",
+            "Version": "v0.3.0",
+            "Sum": "h1:6JYzdifzYkGmTdRR59oYH+Ng7k49H9qVpWwNSsGJj3U="
+          },
+          {
+            "Path": "go4.org/netipx",
+            "Version": "v0.0.0-20231129151722-fdeea329fbba",
+            "Sum": "h1:0b9z3AuHCjxk0x/opv64kcgZLBseWJUpBw5I82+2U4M="
+          },
+          {
+            "Path": "golang.org/x/crypto",
+            "Version": "v0.54.0",
+            "Sum": "h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw="
+          },
+          {
+            "Path": "golang.org/x/exp",
+            "Version": "v0.0.0-20260410095643-746e56fc9e2f",
+            "Sum": "h1:W3F4c+6OLc6H2lb//N1q4WpJkhzJCK5J6kUi1NTVXfM="
+          },
+          {
+            "Path": "golang.org/x/mod",
+            "Version": "v0.37.0",
+            "Sum": "h1:vF1DjpVEshcIqoEaauuHebaLk1O1forxjxBaVn884JQ="
+          },
+          {
+            "Path": "golang.org/x/net",
+            "Version": "v0.57.0",
+            "Sum": "h1:K5+3DljvIuDG9/Jv9rvyMywYNFCQ9RSUY6OOTTkT+tE="
+          },
+          {
+            "Path": "golang.org/x/sync",
+            "Version": "v0.22.0",
+            "Sum": "h1:SZjpbeLmrCk4xhRSZFNZW5gFUeCeFgjekvI/+gfScek="
+          },
+          {
+            "Path": "golang.org/x/sys",
+            "Version": "v0.47.0",
+            "Sum": "h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs="
+          },
+          {
+            "Path": "golang.org/x/text",
+            "Version": "v0.40.0",
+            "Sum": "h1:Ub2Z6/xjgF1WrYQz2nuITOEegKFtiIy+rieRJ5lHZKs="
+          },
+          {
+            "Path": "google.golang.org/genproto/googleapis/rpc",
+            "Version": "v0.0.0-20251202230838-ff82c1b0f217",
+            "Sum": "h1:gRkg/vSppuSQoDjxyiGfN4Upv/h/DQmIR10ZU8dh4Ww="
+          },
+          {
+            "Path": "google.golang.org/grpc",
+            "Version": "v1.79.1",
+            "Sum": "h1:zGhSi45ODB9/p3VAawt9a+O/MULLl9dpizzNNpq7flY="
+          },
+          {
+            "Path": "google.golang.org/protobuf",
+            "Version": "v1.36.11",
+            "Sum": "h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE="
+          },
+          {
+            "Path": "lukechampine.com/blake3",
+            "Version": "v1.3.0",
+            "Sum": "h1:sJ3XhFINmHSrYCgl958hscfIa3bw8x4DqMP3u1YvoYE="
+          }
+        ],
+        "Settings": [
+          {
+            "Key": "-buildmode",
+            "Value": "c-shared"
+          },
+          {
+            "Key": "-compiler",
+            "Value": "gc"
+          },
+          {
+            "Key": "-tags",
+            "Value": "with_quic,with_utls"
+          },
+          {
+            "Key": "-trimpath",
+            "Value": "true"
+          },
+          {
+            "Key": "CGO_ENABLED",
+            "Value": "1"
+          },
+          {
+            "Key": "GOARCH",
+            "Value": "arm64"
+          },
+          {
+            "Key": "GOOS",
+            "Value": "android"
+          },
+          {
+            "Key": "GOARM64",
+            "Value": "v8.0"
+          },
+          {
+            "Key": "vcs",
+            "Value": "git"
+          },
+          {
+            "Key": "vcs.revision",
+            "Value": "4304fb196a86de40927b9597057019bc918cdf2b"
+          },
+          {
+            "Key": "vcs.time",
+            "Value": "2026-11-05T03:55:12Z"
+          },
+          {
+            "Key": "vcs.modified",
+            "Value": "true"
+          }
+        ]
+      },
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "offlineGoModuleGraphMatches": true,
+      "path": "lib/arm64-v8a/libgojni.so",
+      "sha256": "fc0fe8c6203c09b003e0ace91d6cb2ccd46f085d50286007da3e356c259ddb36"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 138504,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libreactnative.so",
+        "libjsi.so",
+        "libhermesvm.so",
+        "libandroid.so",
+        "libfbjni.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libhermestooling.so",
+      "sha256": "072b7efd45640623eca4fab4cd88cb71948ebc59a82a72b6ef2e07af97c76edd"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 2460728,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjsi.so",
+        "libfbjni.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libhermesvm.so",
+      "sha256": "a497ad26e54785680581a7653dd0386af8e07e4290007f21917ec94e2774a078"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 8760,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/arm64-v8a/libimagepipeline.so",
+      "sha256": "1b377992e4256fa9398ec057722f84a359c7d588e570c8a41f51d930c19ece7d"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 395912,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libjsi.so",
+      "sha256": "246517043246d22950510346a83b4a89799aaa501da2d436a07a974fe63cfa06"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 23712,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/arm64-v8a/libnative-filters.so",
+      "sha256": "4294b57460e70a6351ce7ae2733a79c088c907dfa54673a657227ec5bb669594"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 585376,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/arm64-v8a/libnative-imagetranscoder.so",
+      "sha256": "2aed28298a25afd52ac670cf9682398c6c7ba42a57195c01efd565e7ddfe17ca"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 157760,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libfbjni.so",
+        "libjsi.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libreact_codegen_safeareacontext.so",
+      "sha256": "a7ff66aafbfef047432412c65b199da208d73cc231087acaf09d35dd8ccc584e"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 6657080,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libandroid.so",
+        "libfbjni.so",
+        "libjsi.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libreactnative.so",
+      "sha256": "c7e658d8c6765b7ab641b3a24a27b97465cc9da022f213fff1ebefdedba2913a"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 501856,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libdl.so",
+        "libc.so",
+        "libm.so"
+      ],
+      "path": "lib/arm64-v8a/libstatic-webp.so",
+      "sha256": "f3e5f9ab4f93f2a0a057285a2de9c93ba0ab59c76c22874d0356493ce283c4c7"
+    },
+    {
+      "abi": "arm64-v8a",
+      "bytes": 731872,
+      "compilerComments": [
+        "Android (12027248, +pgo, -bolt, +lto, -mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "",
+        "Android (12027248, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.1"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_AARCH64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/arm64-v8a/libzstd-kmp.so",
+      "sha256": "10ec47f13bee884450b0911066019ba7aa6b4164a4c1f8c33c9d30dd3fd8868a"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 166584,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libreact_codegen_safeareacontext.so",
+        "libfbjni.so",
+        "libjsi.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libappmodules.so",
+      "sha256": "2fa7238c324bd7a65f80c665836810b477ff2e0ba343ad1becb15599571eeb43"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 1252080,
+      "compilerComments": [
+        "Android (11695104, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/x86_64/libc++_shared.so",
+      "sha256": "0a2c7afa35b183fdd5a3cb20e2080ad54cbea06c2a4f0bc8f122cb7d1e9e0b9f"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 1387080,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libandroid.so",
+        "libjsi.so",
+        "libfbjni.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libexpo-modules-core.so",
+      "sha256": "5a470c367bb4524f92b3f130bd8d50a529b112cf4509e574c5d448cff98af46c"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 172952,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libandroid.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libfbjni.so",
+      "sha256": "a51410366a0394e05bc04052cfb237c70dcf7d4d53a56e1d00a041436cb0b653"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 302952,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libjnigraphics.so",
+        "liblog.so",
+        "libdl.so",
+        "libandroid.so",
+        "libc.so",
+        "libm.so"
+      ],
+      "path": "lib/x86_64/libgifimage.so",
+      "sha256": "20768d822119deee9beeccfd4340987976381587b519b630f5393fee4d731c1f"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 38566616,
+      "compilerComments": [
+        "Android (14863223, +pgo, +bolt, +lto, +mlgo, based on r584948b) clang version 22.0.1 (https://android.googlesource.com/toolchain/llvm-project 2d65e4108033380e6fe8e08b1f1826cd2bfb0c99)",
+        "",
+        "Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb)",
+        "Linker: LLD 21.0.0 (/mnt/disks/build-disk/src/googleplex-android/llvm-r574158-release/out/llvm-project/llvm 9f872551d3c681d06fd303b36f16ed5c274735eb)"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "embeddedGoBuildInfo": {
+        "GoVersion": "go1.25.5",
+        "Path": "github.com/lilyco-42/lyco-browser/mobile/core/build/amd64/libgojni",
+        "Main": {
+          "Path": "github.com/lilyco-42/lyco-browser/mobile/core",
+          "Version": "(devel)"
+        },
+        "Deps": [
+          {
+            "Path": "github.com/ajg/form",
+            "Version": "v1.5.1",
+            "Sum": "h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU="
+          },
+          {
+            "Path": "github.com/andybalholm/brotli",
+            "Version": "v1.1.0",
+            "Sum": "h1:eLKJA0d02Lf0mVpIDgYnqXcUn0GqVmEFny3VuID1U3M="
+          },
+          {
+            "Path": "github.com/anytls/sing-anytls",
+            "Version": "v0.0.11",
+            "Sum": "h1:w8e9Uj1oP3m4zxkyZDewPk0EcQbvVxb7Nn+rapEx4fc="
+          },
+          {
+            "Path": "github.com/caddyserver/certmagic",
+            "Version": "v0.25.3-0.20260421143802-60d9d8b415d6",
+            "Sum": "h1:LYSB6VgWzKtNrcxElw3c97BP40Oc7bizKxA9K1Vi/5k="
+          },
+          {
+            "Path": "github.com/caddyserver/zerossl",
+            "Version": "v0.1.5",
+            "Sum": "h1:dkvOjBAEEtY6LIGAHei7sw2UgqSD6TrWweXpV7lvEvE="
+          },
+          {
+            "Path": "github.com/coder/websocket",
+            "Version": "v1.8.14",
+            "Sum": "h1:9L0p0iKiNOibykf283eHkKUHHrpG7f65OE3BhhO7v9g="
+          },
+          {
+            "Path": "github.com/cretz/bine",
+            "Version": "v0.2.0",
+            "Sum": "h1:8GiDRGlTgz+o8H9DSnsl+5MeBK4HsExxgl6WgzOCuZo="
+          },
+          {
+            "Path": "github.com/database64128/netx-go",
+            "Version": "v0.1.1",
+            "Sum": "h1:dT5LG7Gs7zFZBthFBbzWE6K8wAHjSNAaK7wCYZT7NzM="
+          },
+          {
+            "Path": "github.com/database64128/tfo-go/v2",
+            "Version": "v2.3.2",
+            "Sum": "h1:UhZMKiMq3swZGUiETkLBDzQnZBPSAeBMClpJGlnJ5Fw="
+          },
+          {
+            "Path": "github.com/florianl/go-nfqueue/v2",
+            "Version": "v2.1.0",
+            "Sum": "h1:Fywt30TY/evxyDySpXjxQ1jsRW7nQbLpOhELqpr4068="
+          },
+          {
+            "Path": "github.com/fsnotify/fsnotify",
+            "Version": "v1.9.0",
+            "Sum": "h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k="
+          },
+          {
+            "Path": "github.com/go-chi/chi/v5",
+            "Version": "v5.2.5",
+            "Sum": "h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug="
+          },
+          {
+            "Path": "github.com/go-chi/render",
+            "Version": "v1.0.3",
+            "Sum": "h1:AsXqd2a1/INaIfUSKq3G5uA8weYx20FOsM7uSoCyyt4="
+          },
+          {
+            "Path": "github.com/gobwas/httphead",
+            "Version": "v0.1.0",
+            "Sum": "h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU="
+          },
+          {
+            "Path": "github.com/gobwas/pool",
+            "Version": "v0.2.1",
+            "Sum": "h1:xfeeEhW7pwmX8nuLVlqbzVc7udMDrwetjEv+TZIz1og="
+          },
+          {
+            "Path": "github.com/godbus/dbus/v5",
+            "Version": "v5.2.2",
+            "Sum": "h1:TUR3TgtSVDmjiXOgAAyaZbYmIeP3DPkld3jgKGV8mXQ="
+          },
+          {
+            "Path": "github.com/gofrs/uuid/v5",
+            "Version": "v5.5.1",
+            "Sum": "h1:z1Ce19/JwNidXpy3tOQc3241lnJLKdKyq/xlNvlD4Ng="
+          },
+          {
+            "Path": "github.com/google/btree",
+            "Version": "v1.1.3",
+            "Sum": "h1:CVpQJjYgC4VbzxeGVHfvZrv1ctoYCAI8vbl07Fcxlyg="
+          },
+          {
+            "Path": "github.com/google/gopacket",
+            "Version": "v1.1.19",
+            "Sum": "h1:ves8RnFZPGiFnTS0uPQStjwru6uO6h+nlr9j6fL7kF8="
+          },
+          {
+            "Path": "github.com/hashicorp/yamux",
+            "Version": "v0.1.2",
+            "Sum": "h1:XtB8kyFOyHXYVFnwT5C3+Bdo8gArse7j2AQ0DA0Uey8="
+          },
+          {
+            "Path": "github.com/huin/goupnp",
+            "Version": "v1.3.0",
+            "Sum": "h1:UvLUlWDNpoUdYzb2TCn+MuTWtcjXKSza2n6CBdQ0xXc="
+          },
+          {
+            "Path": "github.com/jackpal/go-nat-pmp",
+            "Version": "v1.0.2",
+            "Sum": "h1:KzKSgb7qkJvOUTqYl9/Hg/me3pWgBmERKrTGD7BdWus="
+          },
+          {
+            "Path": "github.com/jsimonetti/rtnetlink",
+            "Version": "v1.4.1",
+            "Sum": "h1:JfD4jthWBqZMEffc5RjgmlzpYttAVw1sdnmiNaPO3hE="
+          },
+          {
+            "Path": "github.com/klauspost/compress",
+            "Version": "v1.19.1",
+            "Sum": "h1:VsB4HPswih7mmZ8WleSFQ75c/Ui1M4trX5oAsJnhSlk="
+          },
+          {
+            "Path": "github.com/klauspost/cpuid/v2",
+            "Version": "v2.3.0",
+            "Sum": "h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y="
+          },
+          {
+            "Path": "github.com/koron/go-ssdp",
+            "Version": "v0.0.4",
+            "Sum": "h1:1IDwrghSKYM7yLf7XCzbByg2sJ/JcNOZRXS2jczTwz0="
+          },
+          {
+            "Path": "github.com/libdns/libdns",
+            "Version": "v1.1.1",
+            "Sum": "h1:wPrHrXILoSHKWJKGd0EiAVmiJbFShguILTg9leS/P/U="
+          },
+          {
+            "Path": "github.com/libp2p/go-nat",
+            "Version": "v1.0.1-0.20250821073202-01afc089f138",
+            "Sum": "h1:YohuNPT/1k3VcThCQlBZ43PCPWPfMRS1zcxWBF2SLK8="
+          },
+          {
+            "Path": "github.com/libp2p/go-netroute",
+            "Version": "v0.2.1",
+            "Sum": "h1:V8kVrpD8GK0Riv15/7VN6RbUQ3URNZVosw7H2v9tksU="
+          },
+          {
+            "Path": "github.com/logrusorgru/aurora",
+            "Version": "v2.0.3+incompatible",
+            "Sum": "h1:tOpm7WcpBTn4fjmVfgpQq0EfczGlG91VSDkswnjF5A8="
+          },
+          {
+            "Path": "github.com/mdlayher/netlink",
+            "Version": "v1.11.2",
+            "Sum": "h1:HKh2jqe+omdSWcQ88nrT7INE61B0NXfiSPFdgL4YbNI="
+          },
+          {
+            "Path": "github.com/mdlayher/socket",
+            "Version": "v0.6.0",
+            "Sum": "h1:ScZPaAGyO1icQnbFrhPM8mnXyMu9qukC1K4ZoM2IQKU="
+          },
+          {
+            "Path": "github.com/metacubex/utls",
+            "Version": "v1.8.7",
+            "Sum": "h1:Cp+yWkNTFkSihETgGWq34hlVFds5HpYWVOR1xovUVTs="
+          },
+          {
+            "Path": "github.com/mholt/acmez/v3",
+            "Version": "v3.1.6",
+            "Sum": "h1:eGVQNObP0pBN4sxqrXeg7MYqTOWyoiYpQqITVWlrevk="
+          },
+          {
+            "Path": "github.com/miekg/dns",
+            "Version": "v1.1.72",
+            "Sum": "h1:vhmr+TF2A3tuoGNkLDFK9zi36F2LS+hKTRW0Uf8kbzI="
+          },
+          {
+            "Path": "github.com/quic-go/qpack",
+            "Version": "v0.6.0",
+            "Sum": "h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8="
+          },
+          {
+            "Path": "github.com/sagernet/bbolt",
+            "Version": "v0.0.0-20260915102804-500ee1e84832",
+            "Sum": "h1:KDXMGbzqLmDdKcld0T3wuMuqf1iezZq+DemgtZ/vhtQ="
+          },
+          {
+            "Path": "github.com/sagernet/cors",
+            "Version": "v1.2.1",
+            "Sum": "h1:Cv5Z8y9YSD6Gm+qSpNrL3LO4lD3eQVvbFYJSG7JCMHQ="
+          },
+          {
+            "Path": "github.com/sagernet/fswatch",
+            "Version": "v0.1.2",
+            "Sum": "h1:/TT7k4mkce1qFPxamLO842WjqBgbTBiXP2mlUjp9PFk="
+          },
+          {
+            "Path": "github.com/sagernet/gomobile",
+            "Version": "v0.1.12",
+            "Sum": "h1:XwzjZaclFF96deLqwAgK8gU3w0M2A8qxgDmhV+A0wjg="
+          },
+          {
+            "Path": "github.com/sagernet/netlink",
+            "Version": "v0.0.0-20260814022025-64455d367bbf",
+            "Sum": "h1:b/3rm+KvxzuYRcnMdLq/hmcqX6/2B8k24l6SDHL2Piw="
+          },
+          {
+            "Path": "github.com/sagernet/nftables",
+            "Version": "v0.3.0-mod.4",
+            "Sum": "h1:vnOtcDYeSXv2e5RoRuGH0lrpttQFJ8iC4ICS2nhlDSo="
+          },
+          {
+            "Path": "github.com/sagernet/quic-go",
+            "Version": "v0.61.0-sing-box-mod.12",
+            "Sum": "h1:9/USaaiONHFeqBePb+4C/A0MBM2dmxED49UGBpHLHS4="
+          },
+          {
+            "Path": "github.com/sagernet/sing",
+            "Version": "v0.9.7-0.20261023115459-5dc452e537bf",
+            "Sum": "h1:qWlGERjsI0F1I9e1W5Z/ARk/9KEN7xIas6e2QHEypUM="
+          },
+          {
+            "Path": "github.com/sagernet/sing-box",
+            "Version": "v1.14.4",
+            "Sum": "h1:KV6J8v1zMUu7BZA93nD9HGMmQnNC46VTuYaKEHkP+gA="
+          },
+          {
+            "Path": "github.com/sagernet/sing-mux",
+            "Version": "v0.3.10-0.20260929204512-caf09fe32475",
+            "Sum": "h1:aG0DqHEOjax7DyfE1GTAXZotOg3QGVCz3/8rCSua2kg="
+          },
+          {
+            "Path": "github.com/sagernet/sing-quic",
+            "Version": "v0.7.2-0.20261020082049-7e0a5869a5f4",
+            "Sum": "h1:QuhAb8QW0pKYmSvfj/nK91libunBwVJiWb852yidlxI="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowsocks",
+            "Version": "v0.2.9-0.20260929204512-65740e0f0e3e",
+            "Sum": "h1:LKgE/uuqp/D2kgxYViOz8vf4slaCUfpFywXjtuwD5gU="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowsocks2",
+            "Version": "v0.2.2-0.20260929152114-a69d1086332b",
+            "Sum": "h1:VH65QNqSHat2b+N3Rlzo5Qe44gRmQGwzY5atuy3D0A8="
+          },
+          {
+            "Path": "github.com/sagernet/sing-shadowtls",
+            "Version": "v0.2.2-0.20260928201441-a9c0127d5c99",
+            "Sum": "h1:l/tdZjaoDp3iqEG4NVrFHtphy1+Qjt9bpWAgNbF8iGg="
+          },
+          {
+            "Path": "github.com/sagernet/sing-snell",
+            "Version": "v0.0.0-20260904135315-bc5a12ac736f",
+            "Sum": "h1:tbTCI+iis5sTmua7a6Q7vebcSRURok/LGgnEafnQAsc="
+          },
+          {
+            "Path": "github.com/sagernet/sing-tun",
+            "Version": "v0.9.7-0.20261023115432-040db71fcd33",
+            "Sum": "h1:0+op+qbxh/M/JsqIG8tkEwPM+5pZtBeicf1ciMxp4OI="
+          },
+          {
+            "Path": "github.com/sagernet/sing-vmess",
+            "Version": "v0.2.9-0.20261019223527-a0c58542bd9d",
+            "Sum": "h1:K93710Sq6/TFl3GVs+NclQ3I+KPXFLluSsUFC0Sm0N8="
+          },
+          {
+            "Path": "github.com/sagernet/smux",
+            "Version": "v1.5.50-sing-box-mod.1",
+            "Sum": "h1:XkJcivBC9V4wBjiGXIXZ229aZCU1hzcbp6kSkkyQ478="
+          },
+          {
+            "Path": "github.com/sagernet/ws",
+            "Version": "v0.0.0-20231204124109-acfe8907c854",
+            "Sum": "h1:6uUiZcDRnZSAegryaUGwPC/Fj13JSHwiTftrXhMmYOc="
+          },
+          {
+            "Path": "github.com/vishvananda/netns",
+            "Version": "v0.0.5",
+            "Sum": "h1:DfiHV+j8bA32MFM7bfEunvT8IAqQ/NzSJHtcmW5zdEY="
+          },
+          {
+            "Path": "github.com/zeebo/blake3",
+            "Version": "v0.2.4",
+            "Sum": "h1:KYQPkhpRtcqh0ssGYcKLG1JYvddkEA8QwCM/yBqhaZI="
+          },
+          {
+            "Path": "go.uber.org/multierr",
+            "Version": "v1.11.0",
+            "Sum": "h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0="
+          },
+          {
+            "Path": "go.uber.org/zap",
+            "Version": "v1.27.1",
+            "Sum": "h1:08RqriUEv8+ArZRYSTXy1LeBScaMpVSTBhCeaZYfMYc="
+          },
+          {
+            "Path": "go.uber.org/zap/exp",
+            "Version": "v0.3.0",
+            "Sum": "h1:6JYzdifzYkGmTdRR59oYH+Ng7k49H9qVpWwNSsGJj3U="
+          },
+          {
+            "Path": "go4.org/netipx",
+            "Version": "v0.0.0-20231129151722-fdeea329fbba",
+            "Sum": "h1:0b9z3AuHCjxk0x/opv64kcgZLBseWJUpBw5I82+2U4M="
+          },
+          {
+            "Path": "golang.org/x/crypto",
+            "Version": "v0.54.0",
+            "Sum": "h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw="
+          },
+          {
+            "Path": "golang.org/x/exp",
+            "Version": "v0.0.0-20260410095643-746e56fc9e2f",
+            "Sum": "h1:W3F4c+6OLc6H2lb//N1q4WpJkhzJCK5J6kUi1NTVXfM="
+          },
+          {
+            "Path": "golang.org/x/mod",
+            "Version": "v0.37.0",
+            "Sum": "h1:vF1DjpVEshcIqoEaauuHebaLk1O1forxjxBaVn884JQ="
+          },
+          {
+            "Path": "golang.org/x/net",
+            "Version": "v0.57.0",
+            "Sum": "h1:K5+3DljvIuDG9/Jv9rvyMywYNFCQ9RSUY6OOTTkT+tE="
+          },
+          {
+            "Path": "golang.org/x/sync",
+            "Version": "v0.22.0",
+            "Sum": "h1:SZjpbeLmrCk4xhRSZFNZW5gFUeCeFgjekvI/+gfScek="
+          },
+          {
+            "Path": "golang.org/x/sys",
+            "Version": "v0.47.0",
+            "Sum": "h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs="
+          },
+          {
+            "Path": "golang.org/x/text",
+            "Version": "v0.40.0",
+            "Sum": "h1:Ub2Z6/xjgF1WrYQz2nuITOEegKFtiIy+rieRJ5lHZKs="
+          },
+          {
+            "Path": "google.golang.org/genproto/googleapis/rpc",
+            "Version": "v0.0.0-20251202230838-ff82c1b0f217",
+            "Sum": "h1:gRkg/vSppuSQoDjxyiGfN4Upv/h/DQmIR10ZU8dh4Ww="
+          },
+          {
+            "Path": "google.golang.org/grpc",
+            "Version": "v1.79.1",
+            "Sum": "h1:zGhSi45ODB9/p3VAawt9a+O/MULLl9dpizzNNpq7flY="
+          },
+          {
+            "Path": "google.golang.org/protobuf",
+            "Version": "v1.36.11",
+            "Sum": "h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE="
+          },
+          {
+            "Path": "lukechampine.com/blake3",
+            "Version": "v1.3.0",
+            "Sum": "h1:sJ3XhFINmHSrYCgl958hscfIa3bw8x4DqMP3u1YvoYE="
+          }
+        ],
+        "Settings": [
+          {
+            "Key": "-buildmode",
+            "Value": "c-shared"
+          },
+          {
+            "Key": "-compiler",
+            "Value": "gc"
+          },
+          {
+            "Key": "-tags",
+            "Value": "with_quic,with_utls"
+          },
+          {
+            "Key": "-trimpath",
+            "Value": "true"
+          },
+          {
+            "Key": "CGO_ENABLED",
+            "Value": "1"
+          },
+          {
+            "Key": "GOARCH",
+            "Value": "amd64"
+          },
+          {
+            "Key": "GOOS",
+            "Value": "android"
+          },
+          {
+            "Key": "GOAMD64",
+            "Value": "v1"
+          },
+          {
+            "Key": "vcs",
+            "Value": "git"
+          },
+          {
+            "Key": "vcs.revision",
+            "Value": "4304fb196a86de40927b9597057019bc918cdf2b"
+          },
+          {
+            "Key": "vcs.time",
+            "Value": "2026-11-05T03:55:12Z"
+          },
+          {
+            "Key": "vcs.modified",
+            "Value": "true"
+          }
+        ]
+      },
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "offlineGoModuleGraphMatches": true,
+      "path": "lib/x86_64/libgojni.so",
+      "sha256": "2917b2e92fe8257616687d79b224bb5ae3fcd4dd9ec7f999976c99a480c51c23"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 135184,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libreactnative.so",
+        "libjsi.so",
+        "libhermesvm.so",
+        "libandroid.so",
+        "libfbjni.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libhermestooling.so",
+      "sha256": "052605acc50e238ff71391c78659b5ea33c677a9dfe482788b2f74d5d8f94a23"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 2575016,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjsi.so",
+        "libfbjni.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libhermesvm.so",
+      "sha256": "fbb8ceab67d3da8c28be817539fe3d7da2c8a991676818d5b1b23f8c4d690dc6"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 8464,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/x86_64/libimagepipeline.so",
+      "sha256": "2e596f4955f65abaa93c891b49eb58b5416581806a04bde0097cc369ae4dbfb3"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 402984,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libjsi.so",
+      "sha256": "0fca96fcd757cd4c4ebe1204b5450a0cd19a2bc6212adaab48507d082481a999"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 30528,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/x86_64/libnative-filters.so",
+      "sha256": "1a5270f007dd4b2f0fc52ceac82e05143648ba9be59c2213a21cf61c84f1f5e5"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 720432,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "path": "lib/x86_64/libnative-imagetranscoder.so",
+      "sha256": "f6b92ad7f1c30973f40704c46987504757c3d079c7f4ace6efc8b318dd9c22f3"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 158168,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libfbjni.so",
+        "libjsi.so",
+        "libreactnative.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libreact_codegen_safeareacontext.so",
+      "sha256": "103feea56ee429fa17bbab17733a403e8d202b81adba386d4c1fc2ab522169dc"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 6770448,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libandroid.so",
+        "libfbjni.so",
+        "libjsi.so",
+        "liblog.so",
+        "libm.so",
+        "libc++_shared.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libreactnative.so",
+      "sha256": "5a8a1bcf748211d4b4a6e9e5b8399a5ff0d160964caad2d7e8361c1f505ce003"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 560968,
+      "compilerComments": [
+        "",
+        "Android (12285214, +pgo, +bolt, +lto, +mlgo, based on r522817b) clang version 18.0.2 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.2"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libdl.so",
+        "libc.so",
+        "libm.so"
+      ],
+      "path": "lib/x86_64/libstatic-webp.so",
+      "sha256": "e7884cd18761b5ee54de98b9a3f4b9e4b0dea364c186e24ff9b740b29742562b"
+    },
+    {
+      "abi": "x86_64",
+      "bytes": 816568,
+      "compilerComments": [
+        "Android (12027248, +pgo, -bolt, +lto, -mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "",
+        "Android (12027248, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+        "Linker: LLD 18.0.1"
+      ],
+      "elfClass": "ELFCLASS64",
+      "elfMachine": "EM_X86_64",
+      "goBuildInfoUnavailable": "not a Go executable",
+      "licenseAndSourceMappingProven": false,
+      "neededLibraries": [
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "path": "lib/x86_64/libzstd-kmp.so",
+      "sha256": "fefcbdcd59580a3043c62380a83d92f13c031c278481e22591a2c75112296e28"
+    }
+  ],
+  "nativeLibraryCount": 32,
+  "offlineGoCatalogSha256": "8dd661c87580366993b73a5304c97576c16d52abea90254e9a4f974744976b75",
+  "readerGoVersion": "go1.25.5",
+  "schemaVersion": 1,
+  "scope": "Original APK ELF headers, DT_NEEDED, compiler comments and embedded Go build information; target libraries never executed",
+  "sourceBinding": {
+    "actualApkBundleBindingVerified": true,
+    "analyzerCommit": "6e07ad6a5d0c4c096cb1090cc778aeae3ec3f6d5",
+    "apkSha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "compiledBundleSha256": "6a9d0cc0655e1bb2e6eb6b6b3a88472fc7a3cdbda027abc988d4f62fbf70e743",
+    "lockSha256": "9bbdc713ccb2aaeb08dc1c34accedc7d84f52b3c17d155906c8732a5d8e035e6",
+    "noticeSha256": "f73219bbe221c50133074a190b7afb052d2ea554c08de6ad48fb766b017bb4da",
+    "originalSizeShaCrcVerified": true,
+    "originals": [
+      {
+        "digest": "sha256:57ca5d59f8da7bb36807f6a7de81705188a704ebdf049a5bf21a5f4a18f0feb4",
+        "id": 13387967173,
+        "name": "lyco-android-candidate-41964719754",
+        "size_in_bytes": 47831524
+      },
+      {
+        "digest": "sha256:877ee18b8662ba52d2ce43a985c2c4d3b049f8945ced3cb753b30bac02af0575",
+        "id": 13386684140,
+        "name": "lyco-native-js-source-android-41964719754",
+        "size_in_bytes": 2219788
+      },
+      {
+        "digest": "sha256:eae8d049b1d187d62bc33e1beb63898ea43e939a982a3ecefb767202e9100371",
+        "id": 13386414220,
+        "name": "lyco-npm-notices-android-41964719754",
+        "size_in_bytes": 168219
+      }
+    ],
+    "packagerMapSha256": "fa88508c82838de89410e80d92f43361968d7c92f3b89436a7c11f7060aa0f5b",
+    "releaseCertificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae",
+    "sourceCommit": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sourceRun": "41964719754"
+  }
+}

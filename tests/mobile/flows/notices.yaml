@@ -1,0 +1,21 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "平台能力"
+- scrollUntilVisible:
+    element: "JavaScript 依赖开源许可"
+    direction: DOWN
+- tapOn: "JavaScript 依赖开源许可"
+- tapOn:
+    id: "npm-notice-search"
+- inputText: react
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "react · 19\\.2\\.3"
+    direction: DOWN
+- tapOn: "react · 19\\.2\\.3"
+- scrollUntilVisible:
+    element: "(?s).*Copyright \\(c\\) Meta Platforms, Inc\\. and affiliates\\..*"
+    direction: DOWN
+- takeScreenshot: original-react-license
+- tapOn: "关闭许可页"
+- assertVisible: "LYCO Browser"

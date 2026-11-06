@@ -1,0 +1,180 @@
+{
+  "checks": [
+    "unchanged-signed-apk-default-tls-rejects-untrusted-ci-ca",
+    "legacy-to-v2-upgrade-keeps-profile-uuid-and-three-website-storage-types",
+    "saved-A-and-B-used-real-authenticated-selected-upstreams",
+    "process-restart-relogin-restores-A-choice-and-storage",
+    "missing-A-never-selects-B",
+    "stopped-A-no-direct-or-system-proxy-fallback-and-B-remains-usable",
+    "explicit-A-to-B-keeps-A-data-and-B-separate",
+    "other-account-cannot-see-owned-environments",
+    "actual-old-apk-refuses-v2-and-cannot-overwrite-bindings",
+    "return-to-current-apk-retains-owner-route-and-storage",
+    "native-paid-session-revocation-removes-webview",
+    "actual-asyncstorage-has-opaque-bindings-and-no-node-or-account-credentials",
+    "actual-1252-entry-search-zero-results-and-clear-retain-selected-node-and-persisted-metadata",
+    "actual-profile-edit-cancel-validation-restart-homepage-and-original-identity-route-storage-preservation"
+  ],
+  "observations": [
+    {
+      "phase": "paid-A",
+      "before": {
+        "cookie": null,
+        "local": null,
+        "indexedDB": null
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "direct"
+    },
+    {
+      "phase": "paid-A",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "A"
+    },
+    {
+      "phase": "paid-B",
+      "before": {
+        "cookie": null,
+        "local": null,
+        "indexedDB": null
+      },
+      "after": {
+        "cookie": "B",
+        "local": "B",
+        "indexedDB": "B"
+      },
+      "route": "B"
+    },
+    {
+      "phase": "paid-A",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "A"
+    },
+    {
+      "phase": "paid-B",
+      "before": {
+        "cookie": "B",
+        "local": "B",
+        "indexedDB": "B"
+      },
+      "after": {
+        "cookie": "B",
+        "local": "B",
+        "indexedDB": "B"
+      },
+      "route": "B"
+    },
+    {
+      "phase": "paid-A",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "B"
+    },
+    {
+      "phase": "paid-A",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "B"
+    }
+  ],
+  "editedHomepageObservation": {
+    "phase": "paid-A-edited",
+    "before": {
+      "cookie": "A",
+      "local": "A",
+      "indexedDB": "A"
+    },
+    "after": {
+      "cookie": "A",
+      "local": "A",
+      "indexedDB": "A"
+    },
+    "route": "A"
+  },
+  "profileEdit": {
+    "scope": "Actual signed Android UI, private metadata and original same-origin TCP/storage observations",
+    "cancelAndInvalidEditsUnchanged": true,
+    "onlyNameAndHomepageChanged": true,
+    "originalUuidCreationTimeAndRoutePreserved": true,
+    "otherProfileUnchanged": true,
+    "processRestartUsedEditedHomepageAndSavedRoute": true,
+    "threeWebsiteStorageTypesPreserved": true,
+    "originalMetadataRestored": true,
+    "originalMetadataSha256": "8a8ec0273a759a6b947bf5825e241c05e34ad146d79648e2a1883a96e5c5daf3",
+    "editedMetadataSha256": "dafb4f3e0deec3e5aa0cf8db49f95db7b5cce6a54bd5d8a7a34756bc13ac1979",
+    "newOriginPages": 1,
+    "observation": {
+      "phase": "paid-A-edited",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "A"
+    }
+  },
+  "catalogueSearch": {
+    "scope": "Actual signed Android UI and metadata; 1250 catalogue aliases share owned route A, not independent exits",
+    "catalogueEntries": 1252,
+    "aliases": 1250,
+    "uiFlowPassed": true,
+    "metadataSha256": "8a8ec0273a759a6b947bf5825e241c05e34ad146d79648e2a1883a96e5c5daf3",
+    "metadataUnchanged": true,
+    "newOriginPages": 0,
+    "selectionRetained": true,
+    "completeDirectoryRestored": true
+  },
+  "candidate": {
+    "run": 41775491059,
+    "source": "4dc38db6ff5c8380b209b2f35aeb6ff955b27842",
+    "sha256": "b8a7d5f627fe3cf483dd0d0c60b131cf5272578748e358eadc76951386cf2ce1",
+    "runtime_source_diff": "empty",
+    "signed_certificate": "retained-owner-certificate",
+    "apk_modified": false
+  },
+  "realPayments": false,
+  "scope": "API35 disposable rooted emulator trusts a CI-only CA for test Billing responses. No APK/runtime API/TLS changes. Native WebView uses actual authenticated HTTP upstreams and real same-origin TCP/storage observations; not customer egress, real payment, iOS routing or a store release."
+}

@@ -1,0 +1,238 @@
+name: Verify offline mobile dependency notices
+on:
+  pull_request:
+    branches: [main]
+    paths: ['apps/universal/src/**', 'apps/universal/third-party/**', 'apps/universal/scripts/collect-npm-notices.mjs', 'apps/universal/scripts/inventory-exported-js.mjs', 'apps/universal/package-lock.json', 'scripts/audit-native-js-*', 'tests/npm-notices*', 'tests/exported-js-inventory.test.mjs', '.github/workflows/mobile-notices.yml']
+  workflow_dispatch:
+    inputs:
+      native_js_inventory:
+        description: Observe Android/iOS export source graphs without changing native candidates
+        type: boolean
+        default: false
+      native_android_candidate:
+        description: Inspect original JavaScript sources of a successful signed Android build run
+        type: string
+        default: ''
+      native_go_origin:
+        description: Retain exact module sources and notice originals from a successful APK native metadata audit
+        type: string
+        default: ''
+      native_go_component:
+        description: Verify original offline notices against a successful actual Android core component
+        type: string
+        default: ''
+      go_toolchain_source:
+        description: Retain pinned official Go compiler/runtime/standard-library sources without building targets
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  offline-notices:
+    if: ${{ inputs.native_js_inventory != true && !inputs.native_android_candidate && !inputs.native_go_origin && !inputs.native_go_component && !inputs.go_toolchain_source }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm ci --no-audit --no-fund
+        working-directory: apps/universal
+      - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - run: node apps/universal/scripts/verify-go-notices.mjs
+      - run: node --test tests/npm-notices.test.mjs
+      - run: node --test tests/exported-js-inventory.test.mjs
+      - run: node --experimental-strip-types --test tests/mobile-billing.test.mjs tests/mobile-route-policy.test.mjs tests/mobile-rtc-policy.test.mjs
+      - run: node --test tests/network.test.js tests/profiles.test.js
+      - run: npx tsc --noEmit
+        working-directory: apps/universal
+      - run: npx expo export --platform web --output-dir dist-web
+        working-directory: apps/universal
+      - name: Install isolated browser verifier
+        run: |
+          npm install --prefix "$RUNNER_TEMP/lyco-notice-browser" --ignore-scripts --package-lock=false playwright@1.55.0
+          "$RUNNER_TEMP/lyco-notice-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - run: node tests/npm-notices-browser.mjs
+      - name: Retain original notice bundle and rendered observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-npm-notices-${{ github.run_id }}
+          path: |
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+            apps/universal/third-party/npm-notice-supplements.json
+            ${{ runner.temp }}/lyco-npm-notice-evidence
+          if-no-files-found: error
+          retention-days: 7
+
+  native-go-component:
+    if: ${{ inputs.native_go_component != '' }}
+    name: Bind original offline notices to the actually compiled core tree
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions: {contents: read, actions: read}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NATIVE_GO_COMPONENT: ${{ inputs.native_go_component }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Verify original archives, actual ELF graphs, locks and verbatim notice bytes
+        run: |
+          python3 -m py_compile scripts/collect-go-notice-core-binding.py
+          python3 scripts/collect-go-notice-core-binding.py "$NATIVE_GO_COMPONENT"
+      - name: Retain the actual review and generated source descriptor
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-go-notice-core-binding-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-go-notice-binding/evidence/
+          if-no-files-found: warn
+          retention-days: 7
+
+  go-toolchain-source:
+    if: ${{ inputs.go_toolchain_source == true }}
+    name: Exact official Go compiler runtime and standard-library sources
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify the original release archive and retain source and notice candidates
+        run: python3 scripts/collect-go-toolchain-source.py
+      - name: Preserve original source archive and read-only source inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-go-toolchain-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-go-toolchain-source
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  native-go-sources:
+    if: ${{ inputs.native_go_origin != '' }}
+    name: Original sources and notice candidates for actual APK Go modules
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NATIVE_GO_ORIGIN: ${{ inputs.native_go_origin }}
+      NATIVE_ANDROID_CANDIDATE: ${{ inputs.native_android_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
+      - name: Collect locked original sources and verbatim notice candidates without executing target code
+        run: python3 scripts/collect-native-go-sources.py "$NATIVE_GO_ORIGIN"
+      - name: Preserve exact originals, scoped manifest and incomplete progress on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-go-sources-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-native-go-sources
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  native-js-export:
+    if: ${{ inputs.native_js_inventory == true && !inputs.native_android_candidate }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [android, ios]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify bounded source-map interpretation
+        run: node --test tests/exported-js-inventory.test.mjs
+      - run: npm ci --no-audit --no-fund
+        working-directory: apps/universal
+      - run: node apps/universal/scripts/collect-npm-notices.mjs
+      - name: Export real native-platform JavaScript with source maps
+        working-directory: apps/universal
+        run: npx expo export --platform ${{ matrix.platform }} --source-maps --no-bytecode --output-dir bundle-inventory/${{ matrix.platform }}
+      - name: Record original mapped packages and unresolved notice targets
+        run: node apps/universal/scripts/inventory-exported-js.mjs --platform ${{ matrix.platform }} --directory apps/universal/bundle-inventory/${{ matrix.platform }}
+      - name: Preserve original exports and inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-js-inventory-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            apps/universal/bundle-inventory/${{ matrix.platform }}
+            apps/universal/src/npm-notices.json
+            apps/universal/package-lock.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  native-android-artifact:
+    if: ${{ inputs.native_android_candidate != '' }}
+    name: Original signed Android APK source and native metadata inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NATIVE_ANDROID_CANDIDATE: ${{ inputs.native_android_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/setup-java@v4
+        with: {distribution: 'temurin', java-version: '17'}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.25.5', cache: false}
+      - name: Set isolated evidence directory
+        run: echo "LYCO_NATIVE_JS_AUDIT=$RUNNER_TEMP/lyco-native-js-audit" >> "$GITHUB_ENV"
+      - name: Verify bounded source-map interpretation
+        run: node --test tests/exported-js-inventory.test.mjs
+      - name: Fetch and verify complete original build artifacts
+        run: python3 scripts/audit-native-js-artifacts.py "$NATIVE_ANDROID_CANDIDATE"
+      - name: Independently recheck the actual APK signing identity
+        run: |
+          set -euo pipefail
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          test -n "$signer"
+          "$signer" verify --verbose --print-certs "$LYCO_NATIVE_JS_AUDIT/candidate/files/LYCO-Browser-Android-preview.apk" > "$LYCO_NATIVE_JS_AUDIT/RECHECKED-APK-SIGNATURE.txt"
+          LYCO_REQUIRE_RELEASE_SIGNATURE=true python3 apps/universal/scripts/verify-android-signature.py "$LYCO_NATIVE_JS_AUDIT/RECHECKED-APK-SIGNATURE.txt" resources/signing/android-release-certificate.pem
+      - name: Classify actual native packager sources against original build notices
+        run: node scripts/audit-native-js-sources.mjs
+      - name: Read original native library metadata without executing target libraries
+        env:
+          GOWORK: 'off'
+          GO111MODULE: 'off'
+          GOTOOLCHAIN: local
+        run: go run scripts/audit-native-libraries.go
+      - name: Retain original source evidence and classification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-native-android-js-origin-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-native-js-audit/source-run.json
+            ${{ runner.temp }}/lyco-native-js-audit/verified-artifacts.json
+            ${{ runner.temp }}/lyco-native-js-audit/NATIVE-JS-INVENTORY.json
+            ${{ runner.temp }}/lyco-native-js-audit/RECHECKED-APK-SIGNATURE.txt
+            ${{ runner.temp }}/lyco-native-js-audit/native-libraries
+            ${{ runner.temp }}/lyco-native-js-audit/source-map/original.zip
+            ${{ runner.temp }}/lyco-native-js-audit/notices/original.zip
+          if-no-files-found: error
+          retention-days: 7

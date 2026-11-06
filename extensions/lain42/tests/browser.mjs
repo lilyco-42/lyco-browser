@@ -30,6 +30,7 @@ try{
  const id=new URL(worker.url()).hostname;
  const popup=await context.newPage();await popup.setViewportSize({width:380,height:850});
  await popup.goto(`chrome-extension://${id}/popup.html`);await popup.locator('#connect').waitFor();
+ assert.match(await popup.locator('.membership').textContent(),/90天季卡、120天套餐或年卡/);
  await popup.locator('header img').evaluate(img=>img.decode());
  const read=()=>worker.evaluate(()=>new Promise(r=>chrome.proxy.settings.get({incognito:false},r)));
  const original=await read();
@@ -66,8 +67,8 @@ try{
  assert.ok(report.requests.some(row=>row.path==='/restored'&&!row.proxied));
  report.checks.push('expired-session-blocks-until-explicit-disconnect','restores-original-browser-proxy');
  const opened=context.waitForEvent('page');await popup.locator('#shop').click();const shop=await opened;
- await shop.waitForURL('https://lain42.top/shop/#proxy_1m',{waitUntil:'commit',timeout:20000});
- report.checks.push('explicit-own-subscription-link');await shop.close();
+ await shop.waitForURL('https://lain42.top/vpn/#plans',{waitUntil:'commit',timeout:20000});
+ report.checks.push('explicit-all-proxy-plans-link');await shop.close();
 }catch(error){report.failure=String(error.stack||error);throw error}
 finally{
  if(context)await context.close();

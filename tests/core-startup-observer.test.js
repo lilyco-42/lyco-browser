@@ -37,3 +37,49 @@ test('observer preserves the actual spawn contract and restores it on failure', 
   assert.equal(options.stdio, 'ignore'); assert.equal(records[0].pid, 123);
   assert.doesNotMatch(JSON.stringify(records), /private config|owned directory/);
 });
+
+test('workspace restarts expose actual child signals and keep failures unchanged', async () => {
+  const child = new EventEmitter(); child.pid = 456; child.stdout = new EventEmitter(); child.stderr = new EventEmitter();
+  const spawn = () => child;
+  class Network {constructor() {this.spawnFn = spawn;} async connectOnce() {return 'unchanged';}}
+  class Routes {
+    constructor(network) {this.network = network;}
+    async start(...args) {
+      assert.deepEqual(args, ['same-id', 'same-route']);
+      this.network.spawnFn('real-core', ['-f', 'PRIVATE_CONFIG'], {cwd: 'PRIVATE_PATH', stdio: 'ignore'});
+      child.stderr.emit('data', Buffer.from('PRIVATE_TOKEN database locked; failed to listen'));
+      throw Error('original listen timeout');
+    }
+  }
+  const records = installCoreStartupObserver(Network, Routes), network = new Network();
+  await assert.rejects(new Routes(network).start('same-id', 'same-route'), /original listen timeout/);
+  assert.equal(network.spawnFn, spawn); assert.equal(records.length, 1);
+  assert.ok(records[0].signals.includes('database-lock')); assert.ok(records[0].signals.includes('listener-error'));
+  assert.doesNotMatch(JSON.stringify(records), /PRIVATE_/);
+});
+
+test('overlapping core operations are observed once and restore the original spawn after the last operation', async () => {
+  let finishFirst, finishSecond;
+  const firstStarted = [], child = new EventEmitter(); child.stdout = new EventEmitter(); child.stderr = new EventEmitter();
+  const spawn = () => child;
+  class Network {
+    constructor() {this.spawnFn = spawn;}
+    async connectOnce() {
+      await new Promise(resolve => {finishFirst = resolve;});
+      this.spawnFn('real-core', [], {stdio: 'ignore'}); return 'connected';
+    }
+  }
+  class Routes {
+    constructor(network) {this.network = network;}
+    async start() {
+      await new Promise(resolve => {finishSecond = resolve;});
+      this.network.spawnFn('real-core', [], {stdio: 'ignore'}); return 'started';
+    }
+  }
+  const records = installCoreStartupObserver(Network, Routes), network = new Network(), routes = new Routes(network);
+  const first = network.connectOnce(), second = routes.start();
+  assert.equal(typeof finishFirst, 'function'); assert.equal(typeof finishSecond, 'function');
+  finishFirst(); firstStarted.push(await first); assert.notEqual(network.spawnFn, spawn);
+  finishSecond(); assert.equal(await second, 'started');
+  assert.deepEqual(firstStarted, ['connected']); assert.equal(records.length, 2); assert.equal(network.spawnFn, spawn);
+});

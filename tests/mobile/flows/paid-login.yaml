@@ -1,0 +1,26 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "会员与代理"
+- scrollUntilVisible:
+    element:
+      id: "网站用户名"
+    direction: UP
+- tapOn:
+    id: "网站用户名"
+- eraseText
+- inputText: ${OWNER}
+- pressKey: Enter
+- tapOn:
+    id: "网站密码"
+- inputText: CI_fixture_password
+- pressKey: Enter
+- scrollUntilVisible:
+    element: "登录并验证权益"
+    direction: DOWN
+- tapOn: "登录并验证权益"
+- extendedWaitUntil:
+    visible: "官网登录成功，已同步代理权益"
+    timeout: 30000
+- scrollUntilVisible:
+    element: "代理年卡有效"
+    direction: UP

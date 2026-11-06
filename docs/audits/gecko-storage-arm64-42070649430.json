@@ -1,0 +1,224 @@
+{
+  "source": "643be4f6af75cc101879b9221cf2cd055fb65741",
+  "run": "42070649430",
+  "upstreamGitRevision": "9a2dc53c369c7ae5172018b35988e1d2ffeff402",
+  "upstreamTag": "FIREFOX_159_0_RELEASE",
+  "publishedMavenHgRevision": "5add844c26613d7e4d84c799d6e23cf987b1240d",
+  "originalAffectedFileSha256": "918068eebc2080e170de43acbf3d10c3643f7fe8a82102548e38025622129988",
+  "appliedPatchSha256": "499192920a5ff49468f43004771176844341c666e27c15e330fe949ce8c91cb3",
+  "patchedFileSha256": "c6d2bc5c2478612d393fdf7d664dbdb2225b3631ec2a6321eb88107493389764",
+  "aarSha256": "a4c3829a81265f18555e526fbe84f23ff824c7e85c510cad9bd4092b9d13eb30",
+  "aarBytes": 85915921,
+  "abi": "arm64-v8a",
+  "gradlePublicationVariant": "debug",
+  "nativeOptimized": true,
+  "nativeDebugSymbols": false,
+  "publishedAarByteMatch": true,
+  "publishedAarPaths": [
+    "obj-lyco/gradle/maven/org/mozilla/geckoview/geckoview-default-omni/159.0.20261105171333-SNAPSHOT/geckoview-default-omni-159.0.20261105171333-20261105.203103-1.aar",
+    "obj-lyco/gradle/maven/org/mozilla/geckoview/geckoview-default-omni/159.0.20261105171333-SNAPSHOT/geckoview-default-omni-159.0.20261105171333-20261105.203617-2.aar"
+  ],
+  "compilerConfigSha256": "0d075a7456c30d8e1ec00984da05bcd9d638e554135a88c74779ff5bcd12b716",
+  "compiledNativeCode": true,
+  "artifactBuild": false,
+  "productAdopted": false,
+  "storageFlushPolicy": {
+    "prefName": "dom.storage.database.flushIntervalMs",
+    "defaultDelayMs": 5000,
+    "originalSourceSha256": {
+      "dom/localstorage/ActorsParent.cpp": "0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5",
+      "modules/libpref/init/StaticPrefList.yaml": "d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330"
+    },
+    "patchedSourceSha256": {
+      "dom/localstorage/ActorsParent.cpp": "492a133abda69287bc0d9a4ed458013cbee83aba4649755cb90f357fa1b184d6",
+      "modules/libpref/init/StaticPrefList.yaml": "2b84754052ee706f524f8f0c8f636ce695b0a604fb398fd85a6d644beec9eccf"
+    },
+    "appliedPatchSha256": "85b220f4cba7e5e16ca898b19e7fe90a459744e351d2458da43e70207b7231e1",
+    "synchronousDiskFenceProven": false,
+    "nativeRuntimeProven": false
+  },
+  "scope": "Actual optimized source-built storage-policy archive only; default5000ms retained. No ARM64 runtime durability, migration, product adoption or release proof",
+  "storageRecipe": {
+    "run": "42070649430",
+    "source": "643be4f6af75cc101879b9221cf2cd055fb65741",
+    "baseRecipeCommit": "69110444d0742c231f55f0b1ccd489fa9fac2bdb",
+    "baseCompiledRun": 41772782539,
+    "normalCloseReference": 41873067393,
+    "cookieBufferReference": 41875833193,
+    "baseRecipeSha256": {
+      ".github/workflows/build-gecko-experiment.yml": "8a96177594e5756c146a89740cce2858d13a65e8d4b5922dac410c416cab4000",
+      "tests/mobile/engine/source/build-engine.sh": "976db526d07f8c69a28495c214321b332030365ec298c3e1133b981deb6612d0",
+      "tests/mobile/engine/source/build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+      "tests/mobile/engine/source/proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8",
+      "tests/mobile/engine/source-storage/database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b"
+    },
+    "generatedRecipeSha256": {
+      "build-engine.sh": "44aabbcd14b2b4bc831ce57ee7244389a418668683dbb4a6d1935c58e31d6030",
+      "build-host.py": "d32a57906e3ed3838b7155581387e325a08dacb94f5f9a5b8313ed0647eae08b",
+      "proxy-default-address.patch": "7797f2c90e03fc0af71b848b45cc3caa37df9b4fe05c9048c48529987b1addd8",
+      "database-flush-delay.patch": "c57f5614a151eb0edce49d357def7711e06fdb816a77ce13581472cd17e6073b"
+    },
+    "replacements": [
+      {
+        "before": "git apply \"$root/proxy-default-address.patch\"\n",
+        "after": "git apply \"$root/proxy-default-address.patch\"\nprintf '%s  %s\\n' \\\n  0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5 dom/localstorage/ActorsParent.cpp \\\n  d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330 modules/libpref/init/StaticPrefList.yaml | sha256sum --check\ngit apply --check \"$root/database-flush-delay.patch\"\ngit apply \"$root/database-flush-delay.patch\"\n",
+        "count": 1
+      },
+      {
+        "before": "run_phase format ./mach format dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n",
+        "after": "run_phase format ./mach format --skip-android dom/media/webrtc/jsapi/PeerConnectionImpl.cpp dom/localstorage/ActorsParent.cpp modules/libpref/init/StaticPrefList.yaml\n",
+        "count": 1
+      },
+      {
+        "before": "cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp \"$evidence/PeerConnectionImpl.cpp\"\n",
+        "after": "cp dom/media/webrtc/jsapi/PeerConnectionImpl.cpp \"$evidence/PeerConnectionImpl.cpp\"\ngit diff -- dom/localstorage/ActorsParent.cpp modules/libpref/init/StaticPrefList.yaml > \"$evidence/storage-applied.patch\"\ncp dom/localstorage/ActorsParent.cpp \"$evidence/ActorsParent.cpp\"\ncp modules/libpref/init/StaticPrefList.yaml \"$evidence/StaticPrefList.yaml\"\n",
+        "count": 1
+      },
+      {
+        "before": "test \"$(git diff --name-only)\" = dom/media/webrtc/jsapi/PeerConnectionImpl.cpp\n",
+        "after": "python3 - \"$evidence/changed-files.txt\" <<'PY_CHANGED'\nfrom pathlib import Path\nimport sys\nchanged = Path(sys.argv[1]).read_text().splitlines()\nassert len(changed) == 3 and set(changed) == {\n    'dom/media/webrtc/jsapi/PeerConnectionImpl.cpp',\n    'dom/localstorage/ActorsParent.cpp', 'modules/libpref/init/StaticPrefList.yaml'}\nPY_CHANGED\n",
+        "count": 1
+      },
+      {
+        "before": "       'compiledNativeCode':True,'artifactBuild':False,'productAdopted':False,\n",
+        "after": "       'compiledNativeCode':True,'artifactBuild':False,'productAdopted':False,\n       'storageFlushPolicy':{\n           'prefName':'dom.storage.database.flushIntervalMs','defaultDelayMs':5000,\n           'originalSourceSha256':{\n               'dom/localstorage/ActorsParent.cpp':'0df7a7d47a7f514d6978c618f972f44e277f5672acb780b45c89e32d8c7087b5',\n               'modules/libpref/init/StaticPrefList.yaml':'d52399cc74e28bb91ec40cc83b57834ce6127452635a8d2a3e3e60a7af2fe330'},\n           'patchedSourceSha256':{\n               'dom/localstorage/ActorsParent.cpp':digest(evidence/'ActorsParent.cpp'),\n               'modules/libpref/init/StaticPrefList.yaml':digest(evidence/'StaticPrefList.yaml')},\n           'appliedPatchSha256':digest(evidence/'storage-applied.patch'),\n           'synchronousDiskFenceProven':False,'nativeRuntimeProven':False},\n",
+        "count": 1
+      }
+    ],
+    "architecture": "arm64-v8a",
+    "storagePreference": "dom.storage.database.flushIntervalMs",
+    "defaultDelayMs": 5000,
+    "upstreamChangedFiles": [
+      "dom/media/webrtc/jsapi/PeerConnectionImpl.cpp",
+      "dom/localstorage/ActorsParent.cpp",
+      "modules/libpref/init/StaticPrefList.yaml"
+    ],
+    "baseFilesModified": false,
+    "routePatchChanged": false,
+    "resourcePolicyChanged": false,
+    "nativeOptimizationChanged": false,
+    "storageFormatChanged": false,
+    "synchronousDiskFenceProven": false,
+    "nativeRuntimeProven": false,
+    "productAdopted": false,
+    "target": "aarch64-linux-android",
+    "storageSourceReferenceRun": 41940576338,
+    "storageRuntimeReferenceRun": 41966583355,
+    "rtcRuntimeReferenceRun": 41968477892,
+    "arm64ArchitectureReplacements": [
+      {
+        "before": "--target=x86_64-linux-android",
+        "after": "--target=aarch64-linux-android",
+        "count": 1
+      },
+      {
+        "before": "jni/x86_64/",
+        "after": "jni/arm64-v8a/",
+        "count": 2
+      },
+      {
+        "before": "'abi':'x86_64'",
+        "after": "'abi':'arm64-v8a'",
+        "count": 1
+      }
+    ],
+    "arm64RuntimeProven": false
+  },
+  "nativeLibraries": [
+    {
+      "path": "jni/arm64-v8a/libclearkey.so",
+      "bytes": 145048,
+      "sha256": "44f10674ce9d37223de67203bde4a2d5e5940c4e46b98510f9a20f0c1b6295fb",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libcrashhelper.so",
+      "bytes": 852744,
+      "sha256": "041f461366813edc729c4f9f9f9a859eee66e5a9db3e653c357a1af3bbcb6c44",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libcrashtools.so",
+      "bytes": 2966224,
+      "sha256": "9de3a73e2ae9fafed91bd55103b38b03a26b541d979bd4028670623114becce7",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libfreebl3.so",
+      "bytes": 853616,
+      "sha256": "4e08b2b7ddd8c83c3aad232ee8aa25c68a76629e7cd72beb3ac8a8c2a79ad7d7",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libgkcodecs.so",
+      "bytes": 5846952,
+      "sha256": "eda8f51c4974cfbf2199986ebff20e0edfe1cac0d915802acf1e5e719c973944",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/liblgpllibs.so",
+      "bytes": 173712,
+      "sha256": "c8be5897cb5ea7b6ac493dd822d60a8abe72bf41b38b0ff6f871b6fb105bbda9",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libmozavcodec.so",
+      "bytes": 2265424,
+      "sha256": "265d31442f5a827c03522ac05f2a0c4f7d5594a714b048f30c0a44a9a5f27a79",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libmozavutil.so",
+      "bytes": 470360,
+      "sha256": "0034a8d21498bed080f6c74185b56e3d2e09ea48c0c0ff00bb9941850505d5fd",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libmozglue.so",
+      "bytes": 1265952,
+      "sha256": "a5114a51f98c3be5aaf2a0833592bc65dea4a709e6377ce8df2b5f4dde0f82a7",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libnss3.so",
+      "bytes": 2797416,
+      "sha256": "491a21e9e3cb0d4d2b2f6f2145e30e2b52e7108d30793079c05065963a45c48d",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libplugin-container.so",
+      "bytes": 4688,
+      "sha256": "baa3807be10fd95504781c4730bb4274565a6d4ff6c64ab0b5b3e49822d7d570",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libsoftokn3.so",
+      "bytes": 330752,
+      "sha256": "6e303d2c01d3b80cff26440b52f06b28bdf4d19e02f4a63631ac09d85bc85db5",
+      "elfClass": 64,
+      "elfMachine": 183
+    },
+    {
+      "path": "jni/arm64-v8a/libxul.so",
+      "bytes": 158486520,
+      "sha256": "53f5205505d4dfe379e02bd801c75b3dbd0301dd0c3069ad6210ffac9b6289f9",
+      "elfClass": 64,
+      "elfMachine": 183
+    }
+  ],
+  "actualElfArchitectureVerified": true,
+  "storageRuntimeProven": false,
+  "arm64RuntimeProven": false,
+  "synchronousDiskFenceProven": false
+}

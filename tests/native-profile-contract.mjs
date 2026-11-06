@@ -22,8 +22,11 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   };
   await checkpoint('profile:create-second');
   await page.locator('[data-view="lyco"]').click();
+  // Other native probes also adopt profiles (including the direct control).
+  // Wait for this creation to replace the current observation, not a stale one.
+  const previousCreatedId = await page.evaluate(() => window.__lycoCreated?.id);
   await page.locator('#lyco-create-profile').click();
-  await page.waitForFunction(id => window.__lycoCreated?.id && window.__lycoCreated.id !== id, profile.id);
+  await page.waitForFunction(id => window.__lycoCreated?.id && window.__lycoCreated.id !== id, previousCreatedId);
   const second = await page.evaluate(() => window.__lycoCreated);
   assert.notEqual(second.id, profile.id, 'Storage test requires two actual environments');
   assert.ok(second.proxyId, 'Second environment must retain its managed proxy binding');
@@ -33,7 +36,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
   const nativeSettings = (device, expected) => Object.fromEntries([
     ['language', expected.language], ['timezone', expected.timezone],
     ['hardwareConcurrency', expected.cores], ['deviceMemory', expected.memory],
-  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key), matches: device?.[key] === expectedValue}]));
+  ].map(([key, expectedValue]) => [key, {present: Object.hasOwn(device || {}, key),
+    type: typeof device?.[key], matches: device?.[key] === expectedValue,
+    numericValueMatches: typeof expectedValue === 'number' ? Number(device?.[key]) === expectedValue : undefined}]));
   const requireApp = createRequire(path.join(appRoot, 'package.json'));
   const {loadInitObject} = requireApp('./automation/kernel-init-sync');
   const cdp = requireApp('./cdp');
@@ -174,6 +179,9 @@ export async function verifyNativeProfileIsolation({page, profile, originPort, f
             const native = typeof raw === 'string' ? JSON.parse(raw) : raw;
             report.newTabNative ||= {};
             report.newTabNative[phase] = {available: true, digest: digest(native), declared: nativeSettings(native, expected)};
+            report.newTabNative[phase].contractShape = Object.fromEntries(
+              ['identityId','identity','overrides','staticConfig','dynamicConfig','hardwareConcurrency','deviceMemory']
+                .filter(key=>Object.hasOwn(native||{},key)).map(key=>[key,typeof native[key]]));
             report.newTabNative[phase].noiseFields = Object.keys(native || {}).filter(key => /^(?:canvas|noise|seed)[A-Za-z0-9_]{0,60}$/i.test(key)).sort();
             const current = await cdp.call(socket, 'Runtime.evaluate', {returnByValue: true, awaitPromise: true,
               expression: readOnlyProfileProbeSource()}, 3000);

@@ -1,0 +1,7 @@
+appId: top.lain42.lycobrowser
+---
+- tapOn: "Upload retained RTC report"
+- extendedWaitUntil:
+    visible: "LYCO RTC stopped report retained"
+    timeout: 30000
+- takeScreenshot: original-stopped-rtc-report-retained

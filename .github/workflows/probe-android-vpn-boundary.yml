@@ -1,0 +1,66 @@
+name: Observe Android VPN and native RTC address boundaries
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tests/mobile/vpn-boundary/**', '.github/workflows/probe-android-vpn-boundary.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: owned-android-vpn-boundary-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  syntax:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Parse the isolated diagnostic sources
+        run: |
+          python3 -m py_compile tests/mobile/vpn-boundary/fixture.py tests/mobile/vpn-boundary/run.py
+          node --check tests/mobile/vpn-boundary/page.js
+          bash -n tests/mobile/vpn-boundary/build.sh
+  observe:
+    if: github.event_name == 'workflow_dispatch'
+    needs: syntax
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - name: Compile the separate non-debuggable SDK-only diagnostic
+        run: bash tests/mobile/vpn-boundary/build.sh
+      - name: Enable the owned emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Observe native ICE before during and after an actual consented per-app VPN
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: python3 tests/mobile/vpn-boundary/run.py
+      - name: Retain raw measurements without adopting a product VPN
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-android-vpn-boundary-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-vpn-boundary/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Remove disposable diagnostic signing material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/lyco-vpn-boundary-private"

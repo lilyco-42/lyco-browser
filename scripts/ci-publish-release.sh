@@ -30,7 +30,8 @@ fi
 for file in "$@"; do
   if [[ ! -s "$file" ]]; then echo "Missing/empty build: $file" >&2; exit 1; fi
   echo "Uploading $(basename "$file") to $tag"
-  gh release upload "$tag" "$file" -R "$GITHUB_REPOSITORY" --clobber
+  node "$(dirname "$0")/artifact-sha256.mjs" "$file" > "$file.sha256"
+  gh release upload "$tag" "$file" "$file.sha256" -R "$GITHUB_REPOSITORY" --clobber
 done
 if [[ "${LYCO_DESKTOP_PUBLIC_RELEASE:-}" == 'false' ]]; then
   echo "Desktop build retained in an owner-only draft; public distribution is not approved."

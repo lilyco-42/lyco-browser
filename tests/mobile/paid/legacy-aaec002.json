@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "sourceRun": 40630265066,
+  "sourceCommit": "aaec002ad75054320419b13ec35d93ac507b6340",
+  "mirrorTag": "compat-android-aaec002",
+  "mirrorReleaseId": 433746321,
+  "identifier": "top.lain42.lycobrowser",
+  "version": "1.0.25",
+  "build": "2",
+  "certificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae",
+  "files": {
+    "LYCO-Browser-Android-preview.apk": {
+      "bytes": 129811032,
+      "sha256": "97f5a04cfe255cef00519fb673274565e5fde4156f771849466b610b601fcf74"
+    },
+    "ANDROID-SHA256SUMS.txt": {
+      "bytes": 297,
+      "sha256": "0b4fd3bffea59ba5665a2ae6024e6f94862896b5e3aee301f1ec1649b3cbbbab"
+    },
+    "ANDROID-SIGNATURE.txt": {
+      "bytes": 1024,
+      "sha256": "a7400d58bb077ab8605f3c59053c99e8af935c2502bfbac7b6d8c088472224e9"
+    },
+    "ANDROID-SIGNATURE-PROVENANCE.json": {
+      "bytes": 341,
+      "sha256": "08fcebc7beb4ecc2cc5a9264d5f6f89bab72b046b56bdc19edde426910080ee1"
+    },
+    "ANDROID-VERSION-PROVENANCE.json": {
+      "bytes": 268,
+      "sha256": "3d8d2462c45c73f4374cbefbd3066511b2c3d758cb971a649fe46047b750276c"
+    },
+    "ANDROID-PACKAGE.txt": {
+      "bytes": 5143,
+      "sha256": "7722d601baf4867d0e4640a4eda7ac0c16567dc34421bab6e9a20c9a3382d513"
+    }
+  },
+  "scope": "Exact unchanged historical pre-route-metadata signed APK for owned upgrade/downgrade/recovery controls; unpublished retained draft mirror only"
+}

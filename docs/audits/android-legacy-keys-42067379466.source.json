@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-11-05T17:05:18.236947+00:00",
+  "run": 42067379466,
+  "job": 127385499838,
+  "source": "4cf92d79318208be22d330a5517f924f53bf9a83",
+  "candidate": {
+    "run": 41964719754,
+    "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+    "sha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+    "runtime_source_diff": "empty",
+    "signed_certificate": "retained-owner-certificate",
+    "apk_modified": false
+  },
+  "originalEvidenceArtifact": {
+    "id": 13436995358,
+    "bytes": 1897959,
+    "sha256": "0f161a4f9d302807eb9eae070e292e2df25ffb9dbab4368a466b8c54f2c07603"
+  },
+  "originalDevicePreparationArtifact": {
+    "id": 13435347736,
+    "bytes": 31041,
+    "sha256": "d8c132d4575c3afe8e0d38ef1efe1d31e049c8b72bd8ed0b1d426a3b5823e654"
+  },
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "devicePreparationAll13FilesByteEqualVerifiedManualPreflight": true,
+  "allEightOriginalKeyReportsMatchRawNetwork": true,
+  "onlyTwoAuthorizedSeedPagesActuallyGeneratedKeys": true,
+  "allSixReadPagesNoReplacementKeys": true,
+  "originalNonExtractableAes256KeysAndExportRejectionVerified": true,
+  "originalCiphertextHashesStableAndActualDecryptReportsTrue": true,
+  "environmentCiphertextDigestsDistinct": true,
+  "originalPaidChecks": 14,
+  "actualJUnitFlows": 15,
+  "zeroFailuresErrorsSkips": true,
+  "fourFullTextCopyAndActualTrueAssertionsVerified": true,
+  "sevenPlusOneOriginalCookieLocalIdbAndSelectedRoutesVerified": true,
+  "upgradeUuidAndDowngradeFinalMetadataReceiptHashesUnchanged": true,
+  "oldApkSaveActuallyDisabled": true,
+  "searchCancelAndInvalidEditNoAdditionalOrigin": true,
+  "actualAuthenticatedAAndBAndIndependentDirectControlsVerified": true,
+  "nativeGuardRevocationObserved": true,
+  "sameOwnerCertificateAndUnmodifiedActualApk": true,
+  "fullJobLogBytes": 134728,
+  "fullJobLogSha256": "fd6b49b7ea8a745f109389f2d6b7b847e7b225b362c77e5846f2f927712bf20c",
+  "privateDatabaseContentExportedOrReconstructed": false,
+  "privateMetadataProofLimit": "Original runner hashes/structured receipts only; private databases removed on runner. No independent reconstruction of private metadata contents.",
+  "crossEngineMigrationProven": false,
+  "productRtcPassed": false,
+  "arm64OrRealCustomerPaymentOrReleaseProven": false,
+  "scope": "Owned secure-loopback API35 website on actual old/current owner-signed APKs. Old A key seeded only before upgrade; B only on first B page. Original key, export refusal and ciphertext decryption survive original reopens/edit/route switch/downgrade/return-to-current. Not Gecko adoption, generic engine migration, power-loss or a release."
+}

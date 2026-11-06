@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-11-05T17:02:05.857001+00:00",
+  "run": 42069972627,
+  "job": 127394902307,
+  "headSource": "643be4f6af75cc101879b9221cf2cd055fb65741",
+  "testedMergeCommit": "a3004b083236a2abd48b050d1906bfa5b19cd04b",
+  "artifactId": 13435850733,
+  "originalZipBytes": 34882,
+  "originalZipSha256": "e01b30d6a2bd5d026161da2ba74929a23adf642c76d68d9cbfc4a8d389f6169c",
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "allFourOriginalPinsVerifiedAgainstActualFiles": true,
+  "derivedCallerGuardAndPreparationReconstructed": true,
+  "allFourX86RecipeHashesExactlyMatchVerifiedProducer41940576338": true,
+  "allFiveStorageTransformsAndThreeArchitectureTransformsReconstructFinalRecipe": true,
+  "allSevenVerifierTransformsReconstructActualVerifier": true,
+  "exact13ElfAnd183MachineAndOriginalSourceGatesRetained": true,
+  "hostResourceScriptByteUnchanged": true,
+  "actualPythonAndShellSyntaxPassed": true,
+  "fullJobLogBytes": 29170,
+  "fullJobLogSha256": "af81a798ea1c3a08a290b97f5d963affe0f228b228f39029413db6eea1072271",
+  "originalArm64Run41812206227Unmodified": true,
+  "compiledNativeArchiveProven": false,
+  "arm64RuntimeProven": false,
+  "productAdopted": false,
+  "scope": "Genuine Actions preparation/parse of distinct ARM64 storage+RTC source recipe. No native compiler/host resource execution or runtime/key migration/release proof yet.",
+  "actualMergeParentsVerified": [
+    "8c08ddc6eb3f8f98d0c1d8d29453d328ef150f30",
+    "643be4f6af75cc101879b9221cf2cd055fb65741"
+  ]
+}

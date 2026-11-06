@@ -1,0 +1,25 @@
+{
+  "vendor": "Wayfern",
+  "version": "155.0.8059.79",
+  "platform": "windows-x64",
+  "url": "https://download.wayfern.com/wayfern-155.0.8059.79_windows_x64.zip",
+  "metadata_source": "https://donutbrowser.com/wayfern.json",
+  "metadata_run": 41440308103,
+  "metadata_artifact_sha256": "55a1ff648a7d6e680e4bb687cca2a36235cdf2c38cb17d61340b90abc4d30781",
+  "expected_bytes": 1599626910,
+  "archive_length_observation_run": 41441463821,
+  "sha256": "43925a0841c254f66289565cd1d65f7d783c1f1e40b2a77fd402253c59b3e8b1",
+  "archive_audit_run": 41441842796,
+  "executable": "wayfern-155.0.8059.79_windows_x64/chrome.exe",
+  "executable_sha256": "1b49fdb3b79de9427b247e0c6bb41a8668e5f7b75ba0da39e6d5518cb2cb25e3",
+  "windows_path_audit_run": 41444394428,
+  "identical_windows_aliases": [
+    {
+      "keep": "wayfern-155.0.8059.79_windows_x64/D3DCompiler_47.dll",
+      "alias": "wayfern-155.0.8059.79_windows_x64/d3dcompiler_47.dll",
+      "bytes": 4741568,
+      "sha256": "e407b9ffadef47e87994dc488214f75405cf04ee99589f2315fc7ab99fd1dfe2"
+    }
+  ],
+  "scope": "Official archive discovery only; no browser execution, product adoption or release acceptance"
+}

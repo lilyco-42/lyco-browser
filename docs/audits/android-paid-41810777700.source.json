@@ -1,0 +1,166 @@
+{
+  "rawResultSha256": "bcbb9d86c76f4d51e48a9b9b8e4a2ad72fe981297c7558f633ff94d9c2df4e56",
+  "checkedAt": "2026-11-04T10:25:03.637124+00:00",
+  "run": 41810777700,
+  "job": 126509318627,
+  "fixtureJob": 126509182733,
+  "source": "90936265aada7dd36e9ac54dc7ef8292f94d283e",
+  "status": "completed",
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "id": 13312648724,
+      "kind": "evidence",
+      "bytes": 1895964,
+      "sha256": "44f0abb68024b71b4c6c5cf91afb4355ddcf96f2b61bc6f05ab06994803fcdf0"
+    },
+    {
+      "id": 13312910178,
+      "kind": "fixture",
+      "bytes": 47772208,
+      "sha256": "a73e4de37b2773c9667908d72a5671dac69018fbcd4df56bf39b3a8cb50c55cf"
+    }
+  ],
+  "fullOriginalSizeShaCrcVerified": true,
+  "sixLegacyFixtureFilesByteEqualOriginals": true,
+  "legacyRebuiltOrResigned": false,
+  "deviceJobTokenReadOnly": true,
+  "candidate": {
+    "run": 41775491059,
+    "source": "4dc38db6ff5c8380b209b2f35aeb6ff955b27842",
+    "sha256": "b8a7d5f627fe3cf483dd0d0c60b131cf5272578748e358eadc76951386cf2ce1",
+    "runtime_source_diff": "empty",
+    "signed_certificate": "retained-owner-certificate",
+    "apk_modified": false
+  },
+  "compositeChecks": 14,
+  "nativeFlows": {
+    "paid-change": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-downgrade": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-edit-details-restore": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-edit-details-save": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-edit-reject": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-edit-reopen": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-initial": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-legacy": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-missing": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-reopen-A": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-reopen-B": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-revoked": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-search": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-stopped": {
+      "testcases": 1,
+      "problems": 0
+    },
+    "paid-tls-rejection": {
+      "testcases": 1,
+      "problems": 0
+    }
+  },
+  "exactFullValueAssertions": [
+    {
+      "flow": "paid-edit-details-save",
+      "fullValueAssertions": 2,
+      "allTrue": true
+    },
+    {
+      "flow": "paid-edit-details-restore",
+      "fullValueAssertions": 2,
+      "allTrue": true
+    }
+  ],
+  "originalObservations": 7,
+  "newEditedHomepageObservations": 1,
+  "totalOriginPages": 8,
+  "profileEdit": {
+    "scope": "Actual signed Android UI, private metadata and original same-origin TCP/storage observations",
+    "cancelAndInvalidEditsUnchanged": true,
+    "onlyNameAndHomepageChanged": true,
+    "originalUuidCreationTimeAndRoutePreserved": true,
+    "otherProfileUnchanged": true,
+    "processRestartUsedEditedHomepageAndSavedRoute": true,
+    "threeWebsiteStorageTypesPreserved": true,
+    "originalMetadataRestored": true,
+    "originalMetadataSha256": "8a8ec0273a759a6b947bf5825e241c05e34ad146d79648e2a1883a96e5c5daf3",
+    "editedMetadataSha256": "dafb4f3e0deec3e5aa0cf8db49f95db7b5cce6a54bd5d8a7a34756bc13ac1979",
+    "newOriginPages": 1,
+    "observation": {
+      "phase": "paid-A-edited",
+      "before": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "after": {
+        "cookie": "A",
+        "local": "A",
+        "indexedDB": "A"
+      },
+      "route": "A"
+    }
+  },
+  "catalogueSearch": {
+    "scope": "Actual signed Android UI and metadata; 1250 catalogue aliases share owned route A, not independent exits",
+    "catalogueEntries": 1252,
+    "aliases": 1250,
+    "uiFlowPassed": true,
+    "metadataSha256": "8a8ec0273a759a6b947bf5825e241c05e34ad146d79648e2a1883a96e5c5daf3",
+    "metadataUnchanged": true,
+    "newOriginPages": 0,
+    "selectionRetained": true,
+    "completeDirectoryRestored": true
+  },
+  "boundDowngradeFinalMetadataSha256": "fad935885847f0133bd6cec6dd72f43251650e3f74d7d637b6baae35c1eb0894",
+  "savedAndInvalidScreenshotsViewed": true,
+  "savedUiScreenshotSha256": "05af4c1e5dd9b1740e5c946fa245ecf37d40c07bd75c5baf13591b1364bd6088",
+  "decodedJobLogBytes": 96331,
+  "decodedJobLogSha256": "1a9518133bf8f61132a9b1d393545f54fe63946780d75f72e27baaac5c45c1fb",
+  "fixtureJobLogBytes": 14565,
+  "fixtureJobLogSha256": "6b05329236e317743b4dd71e24aa65375ba094d0b52b40caafa424c3c5f195fa",
+  "nativeEditorAcceptanceProven": true,
+  "actualProductRtcStillFailed": true,
+  "independentSourceEngineRtcPassed": true,
+  "iosRoutingStillUnresolved": true,
+  "realPayments": false,
+  "defaultDownloadChanged": false,
+  "scope": "API35 disposable rooted emulator trusts a CI-only CA for test Billing responses. No APK/runtime API/TLS changes. Native WebView uses actual authenticated HTTP upstreams and real same-origin TCP/storage observations; not customer egress, real payment, iOS routing or a store release."
+}

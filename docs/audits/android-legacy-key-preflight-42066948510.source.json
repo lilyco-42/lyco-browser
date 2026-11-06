@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-05T16:43:05.818636+00:00",
+  "run": 42066948510,
+  "job": 127383559539,
+  "headSource": "4cf92d79318208be22d330a5517f924f53bf9a83",
+  "testedMergeCommit": "2556ca3d7c803fb2c771d78dbe5ff95209acb1c3",
+  "artifactId": 13434277496,
+  "originalZipBytes": 31041,
+  "originalZipSha256": "4559c08ca962119b86140dea444fda41d81ef343267c2e397a26d47c4fc8641c",
+  "fullOriginalSizeShaCrcSafePathsVerified": true,
+  "allEightOriginalInputHashesMatch": true,
+  "allFourAddedSourcesMatchCurrentCommit": true,
+  "allNineExactReplacementsReconstructFourGeneratedFiles": true,
+  "actualPythonShellJavaScriptSyntaxPassed": true,
+  "originalPaidAssertionFilesByteUnchanged": true,
+  "fullJobLogBytes": 26913,
+  "fullJobLogSha256": "014fe0de786c0fdafd4c9d85ef7a2851b2246fe777e3180f5579428507148311",
+  "nativeRuntimeTested": false,
+  "productOrEngineChanged": false,
+  "crossEngineMigrationProven": false,
+  "scope": "Actual Actions source preparation and parsing only, no local helper execution, device/key persistence or commercial release claim.",
+  "actualMergeParentsVerified": [
+    "8c08ddc6eb3f8f98d0c1d8d29453d328ef150f30",
+    "4cf92d79318208be22d330a5517f924f53bf9a83"
+  ]
+}

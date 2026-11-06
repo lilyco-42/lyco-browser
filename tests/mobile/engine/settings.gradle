@@ -1,0 +1,18 @@
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+if (System.getenv('GITHUB_ACTIONS') != 'true') {
+    throw new GradleException('Native engine experiments run only in GitHub Actions')
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        if (System.getenv('LYCO_ENGINE_MAVEN_ROOT')) {
+            maven {
+                url uri(System.getenv('LYCO_ENGINE_MAVEN_ROOT'))
+                content { includeModule 'top.lain42.experimental', 'geckoview-source' }
+            }
+        }
+        google(); mavenCentral(); maven { url 'https://maven.mozilla.org/maven2' }
+    }
+}
+rootProject.name = 'LycoNativeEngineExperiment'
+include ':app'

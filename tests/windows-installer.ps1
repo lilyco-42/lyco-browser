@@ -17,6 +17,8 @@ $uninstaller=Join-Path $installRoot 'Uninstall.exe'
 foreach($required in @($binary,$uninstaller,(Join-Path $appRoot 'lyco/network.js'))) { if(-not(Test-Path -LiteralPath $required)){throw "Installed file missing: $required"} }
 $entry=Get-ItemProperty $registryPath
 if($entry.DisplayName -ne 'LYCO Browser' -or $entry.Publisher -ne 'LYCO Browser' -or $entry.InstallLocation -ne $installRoot){throw 'LYCO uninstall registration mismatch'}
+$product=Get-Content -Raw -LiteralPath 'lyco/apps/universal/src/product.json' | ConvertFrom-Json
+if($entry.DisplayVersion -ne $product.version){throw 'LYCO uninstall version differs from the shared product manifest'}
 $shell=New-Object -ComObject WScript.Shell
 $shortcuts=@((Join-Path ([Environment]::GetFolderPath('Programs')) 'LYCO Browser/LYCO Browser.lnk'),(Join-Path ([Environment]::GetFolderPath('Desktop')) 'LYCO Browser.lnk'))
 foreach($shortcut in $shortcuts) {

@@ -1,0 +1,18 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: create.yaml
+    env:
+      NAME: network-rtc
+      URL: http://10.0.2.2:18080/rtc?phase=lyco
+- runFlow:
+    file: open.yaml
+    env:
+      NAME: network-rtc
+      PROXY: http://10.0.2.2:18081
+- extendedWaitUntil:
+    visible: "LYCO RTC lyco completed"
+    timeout: 30000
+- takeScreenshot: actual-selected-route-rtc

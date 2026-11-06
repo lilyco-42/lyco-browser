@@ -1,0 +1,33 @@
+{
+  "rawResultSha256": "533b57a055e3e1654d4e17bc91764d8553bd8902b6a8df1c8ed5fe98af973d19",
+  "checkedAt": "2026-11-04T16:51:41.663587+00:00",
+  "run": 41869878855,
+  "job": 126713735603,
+  "source": "9247d1bedcaef7296febdf2c7af4a942a2e1d7e8",
+  "status": "completed",
+  "conclusion": "failure",
+  "artifactId": 13343074338,
+  "originalZipBytes": 98130313,
+  "originalZipSha256": "7a4e0dbff805ddb8eb94642f3be8c0973ee9659a2c55d7518ed70892cda88264",
+  "fullOriginalSizeShaCrcVerified": true,
+  "all13NativeLibrariesEqualSourceAar": true,
+  "apkBytes": 223967215,
+  "apkSha256": "1e32430e12d3f7dee049e19212d183da3d7a4e1c031166683f0c445f7bfe7aaa",
+  "fullJobLogBytes": 91257,
+  "fullJobLogSha256": "96c5361a0ea024e39af6abc967db03e3348ea4e6ad2bc1b9d4998b651b9b32a5",
+  "abruptOriginalReports": 9,
+  "abruptFailedChecks": [
+    "a-reopen-actual-cookie-ls-idb",
+    "b-reopen-actual-cookie-ls-idb",
+    "b-after-clear-a-actual-cookie-ls-idb"
+  ],
+  "gracefulReportsBeforeExit": 1,
+  "gracefulShutdownUiObserved": false,
+  "actualParentProcessExitedCleanlyZero": true,
+  "parentPid": 4324,
+  "actualNormalPersistenceProven": false,
+  "storagePassProven": false,
+  "productAdopted": false,
+  "migrationProven": false,
+  "nextHypothesis": "Pinned optimized default fastShutdownStage=1 may exit native process before GeckoThread dispatches Gecko:Exited; verify stage0 with the same optimized AAR and unchanged raw data/key gates, rather than extending wait or faking callback"
+}

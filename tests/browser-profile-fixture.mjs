@@ -22,6 +22,9 @@ async function observeProfile(marker, readOnly, readFonts, readLocal, family, re
     userAgent: navigator.userAgent, platform: navigator.platform,
     language: navigator.language, languages: Array.from(navigator.languages),
     cores: navigator.hardwareConcurrency, memory: navigator.deviceMemory,
+    memorySurface: {secure: isSecureContext, present: 'deviceMemory' in navigator,
+      own: Object.prototype.hasOwnProperty.call(navigator, 'deviceMemory'),
+      prototype: 'deviceMemory' in Navigator.prototype},
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     webgl: readGpu(),
   };

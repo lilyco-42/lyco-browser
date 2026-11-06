@@ -1,0 +1,29 @@
+appId: top.lain42.lycobrowser
+---
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-A
+- assertVisible: "已保存线路 CI route A"
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: DOWN
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "(?s)页面网络请求失败.*|页面返回 HTTP.*|.*net::ERR_HTTP_RESPONSE_CODE_FAILURE.*"
+    timeout: 30000
+- assertNotVisible: "LYCO route .* owner A"
+- takeScreenshot: paid-stopped-no-direct
+- runFlow: close.yaml
+- runFlow:
+    file: paid-open.yaml
+    env:
+      NAME: paid-B
+- scrollUntilVisible:
+    element: "通过官网线路打开环境"
+    direction: DOWN
+- tapOn: "通过官网线路打开环境"
+- extendedWaitUntil:
+    visible: "LYCO route B owner B"
+    timeout: 30000
+- runFlow: close.yaml

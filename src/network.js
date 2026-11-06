@@ -8,7 +8,7 @@ const net = require('node:net');
 const { spawn } = require('node:child_process');
 
 const API = 'https://lain42.top/studio/api';
-const SHOP = 'https://lain42.top/shop/#proxy_1m';
+const SHOP = 'https://lain42.top/vpn/#plans';
 const ACCOUNT = 'https://lain42.top/account/';
 const SUB_REGEX = /^https:\/\/lain42\.top\/panel\/api\/sub\/([A-Za-z0-9_-]{6,128})$/;
 const TOKEN_REGEX = /^[A-Za-z0-9_-]{6,128}$/;
@@ -21,7 +21,15 @@ function extractEntitlement(me, now = Date.now()) {
     if (!match) continue;
     const expire = item.expires_at ? Date.parse(item.expires_at) : null;
     if (item.expires_at && (!Number.isFinite(expire) || expire <= now)) continue;
-    return { token: match[1], expires_at: item.expires_at || null };
+    const purchased=item.purchase_product||item.meta?.purchase_product||item.product;
+    let plan_name='代理订阅';
+    switch(purchased){
+      case 'proxy_1m':plan_name='代理月卡';break;
+      case 'proxy_3m':plan_name='代理季卡';break;
+      case 'proxy_4m':plan_name='代理120天套餐';break;
+      case 'proxy_1y':plan_name='代理年卡';break;
+    }
+    return { token: match[1], expires_at: item.expires_at || null, plan_name };
   }
   return null;
 }
@@ -45,6 +53,9 @@ function makeConfig(input, port) {
       typeof node.type!=='string' || !node.type ||
       isBypass(node.name) || ['direct','pass','dns'].includes(node.type.toLowerCase()) ||
       isBypass(node['dialer-proxy']))throw Error('订阅包含不安全的直连节点');
+    // These exact names are created/overwritten by the pinned Mihomo parser.
+    if(['GLOBAL','REJECT','REJECT-DROP'].includes(node.name))throw Error('订阅节点使用内核保留名称');
+    if(node['dialer-proxy']!==undefined&&typeof node['dialer-proxy']!=='string')throw Error('订阅节点的链式代理引用无效');
     return {...node};
   });
   const groups=obj['proxy-groups'].map(group=>{
@@ -54,12 +65,15 @@ function makeConfig(input, port) {
       !group.proxies.every(name=>typeof name==='string') ||
       group.use?.length || group['include-all'] || group['include-all-proxies'] ||
       group['include-all-providers'])throw Error('订阅含无法验证的代理分组');
+    if(['DIRECT','REJECT','REJECT-DROP','COMPATIBLE','PASS','PASS-RULE'].includes(group.name))throw Error('订阅分组使用内核保留名称');
     const allowed=group.proxies.filter(name=>!isBypass(name));
     if(!allowed.length)throw Error('代理分组没有非直连节点');
     return {...group,proxies:allowed,'empty-fallback':'REJECT',
       'default-selected':allowed.includes(group['default-selected'])?group['default-selected']:allowed[0],
       'include-all':false,'include-all-proxies':false,'include-all-providers':false};
   });
+  const names=[...proxies,...groups].map(row=>row.name);
+  if(new Set(names).size!==names.length)throw Error('订阅存在重复节点或分组名称');
   const known=new Set([...proxies.map(node=>node.name),...groups.map(group=>group.name),'REJECT','REJECT-DROP']);
   if(!groups.some(group=>group.name==='PROXY') ||
     groups.some(group=>group.proxies.some(name=>!known.has(name))) ||
@@ -122,6 +136,10 @@ class LycoNetwork {
     this.connectionEpoch = 0;
     this.authGeneration = 0;
     this.onCoreExit = null;
+    this.onAuthorizationLost = null;
+    this.onDisconnect = null;
+    this.validationTimer = null;
+    this.lastVerifiedAt = 0;
   }
   async request(route, { body, jwt = this.token, raw = false } = {}) {
     const response = await this.fetchFn(API + route, {
@@ -132,9 +150,9 @@ class LycoNetwork {
       signal: AbortSignal.timeout(15000), redirect: 'error',
     });
     if (!response.ok) {
-      if (response.status === 401 && jwt === this.token) {
+      if ((response.status === 401 || response.status === 403) && jwt && jwt === this.token) {
         this.token = null; this.entitlement = null; this.username = null;
-        await this.disconnect();
+        await this.endAuthorization();
       }
       throw Error(response.status === 401 ? '登录失败或会话已过期' :
         '官网 API 请求失败（HTTP ' + response.status + '）');
@@ -169,8 +187,9 @@ class LycoNetwork {
     const me = await this.request('/me');
     if(this.token!==sessionToken || this.connectionEpoch!==epoch)throw Error('登录会话已变化，请重新操作');
     this.username = typeof me.username === 'string' ? me.username : '';
+    this.lastVerifiedAt = Date.now();
     this.entitlement = extractEntitlement(me);
-    if (!this.entitlement && this.child) await this.disconnect();
+    if (!this.entitlement && this.child) await this.endAuthorization();
     if(this.child) this.armExpiry();
     return this.status();
   }
@@ -179,27 +198,74 @@ class LycoNetwork {
     if(!this.entitlement?.expires_at) return;
     const remaining=Date.parse(this.entitlement.expires_at)-Date.now();
     if(!Number.isFinite(remaining) || remaining<=0) {
-      this.entitlement=null;void this.disconnect();return;
+      void this.endAuthorization();return;
     }
     this.expiryTimer=setTimeout(()=>this.armExpiry(),Math.min(remaining,2147483647));
     this.expiryTimer.unref?.();
+  }
+  async endAuthorization() {
+    this.entitlement = null;
+    const disconnected = this.disconnect();
+    // The core stops immediately; owned windows also stop when Billing revokes
+    // access. Explicit core disconnect does not emit the unexpected-exit hook.
+    await Promise.allSettled([disconnected, Promise.resolve().then(()=>this.onAuthorizationLost?.())]);
+    return this.status();
+  }
+  async validateConnection() {
+    const child=this.child,epoch=this.connectionEpoch;
+    if(!child) return this.status();
+    try { return await this.refresh(); }
+    catch(error) {
+      // A short API outage may recover. An unverified paid connection cannot
+      // continue forever, and a late old response cannot stop a new connection.
+      if(this.child===child && this.connectionEpoch===epoch && Date.now()-this.lastVerifiedAt>=300000)
+        await this.endAuthorization();
+      throw error;
+    }
+  }
+  armValidation() {
+    clearTimeout(this.validationTimer);
+    const child=this.child;
+    if(!child) return;
+    this.validationTimer=setTimeout(async()=>{
+      try { await this.validateConnection(); } catch (_) { /* bounded lease above */ }
+      if(this.child===child) this.armValidation();
+    },60000);
+    this.validationTimer.unref?.();
   }
   status() {
     const connected = Boolean(this.child && this.child.exitCode === null && !this.child.killed && this.port);
     return {
       username: this.username || '', logged_in: Boolean(this.token),
       entitled: Boolean(this.entitlement), expires_at: this.entitlement?.expires_at || null,
+      plan_name: this.entitlement ? this.entitlement.plan_name||'代理订阅' : null,
       connected, port: connected ? this.port : null,
       has_core: Boolean(this.findCore()),
     };
   }
   async extensionConnection() {
     const state = await this.refresh();
-    if (!state.entitled || !state.connected) throw Error('请先登录有效月卡并连接本地代理');
+    if (!state.entitled || !state.connected) throw Error('请先登录有效代理订阅并连接本地代理');
     const issuedAt = Date.now();
     const expiresAt = Math.min(issuedAt + 8 * 60 * 60 * 1000,
       this.entitlement?.expires_at ? Date.parse(this.entitlement.expires_at) : Infinity);
     return {kind:'lyco-loopback-proxy',version:1,scheme:'http',host:'127.0.0.1',port:state.port,issuedAt,expiresAt};
+  }
+  // Main-process only. The subscription body must never be an IPC result.
+  async workspaceSubscription(authorization) {
+    const token=this.token,subToken=this.entitlement?.token;
+    const current=()=>{
+      const state=this.status();
+      if(!token||token!==this.token||subToken!==this.entitlement?.token||
+        !TOKEN_REGEX.test(subToken||'')||!state.logged_in||!state.entitled||!state.connected||
+        state.username!==authorization.username||state.port!==authorization.port||
+        this.connectionEpoch!==authorization.connectionEpoch||
+        (state.expires_at&&Date.parse(state.expires_at)<=Date.now()))
+        throw Error('账号或连接已变化，请重新操作');
+    };
+    current();
+    const raw=await this.request('/sub/'+encodeURIComponent(subToken)+'/clash',{raw:true});
+    current();return raw;
   }
   findCore() {
     const opts = [this.customCore, this.bundledCore,
@@ -225,7 +291,7 @@ class LycoNetwork {
     const epoch=this.connectionEpoch;
     const stillCurrent=()=>{if(epoch!==this.connectionEpoch)throw Error('连接已取消，请重新连接');};
     if (this.status().connected) return this.status();
-    if (!this.token || !this.entitlement) throw Error('需要先购买并激活 proxy_1m 代理月卡');
+    if (!this.token || !this.entitlement) throw Error('需要先购买并激活代理订阅');
     if (!TOKEN_REGEX.test(this.entitlement.token)) throw Error('订阅令牌无效');
     const core = this.findCore();
     if (!core) throw Error('请先导入官方 mihomo.exe 代理内核');
@@ -249,7 +315,7 @@ class LycoNetwork {
     this.child = child; this.port = port;
     const onGone=()=>{
       if(this.child!==child)return;
-      this.child=null;this.port=null;clearTimeout(this.expiryTimer);
+      this.child=null;this.port=null;clearTimeout(this.expiryTimer);clearTimeout(this.validationTimer);
       // Unexpected core loss closes managed windows. Explicit disconnect
       // clears this.child first, so the callback is never invoked for it.
       try { Promise.resolve(this.onCoreExit?.()).catch(()=>{}); } catch (_) {}
@@ -260,6 +326,7 @@ class LycoNetwork {
       await waitForPort(port, child);
       stillCurrent();
       this.armExpiry();
+      this.armValidation();
       return this.status();
     } catch (e) {
       await this.disconnect();
@@ -274,12 +341,14 @@ class LycoNetwork {
   async disconnect() {
     this.connectionEpoch++;
     clearTimeout(this.expiryTimer);this.expiryTimer=null;
+    clearTimeout(this.validationTimer);this.validationTimer=null;
     if (this.child) {
       const child = this.child;
       this.child = null; this.port = null;
       if (child.exitCode === null) child.kill();
     }
     await this.cleanupConfig();
+    await this.onDisconnect?.();
     return this.status();
   }
   async logout() {
@@ -289,4 +358,4 @@ class LycoNetwork {
     return this.status();
   }
 }
-module.exports = { LycoNetwork, extractEntitlement, makeConfig, SHOP, ACCOUNT, API };
+module.exports = { LycoNetwork, extractEntitlement, makeConfig, freePort, waitForPort, SHOP, ACCOUNT, API };

@@ -1,0 +1,33 @@
+appId: top.lain42.lycobrowser
+---
+- launchApp:
+    stopApp: false
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "删除环境 mobile-A"
+    direction: DOWN
+- tapOn: "删除环境 mobile-A"
+- tapOn: "删除"
+- extendedWaitUntil:
+    visible: "已删除环境及网站数据"
+    timeout: 30000
+- scrollUntilVisible:
+    element: "已保存 1 个环境"
+    direction: UP
+- assertVisible: "已保存 1 个环境"
+- scrollUntilVisible:
+    element: "打开环境 mobile-B"
+    direction: DOWN
+- assertVisible: "打开环境 mobile-B"
+# Restart the control app to verify the deletion was saved, rather than only
+# removing a card from the current React tree. No native browser is open here.
+- launchApp
+- tapOn: "环境管理"
+- scrollUntilVisible:
+    element: "已保存 1 个环境"
+    direction: DOWN
+- assertVisible: "已保存 1 个环境"
+- scrollUntilVisible:
+    element: "打开环境 mobile-B"
+    direction: DOWN
+- assertVisible: "打开环境 mobile-B"

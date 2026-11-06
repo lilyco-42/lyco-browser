@@ -1,0 +1,60 @@
+name: Source-built Gecko ARM64 archive experiment
+on:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: source-built-gecko-arm64-experiment
+  cancel-in-progress: false
+jobs:
+  native-engine:
+    name: Compile actual patched Gecko C++ · ARM64 archive only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '21'}
+      - name: Derive exact ARM64 recipe without modifying the tested base
+        run: python3 tests/mobile/engine/source-arm64/prepare.py
+      - name: Prepare disposable build host disk
+        run: |
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-before.txt"
+          free -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/memory.txt"
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          df -h > "$RUNNER_TEMP/lyco-gecko-build-evidence/disk-after.txt"
+          test "$(df --output=avail -B1 "$RUNNER_TEMP" | tail -1)" -gt 45000000000
+      - name: Validate unchanged build host resource containment
+        run: python3 "$RUNNER_TEMP/lyco-gecko-arm64-recipe/build-host.py" --check
+      - name: Preserve exact adaptation and host preflight before compilation
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-arm64-host-preflight-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lyco-gecko-build-evidence/host-check-*.json
+            ${{ runner.temp }}/lyco-gecko-build-evidence/ARM64-RECIPE.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Build the same native patch for ARM64
+        run: python3 "$RUNNER_TEMP/lyco-gecko-arm64-recipe/build-host.py"
+      - name: Verify actual ARM64 ELF and unchanged native source
+        run: python3 tests/mobile/engine/source-arm64/verify-output.py
+      - name: Retain source-built ARM64 archive without adopting it
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-built-gecko-arm64-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-output/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Preserve original ARM64 source, adaptation and observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyco-source-gecko-arm64-build-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/lyco-gecko-build-evidence/
+          if-no-files-found: warn
+          retention-days: 7

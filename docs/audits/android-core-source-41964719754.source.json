@@ -1,0 +1,86 @@
+{
+  "verifiedAt": "2026-11-05T04:27:52.663272+00:00",
+  "run": 41964719754,
+  "job": 127038964112,
+  "source": "4304fb196a86de40927b9597057019bc918cdf2b",
+  "conclusion": "success",
+  "originalArtifacts": [
+    {
+      "id": 13387996878,
+      "name": "lyco-mobile-android-evidence-41964719754",
+      "bytes": 552390,
+      "sha256": "f428829e5b2b729a5478afa9683c2283618445e5591f5b1b00ae789ee7f95ab3"
+    },
+    {
+      "id": 13387967173,
+      "name": "lyco-android-candidate-41964719754",
+      "bytes": 47831524,
+      "sha256": "57ca5d59f8da7bb36807f6a7de81705188a704ebdf049a5bf21a5f4a18f0feb4"
+    },
+    {
+      "id": 13387663089,
+      "name": "lyco-android-core-source-41964719754",
+      "bytes": 836157550,
+      "sha256": "1a020eb6505cb5ecc50a821ba4b34ac59c9c528f47a7b1aef68659571e964415"
+    },
+    {
+      "id": 13386684140,
+      "name": "lyco-native-js-source-android-41964719754",
+      "bytes": 2219788,
+      "sha256": "877ee18b8662ba52d2ce43a985c2c4d3b049f8945ced3cb753b30bac02af0575"
+    },
+    {
+      "id": 13386414220,
+      "name": "lyco-npm-notices-android-41964719754",
+      "bytes": 168219,
+      "sha256": "eae8d049b1d187d62bc33e1beb63898ea43e939a982a3ecefb767202e9100371"
+    },
+    {
+      "id": 13386274449,
+      "name": "lyco-go-notices-android-41964719754",
+      "bytes": 69598,
+      "sha256": "06fcd749e369cf615231cddb79fd41d0cae6bf08be4ae122895502e048c0c463"
+    }
+  ],
+  "allSixOriginalZipSizeShaCrcVerified": true,
+  "connectorCoreSizeLimit": 536870912,
+  "sameOriginalGhApiFallbackUsed": true,
+  "apkBytes": 130039995,
+  "apkSha256": "5363d3f783ca697177851509dcb81d643c315a808d2880fe5dcd1617dde69ee9",
+  "retainedOwnerCertificateSha256": "1a5407a3cdea1bef835214d0f97d4e94952c69c10b45c1c7573c8f6691297bae",
+  "version": "1.0.25",
+  "build": "2",
+  "actualPackagerMapAndBundleMatchApk": true,
+  "sevenOriginalNativeFlowsPassed": true,
+  "originalNativeStorageReports": 6,
+  "originalNativeNavigationObservations": 5,
+  "nativeStoppedProxyDirectFallbackRequests": 0,
+  "originalGoNoticeUiCommandsCompleted": 30,
+  "originalNpmNoticeUiCommandsCompleted": 14,
+  "rawCoreBindingSha256": "3deec470eb7e5d50fb8108e8d294298a0fdbc27eed884c4f91391ae2a3505a94",
+  "actualCompilerAndGeneratedSourceArchive": {
+    "captureCalls": 2,
+    "sourcesPerAbi": 13,
+    "retainedWorkSources": 266,
+    "trackedGitBlobs": 425,
+    "sourceModules": 405,
+    "moduleZipEntriesCrcVerified": 55988,
+    "allModuleZipGoAndGoModChecksumsVerified": true,
+    "outerLocksMatchBothCompilers": true,
+    "parentApplicationCommit": "4304fb196a86de40927b9597057019bc918cdf2b"
+  },
+  "bothRawCompilerOutputsMatchActualAar": true,
+  "actualGradleStrippedLibrariesMatchApk": true,
+  "all29AllocatedSectionsAndProgramHeadersPerAbiIndependentlyMatchCompilerOutput": true,
+  "rawAarAndApkLibraryBytesIdentical": false,
+  "strippingToolIdentityProven": false,
+  "fullOriginalJobLogBytes": 259879,
+  "fullOriginalJobLogSha256": "3674c8c44142b3e0e0f55d92fbd42d5644e2149a1e984c1c226f32cb80974972",
+  "fullCorrespondingSourceProven": false,
+  "allNativeLicenseMappingProven": false,
+  "reproducibleBuildProven": false,
+  "browserPrivacyPassed": false,
+  "nativeEngineProductAdopted": false,
+  "oldSignedApkCorrespondenceProven": false,
+  "scope": "Current actual owner-signed Android APK core compiler/generated-source/AAR/Gradle strip/output binding and original seven native smoke flows. No all-native source/license clearance, paid-route upgrade suite, RTC privacy, customer payment/egress, old WebView migration, ARM64 Gecko or five-platform commercial release proof."
+}

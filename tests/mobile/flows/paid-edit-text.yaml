@@ -1,0 +1,27 @@
+appId: top.lain42.lycobrowser
+---
+# Android may place the caret in the middle of a horizontally scrolled URL.
+# Select the field's entire value, then require an exact UI readback.
+- tapOn:
+    id: ${FIELD}
+- scrollUntilVisible:
+    element:
+      id: ${FIELD}
+    direction: DOWN
+- longPressOn:
+    id: ${FIELD}
+- runFlow:
+    when:
+      visible: "(?i)select all"
+    commands:
+      - tapOn: "(?i)select all"
+- eraseText: 1
+- inputText: ${VALUE}
+# Android hideKeyboard sends Back even when no keyboard is showing, closing Modal.
+# Use the field's real Done/submit handler instead.
+- pressKey: Enter
+- copyTextFrom:
+    id: ${FIELD}
+- assertTrue:
+    condition: ${maestro.copiedText === VALUE}
+    label: The complete editor field equals the requested value

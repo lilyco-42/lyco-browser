@@ -1,0 +1,1215 @@
+{
+  "host": "10.1.0.102",
+  "ports": {
+    "before": {
+      "top": 39912,
+      "initial-empty": 46055,
+      "nested-empty": 40380
+    },
+    "vpn": {
+      "top": 56488,
+      "initial-empty": 50722,
+      "nested-empty": 58676
+    },
+    "after": {
+      "top": 54335,
+      "initial-empty": 48055,
+      "nested-empty": 37766
+    }
+  },
+  "reports": [
+    {
+      "phase": "before",
+      "userAgent": "Mozilla/5.0 (Linux; Android 15; Android SDK built for x86_64 Build/AE3A.240806.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.219 Mobile Safari/537.36",
+      "observations": [
+        {
+          "name": "top",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:3421372390 1 udp 2113937151 10.0.2.15 44852 typ host generation 0 ufrag yBA4 network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "yBA4"
+              },
+              "address": "10.0.2.15",
+              "port": 44852,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:2167260821 1 udp 2113929727 fec0::5054:ff:fe12:3456 53059 typ host generation 0 ufrag yBA4 network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "yBA4"
+              },
+              "address": "[fec0::5054:ff:fe12:3456]",
+              "port": 53059,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:2787791420 1 udp 1677729535 10.1.0.102 41243 typ srflx raddr 10.0.2.15 rport 44852 generation 0 ufrag yBA4 network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "yBA4"
+              },
+              "address": "10.1.0.102",
+              "port": 41243,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:39912"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "IM4v04gSS",
+              "timestamp": 1793843665646.331,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "997031008",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "yBA4"
+            },
+            {
+              "id": "IXd+dBQ+N",
+              "timestamp": 1793843665646.331,
+              "type": "local-candidate",
+              "address": "10.0.2.15",
+              "candidateType": "host",
+              "foundation": "3421372390",
+              "ip": "10.0.2.15",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 44852,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "yBA4"
+            },
+            {
+              "id": "IZ6xTTeOg",
+              "timestamp": 1793843665646.331,
+              "type": "local-candidate",
+              "address": "fec0::5054:ff:fe12:3456",
+              "candidateType": "host",
+              "foundation": "2167260821",
+              "ip": "fec0::5054:ff:fe12:3456",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 53059,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "yBA4"
+            },
+            {
+              "id": "IizNGY00n",
+              "timestamp": 1793843665646.331,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "3891870812",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "yBA4"
+            },
+            {
+              "id": "Iz/pEUKhY",
+              "timestamp": 1793843665646.331,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "2787791420",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 41243,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.15",
+              "relatedPort": 44852,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:39912",
+              "usernameFragment": "yBA4"
+            }
+          ],
+          "sdp": "v=0\r\no=- 5767767442246769103 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 41243 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:3421372390 1 udp 2113937151 10.0.2.15 44852 typ host generation 0 network-cost 999\r\na=candidate:2167260821 1 udp 2113929727 fec0::5054:ff:fe12:3456 53059 typ host generation 0 network-cost 999\r\na=candidate:2787791420 1 udp 1677729535 10.1.0.102 41243 typ srflx raddr 10.0.2.15 rport 44852 generation 0 network-cost 999\r\na=ice-ufrag:yBA4\r\na=ice-pwd:cN2GWcrGREQ4jFtayJsghDUB\r\na=ice-options:trickle\r\na=fingerprint:sha-256 0F:5B:8D:32:61:84:D8:5C:61:F0:48:CE:C3:EF:74:B6:17:4B:E3:08:F8:A1:C1:A9:6D:22:40:0F:39:AA:FC:70\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        },
+        {
+          "name": "initial-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:3152288986 1 udp 2113937151 10.0.2.15 43718 typ host generation 0 ufrag X3zu network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "X3zu"
+              },
+              "address": "10.0.2.15",
+              "port": 43718,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:3774084135 1 udp 2113929727 fec0::5054:ff:fe12:3456 47073 typ host generation 0 ufrag X3zu network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "X3zu"
+              },
+              "address": "[fec0::5054:ff:fe12:3456]",
+              "port": 47073,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:1750369245 1 udp 1677729535 10.1.0.102 58078 typ srflx raddr 10.0.2.15 rport 43718 generation 0 ufrag X3zu network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "X3zu"
+              },
+              "address": "10.1.0.102",
+              "port": 58078,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:46055"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "I3yGcDViS",
+              "timestamp": 1793843665668.623,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "2727084301",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "X3zu"
+            },
+            {
+              "id": "IAycD02rI",
+              "timestamp": 1793843665668.623,
+              "type": "local-candidate",
+              "address": "10.0.2.15",
+              "candidateType": "host",
+              "foundation": "3152288986",
+              "ip": "10.0.2.15",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 43718,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "X3zu"
+            },
+            {
+              "id": "Ii9+jgvzy",
+              "timestamp": 1793843665668.623,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "2812536310",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "X3zu"
+            },
+            {
+              "id": "In4BsefJZ",
+              "timestamp": 1793843665668.623,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "1750369245",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 58078,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.15",
+              "relatedPort": 43718,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:46055",
+              "usernameFragment": "X3zu"
+            },
+            {
+              "id": "IxGSZZUjz",
+              "timestamp": 1793843665668.623,
+              "type": "local-candidate",
+              "address": "fec0::5054:ff:fe12:3456",
+              "candidateType": "host",
+              "foundation": "3774084135",
+              "ip": "fec0::5054:ff:fe12:3456",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 47073,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "X3zu"
+            }
+          ],
+          "sdp": "v=0\r\no=- 3192839692012596589 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 58078 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:3152288986 1 udp 2113937151 10.0.2.15 43718 typ host generation 0 network-cost 999\r\na=candidate:3774084135 1 udp 2113929727 fec0::5054:ff:fe12:3456 47073 typ host generation 0 network-cost 999\r\na=candidate:1750369245 1 udp 1677729535 10.1.0.102 58078 typ srflx raddr 10.0.2.15 rport 43718 generation 0 network-cost 999\r\na=ice-ufrag:X3zu\r\na=ice-pwd:x5fdyWSAkUxELMi4bFof2Xds\r\na=ice-options:trickle\r\na=fingerprint:sha-256 FC:2B:C9:58:64:A8:12:82:92:A1:8A:B7:D2:A3:8F:93:65:93:81:81:2B:D8:E3:9B:3E:6C:48:EC:C2:AF:F8:95\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        },
+        {
+          "name": "nested-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:1875012260 1 udp 2113937151 10.0.2.15 50914 typ host generation 0 ufrag WwdD network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "WwdD"
+              },
+              "address": "10.0.2.15",
+              "port": 50914,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:2793703963 1 udp 2113929727 fec0::5054:ff:fe12:3456 40068 typ host generation 0 ufrag WwdD network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "WwdD"
+              },
+              "address": "[fec0::5054:ff:fe12:3456]",
+              "port": 40068,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:162109123 1 udp 1677729535 10.1.0.102 54978 typ srflx raddr 10.0.2.15 rport 50914 generation 0 ufrag WwdD network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "WwdD"
+              },
+              "address": "10.1.0.102",
+              "port": 54978,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:40380"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "I15HeyemT",
+              "timestamp": 1793843665668.707,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "1810484274",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "WwdD"
+            },
+            {
+              "id": "ILMxkPjRF",
+              "timestamp": 1793843665668.707,
+              "type": "local-candidate",
+              "address": "10.0.2.15",
+              "candidateType": "host",
+              "foundation": "1875012260",
+              "ip": "10.0.2.15",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 50914,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "WwdD"
+            },
+            {
+              "id": "IMLfCbWsS",
+              "timestamp": 1793843665668.707,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "1146758389",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "WwdD"
+            },
+            {
+              "id": "IaZgU6oje",
+              "timestamp": 1793843665668.707,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "162109123",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 54978,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.15",
+              "relatedPort": 50914,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:40380",
+              "usernameFragment": "WwdD"
+            },
+            {
+              "id": "IzTMfInbx",
+              "timestamp": 1793843665668.707,
+              "type": "local-candidate",
+              "address": "fec0::5054:ff:fe12:3456",
+              "candidateType": "host",
+              "foundation": "2793703963",
+              "ip": "fec0::5054:ff:fe12:3456",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40068,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "WwdD"
+            }
+          ],
+          "sdp": "v=0\r\no=- 8457491374171888476 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 54978 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:1875012260 1 udp 2113937151 10.0.2.15 50914 typ host generation 0 network-cost 999\r\na=candidate:2793703963 1 udp 2113929727 fec0::5054:ff:fe12:3456 40068 typ host generation 0 network-cost 999\r\na=candidate:162109123 1 udp 1677729535 10.1.0.102 54978 typ srflx raddr 10.0.2.15 rport 50914 generation 0 network-cost 999\r\na=ice-ufrag:WwdD\r\na=ice-pwd:21N+PLKrwdOCvx7ehA1naDkN\r\na=ice-options:trickle\r\na=fingerprint:sha-256 94:01:C4:1C:71:C1:C8:9F:C7:87:3C:C6:0D:DE:5D:0D:31:4A:75:91:C9:32:62:91:84:95:CF:32:69:1A:9A:74\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        }
+      ]
+    },
+    {
+      "phase": "vpn",
+      "userAgent": "Mozilla/5.0 (Linux; Android 15; Android SDK built for x86_64 Build/AE3A.240806.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.219 Mobile Safari/537.36",
+      "observations": [
+        {
+          "name": "top",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:775473445 1 udp 2113937151 192.0.2.2 53983 typ host generation 0 ufrag XVdJ network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "XVdJ"
+              },
+              "address": "192.0.2.2",
+              "port": 53983,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:1635024349 1 udp 2113939711 2001:db8::2 57963 typ host generation 0 ufrag XVdJ network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "XVdJ"
+              },
+              "address": "[2001:db8::2]",
+              "port": 57963,
+              "candidateType": "host"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:56488"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "IVVYdYr2v",
+              "timestamp": 1793843685808.778,
+              "type": "local-candidate",
+              "address": "2001:db8::2",
+              "candidateType": "host",
+              "foundation": "1635024349",
+              "ip": "2001:db8::2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 57963,
+              "priority": 2113939711,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "XVdJ"
+            },
+            {
+              "id": "IXMrWhxtv",
+              "timestamp": 1793843685808.778,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "4255560967",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "XVdJ"
+            },
+            {
+              "id": "IZjnGACSB",
+              "timestamp": 1793843685808.778,
+              "type": "local-candidate",
+              "address": "192.0.2.2",
+              "candidateType": "host",
+              "foundation": "775473445",
+              "ip": "192.0.2.2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 53983,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "XVdJ"
+            },
+            {
+              "id": "Iq7rZghCw",
+              "timestamp": 1793843685808.778,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "3524615616",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "XVdJ"
+            }
+          ],
+          "sdp": "v=0\r\no=- 3071295520629496701 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 53983 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 192.0.2.2\r\na=candidate:775473445 1 udp 2113937151 192.0.2.2 53983 typ host generation 0 network-cost 999\r\na=candidate:1635024349 1 udp 2113939711 2001:db8::2 57963 typ host generation 0 network-cost 999\r\na=ice-ufrag:XVdJ\r\na=ice-pwd:CgSwXxvUqJ7dSeQw5eBoBB+i\r\na=ice-options:trickle\r\na=fingerprint:sha-256 45:64:A9:43:DF:86:4B:B7:F8:30:C2:F7:F1:08:42:0A:27:31:02:7B:31:51:99:4B:07:37:D0:66:70:87:31:EF\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "deadline"
+        },
+        {
+          "name": "initial-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:398701503 1 udp 2113937151 192.0.2.2 57605 typ host generation 0 ufrag o0pM network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "o0pM"
+              },
+              "address": "192.0.2.2",
+              "port": 57605,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:1485768519 1 udp 2113939711 2001:db8::2 40287 typ host generation 0 ufrag o0pM network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "o0pM"
+              },
+              "address": "[2001:db8::2]",
+              "port": 40287,
+              "candidateType": "host"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:50722"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "I9WrWcbGG",
+              "timestamp": 1793843685810.552,
+              "type": "local-candidate",
+              "address": "2001:db8::2",
+              "candidateType": "host",
+              "foundation": "1485768519",
+              "ip": "2001:db8::2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40287,
+              "priority": 2113939711,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "o0pM"
+            },
+            {
+              "id": "IH3VW9fDW",
+              "timestamp": 1793843685810.552,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "3958253402",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "o0pM"
+            },
+            {
+              "id": "ImpRBgpP2",
+              "timestamp": 1793843685810.552,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "3294482333",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "o0pM"
+            },
+            {
+              "id": "In5SNLOZa",
+              "timestamp": 1793843685810.552,
+              "type": "local-candidate",
+              "address": "192.0.2.2",
+              "candidateType": "host",
+              "foundation": "398701503",
+              "ip": "192.0.2.2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 57605,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "o0pM"
+            }
+          ],
+          "sdp": "v=0\r\no=- 5084380809093003219 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 57605 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 192.0.2.2\r\na=candidate:398701503 1 udp 2113937151 192.0.2.2 57605 typ host generation 0 network-cost 999\r\na=candidate:1485768519 1 udp 2113939711 2001:db8::2 40287 typ host generation 0 network-cost 999\r\na=ice-ufrag:o0pM\r\na=ice-pwd:lqxBZr7G79PLvwjSLmOwix2H\r\na=ice-options:trickle\r\na=fingerprint:sha-256 92:0C:FD:7F:AB:9D:D5:93:1F:B5:0C:C8:41:4F:90:37:92:87:6C:76:96:78:B2:14:7F:43:90:0A:0E:05:71:5C\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "deadline"
+        },
+        {
+          "name": "nested-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:3585864472 1 udp 2113937151 192.0.2.2 46214 typ host generation 0 ufrag BjDn network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "BjDn"
+              },
+              "address": "192.0.2.2",
+              "port": 46214,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:1720894850 1 udp 2113939711 2001:db8::2 58762 typ host generation 0 ufrag BjDn network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "BjDn"
+              },
+              "address": "[2001:db8::2]",
+              "port": 58762,
+              "candidateType": "host"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:58676"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "IANnUwNr3",
+              "timestamp": 1793843685812.4111,
+              "type": "local-candidate",
+              "address": "2001:db8::2",
+              "candidateType": "host",
+              "foundation": "1720894850",
+              "ip": "2001:db8::2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 58762,
+              "priority": 2113939711,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "BjDn"
+            },
+            {
+              "id": "IEWkAXBk7",
+              "timestamp": 1793843685812.4111,
+              "type": "local-candidate",
+              "address": "192.0.2.2",
+              "candidateType": "host",
+              "foundation": "3585864472",
+              "ip": "192.0.2.2",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 46214,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "BjDn"
+            },
+            {
+              "id": "IITsm/YSc",
+              "timestamp": 1793843685812.4111,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "535680",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "BjDn"
+            },
+            {
+              "id": "IXQEJhqR2",
+              "timestamp": 1793843685812.4111,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "86493307",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "BjDn"
+            }
+          ],
+          "sdp": "v=0\r\no=- 2685112191400651661 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 46214 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 192.0.2.2\r\na=candidate:3585864472 1 udp 2113937151 192.0.2.2 46214 typ host generation 0 network-cost 999\r\na=candidate:1720894850 1 udp 2113939711 2001:db8::2 58762 typ host generation 0 network-cost 999\r\na=ice-ufrag:BjDn\r\na=ice-pwd:koabPuK3+pxEmbrxgnjzw3Yg\r\na=ice-options:trickle\r\na=fingerprint:sha-256 1E:62:98:53:95:9A:FE:25:46:7C:49:27:3B:1E:76:90:5A:99:0A:BC:8A:24:60:73:FE:FD:BA:CC:81:CA:C3:73\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "deadline"
+        }
+      ]
+    },
+    {
+      "phase": "after",
+      "userAgent": "Mozilla/5.0 (Linux; Android 15; Android SDK built for x86_64 Build/AE3A.240806.019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.219 Mobile Safari/537.36",
+      "observations": [
+        {
+          "name": "top",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:451305682 1 udp 2113937151 10.0.2.16 60454 typ host generation 0 ufrag jl4H network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "jl4H"
+              },
+              "address": "10.0.2.16",
+              "port": 60454,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:2890876186 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 40616 typ host generation 0 ufrag jl4H network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "jl4H"
+              },
+              "address": "[fec0::9c99:17cd:f33f:4e35]",
+              "port": 40616,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:2437437181 1 udp 1677729535 10.1.0.102 44160 typ srflx raddr 10.0.2.16 rport 60454 generation 0 ufrag jl4H network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "jl4H"
+              },
+              "address": "10.1.0.102",
+              "port": 44160,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:54335"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "ICdcN4Wm/",
+              "timestamp": 1793843690254.9421,
+              "type": "local-candidate",
+              "address": "10.0.2.16",
+              "candidateType": "host",
+              "foundation": "451305682",
+              "ip": "10.0.2.16",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 60454,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "jl4H"
+            },
+            {
+              "id": "IURdeRrXy",
+              "timestamp": 1793843690254.9421,
+              "type": "local-candidate",
+              "address": "fec0::9c99:17cd:f33f:4e35",
+              "candidateType": "host",
+              "foundation": "2890876186",
+              "ip": "fec0::9c99:17cd:f33f:4e35",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40616,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "jl4H"
+            },
+            {
+              "id": "IlaOQvgyX",
+              "timestamp": 1793843690254.9421,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "1536218157",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "jl4H"
+            },
+            {
+              "id": "ImDHOwdYh",
+              "timestamp": 1793843690254.9421,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "2437437181",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 44160,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.16",
+              "relatedPort": 60454,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:54335",
+              "usernameFragment": "jl4H"
+            },
+            {
+              "id": "IpkPHFLfg",
+              "timestamp": 1793843690254.9421,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "1589588182",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "jl4H"
+            }
+          ],
+          "sdp": "v=0\r\no=- 9099030035874531282 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 44160 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:451305682 1 udp 2113937151 10.0.2.16 60454 typ host generation 0 network-cost 999\r\na=candidate:2890876186 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 40616 typ host generation 0 network-cost 999\r\na=candidate:2437437181 1 udp 1677729535 10.1.0.102 44160 typ srflx raddr 10.0.2.16 rport 60454 generation 0 network-cost 999\r\na=ice-ufrag:jl4H\r\na=ice-pwd:Fsj+U1Zxy8l9l8hXo2cx9gaN\r\na=ice-options:trickle\r\na=fingerprint:sha-256 8C:42:73:24:A0:63:40:F3:C3:03:2C:0E:E3:E2:FC:68:C5:A1:8D:10:BA:58:72:BE:23:07:88:1E:8F:02:F1:86\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        },
+        {
+          "name": "initial-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:2742510055 1 udp 2113937151 10.0.2.16 59943 typ host generation 0 ufrag VodS network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "VodS"
+              },
+              "address": "10.0.2.16",
+              "port": 59943,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:366887983 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 50585 typ host generation 0 ufrag VodS network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "VodS"
+              },
+              "address": "[fec0::9c99:17cd:f33f:4e35]",
+              "port": 50585,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:685332424 1 udp 1677729535 10.1.0.102 50230 typ srflx raddr 10.0.2.16 rport 59943 generation 0 ufrag VodS network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "VodS"
+              },
+              "address": "10.1.0.102",
+              "port": 50230,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:48055"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "I4z5zCfZf",
+              "timestamp": 1793843690254.868,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "3791770904",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "VodS"
+            },
+            {
+              "id": "ICFFxZVCt",
+              "timestamp": 1793843690254.868,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "3878564323",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "VodS"
+            },
+            {
+              "id": "IRJneDRwS",
+              "timestamp": 1793843690254.868,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "685332424",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 50230,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.16",
+              "relatedPort": 59943,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:48055",
+              "usernameFragment": "VodS"
+            },
+            {
+              "id": "IaEXqxkTn",
+              "timestamp": 1793843690254.868,
+              "type": "local-candidate",
+              "address": "10.0.2.16",
+              "candidateType": "host",
+              "foundation": "2742510055",
+              "ip": "10.0.2.16",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 59943,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "VodS"
+            },
+            {
+              "id": "IwZAulNND",
+              "timestamp": 1793843690254.868,
+              "type": "local-candidate",
+              "address": "fec0::9c99:17cd:f33f:4e35",
+              "candidateType": "host",
+              "foundation": "366887983",
+              "ip": "fec0::9c99:17cd:f33f:4e35",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 50585,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "VodS"
+            }
+          ],
+          "sdp": "v=0\r\no=- 2674845826853047493 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 50230 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:2742510055 1 udp 2113937151 10.0.2.16 59943 typ host generation 0 network-cost 999\r\na=candidate:366887983 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 50585 typ host generation 0 network-cost 999\r\na=candidate:685332424 1 udp 1677729535 10.1.0.102 50230 typ srflx raddr 10.0.2.16 rport 59943 generation 0 network-cost 999\r\na=ice-ufrag:VodS\r\na=ice-pwd:V9XYWLG2zPL3aiIP85w25ezF\r\na=ice-options:trickle\r\na=fingerprint:sha-256 18:56:9D:36:62:E5:A1:4A:3B:F9:20:7B:6C:66:EE:7D:14:9E:C1:61:95:99:C5:4C:EB:83:81:A9:C7:A4:34:EB\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        },
+        {
+          "name": "nested-empty",
+          "candidates": [
+            {
+              "json": {
+                "candidate": "candidate:1031055202 1 udp 2113937151 10.0.2.16 34553 typ host generation 0 ufrag 437d network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "437d"
+              },
+              "address": "10.0.2.16",
+              "port": 34553,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:4068233821 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 40814 typ host generation 0 ufrag 437d network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "437d"
+              },
+              "address": "[fec0::9c99:17cd:f33f:4e35]",
+              "port": 40814,
+              "candidateType": "host"
+            },
+            {
+              "json": {
+                "candidate": "candidate:771383864 1 udp 1677729535 10.1.0.102 56016 typ srflx raddr 10.0.2.16 rport 34553 generation 0 ufrag 437d network-cost 999",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0,
+                "usernameFragment": "437d"
+              },
+              "address": "10.1.0.102",
+              "port": 56016,
+              "candidateType": "srflx"
+            }
+          ],
+          "errors": [
+            {
+              "errorCode": 701,
+              "errorText": "STUN server address is incompatible.",
+              "address": "[0:0:0:x:x:x:x:x]",
+              "url": "stun:10.1.0.102:37766"
+            }
+          ],
+          "localStats": [
+            {
+              "id": "I55DTdSFX",
+              "timestamp": 1793843690254.823,
+              "type": "local-candidate",
+              "address": "fec0::9c99:17cd:f33f:4e35",
+              "candidateType": "host",
+              "foundation": "4068233821",
+              "ip": "fec0::9c99:17cd:f33f:4e35",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 40814,
+              "priority": 2113929727,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "437d"
+            },
+            {
+              "id": "ILomx2hHF",
+              "timestamp": 1793843690254.823,
+              "type": "local-candidate",
+              "address": "0.0.0.0",
+              "candidateType": "host",
+              "foundation": "1337604297",
+              "ip": "0.0.0.0",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509957375,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "437d"
+            },
+            {
+              "id": "IZOAFT1iQ",
+              "timestamp": 1793843690254.823,
+              "type": "local-candidate",
+              "address": "10.1.0.102",
+              "candidateType": "srflx",
+              "foundation": "771383864",
+              "ip": "10.1.0.102",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 56016,
+              "priority": 1677729535,
+              "protocol": "udp",
+              "relatedAddress": "10.0.2.16",
+              "relatedPort": 34553,
+              "transportId": "T01",
+              "url": "stun:10.1.0.102:37766",
+              "usernameFragment": "437d"
+            },
+            {
+              "id": "IwGKuCbrw",
+              "timestamp": 1793843690254.823,
+              "type": "local-candidate",
+              "address": "10.0.2.16",
+              "candidateType": "host",
+              "foundation": "1031055202",
+              "ip": "10.0.2.16",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 34553,
+              "priority": 2113937151,
+              "protocol": "udp",
+              "transportId": "T01",
+              "usernameFragment": "437d"
+            },
+            {
+              "id": "IwyNDDmfo",
+              "timestamp": 1793843690254.823,
+              "type": "local-candidate",
+              "address": "::",
+              "candidateType": "host",
+              "foundation": "1611255822",
+              "ip": "::",
+              "isRemote": false,
+              "networkType": "unknown",
+              "port": 9,
+              "priority": 1509949951,
+              "protocol": "tcp",
+              "tcpType": "active",
+              "transportId": "T01",
+              "usernameFragment": "437d"
+            }
+          ],
+          "sdp": "v=0\r\no=- 1766743348221480868 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 56016 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 10.1.0.102\r\na=candidate:1031055202 1 udp 2113937151 10.0.2.16 34553 typ host generation 0 network-cost 999\r\na=candidate:4068233821 1 udp 2113929727 fec0::9c99:17cd:f33f:4e35 40814 typ host generation 0 network-cost 999\r\na=candidate:771383864 1 udp 1677729535 10.1.0.102 56016 typ srflx raddr 10.0.2.16 rport 34553 generation 0 network-cost 999\r\na=ice-ufrag:437d\r\na=ice-pwd:N4SyIIiife8vPoPqWbnYPoOE\r\na=ice-options:trickle\r\na=fingerprint:sha-256 CA:9E:F6:B7:2E:21:B3:3B:C3:E9:89:3D:BC:AE:6D:83:AC:D4:45:73:29:F1:4C:EE:10:28:8A:14:CF:F4:EC:85\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+          "finishedBecause": "gather-complete"
+        }
+      ]
+    }
+  ],
+  "stun": [
+    {
+      "phase": "before",
+      "case": "top",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 41243,
+      "responseBytes": 40
+    },
+    {
+      "phase": "before",
+      "case": "nested-empty",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 54978,
+      "responseBytes": 40
+    },
+    {
+      "phase": "before",
+      "case": "initial-empty",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 58078,
+      "responseBytes": 40
+    },
+    {
+      "phase": "after",
+      "case": "initial-empty",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 50230,
+      "responseBytes": 40
+    },
+    {
+      "phase": "after",
+      "case": "top",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 44160,
+      "responseBytes": 40
+    },
+    {
+      "phase": "after",
+      "case": "nested-empty",
+      "validStun": true,
+      "peerAddress": "10.1.0.102",
+      "peerPort": 56016,
+      "responseBytes": 40
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Preserve the verified upstream license bytes on Windows checkouts too.
+resources/ui-font/OFL.txt text eol=lf
