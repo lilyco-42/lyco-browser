@@ -53,7 +53,7 @@ tracked product files must remain unchanged. There are no forced peer installs,
 SDK/minor check suppressions or AAR metadata rewrites. Native generation and
 the original metadata task run after these upgrades, retaining any failure.
 Partial final manifests/locks survive an early failed upgrade. The default
-remains the current product. This optional path is prepared, not yet validated;
+remains the current product.
 SDK58's documented SDK37 does not prove the AAR's minor37.2 requirement.
 
 Actual [42248634340](https://github.com/lilyco-42/lyco-browser/actions/runs/42248634340)
@@ -73,8 +73,22 @@ properties/install log. Only the generated private app and owned module receive
 the public `compileSdk { version = release(37) { minorApiLevel = 2 } }` setting;
 original/adapted bytes and exact additions are retained. Target/minimum SDK,
 dependency metadata and version checks are unchanged. SDK default checks remain
-available for comparison. This next platform option is prepared, not yet
-validated; installation, DSL and metadata failures must remain failures.
+available for comparison. Installation, DSL and metadata failures remain job
+failures; the result below validates this option's dependency check only.
+
+The real API37.2 option subsequently passed
+[42250336449](https://github.com/lilyco-42/lyco-browser/actions/runs/42250336449).
+The complete 350937-byte evidence ZIP and70799-byte source ZIP, all file receipt
+hashes/source pins, both SDK locks, actual SDK properties and exact app/module/
+root additions were independently verified. The actual configured app reports
+`android-37.2`, AGP9.2.1, Gradle9.4.1, min28 and target36; the original
+`:app:checkReleaseAarMetadata` executed and exited zero without suppressed
+checks or rewritten dependency metadata. See the
+[unmodified result](../../../../docs/audits/gecko-product-api372-42250336449.json)
+and [provenance](../../../../docs/audits/gecko-product-api372-42250336449.source.json).
+This establishes dependency compatibility only. Kotlin/APK compilation,
+original Go binding inputs, installed product bridge, runtime privacy/storage
+and old profile/key handoff remain required before product adoption.
 
 Compatibility is only a prerequisite: actual product bridge, ARM64 runtime, original-data/key handoff,
 full routing/RTC/privacy, licenses and all five-platform release conditions

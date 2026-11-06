@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-11-06T16:18:59.147605+00:00",
+  "run": 42250336449,
+  "job": 128003529963,
+  "source": "a49610d0bf8d365393833e314b541e8171ea4bc7",
+  "artifactId": 13519379993,
+  "zipBytes": 350937,
+  "zipSha256": "5487e8d8a0dcffd7f938a2384fc5b74c634e02c04d36ff74e1883e98a306956d",
+  "sourceArtifactId": 13521015172,
+  "sourceZipBytes": 70799,
+  "sourceZipSha256": "80fc5631301c350ccd087383c236ea2ea85566f7618cca4e96caf54dcc7bebcb",
+  "fullSizeShaCrcSafePathsAllReceiptsVerified": true,
+  "all5OriginalPinsAnd3CommittedSourcesMatch": true,
+  "privateRootModuleAndAppExactAdditionsReconstructed": true,
+  "originalSourceEngineBindingUnchanged": true,
+  "actualInstalledStages": {
+    "57": {
+      "expo": "57.0.32",
+      "react-native": "0.86.3",
+      "react": "19.2.3",
+      "expo-modules-core": "57.0.25"
+    },
+    "58": {
+      "expo": "58.0.23",
+      "react-native": "0.88.1",
+      "react": "19.3.0",
+      "expo-modules-core": "58.0.30"
+    }
+  },
+  "completeStageLocksRetainedAndVerified": true,
+  "sdk37_2OriginalPropertiesSha256": "aff64aedf5df75e73feb8d73f50e71445d93801518d1f39be5e005b21f878372",
+  "actualGradleModel": {
+    "gradleVersion": "9.4.1",
+    "androidGradlePluginVersion": "9.2.1",
+    "compileSdk": 37,
+    "compileSdkHash": "android-37.2",
+    "minSdk": "28",
+    "targetSdk": "36",
+    "projectNames": [
+      ":",
+      ":app",
+      ":expo",
+      ":expo-constants",
+      ":expo-dom-webview",
+      ":expo-log-box",
+      ":expo-modules-core",
+      ":lyco-mobile-browser",
+      ":react-native-async-storage_async-storage",
+      ":react-native-safe-area-context"
+    ],
+    "task": ":app:checkReleaseAarMetadata",
+    "scope": "Actual configured product model, not native compilation or runtime"
+  },
+  "metadataTaskObserved": true,
+  "actualExitCode": 0,
+  "metadataGatePassed": true,
+  "fullLogBytes": 68506,
+  "fullLogSha256": "dba0be6b452fab17e8940c157c527cc07243e1a5699a8643ef5e01719d6233bc",
+  "compiledProduct": false,
+  "productAdopted": false,
+  "runtimeProven": false,
+  "scope": "Actual product-derived SDK58/API37.2 dependency metadata gate only. Not native Kotlin/APK compilation, signed installation, RTC/storage/old-key migration, ARM64 runtime or all-platform release proof."
+}
